@@ -43,12 +43,12 @@ const LoginView = () => {
     <>
       {currentStep === "register" && <RegistrationForm setPhoneNumber={setPhoneNumber} phoneNumber={phoneNumber} setCurrentStep={setCurrentStep} />}
 
-    
+
     </>)
 };
 
 export default LoginView;
-const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
+const RegistrationForm = ({ setCurrentStep, setPhoneNumber, phoneNumber }) => {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
   const context = useBookingContext()
@@ -58,13 +58,13 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
     try {
       let result = await checkUser({
         "type": "phone",
-        "value": "0"+phoneNumber
-    })
-    if(result.code == "OK"){
-      setCurrentStep("pin")
-    }else{
-      toast.error(result.message)
-    }
+        "value": "0" + phoneNumber
+      })
+      if (result.code == "OK") {
+        setCurrentStep("pin")
+      } else {
+        toast.error(result.message)
+      }
     } catch (error) {
       console.log(error)
     }
@@ -73,7 +73,7 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
   const isValidPhone = (phoneNumber) => {
     return /^[1-9][0-9]{8,9}$/.test(phoneNumber);
   };
- 
+
 
 
   return (
@@ -122,10 +122,10 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
               sx={{ fontSize: { xs: "28px", md: "32px" } }}
               fontWeight={700}
               mb={1}>
-            Đăng nhập
+              Đăng nhập
             </Typography>
 
-            
+
 
             <Box  >
               {/* SỐ ĐIỆN THOẠI */}
@@ -136,8 +136,12 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 sx={{
-                  mb: 3, "& .MuiOutlinedInput-root": {
-                    borderRadius: "16px", height: "60px", backgroundColor: "#fff", "&.Mui-focused fieldset": {
+                  mb: 3,
+                   "& .MuiOutlinedInput-root": {
+                    borderRadius: "16px", 
+                    height: "60px",
+                    backgroundColor: "#fff",
+                    "&.Mui-focused fieldset": {
                       borderColor: "#98b720",
                       borderWidth: 1.5,
                     },
@@ -161,15 +165,15 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
                   }
                 }}
               />
-  <FormGroup>
-  <FormControlLabel control={<Checkbox defaultChecked />} label="Duy trì đăng nhập" />
-  
-</FormGroup>
+              <FormGroup>
+                <FormControlLabel control={<Checkbox defaultChecked />} label="Duy trì đăng nhập" />
+
+              </FormGroup>
 
 
-            
+
               <Button
-               onClick={handleRegister}
+                onClick={handleRegister}
                 variant='contained'
                 fullWidth
                 disabled={!phoneNumber || !isValidPhone(phoneNumber)}
@@ -192,7 +196,7 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
                   },
                   boxShadow: "none",
                 }}>
-                 {loading ? (
+                {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
                     Đăng nhập...
@@ -202,9 +206,9 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
                 )}
               </Button>
 
-            
+
               <Typography sx={{ fontSize: "14px" }} color='text.secondary'>
-              
+
                 <Link
                   href='#'
                   sx={{
@@ -213,7 +217,7 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
                     textDecoration: "underline",
                     "&:hover": { textDecoration: "underline" },
                   }}>
-                Đăng Ký trở thành đối tác Hotel Booking
+                  Đăng Ký trở thành đối tác Hotel Booking
                 </Link>
               </Typography>
             </Box>
