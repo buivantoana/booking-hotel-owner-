@@ -27,6 +27,9 @@ const CreateHotelView = (props: Props) => {
            <Box sx={{ my: 2 }}>
            {step == 1&&<HotelTypeSelect typeHotel={typeHotel} onSelect={handleSelectType} />}
            {step == 2&&  <HotelBasicInfo/>}
+           {step == 3 && <HotelImageUpload/>}
+           {step==4 && <HotelLocationInput/>}
+           {step == 5 && <RoomTypeTabsModern/>}
             </Box>
             <Box my={5} display={"flex"} justifyContent={"space-between"}>
                 <Typography sx={{ display: "flex", alignItems: "center", gap: 1 }} color='#FF3030'><LoginIcon color='#FF3030' /> Đăng xuất</Typography>
@@ -66,6 +69,10 @@ import { Box, useMediaQuery } from "@mui/material";
 import CheckIcon from '@mui/icons-material/Check';
 import HotelTypeSelect from './HotelTypeSelect';
 import HotelBasicInfo from './HotelBasicInfo';
+import HotelImageUpload from './HotelImageUpload';
+import HotelLocationInput from './HotelLocationInput';
+import RoomTypeTabsModern from './RoomTypeManager';
+
 
 const steps = [
     { id: 1, label: "Hình thức hợp tác" },
