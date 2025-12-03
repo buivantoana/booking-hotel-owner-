@@ -8,6 +8,7 @@ import PrivateRouter from "../components/PrivateRouter";
 import GuestRoute from "../components/GuestRoute";
 import { useEffect } from "react";
 import CreateHotelController from "../pages/create_hotel/CreateHotelController";
+import HomeController from "../pages/home/HomeController";
 
 const Router = () => {
   const context: any = useBookingContext();
@@ -26,7 +27,7 @@ const Router = () => {
           
           <Route path='/login' element={<GuestRoute ><LoginController /></GuestRoute>} />
         </Route>
-        
+        <Route path='/home' element={<HomeController />} />
       </Routes>
     </>
   );
