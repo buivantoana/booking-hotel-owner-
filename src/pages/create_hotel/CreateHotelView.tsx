@@ -1,165 +1,278 @@
-import { Button, Container, Typography } from '@mui/material'
-import React, { useState } from 'react'
-import LoginIcon from '@mui/icons-material/Login';
-type Props = {}
+import { Button, Container, Typography, useTheme } from "@mui/material";
+import React, { useState } from "react";
+import LoginIcon from "@mui/icons-material/Login";
+type Props = {};
 
 const CreateHotelView = (props: Props) => {
-    const [step, setStep] = useState(1);
-    const [typeHotel, setTypeHotel] = useState("Khách sạn Listing");
+  const [step, setStep] = useState(1);
+  const [typeHotel, setTypeHotel] = useState("Khách sạn Listing");
 
-    const handleStepClick = (id) => {
-        console.log("Bạn vừa chọn step:", id);
-        setStep(id);
-    };
-    const handleSelectType = (name) => {
-        console.log("Bạn đã chọn loại khách sạn", name);
-        setTypeHotel(name)
-    };
-    return (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
-            <Typography fontSize={"32px"} fontWeight={"600"}>
-                Tạo khách sạn
-            </Typography>
-            <Typography fontSize={"16px"} mt={1} color='#989FAD' >
-                Để bắt đầu, vui lòng nhập các thông tin bên dưới về khách sạn của bạn.
-            </Typography>
-            <StepIndicator activeStep={step} onStepChange={handleStepClick} />
-           <Box sx={{ my: 2 }}>
-           {step == 1&&<HotelTypeSelect typeHotel={typeHotel} onSelect={handleSelectType} />}
-           {step == 2&&  <HotelBasicInfo/>}
-           {step == 3 && <HotelImageUpload/>}
-           {step==4 && <HotelLocationInput/>}
-           {step == 5 && <RoomTypeTabsModern/>}
-            </Box>
-            <Box my={5} display={"flex"} justifyContent={"space-between"}>
-                <Typography sx={{ display: "flex", alignItems: "center", gap: 1 }} color='#FF3030'><LoginIcon color='#FF3030' /> Đăng xuất</Typography>
-                <Button
-                    fullWidth
-                    variant="contained"
-                    onClick={()=>setStep(step+1)}
-                    sx={{
+  const handleStepClick = (id) => {
+    console.log("Bạn vừa chọn step:", id);
+    setStep(id);
+  };
+  const handleSelectType = (name) => {
+    console.log("Bạn đã chọn loại khách sạn", name);
+    setTypeHotel(name);
+  };
+  return (
+    <Container maxWidth='lg' sx={{ py: 4 }}>
+      {step < 6 && (
+        <>
+          <Typography fontSize={"32px"} fontWeight={"600"}>
+            Tạo khách sạn
+          </Typography>
+          <Typography fontSize={"16px"} mt={1} color='#989FAD'>
+            Để bắt đầu, vui lòng nhập các thông tin bên dưới về khách sạn của
+            bạn.
+          </Typography>
+        </>
+      )}
 
-                        background: "#8BC34A",
-                        color: "white",
-                        py: 1.4,
-                        fontSize: 16,
-                        fontWeight: 600,
-                        borderRadius: 3,
-                        width: "150px",
-                        textTransform: "none",
-                        "&:hover": {
-                            background: "#7CB342",
-                        },
-                    }}
-                >
-                    Kế tiếp
-                </Button>
-            </Box>
-        </Container>
-    )
-}
+      {step < 6 && (
+        <StepIndicator activeStep={step} onStepChange={handleStepClick} />
+      )}
+      <Box sx={{ my: 2 }}>
+        {step == 1 && (
+          <HotelTypeSelect typeHotel={typeHotel} onSelect={handleSelectType} />
+        )}
+        {step == 2 && <HotelBasicInfo />}
+        {step == 3 && <HotelImageUpload />}
+        {step == 4 && <HotelLocationInput />}
+        {step == 5 && <RoomTypeTabsModern />}
+        {step == 6 && <CreateSuccess />}
+      </Box>
+      {step < 6 && (
+        <Box my={5} display={"flex"} justifyContent={"space-between"}>
+          <Typography
+            sx={{ display: "flex", alignItems: "center", gap: 1 }}
+            color='#FF3030'>
+            <LoginIcon color='#FF3030' /> Đăng xuất
+          </Typography>
+          <Button
+            fullWidth
+            variant='contained'
+            onClick={() => setStep(step + 1)}
+            sx={{
+              background: "#8BC34A",
+              color: "white",
+              py: 1.4,
+              fontSize: 16,
+              fontWeight: 600,
+              borderRadius: 3,
+              width: "150px",
+              textTransform: "none",
+              "&:hover": {
+                background: "#7CB342",
+              },
+            }}>
+            Kế tiếp
+          </Button>
+        </Box>
+      )}
+    </Container>
+  );
+};
 
-export default CreateHotelView
-
-
-
-
+export default CreateHotelView;
 
 import { Box, useMediaQuery } from "@mui/material";
-import CheckIcon from '@mui/icons-material/Check';
-import HotelTypeSelect from './HotelTypeSelect';
-import HotelBasicInfo from './HotelBasicInfo';
-import HotelImageUpload from './HotelImageUpload';
-import HotelLocationInput from './HotelLocationInput';
-import RoomTypeTabsModern from './RoomTypeManager';
-
+import CheckIcon from "@mui/icons-material/Check";
+import HotelTypeSelect from "./HotelTypeSelect";
+import HotelBasicInfo from "./HotelBasicInfo";
+import HotelImageUpload from "./HotelImageUpload";
+import HotelLocationInput from "./HotelLocationInput";
+import RoomTypeTabsModern from "./RoomTypeManager";
 
 const steps = [
-    { id: 1, label: "Hình thức hợp tác" },
-    { id: 2, label: "Thông tin cơ bản" },
-    { id: 3, label: "Hình ảnh khách sạn" },
-    { id: 4, label: "Vị trí khách sạn" },
-    { id: 5, label: "Thêm loại phòng" },
+  { id: 1, label: "Hình thức hợp tác" },
+  { id: 2, label: "Thông tin cơ bản" },
+  { id: 3, label: "Hình ảnh khách sạn" },
+  { id: 4, label: "Vị trí khách sạn" },
+  { id: 5, label: "Thêm loại phòng" },
 ];
 
 function StepIndicator({ activeStep = 1, onStepChange }) {
-    const isMobile = useMediaQuery("(max-width:768px)");
+  const isMobile = useMediaQuery("(max-width:768px)");
 
-    const handleClick = (stepId) => {
-        if (onStepChange) onStepChange(stepId);
-    };
+  const handleClick = (stepId) => {
+    if (onStepChange) onStepChange(stepId);
+  };
 
-    return (
-        <Box
-            display="flex"
-            flexDirection={isMobile ? "column" : "row"}
-            alignItems="center"
-            justifyContent="start"
-            gap={isMobile ? 2 : 4}
-            width="100%"
-            py={3}
-        >
-            {steps.map((step, index) => {
-                const isCompleted = step.id < activeStep;
-                const isActive = step.id === activeStep;
+  return (
+    <Box
+      display='flex'
+      flexDirection={isMobile ? "column" : "row"}
+      alignItems='center'
+      justifyContent='start'
+      gap={isMobile ? 2 : 4}
+      width='100%'
+      py={3}>
+      {steps.map((step, index) => {
+        const isCompleted = step.id < activeStep;
+        const isActive = step.id === activeStep;
 
-                return (
-                    <Box
-                        key={step.id}
-                        display="flex"
-                        alignItems="center"
-                        gap={1}
-                        sx={{ cursor: "pointer" }}
-                        onClick={() => handleClick(step.id)}
-                    >
-                        {/* Icon số hoặc check */}
-                        <Box
-                            width={32}
-                            height={32}
-                            borderRadius="50%"
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                            sx={{
-                                backgroundColor: isActive ? "#9AC33C" : isCompleted ? "#9AC33C" : "transparent",
-                                color: isActive ? "white" : "#666",
-                                fontWeight: 600,
-                                fontSize: 14,
-                                border: isActive ? "1px solid transparent" : isCompleted ? "1px solid transparent" : "1px solid #888"
+        return (
+          <Box
+            key={step.id}
+            display='flex'
+            alignItems='center'
+            gap={1}
+            sx={{ cursor: "pointer" }}
+            onClick={() => handleClick(step.id)}>
+            {/* Icon số hoặc check */}
+            <Box
+              width={32}
+              height={32}
+              borderRadius='50%'
+              display='flex'
+              alignItems='center'
+              justifyContent='center'
+              sx={{
+                backgroundColor: isActive
+                  ? "#9AC33C"
+                  : isCompleted
+                  ? "#9AC33C"
+                  : "transparent",
+                color: isActive ? "white" : "#666",
+                fontWeight: 600,
+                fontSize: 14,
+                border: isActive
+                  ? "1px solid transparent"
+                  : isCompleted
+                  ? "1px solid transparent"
+                  : "1px solid #888",
+              }}>
+              {isCompleted ? (
+                <CheckIcon sx={{ fontSize: 20, color: "white" }} />
+              ) : (
+                step.id
+              )}
+            </Box>
 
-                            }}
-                        >
-                            {isCompleted ? (
-                                <CheckIcon sx={{ fontSize: 20, color: "white" }} />
-                            ) : (
-                                step.id
-                            )}
-                        </Box>
+            {/* Text label */}
+            <Typography
+              fontSize={14}
+              fontWeight={isActive ? 600 : 400}
+              color={isActive ? "#9AC33C" : "#888"}>
+              {step.label}
+            </Typography>
 
-                        {/* Text label */}
-                        <Typography
-                            fontSize={14}
-                            fontWeight={isActive ? 600 : 400}
-                            color={isActive ? "#9AC33C" : "#888"}
-                        >
-                            {step.label}
-                        </Typography>
-
-                        {/* Dấu gạch nối (desktop only) */}
-                        {index < steps.length - 1 && !isMobile && (
-                            <Box
-
-                                sx={{
-                                    width: 40,
-                                    height: 1,
-                                    mt: .5,
-                                    borderBottom: "2px dashed #ccc",
-                                }}
-                            />
-                        )}
-                    </Box>
-                );
-            })}
-        </Box>
-    );
+            {/* Dấu gạch nối (desktop only) */}
+            {index < steps.length - 1 && !isMobile && (
+              <Box
+                sx={{
+                  width: 40,
+                  height: 1,
+                  mt: 0.5,
+                  borderBottom: "2px dashed #ccc",
+                }}
+              />
+            )}
+          </Box>
+        );
+      })}
+    </Box>
+  );
 }
+
+import { Stack, Paper } from "@mui/material";
+
+import success from "../../images/Frame 1321317962.png";
+
+const CreateSuccess = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  return (
+    <Box
+      sx={{
+        bgcolor: "#f9f9f9",
+
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        py: 4,
+      }}>
+      <Container maxWidth='sm'>
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: "24px",
+            bgcolor: "white",
+            p: { xs: 3, sm: 4 },
+            textAlign: "center",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+          }}>
+          <Stack spacing={3} alignItems='center'>
+            {/* ICON CHECK XANH */}
+            <Box>
+              <img src={success} alt='' />
+            </Box>
+
+            {/* TIÊU ĐỀ */}
+            <Typography
+              fontWeight={700}
+              fontSize={{ xs: "1.25rem", sm: "1.5rem" }}
+              color='rgba(152, 183, 32, 1)'>
+              Đăng ký thành công
+            </Typography>
+
+            {/* MÔ TẢ */}
+            <Typography fontSize='0.9rem' color='#666' lineHeight={1.5}>
+              Chúc mừng, bạn đã hoàn thành tạo khách sạn trên Hotel Booking.
+              Tiếp theo, chúng tôi sẽ xử lý thông tin khách sạn của bạn trong
+              thời gian sớm nhất.
+            </Typography>
+            <Typography fontSize='0.9rem' color='#666' lineHeight={1.5}>
+              <strong>Nếu duyệt thành công</strong>: Khách sạn của bạn tự động
+              được hiển thị trên app và website chính thức của Hotel Booking.
+            </Typography>
+            <Typography fontSize='0.9rem' color='#666' lineHeight={1.5}>
+              <strong>Nếu duyệt không thành công</strong>: Hotel Booking sẽ liên
+              hệ với khách sạn để xác thực thông tin
+            </Typography>
+            <Typography fontSize='0.9rem' color='#666' lineHeight={1.5}>
+              Hotline bộ phận CSKH:{" "}
+              <Typography
+                variant='span'
+                fontWeight={600}
+                color='rgba(234, 106, 0, 1)'>
+                1900 638 838
+              </Typography>
+            </Typography>
+
+            {/* THÔNG TIN CHI TIẾT */}
+
+            {/* NÚT HÀNH ĐỘNG */}
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={2}
+              width='100%'
+              mt={2}>
+              <Button
+                onClick={() => {}}
+                fullWidth
+                variant='contained'
+                sx={{
+                  bgcolor: "#98b720",
+                  color: "white",
+                  borderRadius: "50px",
+                  fontWeight: 600,
+                  textTransform: "none",
+                  py: 1.5,
+                  fontSize: "0.95rem",
+                  boxShadow: "0 4px 12px rgba(152, 183, 32, 0.3)",
+                  "&:hover": {
+                    bgcolor: "#7a9a1a",
+                  },
+                }}>
+                Đồng ý
+              </Button>
+            </Stack>
+          </Stack>
+        </Paper>
+      </Container>
+    </Box>
+  );
+};

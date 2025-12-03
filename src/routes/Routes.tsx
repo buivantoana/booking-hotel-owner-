@@ -9,6 +9,8 @@ import GuestRoute from "../components/GuestRoute";
 import { useEffect } from "react";
 import CreateHotelController from "../pages/create_hotel/CreateHotelController";
 import HomeController from "../pages/home/HomeController";
+import ReviewController from "../pages/review/ReviewController";
+import NotificateController from "../pages/notificate/NotificateController";
 
 const Router = () => {
   const context: any = useBookingContext();
@@ -16,18 +18,34 @@ const Router = () => {
   useEffect(() => {
     // window.scrollTo(0, 0);
     // hoặc mượt hơn:
-     window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [pathname]);
   return (
     <>
       <Routes>
         <Route path='/' element={<LayoutWebsite />}>
-          <Route path='/' element={<GuestRoute ><RegisterController /></GuestRoute>} />
-          <Route path='/create-hotel' element={<CreateHotelController />} />
-          
-          <Route path='/login' element={<GuestRoute ><LoginController /></GuestRoute>} />
+          <Route path='/home' element={<HomeController />} />
+          <Route path='/notificate' element={<NotificateController />} />
+          <Route path='/review' element={<ReviewController />} />
         </Route>
-        <Route path='/home' element={<HomeController />} />
+        <Route
+          path='/'
+          element={
+            <GuestRoute>
+              <RegisterController />
+            </GuestRoute>
+          }
+        />
+        <Route path='/create-hotel' element={<CreateHotelController />} />
+
+        <Route
+          path='/login'
+          element={
+            <GuestRoute>
+              <LoginController />
+            </GuestRoute>
+          }
+        />
       </Routes>
     </>
   );

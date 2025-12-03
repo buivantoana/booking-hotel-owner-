@@ -4,15 +4,15 @@ import Header from "../Header";
 
 import { Box } from "@mui/material";
 import Footer from "../Footer";
+import SidebarMenu from "../SidebarMenu";
 
 const LayoutWebsite = () => {
   return (
-    <Box bgcolor={"#f8fafc"} minHeight={"100vh"}>
-      <Header />
-      <Box>
+    <Box bgcolor={"#f8fafc"} display={"flex"}>
+      <SidebarMenu />
+      <Box sx={{ overflowY: "scroll", height: "100vh" }} flex={3.3}>
         <Outlet />
       </Box>
-      <Footer />
     </Box>
   );
 };
