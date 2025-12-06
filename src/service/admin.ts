@@ -63,9 +63,9 @@ export async function checkUser(body: any) {
   }
 }
 
-export async function sendOtp(body: any) {
+export async function register(body: any) {
   try {
-    const response = await api.post(`/user/send-otp`, body);
+    const response = await api.post(`/partner/register`, body);
     return response.data;
   } catch (error: any) {
     if (error.response) {

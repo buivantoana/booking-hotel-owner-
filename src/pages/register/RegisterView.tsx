@@ -22,7 +22,7 @@ import image_left from "../../images/Frame 1321317999.png";
 import vn from "../../images/VN - Vietnam.png";
 import google from "../../images/Social media logo.png";
 import apple from "../../images/Group.png";
-import { sendOtp, userUpdate, verifyOtp } from "../../service/admin";
+import { register, sendOtp, userUpdate, verifyOtp } from "../../service/admin";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useBookingContext } from "../../App";
@@ -35,8 +35,8 @@ interface RegistrationFormProps {
   setPhoneNumber: (v: string) => void;
   name: string;
   setName: (v: string) => void;
-  birthDate: string;
-  setBirthDate: (v: string) => void;
+  Email: string;
+  setEmail: (v: string) => void;
   onNext: () => void;
 }
 
@@ -45,8 +45,8 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
   setPhoneNumber,
   name,
   setName,
-  birthDate,
-  setBirthDate,
+  Email,
+  setEmail,
   onNext,
 }) => {
   const [touched, setTouched] = useState(false);
@@ -54,56 +54,97 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     setLoading(true);
     e.preventDefault();
-    if (phoneNumber && name && birthDate) {
+    if (phoneNumber && name && Email) {
       try {
-        let result = await sendOtp({
-          "platform": "ios",
-          "type": "phone",
-          "value": "0" + phoneNumber
-        })
+        let result = await register({
+          name: name,
+          email: Email,
+          phone: "0" + phoneNumber,
+        });
         if (result.success) {
-          onNext()
+          onNext();
         }
-
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
       setLoading(false);
+    }
+  };
 
-    };
+  const normalizePhone = (phone) => {
+    if (!phone) return "";
+    let p = phone.trim().replace(/\D/g, "");
+    if (p.startsWith("84")) p = p.slice(2); // bỏ 84 đầu nếu nhập +84
+    if (p.startsWith("0")) p = p.slice(1); // bỏ số 0 đầu nếu người dùng nhập
+    return p;
   };
-  const isValidPhone = (phoneNumber) => {
-    return /^[1-9][0-9]{8,9}$/.test(phoneNumber);
+  const isValidPhone = (phone) => {
+    if (!phone) return false;
+    if (phone.length > 9) return false;
+    const normalized = normalizePhone(phone);
+    if (!/^[35789]/.test(normalized)) return false; // đầu số hợp lệ
+    if (normalized.length < 9) return false; // độ dài
+    return true;
   };
-  const isDisabled = !phoneNumber || !name || !birthDate || !isValidPhone(phoneNumber) || loading;
+  const isDisabled =
+    !phoneNumber || !name || !Email || !isValidPhone(phoneNumber) || loading;
   return (
-    <Container maxWidth="lg" sx={{ display: "flex", alignItems: "center", py: 8 }}>
+    <Container
+      maxWidth='lg'
+      sx={{ display: "flex", alignItems: "center", py: 8 }}>
       <Grid container sx={{ alignItems: "center", minHeight: "60vh" }}>
         {/* LEFT */}
-        <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "flex" }, justifyContent: "center", alignItems: "center" }}>
-          <Box component="img" src={image_left} alt="Hotel illustration" sx={{ width: "592px", height: "557px", maxWidth: "100%" }} />
+        <Grid
+          item
+          xs={12}
+          md={6}
+          sx={{
+            display: { xs: "none", md: "flex" },
+            justifyContent: "center",
+            alignItems: "center",
+          }}>
+          <Box
+            component='img'
+            src={image_left}
+            alt='Hotel illustration'
+            sx={{ width: "592px", height: "557px", maxWidth: "100%" }}
+          />
         </Grid>
 
         {/* RIGHT */}
         <Grid item xs={12} display={"flex"} justifyContent={"end"} md={6}>
           <Box sx={{ width: { xs: "100%", sm: "400px", md: "486px" } }}>
-            <Typography sx={{ fontSize: { xs: "28px", md: "32px" }, fontWeight: 700, mb: 1 }}>
-            Đăng ký đối tác Hotel Booking
+            <Typography
+              sx={{
+                fontSize: { xs: "28px", md: "32px" },
+                fontWeight: 700,
+                mb: 1,
+              }}>
+              Đăng ký đối tác Hotel Booking
             </Typography>
-            <Typography sx={{ fontSize: "16px", mb: 4 }} color="text.secondary">
-            Đăng ký để trở thành đối tác với Hotel Booking với những ưu đã độc quyền dành cho đối tác.
+            <Typography sx={{ fontSize: "16px", mb: 4 }} color='text.secondary'>
+              Đăng ký để trở thành đối tác với Hotel Booking với những ưu đã độc
+              quyền dành cho đối tác.
             </Typography>
 
-            <Box component="form" onSubmit={handleSubmit}>
+            <Box component='form' onSubmit={handleSubmit}>
               {/* Phone */}
-              <Typography fontSize={14} fontWeight={500} mb={0.5}>Số điện thoại</Typography>
+              <Typography fontSize={14} fontWeight={500} mb={0.5}>
+                Số điện thoại
+              </Typography>
               <TextField
                 fullWidth
-                placeholder="Nhập số điện thoại"
-                variant="outlined"
+                placeholder='Nhập số điện thoại'
+                variant='outlined'
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
-                onBlur={() => setTouched(true)}   // chỉ validate khi blur
+                onChange={(e) => {
+                  let val = e.target.value.replace(/\D/g, ""); // chỉ giữ số
+                  // loại bỏ 0 đầu tiên
+                  if (val.length > 20) val = val.slice(0, 20);
+                  if (val.startsWith("0")) val = val.slice(1);
+                  setPhoneNumber(val);
+                }}
+                onBlur={() => setTouched(true)} // chỉ validate khi blur
                 error={touched && !isValidPhone(phoneNumber)}
                 helperText={
                   touched && !isValidPhone(phoneNumber)
@@ -133,10 +174,10 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 }}
                 InputProps={{
                   startAdornment: (
-                    <InputAdornment position="start">
+                    <InputAdornment position='start'>
                       <img
                         src={vn}
-                        alt="vn"
+                        alt='vn'
                         style={{
                           width: 28,
                           height: 20,
@@ -145,12 +186,14 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                           marginRight: 8,
                         }}
                       />
-                      <Typography sx={{ fontSize: 14, marginRight: 1 }}>+84</Typography>
+                      <Typography sx={{ fontSize: 14, marginRight: 1 }}>
+                        +84
+                      </Typography>
                     </InputAdornment>
                   ),
                   endAdornment:
                     touched && !isValidPhone(phoneNumber) ? (
-                      <InputAdornment position="end">
+                      <InputAdornment position='end'>
                         <Box
                           sx={{
                             cursor: "pointer",
@@ -160,8 +203,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                           onClick={() => {
                             setPhoneNumber("");
                             setTouched(false); // reset error khi xóa
-                          }}
-                        >
+                          }}>
                           ✕
                         </Box>
                       </InputAdornment>
@@ -170,51 +212,71 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
               />
 
               {/* Name */}
-              <Typography fontSize={14} fontWeight={500} mb={0.5}>Tên của bạn</Typography>
+              <Typography fontSize={14} fontWeight={500} mb={0.5}>
+                Tên của bạn
+              </Typography>
               <TextField
                 fullWidth
-                placeholder="Nhập tên của bạn"
+                placeholder='Nhập tên của bạn'
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 sx={{
-                  mb: 3, "& .MuiOutlinedInput-root": {
-                    borderRadius: "16px", height: "60px", backgroundColor: "#fff", "&.Mui-focused fieldset": {
+                  mb: 3,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "16px",
+                    height: "60px",
+                    backgroundColor: "#fff",
+                    "&.Mui-focused fieldset": {
                       borderColor: "#98b720",
                       borderWidth: 1.5,
                     },
-                  }
+                  },
                 }}
               />
 
               {/* Birth date */}
-              <Typography fontSize={14} fontWeight={500} mb={0.5}>Email</Typography>
+              <Typography fontSize={14} fontWeight={500} mb={0.5}>
+                Email
+              </Typography>
               <TextField
                 fullWidth
-                placeholder="Nhập email của khách sạn"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                placeholder='Nhập email của khách sạn'
+                value={Email}
+                onChange={(e) => setEmail(e.target.value)}
                 sx={{
-                  mb: 3, "& .MuiOutlinedInput-root": {
-                    borderRadius: "16px", height: "60px", backgroundColor: "#fff", "&.Mui-focused fieldset": {
+                  mb: 3,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "16px",
+                    height: "60px",
+                    backgroundColor: "#fff",
+                    "&.Mui-focused fieldset": {
                       borderColor: "#98b720",
                       borderWidth: 1.5,
                     },
-                  }
+                  },
                 }}
               />
 
               {/* Agreement + Button + Social + Login link giữ nguyên như cũ */}
               {/* (đoạn này quá dài nên mình giữ nguyên copy từ code gốc của bạn) */}
-              <Typography sx={{ fontSize: "14px", mb: 3 }} color="text.secondary">
+              <Typography
+                sx={{ fontSize: "14px", mb: 3 }}
+                color='text.secondary'>
                 Bằng việc đăng kí tài khoản, tôi đồng ý với{" "}
-                <Link href="#" sx={{ color: "#9AC700", fontWeight: 500, textDecoration: "underline" }}>
+                <Link
+                  href='#'
+                  sx={{
+                    color: "#9AC700",
+                    fontWeight: 500,
+                    textDecoration: "underline",
+                  }}>
                   điều khoản và chính sách bảo mật
                 </Link>{" "}
                 của Hotel Booking
               </Typography>
 
               <Button
-                type="submit"
+                type='submit'
                 fullWidth
                 disabled={isDisabled}
                 sx={{
@@ -228,9 +290,10 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                   fontSize: "18px",
                   height: "56px",
                   position: "relative",
-                  "&:hover": { backgroundColor: isDisabled ? "#e0e0e0" : "#98b720" },
-                }}
-              >
+                  "&:hover": {
+                    backgroundColor: isDisabled ? "#e0e0e0" : "#98b720",
+                  },
+                }}>
                 {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
@@ -241,12 +304,19 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 )}
               </Button>
 
-              <Typography sx={{ fontSize: "14px", mb: 3 }} color="text.secondary">
-              Bạn đã có tài khoản? {" "}
-                <Link href="#" sx={{ color: "#EA6A00", fontWeight: 500, textDecoration: "underline" }}>
-                Đăng nhập ngay
+              <Typography
+                sx={{ fontSize: "14px", mb: 3 }}
+                color='text.secondary'>
+                Bạn đã có tài khoản?{" "}
+                <Link
+                  href='#'
+                  sx={{
+                    color: "#EA6A00",
+                    fontWeight: 500,
+                    textDecoration: "underline",
+                  }}>
+                  Đăng nhập ngay
                 </Link>{" "}
-               
               </Typography>
             </Box>
           </Box>
@@ -256,18 +326,17 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
   );
 };
 
-
 const RegisterView = () => {
-  const [currentStep, setCurrentStep] = useState("success");
+  const [currentStep, setCurrentStep] = useState("register");
   const [pin, setPin] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [name, setName] = useState("");
-  const [birthDate, setBirthDate] = useState("");
+  const [Email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [dataUser, setDataUser] = useState(null);
   const [timer, setTimer] = useState(55);
   const [isResendEnabled, setIsResendEnabled] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   // Timer
   useEffect(() => {
     if (timer > 0 && currentStep === "otp") {
@@ -278,24 +347,8 @@ const RegisterView = () => {
     }
   }, [timer, currentStep]);
 
-  const formatPhoneNumber = (phone: string) => phone.replace(/(\d{3})(\d{3})(\d{3})/, "$1-$2-$3");
-
   const goToOtp = () => {
-    setCurrentStep("otp");
-    setTimer(55);
-    setIsResendEnabled(false);
-  };
-
-  const goToPin = (user) => {
-    setDataUser(user)
-    setCurrentStep("pin")
-  };
-  const goBack = () => setCurrentStep("register");
-
-  const handleResend = () => {
-    setTimer(55);
-    setIsResendEnabled(false);
-    setOtp("");
+    setCurrentStep("success");
   };
 
   return (
@@ -306,36 +359,20 @@ const RegisterView = () => {
           setPhoneNumber={setPhoneNumber}
           name={name}
           setName={setName}
-          birthDate={birthDate}
-          setBirthDate={setBirthDate}
+          Email={Email}
+          setEmail={setEmail}
           onNext={goToOtp}
         />
       )}
 
-{currentStep === "success" && (
-        <RegisterSuccess
-          
-        />
-      )}
-
-     
+      {currentStep === "success" && <RegisterSuccess Email={Email} />}
     </>
   );
 };
 
 export default RegisterView;
 
-
-
-
-import {
- 
-  Stack,
-
-  Paper,
-  
-  useMediaQuery,
-} from "@mui/material";
+import { Stack, Paper, useMediaQuery } from "@mui/material";
 import {
   CheckCircle as CheckCircleIcon,
   Home as HomeIcon,
@@ -345,15 +382,15 @@ import {
 } from "@mui/icons-material";
 import success from "../../images/Frame 1321317962.png";
 
-const RegisterSuccess = () => {
+const RegisterSuccess = ({ Email }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   return (
     <Box
       sx={{
         bgcolor: "#f9f9f9",
-       
+        height: "100vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -380,39 +417,30 @@ const RegisterSuccess = () => {
               fontWeight={700}
               fontSize={{ xs: "1.25rem", sm: "1.5rem" }}
               color='rgba(152, 183, 32, 1)'>
-             Đăng ký thành công
+              Đăng ký thành công
             </Typography>
 
             {/* MÔ TẢ */}
             <Typography fontSize='0.9rem' color='#666' lineHeight={1.5}>
-            Chúng tôi đã gửi mật khẩu về địa chỉ email <strong>thangdv@gmail.com</strong>  mà bạn đã đăng ký. Bạn có thể truy cập hòm thư để lấy thông tin đăng nhập.
-
-
-             
-              
+              Chúng tôi đã gửi mật khẩu về địa chỉ email{" "}
+              <strong>{Email}</strong> mà bạn đã đăng ký. Bạn có thể truy cập
+              hòm thư để lấy thông tin đăng nhập.
             </Typography>
             <Typography fontSize='0.9rem' color='#666' lineHeight={1.5}>
-            Tiếp theo, vui lòng tạo khách sạn của bạn để bắt đầu kinh doanh cùng Hotel booking trong thời gian sớm nhất.
-
-
-             
-              
+              Tiếp theo, vui lòng tạo khách sạn của bạn để bắt đầu kinh doanh
+              cùng Hotel booking trong thời gian sớm nhất.
             </Typography>
-           
 
             {/* THÔNG TIN CHI TIẾT */}
-           
+
             {/* NÚT HÀNH ĐỘNG */}
             <Stack
               direction={{ xs: "column", sm: "row" }}
               spacing={2}
               width='100%'
               mt={2}>
-             
               <Button
-              onClick={()=>{
-                
-              }}
+                onClick={() => {navigate("/login")}}
                 fullWidth
                 variant='contained'
                 sx={{
@@ -437,4 +465,3 @@ const RegisterSuccess = () => {
     </Box>
   );
 };
-

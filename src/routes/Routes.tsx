@@ -11,6 +11,7 @@ import CreateHotelController from "../pages/create_hotel/CreateHotelController";
 import HomeController from "../pages/home/HomeController";
 import ReviewController from "../pages/review/ReviewController";
 import NotificateController from "../pages/notificate/NotificateController";
+import ManagerRoomController from "../pages/manager-room/ManagerRoomController";
 
 const Router = () => {
   const context: any = useBookingContext();
@@ -27,25 +28,12 @@ const Router = () => {
           <Route path='/home' element={<HomeController />} />
           <Route path='/notificate' element={<NotificateController />} />
           <Route path='/review' element={<ReviewController />} />
+          <Route path='/manager-room' element={<ManagerRoomController />} />
         </Route>
-        <Route
-          path='/'
-          element={
-            <GuestRoute>
-              <RegisterController />
-            </GuestRoute>
-          }
-        />
+        <Route path='/register' element={<RegisterController />} />
         <Route path='/create-hotel' element={<CreateHotelController />} />
 
-        <Route
-          path='/login'
-          element={
-            <GuestRoute>
-              <LoginController />
-            </GuestRoute>
-          }
-        />
+        <Route path='/login' element={<LoginController />} />
       </Routes>
     </>
   );
