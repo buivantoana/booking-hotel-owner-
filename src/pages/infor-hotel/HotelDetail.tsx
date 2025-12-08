@@ -4,15 +4,16 @@ import { ArrowBackIos, Edit as EditIcon } from "@mui/icons-material";
 export default function HotelDetail() {
   return (
     <Box sx={{ minHeight: "100vh" }}>
-      {/* Phần header trên cùng */}
+     
       <Box
         sx={{
-          px: 4,
+          
           py: 3,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           borderBottom: "1px solid #eee",
+          pt:0
         }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <ArrowBackIos
@@ -40,8 +41,8 @@ export default function HotelDetail() {
             label='Đang hoạt động'
             size='small'
             sx={{
-              bgcolor: "#e8f5e9",
-              color: "#2e7d32",
+              bgcolor: "#98B720",
+              color: "white",
               fontWeight: 600,
               fontSize: 13,
               height: 28,
@@ -51,10 +52,8 @@ export default function HotelDetail() {
         </Box>
         <Box />
       </Box>
-
-      {/* Thanh tab + nút chỉnh sửa */}
-
-      <HotelInfoDetail />
+       <HotelInfoDetail />
+       
     </Box>
   );
 }
@@ -62,6 +61,8 @@ export default function HotelDetail() {
 import { Grid, Paper, Avatar, Stack, Divider } from "@mui/material";
 import { LocationOn, Star, Edit } from "@mui/icons-material";
 import image from "../../images/Rectangle 29975.png";
+import ManagerRooms from "./ManagerRooms";
+import RoomDetail from "./RoomDetail";
 function HotelInfoDetail() {
   return (
     <Paper
@@ -85,10 +86,10 @@ function HotelInfoDetail() {
           <Typography
             fontSize={16}
             fontWeight={600}
-            color='#4caf50'
+            color='#98B720'
             sx={{
-              borderBottom: "3px solid #66bb6a",
-              pb: 1.5,
+              borderBottom: "3px solid #98B720",
+              pb: 1,
               cursor: "pointer",
             }}>
             Thông tin chung
@@ -107,7 +108,7 @@ function HotelInfoDetail() {
           variant='contained'
           startIcon={<EditIcon />}
           sx={{
-            bgcolor: "#66bb6a",
+            bgcolor: "#98B720",
             color: "white",
             fontWeight: 600,
             fontSize: 15,
@@ -115,15 +116,14 @@ function HotelInfoDetail() {
             py: 1.4,
             borderRadius: "50px",
             textTransform: "none",
-            boxShadow: "0 4px 16px rgba(102,187,106,0.4)",
-            "&:hover": {
-              bgcolor: "#4caf50",
-              boxShadow: "0 6px 20px rgba(76,175,80,0.5)",
-            },
+         
           }}>
           Chỉnh sửa
         </Button>
       </Box>
+      {false && <ManagerRooms/>}
+      
+      {false &&<>
       <Grid container spacing={{ xs: 3, md: 4 }}>
         {/* Cột 1: Hình ảnh khách sạn */}
         <Grid item xs={12} md={4}>
@@ -323,6 +323,7 @@ function HotelInfoDetail() {
       </Grid>
       <Divider sx={{ my: 4 }} />
       <RoomTypeCard />
+      </>}
     </Paper>
   );
 }
@@ -420,3 +421,5 @@ function RoomTypeCard() {
     </Grid>
   );
 }
+
+

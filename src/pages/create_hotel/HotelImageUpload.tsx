@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Box, Typography, IconButton, Grid, Button, useMediaQuery } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import add from "../../images/gallery-add.png"
-export default function HotelImageUpload() {
+export default function HotelImageUpload({isPadding}) {
   const isMobile = useMediaQuery("(max-width:600px)");
 
   const [outsideImages, setOutsideImages] = useState([]);
@@ -88,7 +88,7 @@ export default function HotelImageUpload() {
   return (
     <Box
       sx={{
-        p: isMobile ? 2 : 4,
+        p:isPadding?0: isMobile ? 2 : 4,
         mx: "auto",
         background: "white",
         borderRadius: 2,

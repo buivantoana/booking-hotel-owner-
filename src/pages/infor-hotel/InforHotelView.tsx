@@ -31,6 +31,7 @@ import { useState } from "react";
 import remove from "../../images/delete.png";
 import HotelDetail from "./HotelDetail";
 import HotelEditForm from "./HotelEditForm";
+import RoomDetail from "./RoomDetail";
 
 // Component menu thao tác
 function ActionMenu() {
@@ -98,7 +99,8 @@ export default function InforHotelView() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(true);
   return (
     <Box sx={{ p: 3, bgcolor: "#f5f7fa", minHeight: "100vh" }}>
-      <HotelEditForm />
+      {true && <RoomDetail/>}
+        {false &&<HotelEditForm />}
       {false && <HotelDetail />}
       {false && (
         <>
