@@ -7,6 +7,7 @@ import {
   Divider,
   useMediaQuery,
   Card,
+  Checkbox,
 } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import LockIcon from "@mui/icons-material/Lock";
@@ -25,116 +26,127 @@ export default function ManagerRoomView() {
   ];
 
   return (
-    <Box py={2} px={isMobile ? 1 : 3}>
-      <Box display='flex' alignItems='center' justifyContent='space-between'>
-        {/* Left section */}
-        <Box display='flex' flexDirection='column' gap={0.5}>
-          <Typography fontSize={isMobile ? 18 : 22} fontWeight={600}>
-            Danh sách loại phòng
-          </Typography>
-
-          <Box display='flex' alignItems='center' gap={1}>
-            <Typography fontSize={14} color='grey.700' fontWeight={500}>
-              Khách sạn 123
-            </Typography>
-            <KeyboardArrowDownIcon sx={{ fontSize: 20, color: "grey.700" }} />
-
-            <Box display='flex' alignItems='center' gap={0.5} ml={2}>
-              <RefreshIcon sx={{ fontSize: 18, color: "#8BC34A" }} />
-              <Typography fontSize={13} color='#8BC34A' fontWeight={500}>
-                Nhấn cập nhật dữ liệu
+    <>
+      <CreateRoom />
+      {false && <LockRoomSetup />}
+      {false && (
+        <Box py={2} px={isMobile ? 1 : 3}>
+          <Box
+            display='flex'
+            alignItems='center'
+            justifyContent='space-between'>
+            {/* Left section */}
+            <Box display='flex' flexDirection='column' gap={0.5}>
+              <Typography fontSize={isMobile ? 18 : 22} fontWeight={600}>
+                Danh sách loại phòng
               </Typography>
+
+              <Box display='flex' alignItems='center' gap={1}>
+                <Typography fontSize={14} color='grey.700' fontWeight={500}>
+                  Khách sạn 123
+                </Typography>
+                <KeyboardArrowDownIcon
+                  sx={{ fontSize: 20, color: "grey.700" }}
+                />
+
+                <Box display='flex' alignItems='center' gap={0.5} ml={2}>
+                  <RefreshIcon sx={{ fontSize: 18, color: "#8BC34A" }} />
+                  <Typography fontSize={13} color='#8BC34A' fontWeight={500}>
+                    Nhấn cập nhật dữ liệu
+                  </Typography>
+                </Box>
+              </Box>
             </Box>
-          </Box>
-        </Box>
 
-        {/* Right section */}
-        <Box display='flex' alignItems='center' gap={2}>
-          <Box
-            display='flex'
-            alignItems='center'
-            gap={0.5}
-            sx={{ cursor: "pointer" }}>
-            <LockIcon sx={{ fontSize: 18, color: "#8BC34A" }} />
-            <Typography fontSize={14} color='#8BC34A' fontWeight={500}>
-              Khóa phòng
-            </Typography>
-          </Box>
-
-          <Divider orientation='vertical' flexItem />
-
-          <Box
-            display='flex'
-            alignItems='center'
-            gap={0.5}
-            sx={{ cursor: "pointer" }}>
-            <AddCircleOutlineIcon sx={{ fontSize: 20, color: "#8BC34A" }} />
-            <Typography fontSize={14} color='#8BC34A' fontWeight={500}>
-              Tạo thêm loại phòng
-            </Typography>
-          </Box>
-        </Box>
-      </Box>
-      <Card sx={{ mt: 4 }}>
-        <Box
-          display='flex'
-          alignItems='center'
-          justifyContent='space-between'
-          py={2}
-          px={isMobile ? 1 : 2}
-          sx={{ background: "#fff" }}>
-          {/* Tabs */}
-          <Box display='flex' alignItems='center' gap={3}>
-            {tabs.map((t) => (
+            {/* Right section */}
+            <Box display='flex' alignItems='center' gap={2}>
               <Box
-                key={t.key}
-                sx={{ cursor: "pointer" }}
-                onClick={() => setActive(t.key)}>
-                <Typography
-                  fontSize={15}
-                  fontWeight={500}
-                  sx={{
-                    color: active === t.key ? "#8BC34A" : "#555",
-                    borderBottom:
-                      active === t.key
-                        ? "2px solid #8BC34A"
-                        : "2px solid transparent",
-                    pb: 0.5,
-                    transition: "all 0.25s",
-                  }}>
-                  {t.label}
+                display='flex'
+                alignItems='center'
+                gap={0.5}
+                sx={{ cursor: "pointer" }}>
+                <LockIcon sx={{ fontSize: 18, color: "#8BC34A" }} />
+                <Typography fontSize={14} color='#8BC34A' fontWeight={500}>
+                  Khóa phòng
                 </Typography>
               </Box>
-            ))}
-          </Box>
 
-          {/* Date Range */}
-          <Box
-            display='flex'
-            alignItems='center'
-            sx={{
-              border: "1px solid #ddd",
-              borderRadius: 1.5,
-              px: 1.5,
-              py: 0.6,
-              minWidth: isMobile ? 150 : 220,
-              cursor: "pointer",
-            }}>
-            <Typography fontSize={14} color='#444' flex={1}>
-              {dateRange}
-            </Typography>
-            <KeyboardArrowDownIcon sx={{ fontSize: 20, color: "#555" }} />
+              <Divider orientation='vertical' flexItem />
+
+              <Box
+                display='flex'
+                alignItems='center'
+                gap={0.5}
+                sx={{ cursor: "pointer" }}>
+                <AddCircleOutlineIcon sx={{ fontSize: 20, color: "#8BC34A" }} />
+                <Typography fontSize={14} color='#8BC34A' fontWeight={500}>
+                  Tạo thêm loại phòng
+                </Typography>
+              </Box>
+            </Box>
           </Box>
+          <Card sx={{ mt: 4 }}>
+            <Box
+              display='flex'
+              alignItems='center'
+              justifyContent='space-between'
+              py={2}
+              px={isMobile ? 1 : 2}
+              sx={{ background: "#fff" }}>
+              {/* Tabs */}
+              <Box display='flex' alignItems='center' gap={3}>
+                {tabs.map((t) => (
+                  <Box
+                    key={t.key}
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => setActive(t.key)}>
+                    <Typography
+                      fontSize={15}
+                      fontWeight={500}
+                      sx={{
+                        color: active === t.key ? "#8BC34A" : "#555",
+                        borderBottom:
+                          active === t.key
+                            ? "2px solid #8BC34A"
+                            : "2px solid transparent",
+                        pb: 0.5,
+                        transition: "all 0.25s",
+                      }}>
+                      {t.label}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+
+              {/* Date Range */}
+              <Box
+                display='flex'
+                alignItems='center'
+                sx={{
+                  border: "1px solid #ddd",
+                  borderRadius: 1.5,
+                  px: 1.5,
+                  py: 0.6,
+                  minWidth: isMobile ? 150 : 220,
+                  cursor: "pointer",
+                }}>
+                <Typography fontSize={14} color='#444' flex={1}>
+                  {dateRange}
+                </Typography>
+                <KeyboardArrowDownIcon sx={{ fontSize: 20, color: "#555" }} />
+              </Box>
+            </Box>
+            <Box py={3}>
+              {active == "hourly" && <RoomScheduleTableHourly />}
+              {active == "daily" && <RoomScheduleTableDaily />}
+              {active == "overnight" && <RoomScheduleTableOvernight />}
+            </Box>
+          </Card>
+          <QuickBlockDialog />
+          <EditOperationDialog />
         </Box>
-        <Box py={3}>
-          {active == "hourly" && <RoomScheduleTableHourly />}
-          {active == "daily" && <RoomScheduleTableDaily />}
-          {active == "overnight" && <RoomScheduleTableOvernight />}
-        </Box>
-      </Card>
-      <QuickBlockDialog />
-      <EditOperationDialog />
-    </Box>
+      )}
+    </>
   );
 }
 ("use client");
@@ -1346,13 +1358,15 @@ import {
 import { CalendarToday, AccessTime } from "@mui/icons-material";
 
 import "dayjs/locale/vi";
+import LockRoomSetup from "./LockRoomSetup";
+import CreateRoom from "./CreateRoom";
 
 dayjs.locale("vi");
 
 const daysOfWeek = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
 function EditOperationDialog() {
-  const [open] = useState(true);
+  const [open] = useState(false);
   const [selectedDays, setSelectedDays] = useState([
     "T2",
     "T3",
@@ -1365,7 +1379,7 @@ function EditOperationDialog() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='vi'>
       <Dialog
-        open={true}
+        open={open}
         maxWidth='md'
         fullWidth
         fullScreen={typeof window !== "undefined" && window.innerWidth < 600}
@@ -1559,57 +1573,64 @@ function EditOperationDialog() {
               <Typography fontSize={14} color='#333' fontWeight={500} mb={2}>
                 Bạn muốn áp dụng thay đổi cho ngày nào trong tuần?
               </Typography>
-              <RadioGroup
-                row
+
+              {/* Dùng Flex để dễ căn chỉnh, không cần RadioGroup nữa */}
+              <Box
                 sx={{
-                  justifyContent: "space-between",
+                  display: "flex",
                   flexWrap: "wrap",
                   gap: 1,
+                  justifyContent: "space-between",
                 }}>
-                {daysOfWeek.map((day) => (
-                  <FormControlLabel
-                    key={day}
-                    value={day}
-                    control={
-                      <Radio
-                        size='small'
-                        sx={{
-                          "& .MuiSvgIcon-root": { fontSize: 22 },
-                          color: selectedDays.includes(day)
-                            ? "#66bb6a"
-                            : "#ccc",
-                          "&.Mui-checked": { color: "#66bb6a" },
-                        }}
-                      />
-                    }
-                    label={
-                      <Typography fontSize={14} fontWeight={500}>
-                        {day}
-                      </Typography>
-                    }
-                    checked={selectedDays.includes(day)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedDays([...selectedDays, day]);
-                      } else {
-                        setSelectedDays(selectedDays.filter((d) => d !== day));
+                {daysOfWeek.map((day) => {
+                  const isChecked = selectedDays.includes(day);
+
+                  return (
+                    <FormControlLabel
+                      key={day}
+                      control={
+                        <Checkbox
+                          size='small'
+                          checked={isChecked}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedDays([...selectedDays, day]);
+                            } else {
+                              setSelectedDays(
+                                selectedDays.filter((d) => d !== day)
+                              );
+                            }
+                          }}
+                          sx={{
+                            "& .MuiSvgIcon-root": { fontSize: 22 },
+                            color: isChecked ? "#66bb6a" : "#ccc",
+                            "&.Mui-checked": { color: "#66bb6a" },
+                          }}
+                        />
                       }
-                    }}
-                    sx={{
-                      bgcolor: selectedDays.includes(day)
-                        ? "#e8f5e9"
-                        : "#f9f9f9",
-                      borderRadius: "12px",
-                      px: 2,
-                      py: 1,
-                      m: 0,
-                      border: selectedDays.includes(day)
-                        ? "1px solid #a5d6a7"
-                        : "1px solid #eee",
-                    }}
-                  />
-                ))}
-              </RadioGroup>
+                      label={
+                        <Typography fontSize={14} fontWeight={500}>
+                          {day}
+                        </Typography>
+                      }
+                      sx={{
+                        bgcolor: isChecked ? "#e8f5e9" : "#f9f9f9",
+                        borderRadius: "12px",
+                        px: 2,
+                        py: 1,
+                        m: 0,
+                        border: isChecked
+                          ? "1px solid #a5d6a7"
+                          : "1px solid #eee",
+                        "& .MuiTypography-root": {
+                          fontSize: 14,
+                          fontWeight: 500,
+                        },
+                      }}
+                    />
+                  );
+                })}
+              </Box>
             </Box>
 
             {/* Cập nhật số phòng còn lại */}

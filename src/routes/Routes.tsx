@@ -12,6 +12,7 @@ import HomeController from "../pages/home/HomeController";
 import ReviewController from "../pages/review/ReviewController";
 import NotificateController from "../pages/notificate/NotificateController";
 import ManagerRoomController from "../pages/manager-room/ManagerRoomController";
+import InforHotelController from "../pages/infor-hotel/InforHotelController";
 
 const Router = () => {
   const context: any = useBookingContext();
@@ -29,6 +30,7 @@ const Router = () => {
           <Route path='/notificate' element={<NotificateController />} />
           <Route path='/review' element={<ReviewController />} />
           <Route path='/manager-room' element={<ManagerRoomController />} />
+          <Route path='/info-hotel' element={<InforHotelController />} />
         </Route>
         <Route path='/register' element={<RegisterController />} />
         <Route path='/create-hotel' element={<CreateHotelController />} />
