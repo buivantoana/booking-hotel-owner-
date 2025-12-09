@@ -28,21 +28,88 @@ const Router = () => {
     <>
       <Routes>
         <Route path='/' element={<LayoutWebsite />}>
-          <Route path='/home' element={<HomeController />} />
-          <Route path='/notificate' element={<NotificateController />} />
-          <Route path='/review' element={<ReviewController />} />
-          <Route path='/manager-room' element={<ManagerRoomController />} />
-          <Route path='/reconciliation' element={<ReconciliationController />} />
+          <Route
+            path='/'
+            element={
+              <PrivateRouter>
+                <HomeController />
+              </PrivateRouter>
+            }
+          />
+          <Route
+            path='/notificate'
+            element={
+              <PrivateRouter>
+                <NotificateController />
+              </PrivateRouter>
+            }
+          />
+          <Route
+            path='/review'
+            element={
+              <PrivateRouter>
+                <ReviewController />
+              </PrivateRouter>
+            }
+          />
+          <Route
+            path='/manager-room'
+            element={
+              <PrivateRouter>
+                <ManagerRoomController />
+              </PrivateRouter>
+            }
+          />
+          <Route
+            path='/reconciliation'
+            element={
+              <PrivateRouter>
+                <ReconciliationController />
+              </PrivateRouter>
+            }
+          />
           <Route
             path='/manager-bookings'
-            element={<ManagerBookingController />}
+            element={
+              <PrivateRouter>
+                <ManagerBookingController />
+              </PrivateRouter>
+            }
           />
-          <Route path='/info-hotel' element={<InforHotelController />} />
+          <Route
+            path='/info-hotel'
+            element={
+              <PrivateRouter>
+                <InforHotelController />
+              </PrivateRouter>
+            }
+          />
         </Route>
-        <Route path='/register' element={<RegisterController />} />
-        <Route path='/create-hotel' element={<CreateHotelController />} />
+        <Route
+          path='/register'
+          element={
+            <GuestRoute>
+              <RegisterController />
+            </GuestRoute>
+          }
+        />
+        <Route
+          path='/create-hotel'
+          element={
+            <PrivateRouter>
+              <CreateHotelController />
+            </PrivateRouter>
+          }
+        />
 
-        <Route path='/login' element={<LoginController />} />
+        <Route
+          path='/login'
+          element={
+            <GuestRoute>
+              <LoginController />
+            </GuestRoute>
+          }
+        />
       </Routes>
     </>
   );

@@ -24,7 +24,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import remove from "../../images/delete.png";
 
-export default function LockRoomSetup() {
+export default function LockRoomSetup({ setAction }) {
   const [hotel, setHotel] = React.useState("");
   const [roomType, setRoomType] = React.useState("");
   const [bookingType, setBookingType] = React.useState("");
@@ -49,7 +49,20 @@ export default function LockRoomSetup() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ p: 3, background: "#F7F9FB", minHeight: "100vh" }}>
-        <Typography sx={{ fontSize: 28, fontWeight: 700, mb: 3 }}>
+        <Typography
+          display={"flex"}
+          alignItems={"center"}
+          gap={2}
+          sx={{ fontSize: 24, fontWeight: 700, mb: 3 }}>
+          <ArrowBackIos
+            sx={{
+              fontSize: 24,
+              color: "#666",
+              cursor: "pointer",
+              "&:hover": { color: "#333" },
+            }}
+            onClick={() => setAction("manager")} // hoặc navigate(-1)
+          />{" "}
           Thiết lập khóa phòng
         </Typography>
 
@@ -424,10 +437,10 @@ import {
   TableRow,
   IconButton,
 } from "@mui/material";
-import { Close, Delete as DeleteIcon } from "@mui/icons-material";
+import { ArrowBackIos, Close, Delete as DeleteIcon } from "@mui/icons-material";
 
 function RoomBlockHistory() {
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   return (
     <Paper
       elevation={0}
@@ -530,6 +543,7 @@ function RoomBlockHistory() {
               <TableCell>12:00</TableCell>
               <TableCell align='center'>
                 <IconButton
+                  onClick={() => setDeleteDialogOpen(true)}
                   size='small'
                   sx={{
                     bgcolor: "#ffebee",
@@ -559,6 +573,7 @@ function RoomBlockHistory() {
               <TableCell>-</TableCell>
               <TableCell align='center'>
                 <IconButton
+                  onClick={() => setDeleteDialogOpen(true)}
                   size='small'
                   sx={{
                     bgcolor: "#ffebee",

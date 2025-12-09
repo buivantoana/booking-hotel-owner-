@@ -133,6 +133,10 @@ export default function ManagerBookingView() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [fromDate, setFromDate] = useState<dayjs.Dayjs | null>(null);
   const [toDate, setToDate] = useState<dayjs.Dayjs | null>(null);
+  const [openNote, setOpenNote] = useState(false);
+  const [openCancel, setOpenCancel] = useState(false);
+  const [openAccepp, setOpenAccepp] = useState(false);
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ p: { xs: 2, md: 3 } }}>
@@ -169,7 +173,7 @@ export default function ManagerBookingView() {
               alignItems='end'>
               {/* Tìm kiếm */}
               <Box>
-                <Typography>Tìm kiếm</Typography>
+                <Typography sx={{ mb: 1.5 }}>Tìm kiếm</Typography>
                 <TextField
                   defaultValue='123456'
                   InputProps={{
@@ -418,13 +422,18 @@ export default function ManagerBookingView() {
                     </TableCell>
                     <TableCell>
                       <Tooltip title='Chỉnh sửa ghi chú'>
-                        <IconButton size='small'>
+                        <IconButton
+                          onClick={() => setOpenNote(true)}
+                          size='small'>
                           <EditIcon fontSize='small' />
                         </IconButton>
                       </Tooltip>
                     </TableCell>
                     <TableCell align='center'>
-                      <ActionMenu />
+                      <ActionMenu
+                        setOpenAccepp={setOpenAccepp}
+                        setOpenCancel={setOpenCancel}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -445,9 +454,15 @@ export default function ManagerBookingView() {
           />
         </Stack>
       </Box>
-      <NoteModal />
-      <CancelBookingModal />
-      <CheckoutConfirmModal />
+      <NoteModal openNote={openNote} onClose={() => setOpenNote(false)} />
+      <CancelBookingModal
+        openCancel={openCancel}
+        onClose={() => setOpenCancel(false)}
+      />
+      <CheckoutConfirmModal
+        openAccepp={openAccepp}
+        onClose={() => setOpenAccepp(false)}
+      />
     </LocalizationProvider>
   );
 }
@@ -456,14 +471,13 @@ import { Dialog, DialogContent, DialogTitle, Divider } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
-function NoteModal() {
-  const [open, setOpen] = useState(false);
+function NoteModal({ openNote, onClose }) {
   const [note, setNote] = useState("");
 
   return (
     <Dialog
-      open={open}
-      onClose={() => setOpen(false)}
+      open={openNote}
+      onClose={onClose}
       maxWidth='sm'
       fullWidth
       PaperProps={{
@@ -482,7 +496,7 @@ function NoteModal() {
           <Typography variant='h6' fontWeight='bold'>
             Ghi chú
           </Typography>
-          <IconButton onClick={() => setOpen(false)} size='small'>
+          <IconButton onClick={onClose} size='small'>
             <CloseIcon />
           </IconButton>
         </Stack>
@@ -593,7 +607,7 @@ function NoteModal() {
               color: "#666",
               borderColor: "#ddd",
             }}
-            onClick={() => setOpen(false)}>
+            onClick={onClose}>
             Hủy
           </Button>
           <Button
@@ -607,10 +621,6 @@ function NoteModal() {
               boxShadow: "0 4px 12px rgba(139,195,74,0.4)",
               "&:hover": { bgcolor: "#7cb342" },
               textTransform: "none",
-            }}
-            onClick={() => {
-              console.log("Ghi chú đã lưu:", note);
-              setOpen(false);
             }}>
             Ghi chú
           </Button>
@@ -621,7 +631,7 @@ function NoteModal() {
 }
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
-function ActionMenu() {
+function ActionMenu({ setOpenCancel, setOpenAccepp }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -663,13 +673,15 @@ function ActionMenu() {
             mt: 1,
           },
         }}>
-        <MenuItem onClick={handleClose} sx={{ gap: 1.5, fontSize: 14 }}>
+        <MenuItem
+          onClick={() => setOpenAccepp(true)}
+          sx={{ gap: 1.5, fontSize: 14 }}>
           <CheckCircleOutlineIcon fontSize='small' sx={{ color: "#666" }} />
           Khách nhận phòng
         </MenuItem>
 
         <MenuItem
-          onClick={handleClose}
+          onClick={() => setOpenCancel(true)}
           sx={{ gap: 1.5, fontSize: 14, color: "#d32f2f" }}>
           <HighlightOffIcon fontSize='small' />
           Hủy đặt phòng
@@ -681,8 +693,7 @@ function ActionMenu() {
 
 import { RadioGroup, FormControlLabel, Radio } from "@mui/material";
 
-function CancelBookingModal() {
-  const [open, setOpen] = useState(false);
+function CancelBookingModal({ openCancel, onClose }) {
   const [reason, setReason] = useState("");
 
   const reasons = [
@@ -697,8 +708,8 @@ function CancelBookingModal() {
 
   return (
     <Dialog
-      open={open}
-      onClose={() => setOpen(false)}
+      open={openCancel}
+      onClose={onClose}
       maxWidth='sm'
       fullWidth
       PaperProps={{
@@ -716,7 +727,7 @@ function CancelBookingModal() {
           <Typography variant='h6' fontWeight='bold'>
             Hủy đặt phòng
           </Typography>
-          <IconButton onClick={() => setOpen(false)}>
+          <IconButton onClick={onClose}>
             <CloseIcon />
           </IconButton>
         </Stack>
@@ -797,7 +808,7 @@ function CancelBookingModal() {
         <Stack direction='row' justifyContent='flex-end' spacing={2} mt={5}>
           <Button
             variant='outlined'
-            onClick={() => setOpen(false)}
+            onClick={onClose}
             sx={{
               borderRadius: 8,
               px: 4,
@@ -830,13 +841,11 @@ function CancelBookingModal() {
   );
 }
 
-function CheckoutConfirmModal() {
-  const [open, setOpen] = useState(true);
-
+function CheckoutConfirmModal({ openAccepp, onClose }) {
   return (
     <Dialog
-      open={open}
-      onClose={() => setOpen(false)}
+      open={openAccepp}
+      onClose={onClose}
       maxWidth='sm'
       fullWidth
       PaperProps={{
@@ -855,7 +864,7 @@ function CheckoutConfirmModal() {
           <Typography variant='h6' fontWeight='bold'>
             Xác nhận Khách trả phòng
           </Typography>
-          <IconButton onClick={() => setOpen(false)} size='small'>
+          <IconButton onClick={onClose} size='small'>
             <CloseIcon />
           </IconButton>
         </Stack>
@@ -923,7 +932,7 @@ function CheckoutConfirmModal() {
         <Stack direction='row' justifyContent='flex-end' spacing={2} mt={2}>
           <Button
             variant='outlined'
-            onClick={() => setOpen(false)}
+            onClick={onClose}
             sx={{
               borderRadius: 8,
               px: 4,
@@ -938,10 +947,6 @@ function CheckoutConfirmModal() {
           <Button
             variant='contained'
             startIcon={<CheckCircleOutlineIcon />}
-            onClick={() => {
-              console.log("Đã xác nhận khách trả phòng");
-              setOpen(false);
-            }}
             sx={{
               borderRadius: 8,
               px: 5,

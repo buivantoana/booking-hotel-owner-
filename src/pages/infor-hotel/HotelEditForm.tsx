@@ -17,18 +17,16 @@ import { ArrowBackIos } from "@mui/icons-material";
 import { GoogleMap, LoadScript } from "@react-google-maps/api";
 import { useCallback, useRef, useState } from "react";
 
-export default function HotelEditFormExact() {
+export default function HotelEditFormExact({ setAction }) {
   const [center, setCenter] = useState({
     lat: 21.0285,
     lng: 105.8542,
   });
   const mapRef = useRef(null);
 
- 
   const containerStyle = {
-    width: '100%',
-    height: '50vh',
-
+    width: "100%",
+    height: "50vh",
   };
 
   const onLoad = useCallback((map) => {
@@ -42,16 +40,18 @@ export default function HotelEditFormExact() {
     const lng = newCenter.lng();
 
     // kiểm tra nếu giống nhau thì không update
-    if (Math.abs(center.lat - lat) < 0.000001 && Math.abs(center.lng - lng) < 0.000001) {
+    if (
+      Math.abs(center.lat - lat) < 0.000001 &&
+      Math.abs(center.lng - lng) < 0.000001
+    ) {
       return;
     }
 
     setCenter({ lat, lng });
-
   };
   return (
     <Box>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2,mb:3 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
         <ArrowBackIos
           sx={{
             fontSize: 20,
@@ -59,7 +59,7 @@ export default function HotelEditFormExact() {
             cursor: "pointer",
             "&:hover": { color: "#333" },
           }}
-          onClick={() => window.history.back()}
+          onClick={() => setAction("edit_detail")}
         />
 
         <Box>
@@ -73,7 +73,6 @@ export default function HotelEditFormExact() {
         </Box>
 
         {/* Badge trạng thái */}
-
       </Box>
       <Paper
         elevation={0}
@@ -89,7 +88,7 @@ export default function HotelEditFormExact() {
           <Grid container spacing={{ xs: 4, lg: 6 }}>
             {/* ==================== CỘT TRÁI ==================== */}
             <Grid item xs={12} lg={4}>
-              <Typography variant="h6">Thông tin khách sạn</Typography>
+              <Typography variant='h6'>Thông tin khách sạn</Typography>
             </Grid>
             <Grid item xs={12} lg={8}>
               <Stack spacing={3.5}>
@@ -184,32 +183,27 @@ export default function HotelEditFormExact() {
                       border: "1px solid #ddd",
                       boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                     }}>
-                    <LoadScript googleMapsApiKey="AIzaSyASJk1hzLv6Xoj0fRsYnfuO6ptOXu0fZsc">
-          <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={center}
-            zoom={14}
-            onLoad={onLoad}
-            onIdle={onIdle}
-            options={{
-              zoomControl: true,
-              streetViewControl: false,
-              mapTypeControl: false,
-              fullscreenControl: false,
-              styles: [
-                {
-                  featureType: "poi",
-                  elementType: "labels",
-                  stylers: [{ visibility: "off" }],
-                },
-              ],
-            }}
-          >
-           
-
-            
-          </GoogleMap>
-        </LoadScript>
+                    <LoadScript googleMapsApiKey='AIzaSyASJk1hzLv6Xoj0fRsYnfuO6ptOXu0fZsc'>
+                      <GoogleMap
+                        mapContainerStyle={containerStyle}
+                        center={center}
+                        zoom={14}
+                        onLoad={onLoad}
+                        onIdle={onIdle}
+                        options={{
+                          zoomControl: true,
+                          streetViewControl: false,
+                          mapTypeControl: false,
+                          fullscreenControl: false,
+                          styles: [
+                            {
+                              featureType: "poi",
+                              elementType: "labels",
+                              stylers: [{ visibility: "off" }],
+                            },
+                          ],
+                        }}></GoogleMap>
+                    </LoadScript>
                   </Box>
                 </Box>
 
@@ -238,7 +232,7 @@ export default function HotelEditFormExact() {
                 </Box>
 
                 {/* Quận + Tỉnh/Thành phố */}
-                <Grid container justifyContent={"space-between"} >
+                <Grid container justifyContent={"space-between"}>
                   <Grid item xs={5.8}>
                     <Typography
                       fontSize={15}
@@ -284,7 +278,11 @@ export default function HotelEditFormExact() {
               <Stack mt={2} spacing={1}>
                 {/* Mô tả phòng */}
                 <Box>
-                  <Typography fontSize={15} fontWeight={600} color='#333' mb={1}>
+                  <Typography
+                    fontSize={15}
+                    fontWeight={600}
+                    color='#333'
+                    mb={1}>
                     Mô tả phòng
                   </Typography>
                   <Typography
@@ -292,8 +290,8 @@ export default function HotelEditFormExact() {
                     color='#888'
                     mb={1.5}
                     lineHeight={1.5}>
-                    Một đoạn giới thiệu ngắn gọn về loại phòng, hiển thị tại trang
-                    chi tiết loại phòng
+                    Một đoạn giới thiệu ngắn gọn về loại phòng, hiển thị tại
+                    trang chi tiết loại phòng
                   </Typography>
                   <TextField
                     fullWidth
@@ -319,7 +317,11 @@ export default function HotelEditFormExact() {
 
                 {/* Chính sách phòng */}
                 <Box>
-                  <Typography fontSize={15} fontWeight={600} color='#333' mb={1}>
+                  <Typography
+                    fontSize={15}
+                    fontWeight={600}
+                    color='#333'
+                    mb={1}>
                     Chính sách phòng
                   </Typography>
                   <Typography
@@ -351,23 +353,40 @@ export default function HotelEditFormExact() {
                 </Box>
               </Stack>
             </Grid>
-
-
-
           </Grid>
           <Divider sx={{ my: 4 }} />
           <Grid container spacing={{ xs: 4, lg: 6 }}>
             <Grid item xs={12} lg={4}>
-              <Typography variant="h6">Hình ảnh</Typography>
-              <Typography color="#5D6679">Thiết lập các thông tin cơ bản của phòng</Typography>
+              <Typography variant='h6'>Hình ảnh</Typography>
+              <Typography color='#5D6679'>
+                Thiết lập các thông tin cơ bản của phòng
+              </Typography>
             </Grid>
             <Grid item xs={12} lg={8}>
-              <HotelImageUpload isPadding={true}/>
+              <HotelImageUpload isPadding={true} />
             </Grid>
           </Grid>
           <Box display={"flex"} justifyContent={"end"} gap={2}>
-            <Button sx={{ background: "#F0F1F3", borderRadius: "30px", color: "black", padding: 1, px: 2 }}>Trở về</Button>
-            <Button sx={{ background: "#98B720", color: "white", borderRadius: "30px", padding: 1, px: 2 }}>Cập nhật</Button>
+            <Button
+              sx={{
+                background: "#F0F1F3",
+                borderRadius: "30px",
+                color: "black",
+                padding: 1,
+                px: 2,
+              }}>
+              Trở về
+            </Button>
+            <Button
+              sx={{
+                background: "#98B720",
+                color: "white",
+                borderRadius: "30px",
+                padding: 1,
+                px: 2,
+              }}>
+              Cập nhật
+            </Button>
           </Box>
         </Box>
       </Paper>

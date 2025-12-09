@@ -61,8 +61,11 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
           email: Email,
           phone: "0" + phoneNumber,
         });
-        if (result.success) {
+        if (result?.message && !result?.code) {
+          toast.success(result?.message);
           onNext();
+        } else {
+          toast.error(result?.message);
         }
       } catch (error) {
         console.log(error);
@@ -440,7 +443,9 @@ const RegisterSuccess = ({ Email }) => {
               width='100%'
               mt={2}>
               <Button
-                onClick={() => {navigate("/login")}}
+                onClick={() => {
+                  navigate("/login");
+                }}
                 fullWidth
                 variant='contained'
                 sx={{

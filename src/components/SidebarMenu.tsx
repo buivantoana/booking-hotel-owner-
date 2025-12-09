@@ -12,31 +12,37 @@ import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
 import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function SidebarMenu() {
-  const [active, setActive] = React.useState("home");
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const menuItems = [
-    { id: "home", label: "Trang chủ", icon: <HomeOutlinedIcon /> },
+    { id: "home", label: "Trang chủ", icon: <HomeOutlinedIcon />, path: "/" },
     {
       id: "review",
       label: "Quản lý đánh giá",
       icon: <StarBorderOutlinedIcon />,
+      path: "/review",
     },
     {
       id: "roomType",
       label: "Quản lý loại phòng",
       icon: <AssignmentOutlinedIcon />,
+      path: "/manager-room",
     },
     {
       id: "booking",
       label: "Quản lý đặt phòng",
       icon: <CalendarMonthOutlinedIcon />,
+      path: "/manager-bookings",
     },
     {
       id: "hotelInfo",
       label: "Thông tin khách sạn",
       icon: <InfoOutlinedIcon />,
+      path: "/info-hotel",
     },
   ];
 
@@ -56,11 +62,12 @@ export default function SidebarMenu() {
 
       <List>
         {menuItems.map((item) => {
-          const isActive = active === item.id;
+          const isActive = location.pathname === item.path;
+
           return (
             <ListItemButton
               key={item.id}
-              onClick={() => setActive(item.id)}
+              onClick={() => navigate(item.path)}
               sx={{
                 mb: 1,
                 borderRadius: "20px",

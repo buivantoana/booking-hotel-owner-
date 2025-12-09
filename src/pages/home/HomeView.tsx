@@ -708,7 +708,7 @@ export default function HomeView() {
               borderRadius: 20,
             }}
           />
-          <Avatar onClick={handleClick} sx={{ bgcolor: "#eee" }}>
+          <Avatar onClick={handleClick} sx={{}}>
             <NotificationsNoneIcon />
           </Avatar>
         </Stack>
@@ -1114,6 +1114,7 @@ import {
   Cancel,
   Receipt,
 } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 const StyledPopover = styled(Popover)(({ theme }) => ({
   "& .MuiPopover-paper": {
@@ -1147,7 +1148,7 @@ const TimeText = styled(Typography)({
 
 function NotificationPopover({ handleClick, anchorEl, setAnchorEl }) {
   const [tab, setTab] = useState(0);
-
+  const navigate = useNavigate();
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -1238,6 +1239,7 @@ function NotificationPopover({ handleClick, anchorEl, setAnchorEl }) {
               Thông báo
             </Typography>
             <Button
+              onClick={() => navigate("/notificate")}
               size='small'
               sx={{ textTransform: "none", fontSize: "14px" }}>
               Xem tất cả

@@ -34,7 +34,7 @@ import HotelEditForm from "./HotelEditForm";
 import RoomDetail from "./RoomDetail";
 
 // Component menu thao tác
-function ActionMenu() {
+function ActionMenu({ setAction, setDeleteDialogOpen }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -76,7 +76,9 @@ function ActionMenu() {
             mt: 1,
           },
         }}>
-        <MenuItem onClick={handleClose} sx={{ gap: 1.5, fontSize: 14 }}>
+        <MenuItem
+          onClick={() => setAction("edit_form")}
+          sx={{ gap: 1.5, fontSize: 14 }}>
           <EditIcon fontSize='small' sx={{ color: "#666" }} />
           Chỉnh sửa
         </MenuItem>
@@ -85,7 +87,7 @@ function ActionMenu() {
           Nhận bản
         </MenuItem>
         <MenuItem
-          onClick={handleClose}
+          onClick={() => setDeleteDialogOpen(true)}
           sx={{ gap: 1.5, fontSize: 14, color: "#d32f2f" }}>
           <PauseCircleIcon fontSize='small' />
           Ngừng kinh doanh
@@ -96,13 +98,14 @@ function ActionMenu() {
 }
 
 export default function InforHotelView() {
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [action, setAction] = useState("manager");
   return (
     <Box sx={{ p: 3, bgcolor: "#f5f7fa", minHeight: "100vh" }}>
-      {true && <RoomDetail/>}
-        {false &&<HotelEditForm />}
-      {false && <HotelDetail />}
-      {false && (
+      {action == "detail" && <RoomDetail onNext={setAction} />}
+      {action == "edit_form" && <HotelEditForm setAction={setAction} />}
+      {action == "edit_detail" && <HotelDetail setAction={setAction} />}
+      {action == "manager" && (
         <>
           {/* Header */}
           <Box
@@ -120,7 +123,7 @@ export default function InforHotelView() {
               variant='contained'
               startIcon={<AddIcon />}
               sx={{
-                bgcolor: "#66bb6a",
+                bgcolor: "#98B720",
                 borderRadius: "50px",
                 textTransform: "none",
                 fontWeight: 600,
@@ -189,7 +192,11 @@ export default function InforHotelView() {
                   {/* Dòng có menu thao tác (giống hệt ảnh) */}
                   <TableRow hover>
                     <TableCell>1</TableCell>
-                    <TableCell fontWeight={500}>Khách sạn 123</TableCell>
+                    <TableCell
+                      onClick={() => setAction("edit_detail")}
+                      fontWeight={500}>
+                      Khách sạn 123
+                    </TableCell>
                     <TableCell>
                       <Chip
                         label='Contract'
@@ -210,39 +217,13 @@ export default function InforHotelView() {
                     <TableCell>16%</TableCell>
                     <TableCell>Cả hai</TableCell>
                     <TableCell>
-                      <ActionMenu /> {/* ← Đây chính là popup menu 3 mục */}
+                      <ActionMenu
+                        setAction={setAction}
+                        setDeleteDialogOpen={setDeleteDialogOpen}
+                      />{" "}
+                      {/* ← Đây chính là popup menu 3 mục */}
                     </TableCell>
                   </TableRow>
-
-                  {/* Các dòng khác (giữ nguyên) */}
-                  <TableRow hover>
-                    <TableCell>2</TableCell>
-                    <TableCell fontWeight={500}>Khách sạn 123</TableCell>
-                    <TableCell>
-                      <Chip
-                        label='Contract'
-                        size='small'
-                        sx={{ bgcolor: "#e3f2fd", color: "#1976d2" }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label='Đang hoạt động'
-                        size='small'
-                        color='success'
-                      />
-                    </TableCell>
-                    <TableCell sx={{ maxWidth: 280 }}>
-                      110 Đ. Cầu Giấy, Quan Hoa, Cầu Giấy, Hà Nội
-                    </TableCell>
-                    <TableCell>16%</TableCell>
-                    <TableCell>Cả hai</TableCell>
-                    <TableCell>
-                      <ActionMenu />
-                    </TableCell>
-                  </TableRow>
-
-                  {/* Thêm các dòng khác nếu cần... */}
                 </TableBody>
               </Table>
             </TableContainer>

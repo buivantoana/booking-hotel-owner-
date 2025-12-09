@@ -1,4 +1,4 @@
-import { CheckCircle, Star } from "@mui/icons-material";
+import { ArrowBackIos, CheckCircle, Star } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -15,18 +15,19 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 type Props = {};
 
 const ReviewView = (props: Props) => {
+  const [detailReview, setDetailReview] = useState(null);
   return (
     <Box sx={{ bgcolor: "#f9f9f9", p: { xs: 2, sm: 3, md: 4 } }}>
-      <Review />
-      {/* <ReviewCard /> */}
-      <HotelReview />
+      <Review detailReview={detailReview} setDetailReview={setDetailReview} />
+      {!detailReview && <ReviewCard setDetailReview={setDetailReview} />}
+      {detailReview && <HotelReview />}
     </Box>
   );
 };
 
 export default ReviewView;
 
-const Review = () => {
+const Review = ({ setDetailReview, detailReview }) => {
   let reviews = [
     {
       id: "0wCyv2zNIl4K",
@@ -112,9 +113,22 @@ const Review = () => {
         display={"flex"}
         alignItems={"center"}
         justifyContent={"space-between"}>
-        <Typography variant='h6' fontWeight='bold'>
-          Tổng quan Đánh giá
-        </Typography>
+        {!detailReview && (
+          <Typography variant='h6' fontWeight='bold'>
+            Tổng quan Đánh giá
+          </Typography>
+        )}
+        {detailReview && (
+          <Typography
+            onClick={() => setDetailReview(null)}
+            variant='h6'
+            display={"flex"}
+            alignItems={"center"}
+            gap={2}
+            fontWeight='bold'>
+            <ArrowBackIos /> Khách sạn 123
+          </Typography>
+        )}
       </Box>
 
       {/* TỔNG ĐIỂM */}
@@ -213,7 +227,7 @@ const Review = () => {
   );
 };
 
-const ReviewCard = () => {
+const ReviewCard = ({ setDetailReview }) => {
   let reviews = [
     {
       id: "0wCyv2zNIl4K",
@@ -330,306 +344,7 @@ const ReviewCard = () => {
                   </Typography>
                   <Typography
                     display={"flex"}
-                    alignItems={"center"}
-                    color='rgba(234, 106, 0, 1)'
-                    fontSize={".8rem"}>
-                    Xem chi tiết <NavigateNextIcon sx={{ fontSize: "18px" }} />
-                  </Typography>
-                </Box>
-                <Box display={"flex"} alignItems={"center"} gap={4}>
-                  <Box
-                    sx={{
-                      color: "black",
-                      borderRadius: "12px",
-                      py: 2,
-                      fontSize: "2rem",
-                      fontWeight: 700,
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}>
-                    <Typography variant='h5'>{avgRate.toFixed(1)}</Typography>
-                  </Box>
-                  <Box display={"flex"} flexDirection={"column"}>
-                    <Typography
-                      fontWeight={600}
-                      fontSize='1rem'
-                      color='rgba(152, 183, 32, 1)'>
-                      Xuất sắc
-                    </Typography>
-                    <Typography fontSize='.9rem' color='rgba(43, 47, 56, 1)'>
-                      Từ {reviews.length} đánh giá
-                    </Typography>
-                  </Box>
-                </Box>
-              </Grid>
-
-              {/* Biểu đồ rating */}
-              <Grid item xs={12} md={12}>
-                <Stack width={"100%"} spacing={2}>
-                  {[5, 4, 3, 2, 1].map((star, idx) => (
-                    <Stack
-                      key={star}
-                      direction='row'
-                      alignItems='center'
-                      spacing={2}>
-                      <Typography
-                        width={40}
-                        fontSize='0.9rem'
-                        display={"flex"}
-                        alignItems={"center"}
-                        gap={1}
-                        color='#666'>
-                        {star} <img src={start} alt='' />
-                      </Typography>
-                      <Box sx={{ flex: 1 }}>
-                        <LinearProgress
-                          variant='determinate'
-                          value={starCounts[idx]}
-                          sx={{
-                            height: 8,
-                            borderRadius: 4,
-                            bgcolor: "#e0e0e0",
-                            "& .MuiLinearProgress-bar": {
-                              bgcolor: "#98b720",
-                              borderRadius: 4,
-                            },
-                          }}
-                        />
-                      </Box>
-                      <Typography
-                        fontWeight={600}
-                        fontSize='0.9rem'
-                        color='#98b720'>
-                        {starCounts[idx]}/100
-                      </Typography>
-                    </Stack>
-                  ))}
-                </Stack>
-              </Grid>
-            </Grid>
-          </Paper>
-        </Card>
-        <Card sx={{ borderRadius: 3, boxShadow: 3, p: 2, width: "28%" }}>
-          <Paper
-            elevation={0}
-            sx={{
-              borderRadius: "16px",
-              py: 0,
-              px: 0,
-            }}>
-            <Grid alignItems='center' flexDirection={"column"}>
-              {/* Tổng điểm */}
-              <Grid item xs={12} md={12}>
-                <Box
-                  display={"flex"}
-                  justifyContent={"space-between"}
-                  alignItems={"center"}>
-                  <Typography variant='h6' fontWeight={500}>
-                    Khách sạn 123
-                  </Typography>
-                  <Typography
-                    display={"flex"}
-                    alignItems={"center"}
-                    color='rgba(234, 106, 0, 1)'
-                    fontSize={".8rem"}>
-                    Xem chi tiết <NavigateNextIcon sx={{ fontSize: "18px" }} />
-                  </Typography>
-                </Box>
-                <Box display={"flex"} alignItems={"center"} gap={4}>
-                  <Box
-                    sx={{
-                      color: "black",
-                      borderRadius: "12px",
-                      py: 2,
-                      fontSize: "2rem",
-                      fontWeight: 700,
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}>
-                    <Typography variant='h5'>{avgRate.toFixed(1)}</Typography>
-                  </Box>
-                  <Box display={"flex"} flexDirection={"column"}>
-                    <Typography
-                      fontWeight={600}
-                      fontSize='1rem'
-                      color='rgba(152, 183, 32, 1)'>
-                      Xuất sắc
-                    </Typography>
-                    <Typography fontSize='.9rem' color='rgba(43, 47, 56, 1)'>
-                      Từ {reviews.length} đánh giá
-                    </Typography>
-                  </Box>
-                </Box>
-              </Grid>
-
-              {/* Biểu đồ rating */}
-              <Grid item xs={12} md={12}>
-                <Stack width={"100%"} spacing={2}>
-                  {[5, 4, 3, 2, 1].map((star, idx) => (
-                    <Stack
-                      key={star}
-                      direction='row'
-                      alignItems='center'
-                      spacing={2}>
-                      <Typography
-                        width={40}
-                        fontSize='0.9rem'
-                        display={"flex"}
-                        alignItems={"center"}
-                        gap={1}
-                        color='#666'>
-                        {star} <img src={start} alt='' />
-                      </Typography>
-                      <Box sx={{ flex: 1 }}>
-                        <LinearProgress
-                          variant='determinate'
-                          value={starCounts[idx]}
-                          sx={{
-                            height: 8,
-                            borderRadius: 4,
-                            bgcolor: "#e0e0e0",
-                            "& .MuiLinearProgress-bar": {
-                              bgcolor: "#98b720",
-                              borderRadius: 4,
-                            },
-                          }}
-                        />
-                      </Box>
-                      <Typography
-                        fontWeight={600}
-                        fontSize='0.9rem'
-                        color='#98b720'>
-                        {starCounts[idx]}/100
-                      </Typography>
-                    </Stack>
-                  ))}
-                </Stack>
-              </Grid>
-            </Grid>
-          </Paper>
-        </Card>
-        <Card sx={{ borderRadius: 3, boxShadow: 3, p: 2, width: "28%" }}>
-          <Paper
-            elevation={0}
-            sx={{
-              borderRadius: "16px",
-              py: 0,
-              px: 0,
-            }}>
-            <Grid alignItems='center' flexDirection={"column"}>
-              {/* Tổng điểm */}
-              <Grid item xs={12} md={12}>
-                <Box
-                  display={"flex"}
-                  justifyContent={"space-between"}
-                  alignItems={"center"}>
-                  <Typography variant='h6' fontWeight={500}>
-                    Khách sạn 123
-                  </Typography>
-                  <Typography
-                    display={"flex"}
-                    alignItems={"center"}
-                    color='rgba(234, 106, 0, 1)'
-                    fontSize={".8rem"}>
-                    Xem chi tiết <NavigateNextIcon sx={{ fontSize: "18px" }} />
-                  </Typography>
-                </Box>
-                <Box display={"flex"} alignItems={"center"} gap={4}>
-                  <Box
-                    sx={{
-                      color: "black",
-                      borderRadius: "12px",
-                      py: 2,
-                      fontSize: "2rem",
-                      fontWeight: 700,
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}>
-                    <Typography variant='h5'>{avgRate.toFixed(1)}</Typography>
-                  </Box>
-                  <Box display={"flex"} flexDirection={"column"}>
-                    <Typography
-                      fontWeight={600}
-                      fontSize='1rem'
-                      color='rgba(152, 183, 32, 1)'>
-                      Xuất sắc
-                    </Typography>
-                    <Typography fontSize='.9rem' color='rgba(43, 47, 56, 1)'>
-                      Từ {reviews.length} đánh giá
-                    </Typography>
-                  </Box>
-                </Box>
-              </Grid>
-
-              {/* Biểu đồ rating */}
-              <Grid item xs={12} md={12}>
-                <Stack width={"100%"} spacing={2}>
-                  {[5, 4, 3, 2, 1].map((star, idx) => (
-                    <Stack
-                      key={star}
-                      direction='row'
-                      alignItems='center'
-                      spacing={2}>
-                      <Typography
-                        width={40}
-                        fontSize='0.9rem'
-                        display={"flex"}
-                        alignItems={"center"}
-                        gap={1}
-                        color='#666'>
-                        {star} <img src={start} alt='' />
-                      </Typography>
-                      <Box sx={{ flex: 1 }}>
-                        <LinearProgress
-                          variant='determinate'
-                          value={starCounts[idx]}
-                          sx={{
-                            height: 8,
-                            borderRadius: 4,
-                            bgcolor: "#e0e0e0",
-                            "& .MuiLinearProgress-bar": {
-                              bgcolor: "#98b720",
-                              borderRadius: 4,
-                            },
-                          }}
-                        />
-                      </Box>
-                      <Typography
-                        fontWeight={600}
-                        fontSize='0.9rem'
-                        color='#98b720'>
-                        {starCounts[idx]}/100
-                      </Typography>
-                    </Stack>
-                  ))}
-                </Stack>
-              </Grid>
-            </Grid>
-          </Paper>
-        </Card>
-        <Card sx={{ borderRadius: 3, boxShadow: 3, p: 2, width: "28%" }}>
-          <Paper
-            elevation={0}
-            sx={{
-              borderRadius: "16px",
-              py: 0,
-              px: 0,
-            }}>
-            <Grid alignItems='center' flexDirection={"column"}>
-              {/* Tổng điểm */}
-              <Grid item xs={12} md={12}>
-                <Box
-                  display={"flex"}
-                  justifyContent={"space-between"}
-                  alignItems={"center"}>
-                  <Typography variant='h6' fontWeight={500}>
-                    Khách sạn 123
-                  </Typography>
-                  <Typography
-                    display={"flex"}
+                    onClick={() => setDetailReview({})}
                     alignItems={"center"}
                     color='rgba(234, 106, 0, 1)'
                     fontSize={".8rem"}>

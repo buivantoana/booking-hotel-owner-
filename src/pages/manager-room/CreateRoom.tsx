@@ -26,7 +26,7 @@ import remove from "../../images/delete.png";
 import { ArrowBackIos } from "@mui/icons-material";
 import RoomTypeManager from "../create_hotel/RoomTypeManager";
 
-export default function CreateRoom() {
+export default function CreateRoom({ setAction }) {
   const [hotel, setHotel] = React.useState("");
   const [roomType, setRoomType] = React.useState("");
   const [bookingType, setBookingType] = React.useState("");
@@ -52,11 +52,11 @@ export default function CreateRoom() {
                 cursor: "pointer",
                 "&:hover": { color: "#333" },
               }}
-              onClick={() => window.history.back()} // hoặc navigate(-1)
+              onClick={() => setAction("manager")} // hoặc navigate(-1)
             />
 
             <Box>
-              <Typography fontSize={18} fontWeight={600} color='#333'>
+              <Typography sx={{ fontSize: 24, fontWeight: 700 }}>
                 Tạo loại phòng
               </Typography>
               <Typography fontSize={13} color='#888' fontWeight={500}>
@@ -69,7 +69,7 @@ export default function CreateRoom() {
           <Button
             variant='contained'
             sx={{
-              bgcolor: "#66bb6a",
+              bgcolor: "#98B720",
               color: "white",
               fontWeight: 600,
               fontSize: 15,

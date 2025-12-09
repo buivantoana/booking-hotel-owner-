@@ -18,6 +18,9 @@ export default function ManagerRoomView() {
   const isMobile = useMediaQuery("(max-width:600px)");
   const [active, setActive] = useState("hourly");
   const [dateRange, setDateRange] = useState("19/11/2025 - 20/11/2025");
+  const [openQuickBlock, setOpenQuickBlock] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [action, setAction] = useState("manager");
 
   const tabs = [
     { key: "hourly", label: "Theo giờ" },
@@ -27,9 +30,9 @@ export default function ManagerRoomView() {
 
   return (
     <>
-      <CreateRoom />
-      {false && <LockRoomSetup />}
-      {false && (
+      {action == "create" && <CreateRoom setAction={setAction} />}
+      {action == "lock" && <LockRoomSetup setAction={setAction} />}
+      {action == "manager" && (
         <Box py={2} px={isMobile ? 1 : 3}>
           <Box
             display='flex'
@@ -63,6 +66,7 @@ export default function ManagerRoomView() {
               <Box
                 display='flex'
                 alignItems='center'
+                onClick={() => setAction("lock")}
                 gap={0.5}
                 sx={{ cursor: "pointer" }}>
                 <LockIcon sx={{ fontSize: 18, color: "#8BC34A" }} />
@@ -77,6 +81,7 @@ export default function ManagerRoomView() {
                 display='flex'
                 alignItems='center'
                 gap={0.5}
+                onClick={() => setAction("create")}
                 sx={{ cursor: "pointer" }}>
                 <AddCircleOutlineIcon sx={{ fontSize: 20, color: "#8BC34A" }} />
                 <Typography fontSize={14} color='#8BC34A' fontWeight={500}>
@@ -137,13 +142,34 @@ export default function ManagerRoomView() {
               </Box>
             </Box>
             <Box py={3}>
-              {active == "hourly" && <RoomScheduleTableHourly />}
-              {active == "daily" && <RoomScheduleTableDaily />}
-              {active == "overnight" && <RoomScheduleTableOvernight />}
+              {active == "hourly" && (
+                <RoomScheduleTableHourly
+                  handleOpenQuickBlock={() => setOpenQuickBlock(true)}
+                  handleOpenEdit={() => setOpenEdit(true)}
+                />
+              )}
+              {active == "daily" && (
+                <RoomScheduleTableDaily
+                  handleOpenQuickBlock={() => setOpenQuickBlock(true)}
+                  handleOpenEdit={() => setOpenEdit(true)}
+                />
+              )}
+              {active == "overnight" && (
+                <RoomScheduleTableOvernight
+                  handleOpenQuickBlock={() => setOpenQuickBlock(true)}
+                  handleOpenEdit={() => setOpenEdit(true)}
+                />
+              )}
             </Box>
           </Card>
-          <QuickBlockDialog />
-          <EditOperationDialog />
+          <QuickBlockDialog
+            openQuickBlock={openQuickBlock}
+            onClose={() => setOpenQuickBlock(false)}
+          />
+          <EditOperationDialog
+            openEdit={openEdit}
+            onClose={() => setOpenEdit(false)}
+          />
         </Box>
       )}
     </>
@@ -173,7 +199,7 @@ import "dayjs/locale/vi";
 
 dayjs.locale("vi");
 
-function QuickBlockDialog() {
+function QuickBlockDialog({ openQuickBlock, onClose }) {
   const [blockType] = useState("Theo giờ");
   const [startDate] = useState(dayjs("19/11/2025", "DD/MM/YYYY"));
   const [endDate] = useState(dayjs("21/11/2025", "DD/MM/YYYY"));
@@ -183,7 +209,7 @@ function QuickBlockDialog() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='vi'>
       <Dialog
-        open={false}
+        open={openQuickBlock}
         maxWidth='sm'
         fullWidth
         fullScreen={typeof window !== "undefined" && window.innerWidth < 600}
@@ -209,7 +235,7 @@ function QuickBlockDialog() {
             Khóa nhanh
           </Typography>
           <IconButton sx={{ position: "absolute", right: 12, top: 12 }}>
-            <CloseIcon sx={{ fontSize: 20 }} />
+            <CloseIcon onClick={onClose} sx={{ fontSize: 20 }} />
           </IconButton>
         </Box>
 
@@ -399,7 +425,7 @@ function QuickBlockDialog() {
                   size='small'
                   sx={{
                     mt: 1,
-                    bgcolor: "#66bb6a",
+                    bgcolor: "#98B720",
                     color: "white",
                     fontWeight: 600,
                     height: 26,
@@ -424,6 +450,7 @@ function QuickBlockDialog() {
               mt={2}>
               <Button
                 variant='outlined'
+                onClick={onClose}
                 sx={{
                   flex: 1,
                   borderRadius: "50px",
@@ -443,7 +470,7 @@ function QuickBlockDialog() {
                 sx={{
                   flex: 1,
                   borderRadius: "50px",
-                  bgcolor: "#66bb6a",
+                  bgcolor: "#98B720",
                   "&:hover": { bgcolor: "#4caf50" },
                   color: "white",
                   textTransform: "none",
@@ -465,7 +492,7 @@ import { TextField } from "@mui/material";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import LaunchIcon from "@mui/icons-material/Launch";
 import { MobileDatePicker, MobileTimePicker } from "@mui/x-date-pickers";
-function RoomScheduleTableHourly() {
+function RoomScheduleTableHourly({ handleOpenQuickBlock, handleOpenEdit }) {
   const isMobile = useMediaQuery("(max-width:768px)");
 
   const hours = [
@@ -598,6 +625,8 @@ function RoomScheduleTableHourly() {
             <Typography
               fontWeight={500}
               display={"flex"}
+              onClick={handleOpenQuickBlock}
+              sx={{ cursor: "pointer" }}
               alignItems={"center"}
               fontSize={"14px"}
               color='rgba(152, 183, 32, 1)'
@@ -683,6 +712,8 @@ function RoomScheduleTableHourly() {
               alignItems={"center"}
               fontSize={"14px"}
               color='rgba(152, 183, 32, 1)'
+              onClick={handleOpenEdit}
+              sx={{ cursor: "pointer" }}
               gap={1}>
               Chỉnh sửa
             </Typography>
@@ -784,7 +815,7 @@ function RoomScheduleTableHourly() {
     </Box>
   );
 }
-function RoomScheduleTableDaily() {
+function RoomScheduleTableDaily({ handleOpenQuickBlock }) {
   const isMobile = useMediaQuery("(max-width:768px)");
 
   const hours = [
@@ -912,6 +943,8 @@ function RoomScheduleTableDaily() {
             <Typography
               fontWeight={500}
               display={"flex"}
+              onClick={handleOpenQuickBlock}
+              sx={{ cursor: "pointer" }}
               alignItems={"center"}
               fontSize={"14px"}
               color='rgba(152, 183, 32, 1)'
@@ -997,6 +1030,8 @@ function RoomScheduleTableDaily() {
               alignItems={"center"}
               fontSize={"14px"}
               color='rgba(152, 183, 32, 1)'
+              onClick={handleOpenEdit}
+              sx={{ cursor: "pointer" }}
               gap={1}>
               Chỉnh sửa
             </Typography>
@@ -1066,7 +1101,7 @@ function RoomScheduleTableDaily() {
     </Box>
   );
 }
-function RoomScheduleTableOvernight() {
+function RoomScheduleTableOvernight({ handleOpenQuickBlock }) {
   const isMobile = useMediaQuery("(max-width:768px)");
 
   const hours = [
@@ -1193,6 +1228,8 @@ function RoomScheduleTableOvernight() {
             </Typography>
             <Typography
               fontWeight={500}
+              onClick={handleOpenQuickBlock}
+              sx={{ cursor: "pointer" }}
               display={"flex"}
               alignItems={"center"}
               fontSize={"14px"}
@@ -1278,6 +1315,8 @@ function RoomScheduleTableOvernight() {
               display={"flex"}
               alignItems={"center"}
               fontSize={"14px"}
+              onClick={handleOpenEdit}
+              sx={{ cursor: "pointer" }}
               color='rgba(152, 183, 32, 1)'
               gap={1}>
               Chỉnh sửa
@@ -1365,7 +1404,7 @@ dayjs.locale("vi");
 
 const daysOfWeek = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
-function EditOperationDialog() {
+function EditOperationDialog({ openEdit, onClose }) {
   const [open] = useState(false);
   const [selectedDays, setSelectedDays] = useState([
     "T2",
@@ -1379,7 +1418,7 @@ function EditOperationDialog() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='vi'>
       <Dialog
-        open={open}
+        open={openEdit}
         maxWidth='md'
         fullWidth
         fullScreen={typeof window !== "undefined" && window.innerWidth < 600}
@@ -1405,7 +1444,7 @@ function EditOperationDialog() {
             Chỉnh sửa hoạt động
           </Typography>
           <IconButton sx={{ position: "absolute", right: 12, top: 12 }}>
-            <CloseIcon sx={{ fontSize: 20 }} />
+            <CloseIcon onClick={onClose} sx={{ fontSize: 20 }} />
           </IconButton>
         </Box>
 
@@ -1676,6 +1715,7 @@ function EditOperationDialog() {
               <Button
                 fullWidth
                 variant='outlined'
+                onClick={onClose}
                 sx={{
                   borderRadius: "50px",
                   py: 1.8,
