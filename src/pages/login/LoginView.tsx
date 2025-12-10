@@ -78,7 +78,7 @@ const RegistrationForm = () => {
   return (
     <Container
       maxWidth='lg'
-      sx={{ display: "flex", alignItems: "center", py: 5 }}>
+      sx={{ display: "flex", alignItems: "center", py: 5,minHeight:"100vh" }}>
       <Grid
         container
         sx={{

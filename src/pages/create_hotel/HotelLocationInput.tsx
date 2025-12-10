@@ -19,6 +19,7 @@ import {
     InfoWindow,
     MarkerClusterer,
   } from "@react-google-maps/api";
+import { useBookingContext } from '../../App';
 // Dữ liệu địa chỉ Việt Nam (cập nhật 2025 - mẫu đầy đủ, bạn có thể mở rộng)
 const vietnamData: Record<string, string[]> = {
   'Hà Nội': ['Ba Đình', 'Hoàn Kiếm', 'Đống Đa', 'Cầu Giấy', 'Hai Bà Trưng', 'Thanh Xuân'],
@@ -27,10 +28,18 @@ const vietnamData: Record<string, string[]> = {
   'Cần Thơ': ['Ninh Kiều', 'Bình Thủy', 'Cái Răng', 'Ô Môn'],
   'Hải Phòng': ['Hồng Bàng', 'Lê Chân', 'Ngô Quyền', 'Hải An'],
 };
+const wardsData: Record<string, string[]> = {
+  "Đống Đa": ["Phường Phương Liên", "Phường Quốc Tử Giám", "Phường Trung Liệt"],
+  "Ba Đình": ["Phường Ngọc Hà", "Phường Trúc Bạch"],
+  "Hoàn Kiếm": ["Phường Hàng Buồm", "Phường Hàng Đào"],
+
+  "Quận 1": ["Phường Bến Nghé", "Phường Nguyễn Thái Bình", "Phường Đa Kao"],
+  "Quận 3": ["Phường 6", "Phường 7", "Phường 8"],
+};
 
 const provinces = Object.keys(vietnamData);
 
-export default function HotelLocationInput() {
+export default function HotelLocationInput({ dataCreateHotel, setDataCreateHotel }) {
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedWard, setSelectedWard] = useState<string | null>(null);
@@ -48,15 +57,80 @@ export default function HotelLocationInput() {
     height: '50vh',
 
   };
+  const context = useBookingContext()
 
-
+  const dataRef = useRef({});
   const mapRef = useRef(null);
 
   const [activeHotel, setActiveHotel] = useState(null);
   const onLoad = useCallback((map) => {
     mapRef.current = map;
   }, []);
+  useEffect(() => {
+    dataRef.current = {
+      selectedProvince,
+      selectedDistrict,
+      selectedWard,
+      address,
+      center
+    };
+  }, [selectedProvince, selectedDistrict, selectedWard, address, center]);
+  console.log("AAA dataCreateHotel",context?.state?.create_hotel)
+  useEffect(() => {
+    const saved = context?.state?.create_hotel;
+    if (!saved) return;
+  
+    const {
+      selectedProvince,
+      selectedDistrict,
+      selectedWard,
+      address,
+      center,
+    } = saved;
+  
+    // 1. Load tỉnh trước
+    if (selectedProvince && provinces.includes(selectedProvince)) {
+      setSelectedProvince(selectedProvince);
+  
+      // Lấy danh sách quận/huyện tương ứng
+      const newDistricts = vietnamData[selectedProvince] || [];
+      setDistricts(newDistricts);
+  
+      // 2. Sau khi có districts → load district (dùng callback hoặc setTimeout nhỏ để đảm bảo state đã update)
+      if (selectedDistrict && newDistricts.includes(selectedDistrict)) {
+        // Dùng setTimeout 0 hoặc callback để chạy sau khi districts đã được set
+        setTimeout(() => {
+          setSelectedDistrict(selectedDistrict);
+  
+          const newWards = wardsData[selectedDistrict] || [];
+          setWards(newWards);
+  
+          if (selectedWard && newWards.includes(selectedWard)) {
+            setSelectedWard(selectedWard);
+          }
+        }, 0);
+      }
+    }
+  
+    if (address) setAddress(address);
+    if (center?.lat && center?.lng) setCenter(center);
+  }, [context?.state?.create_hotel]);
+  
+  
 
+  // ⭐ LƯU DỮ LIỆU KHI UNMOUNT
+  useEffect(() => {
+    return () => {
+      context.dispatch({
+        type: "UPDATE_CREATE_HOTEL",
+        payload: {
+          ...context.state,
+          create_hotel: { ...dataRef.current },
+        },
+      });
+      
+    };
+  }, []);
   // Khi map dừng di chuyển (drag, zoom…)
   const onIdle = () => {
     if (!mapRef.current) return;
@@ -90,18 +164,24 @@ export default function HotelLocationInput() {
 
   // Khi chọn quận → load phường/xã (giả lập)
   useEffect(() => {
-    if (selectedDistrict) {
-      const mockWards = [
-        'Phường Bến Nghé', 'Phường Nguyễn Thái Bình', 'Phường Đa Kao',
-        'Phường Tân Định', 'Phường Phạm Ngũ Lão', 'Phường Cầu Ông Lãnh'
-      ].filter((_, i) => i < 6); // giả lập 6 phường
-      setWards(mockWards);
-    } else {
+    if (!selectedDistrict) {
       setWards([]);
       setSelectedWard(null);
+      return;
     }
+  
+    const loadedWards = wardsData[selectedDistrict] || [];
+  
+    setWards(loadedWards);
+  
+    // nếu ward cũ không thuộc district mới => reset
+    if (!loadedWards.includes(selectedWard)) {
+      setSelectedWard(null);
+    }
+  
   }, [selectedDistrict]);
-
+  console.log("AAA selectedDistrict",selectedDistrict)
+  console.log("AAA wards",wards)
   return (
     <Box sx={{  p: { xs: 2, md: 4 },background:"white",borderRadius:3 }}>
       {/* Tiêu đề */}

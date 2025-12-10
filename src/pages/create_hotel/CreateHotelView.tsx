@@ -6,7 +6,7 @@ type Props = {};
 const CreateHotelView = (props: Props) => {
   const [step, setStep] = useState(1);
   const [typeHotel, setTypeHotel] = useState("Khách sạn Listing");
-
+  const [dataCreateHotel,setDataCreateHotel] = useState({})
   const handleStepClick = (id) => {
     console.log("Bạn vừa chọn step:", id);
     setStep(id);
@@ -16,7 +16,8 @@ const CreateHotelView = (props: Props) => {
     setTypeHotel(name);
   };
   return (
-    <Container maxWidth='lg' sx={{ py: 4 }}>
+    <Box sx={{background:"#f7f7f7"}}>
+    <Container maxWidth='lg' sx={{ py: 4,minHeight:"100vh" }}>
       {step < 6 && (
         <>
           <Typography fontSize={"32px"} fontWeight={"600"}>
@@ -36,9 +37,10 @@ const CreateHotelView = (props: Props) => {
         {step == 1 && (
           <HotelTypeSelect typeHotel={typeHotel} onSelect={handleSelectType} />
         )}
-        {step == 2 && <HotelBasicInfo />}
-        {step == 3 && <HotelImageUpload />}
-        {step == 4 && <HotelLocationInput />}
+        {step == 2 && <HotelBasicInfo dataCreateHotel={dataCreateHotel} setDataCreateHotel={setDataCreateHotel} />}
+        {step == 3 && <HotelImageUpload dataCreateHotel={dataCreateHotel} setDataCreateHotel={setDataCreateHotel} />}
+        {step == 4 && <HotelLocationInput  dataCreateHotel={dataCreateHotel}
+    setDataCreateHotel={setDataCreateHotel} />}
         {step == 5 && <RoomTypeTabsModern />}
         {step == 6 && <CreateSuccess />}
       </Box>
@@ -71,6 +73,7 @@ const CreateHotelView = (props: Props) => {
         </Box>
       )}
     </Container>
+    </Box>
   );
 };
 

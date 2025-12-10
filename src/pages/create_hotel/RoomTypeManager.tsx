@@ -1,15 +1,13 @@
-import React, { useState } from 'react';
+// src/components/hotel/create/RoomTypeManager.tsx
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
-  Tabs,
-  Tab,
   Typography,
   TextField,
   Button,
   Grid,
   Paper,
   Chip,
-  Stack,
   Autocomplete,
   InputAdornment,
   Divider,
@@ -17,9 +15,7 @@ import {
   FormControlLabel,
   Select,
   MenuItem,
-  FormControl,
   IconButton,
-  InputLabel,
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import CloseIcon from '@mui/icons-material/Close';
@@ -28,6 +24,7 @@ import CompassCalibrationIcon from '@mui/icons-material/CompassCalibration';
 import CheckIcon from '@mui/icons-material/Check';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import SearchIcon from '@mui/icons-material/Search';
+import { useBookingContext } from '../../App'; // Điều chỉnh đường dẫn nếu cần
 
 const bedTypes = [
   '1 giường đơn',
@@ -40,7 +37,6 @@ const bedTypes = [
 
 const directions = ['Hướng Đông', 'Hướng Tây', 'Hướng Nam', 'Hướng Bắc'];
 
-// Định nghĩa type rõ ràng
 interface Pricing {
   hourly: {
     enabled: boolean;
@@ -71,29 +67,70 @@ interface RoomType {
   pricing: Pricing;
 }
 
-// Component chính - dữ liệu tập trung ở đây
 export default function RoomTypeManager() {
-  const [roomTypes, setRoomTypes] = useState<RoomType[]>([
-    {
-      id: '1',
-      name: '',
-      quantity: '',
-      area: '',
-      bedType: '',
-      direction: '',
-      description: '',
-      images: [],
-      imagePreviews: [],
-      pricing: {
-        hourly: { enabled: true, firstHours: '', extraHour: '', maxHours: '12' },
-        overnight: { enabled: true, price: '' },
-        daily: { enabled: true, price: '' },
-      },
-    },
-  ]);
+  const context = useBookingContext();
+  const dataRef = useRef<{ roomTypes: RoomType[]; activeTab: number }>({
+    roomTypes: [],
+    activeTab: 0,
+  });
 
-  const [activeTab, setActiveTab] = useState(0);
+  // Khởi tạo từ context hoặc mặc định
+  console.log("AAAA RoomTypeManager",context)
+  const getInitialData = (): { roomTypes: RoomType[]; activeTab: number } => {
+    const saved = context?.state?.create_hotel;
+    if (saved?.roomTypes && Array.isArray(saved.roomTypes) && saved.roomTypes.length > 0) {
+      return {
+        roomTypes: saved.roomTypes,
+        activeTab: saved.activeRoomTab ?? 0,
+      };
+    }
+    return {
+      roomTypes: [
+        {
+          id: Date.now().toString(),
+          name: '',
+          quantity: '',
+          area: '',
+          bedType: '',
+          direction: '',
+          description: '',
+          images: [],
+          imagePreviews: [],
+          pricing: {
+            hourly: { enabled: true, firstHours: '', extraHour: '', maxHours: '12' },
+            overnight: { enabled: true, price: '' },
+            daily: { enabled: true, price: '' },
+          },
+        },
+      ],
+      activeTab: 0,
+    };
+  };
+
+  const [roomTypes, setRoomTypes] = useState<RoomType[]>(getInitialData().roomTypes);
+  const [activeTab, setActiveTab] = useState<number>(getInitialData().activeTab);
+
   const current = roomTypes[activeTab];
+
+  // Cập nhật dataRef mỗi khi có thay đổi
+  useEffect(() => {
+    dataRef.current = { roomTypes, activeTab };
+  }, [roomTypes, activeTab]);
+
+  // Lưu vào context khi unmount
+  useEffect(() => {
+    return () => {
+      
+        context.dispatch({
+          type: 'UPDATE_CREATE_HOTEL',
+          payload: {
+            roomTypes: dataRef.current.roomTypes,
+            activeRoomTab: dataRef.current.activeTab,
+          },
+        });
+      }
+    
+  }, [context?.dispatch]);
 
   // Thêm loại phòng mới
   const addRoomType = () => {
@@ -113,37 +150,31 @@ export default function RoomTypeManager() {
         daily: { enabled: true, price: '' },
       },
     };
-    setRoomTypes([...roomTypes, newRoom]);
+    setRoomTypes(prev => [...prev, newRoom]);
     setActiveTab(roomTypes.length);
   };
 
   // Xóa loại phòng
   const removeRoomType = (index: number) => {
     if (roomTypes.length === 1) return;
-    setRoomTypes(roomTypes.filter((_, i) => i !== index));
+    setRoomTypes(prev => prev.filter((_, i) => i !== index));
     setActiveTab(prev => (prev >= index ? Math.max(0, prev - 1) : prev));
   };
 
-  // Cập nhật field đơn giản
-  const updateRoomField = <K extends keyof RoomType>(
-    field: K,
-    value: RoomType[K]
-  ) => {
+  // Cập nhật field
+  const updateRoomField = <K extends keyof RoomType>(field: K, value: RoomType[K]) => {
     setRoomTypes(prev =>
-      prev.map((room, i) =>
-        i === activeTab ? { ...room, [field]: value } : room
-      )
+      prev.map((room, i) => (i === activeTab ? { ...room, [field]: value } : room))
     );
   };
 
-  // Cập nhật pricing
   const updatePricing = (newPricing: Pricing) => {
     updateRoomField('pricing', newPricing);
   };
 
   return (
-    <Box sx={{ p: { xs: 2, md: 3 }, bgcolor: 'white', borderRadius: 3, minHeight: '100vh' }}>
-      {/* Header Tabs */}
+    <Box sx={{ p: { xs: 2, md: 3 }, bgcolor: 'white', borderRadius: 3 }}>
+      {/* Tabs loại phòng */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap', mb: 4, pt: 2 }}>
         {roomTypes.map((_, index) => (
           <Chip
@@ -183,7 +214,7 @@ export default function RoomTypeManager() {
         </Button>
       </Box>
 
-      {/* Form chính */}
+      {/* Thông tin phòng */}
       <Box sx={{ py: 2 }}>
         <Box display="flex" justifyContent="space-between" gap={4}>
           <Box width={{ xs: '100%', md: '30%' }}>
@@ -197,7 +228,6 @@ export default function RoomTypeManager() {
 
           <Box width={{ xs: '100%', md: '65%' }}>
             <Grid container spacing={3}>
-              {/* Tên loại phòng */}
               <Grid item xs={12}>
                 <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                   Tên loại phòng
@@ -205,16 +235,13 @@ export default function RoomTypeManager() {
                 <TextField
                   fullWidth
                   placeholder="Nhập tên loại phòng"
-                  value={current.name}
+                  value={current?.name || ''}
                   onChange={e => updateRoomField('name', e.target.value)}
                   variant="outlined"
-                  sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 2, "&.Mui-focused fieldset": {
-                    borderColor: '#a0d468',
-                  } } }}
+                  sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 2, '&.Mui-focused fieldset': { borderColor: '#a0d468' } } }}
                 />
               </Grid>
 
-              {/* Số lượng & Diện tích */}
               <Grid item xs={12} md={6}>
                 <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                   Số lượng phòng bán
@@ -222,13 +249,12 @@ export default function RoomTypeManager() {
                 <TextField
                   fullWidth
                   placeholder="Nhập số phòng"
-                  value={current.quantity}
+                  value={current?.quantity || ''}
                   onChange={e => updateRoomField('quantity', e.target.value)}
-                  sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 2, "&.Mui-focused fieldset": {
-                    borderColor: '#a0d468',
-                  } } }}
+                  sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 2, '&.Mui-focused fieldset': { borderColor: '#a0d468' } } }}
                 />
               </Grid>
+
               <Grid item xs={12} md={6}>
                 <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                   Diện tích phòng (m²)
@@ -236,23 +262,20 @@ export default function RoomTypeManager() {
                 <TextField
                   fullWidth
                   placeholder="Nhập diện tích phòng"
-                  value={current.area}
+                  value={current?.area || ''}
                   onChange={e => updateRoomField('area', e.target.value)}
                   InputProps={{ endAdornment: <InputAdornment position="end">m²</InputAdornment> }}
-                  sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 2 , "&.Mui-focused fieldset": {
-                    borderColor: '#a0d468',
-                  }} }}
+                  sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 2, '&.Mui-focused fieldset': { borderColor: '#a0d468' } } }}
                 />
               </Grid>
 
-              {/* Loại giường */}
               <Grid item xs={12}>
                 <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                   Loại giường
                 </Typography>
                 <Autocomplete
                   options={bedTypes}
-                  value={current.bedType}
+                  value={current?.bedType || ''}
                   onChange={(_, v) => updateRoomField('bedType', v || '')}
                   renderInput={params => (
                     <TextField
@@ -262,9 +285,7 @@ export default function RoomTypeManager() {
                         ...params.InputProps,
                         startAdornment: <InputAdornment position="start"><BedIcon sx={{ color: '#999' }} /></InputAdornment>,
                       }}
-                      sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 1.5 , "&.Mui-focused fieldset": {
-                        borderColor: '#a0d468',
-                      }} }}
+                      sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 1.5, '&.Mui-focused fieldset': { borderColor: '#a0d468' } } }}
                     />
                   )}
                   renderOption={(props, option, { selected }) => (
@@ -277,14 +298,13 @@ export default function RoomTypeManager() {
                 />
               </Grid>
 
-              {/* Hướng phòng */}
               <Grid item xs={12}>
                 <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                   Hướng phòng
                 </Typography>
                 <Autocomplete
                   options={directions}
-                  value={current.direction}
+                  value={current?.direction || ''}
                   onChange={(_, v) => updateRoomField('direction', v || '')}
                   renderInput={params => (
                     <TextField
@@ -294,9 +314,7 @@ export default function RoomTypeManager() {
                         ...params.InputProps,
                         startAdornment: <InputAdornment position="start"><CompassCalibrationIcon sx={{ color: '#999' }} /></InputAdornment>,
                       }}
-                      sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 1.5, "&.Mui-focused fieldset": {
-                        borderColor: '#a0d468',
-                      } } }}
+                      sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 1.5, '&.Mui-focused fieldset': { borderColor: '#a0d468' } } }}
                     />
                   )}
                   renderOption={(props, option, { selected }) => (
@@ -309,28 +327,25 @@ export default function RoomTypeManager() {
                 />
               </Grid>
 
-              {/* Mô tả */}
               <Grid item xs={12}>
                 <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                   Mô tả phòng (Không bắt buộc)
                 </Typography>
                 <Typography variant="body2" color="text.secondary" fontSize="0.875rem" sx={{ mb: 1 }}>
-                  Một đoạn giới thiệu ngắn gọn về loại phòng, hiển thị tại trang chi tiết loại phòng
+                  Một đoạn giới thiệu ngắn gọn về loại phòng
                 </Typography>
                 <TextField
                   fullWidth
                   multiline
                   rows={4}
                   placeholder="Nhập mô tả về loại phòng..."
-                  value={current.description}
+                  value={current?.description || ''}
                   onChange={e => updateRoomField('description', e.target.value)}
                   inputProps={{ maxLength: 3000 }}
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2, "&.Mui-focused fieldset": {
-                    borderColor: '#a0d468',
-                  } } }}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2, '&.Mui-focused fieldset': { borderColor: '#a0d468' } } }}
                 />
                 <Typography variant="caption" color="text.secondary" sx={{ float: 'right', mt: 0.5 }}>
-                  {current.description.length}/3000
+                  {(current?.description || '').length}/3000
                 </Typography>
               </Grid>
             </Grid>
@@ -342,11 +357,11 @@ export default function RoomTypeManager() {
 
       {/* Upload ảnh */}
       <RoomImagesUpload
-        previews={current.imagePreviews}
-        files={current.images}
+        previews={current?.imagePreviews || []}
+        files={current?.images || []}
         onChange={(previews, files) => {
           setRoomTypes(prev =>
-            prev.map((r, i) => i === activeTab ? { ...r, imagePreviews: previews, images: files } : r)
+            prev.map((r, i) => (i === activeTab ? { ...r, imagePreviews: previews, images: files } : r))
           );
         }}
       />
@@ -354,20 +369,13 @@ export default function RoomTypeManager() {
       <Divider sx={{ my: 4 }} />
 
       {/* Giá phòng */}
-      <RoomPricingSection
-        pricing={current.pricing}
-        onChange={updatePricing}
-      />
+      <RoomPricingSection pricing={current?.pricing} onChange={updatePricing} />
     </Box>
   );
 }
 
 // Component Upload ảnh
-function RoomImagesUpload({ previews, files, onChange }: {
-  previews: string[];
-  files: File[];
-  onChange: (previews: string[], files: File[]) => void;
-}) {
+function RoomImagesUpload({ previews, files, onChange }: { previews: string[]; files: File[]; onChange: (p: string[], f: File[]) => void }) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files;
     if (!selected) return;
@@ -385,7 +393,6 @@ function RoomImagesUpload({ previews, files, onChange }: {
         alert('Chỉ được tải lên tối đa 3 ảnh!');
         return;
       }
-
       newFiles.push(file);
       newPreviews.push(URL.createObjectURL(file));
     });
@@ -405,42 +412,20 @@ function RoomImagesUpload({ previews, files, onChange }: {
       <Box display="flex" justifyContent="space-between" gap={4}>
         <Box width={{ xs: '100%', md: '30%' }}>
           <Typography variant="h6" fontWeight={600} gutterBottom>
-            Tiện ích và hình ảnh
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Thiết lập các thông tin cơ bản của phòng
+            Hình ảnh phòng
           </Typography>
         </Box>
-
         <Box width={{ xs: '100%', md: '65%' }}>
-          <Grid container  spacing={2} alignItems={"center"} sx={{ mb: 3 }}>
-            <Grid item xs={12} sm={8}><Typography fontSize={14} color="#48505E">Thêm tiện ích</Typography></Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                placeholder="Tìm kiếm tiện ích..."
-                size="small"
-                InputProps={{
-                  startAdornment: <InputAdornment position="start"><SearchIcon color="action" /></InputAdornment>,
-                }}
-                sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 2 , "&.Mui-focused fieldset": {
-                    borderColor: '#a0d468',
-                  }} }}
-              />
-            </Grid>
-          </Grid>
-
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3, fontSize: '0.875rem' }}>
-            Tải lên ít nhất 3 ảnh phòng nhiều góc độ (phải có ảnh phòng ngủ, phòng tắm, view). Định dạng JPG hoặc PNG, dung lượng không quá 3MB
+            Tải lên ít nhất 3 ảnh phòng (phòng ngủ, phòng tắm, view). Tối đa 3MB/ảnh.
           </Typography>
 
           <Grid container spacing={2}>
             {previews.map((src, i) => (
               <Grid item key={i}>
                 <Box sx={{ position: 'relative', width: 160, height: 160 }}>
-                  <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12, border: '1px solid #eee' }} />
-                  <IconButton size="small" onClick={() => removeImage(i)}
-                    sx={{ position: 'absolute', top: 8, right: 8, bgcolor: 'rgba(0,0,0,0.6)', color: 'white', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}>
+                  <img src={src} alt={`preview ${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12, border: '1px solid #eee' }} />
+                  <IconButton size="small" onClick={() => removeImage(i)} sx={{ position: 'absolute', top: 8, right: 8, bgcolor: 'rgba(0,0,0,0.6)', color: 'white' }}>
                     <CloseIcon fontSize="small" />
                   </IconButton>
                 </Box>
@@ -471,7 +456,9 @@ function RoomImagesUpload({ previews, files, onChange }: {
 }
 
 // Component Giá phòng
-function RoomPricingSection({ pricing, onChange }: { pricing: Pricing; onChange: (p: Pricing) => void }) {
+function RoomPricingSection({ pricing, onChange }: { pricing?: Pricing; onChange: (p: Pricing) => void }) {
+  if (!pricing) return null;
+
   const toggle = (key: keyof Pricing) => {
     onChange({ ...pricing, [key]: { ...pricing[key], enabled: !pricing[key].enabled } });
   };
@@ -491,7 +478,7 @@ function RoomPricingSection({ pricing, onChange }: { pricing: Pricing; onChange:
             Giá phòng
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Thiết lập giá phòng theo loại đặt phòng phù hợp với mục tiêu kinh doanh của bạn
+            Thiết lập giá theo loại đặt phòng
           </Typography>
         </Box>
 
@@ -500,7 +487,10 @@ function RoomPricingSection({ pricing, onChange }: { pricing: Pricing; onChange:
           <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 3 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <Typography fontWeight={600}>Giá phòng theo giờ</Typography>
-              <FormControlLabel control={<Checkbox checked={!pricing.hourly.enabled} onChange={() => toggle('hourly')} size="small" />} label="Không kinh doanh" />
+              <FormControlLabel
+                control={<Checkbox checked={!pricing.hourly.enabled} onChange={() => toggle('hourly')} size="small" />}
+                label="Không kinh doanh"
+              />
             </Box>
 
             {pricing.hourly.enabled && (
@@ -508,42 +498,41 @@ function RoomPricingSection({ pricing, onChange }: { pricing: Pricing; onChange:
                 <Grid container spacing={2} mb={2}>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="body2" color="text.secondary" gutterBottom>Số giờ đầu</Typography>
-                    <TextField fullWidth placeholder="Nhập số tiền" value={pricing.hourly.firstHours}
+                    <TextField
+                      fullWidth
+                      placeholder="Nhập số tiền"
+                      value={pricing.hourly.firstHours}
                       onChange={e => update('hourly', 'firstHours', e.target.value)}
                       InputProps={{ endAdornment: <InputAdornment position="end">đồng/2 giờ</InputAdornment> }}
-                      sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 2, "&.Mui-focused fieldset": {
-                        borderColor: '#a0d468',
-                      }} }}
+                      sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 2, '&.Mui-focused fieldset': { borderColor: '#a0d468' } } }}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="body2" color="text.secondary" gutterBottom>Giờ thêm</Typography>
-                    <TextField fullWidth placeholder="Nhập số tiền" value={pricing.hourly.extraHour}
+                    <TextField
+                      fullWidth
+                      placeholder="Nhập số tiền"
+                      value={pricing.hourly.extraHour}
                       onChange={e => update('hourly', 'extraHour', e.target.value)}
                       InputProps={{ endAdornment: <InputAdornment position="end">đồng/1 giờ</InputAdornment> }}
-                      sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 2, "&.Mui-focused fieldset": {
-                        borderColor: '#a0d468',
-                      } } }}
+                      sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 2, '&.Mui-focused fieldset': { borderColor: '#a0d468' } } }}
                     />
                   </Grid>
                 </Grid>
 
-                <Typography variant="body2" color="text.secondary" gutterBottom>Số giờ tối đa khách có thể đặt</Typography>
-                <FormControl fullWidth>
-                  <Select value={pricing.hourly.maxHours} onChange={e => update('hourly', 'maxHours', e.target.value)} displayEmpty sx={{ height: 50, borderRadius: 2 , '&.MuiOutlinedInput-root': {
-        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-          borderColor: '#a0d468',
-          borderWidth: 2,
-        },
-        // Optional: đổi màu chữ label khi focus
-        '&.Mui-focused .MuiSelect-select': {
-          color: '#333',
-        },
-      },}}>
-                    <MenuItem value="" disabled>Chọn số giờ tối đa</MenuItem>
-                    {[6, 8, 10, 12, 18, 24].map(h => <MenuItem key={h} value={h}>{h} giờ</MenuItem>)}
-                  </Select>
-                </FormControl>
+                <Typography variant="body2" color="text.secondary" gutterBottom>Số giờ tối đa</Typography>
+                <Select
+                  fullWidth
+                  value={pricing.hourly.maxHours}
+                  onChange={e => update('hourly', 'maxHours', e.target.value)}
+                  displayEmpty
+                  sx={{ height: 50, borderRadius: 2, '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#a0d468', borderWidth: 2 } }}
+                >
+                  <MenuItem value="" disabled>Chọn số giờ tối đa</MenuItem>
+                  {[6, 8, 10, 12, 18, 24].map(h => (
+                    <MenuItem key={h} value={h}>{h} giờ</MenuItem>
+                  ))}
+                </Select>
               </>
             )}
           </Paper>
@@ -552,19 +541,20 @@ function RoomPricingSection({ pricing, onChange }: { pricing: Pricing; onChange:
           <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 3 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <Typography fontWeight={600}>Giá phòng qua đêm</Typography>
-              <FormControlLabel control={<Checkbox checked={!pricing.overnight.enabled} onChange={() => toggle('overnight')} size="small" />} label="Không kinh doanh" />
+              <FormControlLabel
+                control={<Checkbox checked={!pricing.overnight.enabled} onChange={() => toggle('overnight')} size="small" />}
+                label="Không kinh doanh"
+              />
             </Box>
             {pricing.overnight.enabled && (
-              <Box>
-                <Typography variant="body2" color="text.secondary" gutterBottom>Giá 1 đêm</Typography>
-                <TextField fullWidth placeholder="Nhập số tiền" value={pricing.overnight.price}
-                  onChange={e => update('overnight', 'price', e.target.value)}
-                  InputProps={{ endAdornment: <InputAdornment position="end">đồng/đêm</InputAdornment> }}
-                  sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 2, "&.Mui-focused fieldset": {
-                    borderColor: '#a0d468',
-                  } } }}
-                />
-              </Box>
+              <TextField
+                fullWidth
+                placeholder="Nhập số tiền"
+                value={pricing.overnight.price}
+                onChange={e => update('overnight', 'price', e.target.value)}
+                InputProps={{ endAdornment: <InputAdornment position="end">đồng/đêm</InputAdornment> }}
+                sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 2, '&.Mui-focused fieldset': { borderColor: '#a0d468' } } }}
+              />
             )}
           </Paper>
 
@@ -572,19 +562,20 @@ function RoomPricingSection({ pricing, onChange }: { pricing: Pricing; onChange:
           <Paper variant="outlined" sx={{ p: 3, borderRadius: 3 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <Typography fontWeight={600}>Giá phòng theo ngày</Typography>
-              <FormControlLabel control={<Checkbox checked={!pricing.daily.enabled} onChange={() => toggle('daily')} size="small" />} label="Không kinh doanh" />
+              <FormControlLabel
+                control={<Checkbox checked={!pricing.daily.enabled} onChange={() => toggle('daily')} size="small" />}
+                label="Không kinh doanh"
+              />
             </Box>
             {pricing.daily.enabled && (
-              <Box>
-                <Typography variant="body2" color="text.secondary" gutterBottom>Giá 1 ngày</Typography>
-                <TextField fullWidth placeholder="Nhập số tiền" value={pricing.daily.price}
-                  onChange={e => update('daily', 'price', e.target.value)}
-                  InputProps={{ endAdornment: <InputAdornment position="end">đồng/ngày</InputAdornment> }}
-                  sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 2, "&.Mui-focused fieldset": {
-                    borderColor: '#a0d468',
-                  } } }}
-                />
-              </Box>
+              <TextField
+                fullWidth
+                placeholder="Nhập số tiền"
+                value={pricing.daily.price}
+                onChange={e => update('daily', 'price', e.target.value)}
+                InputProps={{ endAdornment: <InputAdornment position="end">đồng/ngày</InputAdornment> }}
+                sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 2, '&.Mui-focused fieldset': { borderColor: '#a0d468' } } }}
+              />
             )}
           </Paper>
         </Box>

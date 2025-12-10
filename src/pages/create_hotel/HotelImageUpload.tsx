@@ -1,12 +1,52 @@
-import React, { useState } from "react";
-import { Box, Typography, IconButton, Grid, Button, useMediaQuery } from "@mui/material";
+import React, { useState, useRef, useEffect } from "react";
+import { Box, Typography, IconButton, Grid, useMediaQuery } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import add from "../../images/gallery-add.png"
-export default function HotelImageUpload({isPadding}) {
+import add from "../../images/gallery-add.png";
+import { useBookingContext } from "../../App";
+
+export default function HotelImageUpload({ isPadding, setDataCreateHotel,dataCreateHotel }) {
   const isMobile = useMediaQuery("(max-width:600px)");
 
   const [outsideImages, setOutsideImages] = useState([]);
   const [hotelImages, setHotelImages] = useState([]);
+  const context = useBookingContext()
+  // ⭐ REF để luôn chứa dữ liệu mới nhất
+  const dataRef = useRef({
+    outsideImages: [],
+    hotelImages: []
+  });
+  useEffect(() => {
+    if (context?.state?.create_hotel?.outsideImages) {
+      setOutsideImages(context?.state?.create_hotel?.outsideImages);
+    }
+    if (context?.state?.create_hotel?.hotelImages) {
+      setHotelImages(context?.state?.create_hotel?.hotelImages);
+    }
+    
+  }, []);
+
+  // ⭐ Update ref mỗi khi dữ liệu thay đổi
+  useEffect(() => {
+    dataRef.current = {
+      outsideImages,
+      hotelImages
+    };
+  }, [outsideImages, hotelImages]);
+
+  // ⭐ Cleanup khi component unmount
+  useEffect(() => {
+    return () => {
+      context.dispatch({
+        type: "UPDATE_CREATE_HOTEL",
+        payload: {
+          ...context.state,
+          create_hotel: { ...dataRef.current },
+        },
+      });
+    };
+  }, []);
+
+  // ------------------- UI Logic ----------------------
 
   const handleUpload = (event, setter) => {
     const files = Array.from(event.target.files);
@@ -57,7 +97,13 @@ export default function HotelImageUpload({isPadding}) {
       <IconButton
         size="small"
         onClick={() => handleDelete(index, setter, list)}
-        sx={{ position: "absolute", top: 4, right: 4, background: "rgba(0,0,0,0.5)", color: "white" }}
+        sx={{
+          position: "absolute",
+          top: 4,
+          right: 4,
+          background: "rgba(0,0,0,0.5)",
+          color: "white",
+        }}
       >
         <DeleteIcon fontSize="small" />
       </IconButton>
@@ -66,7 +112,9 @@ export default function HotelImageUpload({isPadding}) {
 
   const Section = ({ title, desc, images, setter }) => (
     <Box sx={{ mb: 4 }}>
-      <Typography fontWeight={600} mb={1}>{title}</Typography>
+      <Typography fontWeight={600} mb={1}>
+        {title}
+      </Typography>
       <Typography variant="body2" color="text.secondary" mb={2}>
         {desc}
       </Typography>
@@ -88,11 +136,11 @@ export default function HotelImageUpload({isPadding}) {
   return (
     <Box
       sx={{
-        p:isPadding?0: isMobile ? 2 : 4,
+        p: isPadding ? 0 : isMobile ? 2 : 4,
         mx: "auto",
         background: "white",
-        borderRadius: 2,
-      
+        borderRadius: 2
+       
       }}
     >
       <Section

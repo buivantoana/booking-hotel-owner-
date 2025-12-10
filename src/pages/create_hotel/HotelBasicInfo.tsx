@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Box,
   TextField,
@@ -8,13 +8,85 @@ import {
   FormControlLabel,
   RadioGroup,
   Card,
+  MenuItem,
+  FormControl,
+  Select,
+  OutlinedInput,
+  InputAdornment,
 } from "@mui/material";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import { useBookingContext } from "../../App";
 
 const businessTypes = ["Tình yêu", "Du lịch", "Homestay", "Camping"];
 
-export default function HotelBasicInfo() {
+export default function HotelBasicInfo({setDataCreateHotel,dataCreateHotel}) {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
+  /** ===============================
+   * STATE TOÀN BỘ FORM
+   =================================*/
+  const [formData, setFormData] = useState({
+    hotelName: "",
+    phone: "",
+    description: "",
+    businessType: "Tình yêu",
+
+    // Theo giờ
+    hourlyStart: "",
+    hourlyEnd: "",
+
+    // Qua đêm
+    overnightStart: "",
+    overnightEnd: "",
+
+    // Theo ngày
+    dailyStart: "",
+    dailyEnd: "",
+  });
+  const context = useBookingContext()
+  useEffect(()=>{
+    if(context?.state?.create_hotel?.hotelName){
+      setFormData(context?.state?.create_hotel)
+    }
+  },[context])
+  /** Cập nhật field */
+  const updateField = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const latestValue = useRef();
+
+  useEffect(() => {
+    latestValue.current = formData;
+  }, [formData]);
+  
+  useEffect(() => {
+    return () => {
+      context.dispatch({
+        type: "UPDATE_CREATE_HOTEL",
+        payload: {
+          ...context.state,
+          create_hotel: { ...latestValue.current },
+        },
+      });
+      
+      console.log("unmount value:", latestValue.current); // ✔ lấy đúng giá trị mới nhất
+    };
+  }, []);
+  console.log("dataCreateHotel",dataCreateHotel);
+  console.log("formData",formData);
+  /** HOURS OPTIONS */
+  const HOURS = [
+    "04:00", "05:00", "06:00", "07:00", "08:00",
+    "09:00", "10:00", "11:00", "12:00",
+    "13:00", "14:00", "15:00", "16:00",
+    "17:00", "18:00", "19:00", "20:00",
+    "21:00", "22:00", "23:00", "00:00", "01:00", "02:00", "03:00",
+  ];
+
+  /** ===============================
+   * COMPONENT RENDER CARD TIME
+   =================================*/
   const renderTimeCard = (title, fields) => (
     <Card
       sx={{
@@ -22,7 +94,6 @@ export default function HotelBasicInfo() {
         borderRadius: 2,
         width: "100%",
         border: "1px solid #E5E7EB",
-        
       }}
     >
       <Typography
@@ -42,22 +113,57 @@ export default function HotelBasicInfo() {
               {item.label}
             </Typography>
 
+            {/* START TIME */}
             <Box
               display="flex"
               flexDirection={isMobile ? "column" : "row"}
               gap={2}
               alignItems="center"
             >
-              <TextField
-                
-                size="small"
-                placeholder={item.startPlaceholder}
-              />
-              <Typography fontSize={14} color="#555">
+              <FormControl size="small" fullWidth>
+                <Select
+                  value={item.startValue}
+                  onChange={(e) => item.onStartChange(e.target.value)}
+                  displayEmpty
+                  input={
+                    <OutlinedInput
+                      startAdornment={
+                        <InputAdornment position="start">
+                          <AccessTimeIcon sx={{ fontSize: 20, color: "#98b720" }} />
+                        </InputAdornment>
+                      }
+                      sx={{
+                        height: 40,
+                        borderRadius: "12px",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#ddd",
+                        },
+                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#98b720",
+                          borderWidth: 2,
+                        },
+                      }}
+                    />
+                  }
+                >
+                  <MenuItem disabled value="">
+                    {item.startPlaceholder}
+                  </MenuItem>
+
+                  {HOURS.map((h) => (
+                    <MenuItem key={h} value={h}>
+                      {h}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <Typography width={"20%"} fontSize={14} color="#555">
                 ngày {item.startDay}
               </Typography>
             </Box>
 
+            {/* END TIME */}
             <Box
               display="flex"
               flexDirection={isMobile ? "column" : "row"}
@@ -65,12 +171,45 @@ export default function HotelBasicInfo() {
               mt={1.5}
               alignItems="center"
             >
-              <TextField
-                
-                size="small"
-                placeholder={item.endPlaceholder}
-              />
-              <Typography fontSize={14} color="#555">
+              <FormControl size="small" fullWidth>
+                <Select
+                  value={item.endValue}
+                  onChange={(e) => item.onEndChange(e.target.value)}
+                  displayEmpty
+                  input={
+                    <OutlinedInput
+                      startAdornment={
+                        <InputAdornment position="start">
+                          <AccessTimeIcon sx={{ fontSize: 20, color: "#98b720" }} />
+                        </InputAdornment>
+                      }
+                      sx={{
+                        height: 40,
+                        borderRadius: "12px",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#ddd",
+                        },
+                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#98b720",
+                          borderWidth: 2,
+                        },
+                      }}
+                    />
+                  }
+                >
+                  <MenuItem disabled value="">
+                    {item.endPlaceholder}
+                  </MenuItem>
+
+                  {HOURS.map((h) => (
+                    <MenuItem key={h} value={h}>
+                      {h}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <Typography width={"20%"} fontSize={14} color="#555">
                 ngày {item.endDay}
               </Typography>
             </Box>
@@ -80,43 +219,56 @@ export default function HotelBasicInfo() {
     </Card>
   );
 
+  /** ===============================
+   * RENDER PAGE
+   =================================*/
   return (
     <Box p={4} bgcolor={"white"} borderRadius={"15px"} width="100%">
-      {/* Row: Tên KS + SĐT */}
-      <Box
-        display="flex"
-        flexDirection={isMobile ? "column" : "row"}
-        gap={3}
-        mb={3}
-      >
+      
+      {/* Row: Tên + SĐT */}
+      <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={3} mb={3}>
         <Box flex={1}>
           <Typography fontSize={14} fontWeight={600} mb={0.8}>
             Tên khách sạn
           </Typography>
-          <TextField fullWidth placeholder="Nhập tên khách sạn của bạn" sx={{"& .MuiOutlinedInput-root": {
-                    borderRadius: "16px", 
-                    height: "50px",
-                    backgroundColor: "#fff",
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#98b720",
-                      borderWidth: 1.5,
-                    },
-                  }}} />
+          <TextField
+            fullWidth
+            placeholder="Nhập tên khách sạn"
+            value={formData.hotelName}
+            onChange={(e) => updateField("hotelName", e.target.value)}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "16px",
+                height: "50px",
+                "&.Mui-focused fieldset": {
+                  borderColor: "#98b720",
+                  borderWidth: 1.5,
+                },
+              },
+            }}
+          />
         </Box>
 
         <Box flex={1}>
           <Typography fontSize={14} fontWeight={600} mb={0.8}>
-            Số điện thoại đặt phòng
+            Số điện thoại
           </Typography>
-          <TextField fullWidth placeholder="Nhập số điện thoại đặt phòng" sx={{"& .MuiOutlinedInput-root": {
-                    borderRadius: "16px", 
-                    height: "50px",
-                    backgroundColor: "#fff",
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#98b720",
-                      borderWidth: 1.5,
-                    },
-                  }}} />
+          <TextField
+            fullWidth
+            placeholder="Nhập số điện thoại"
+            value={formData.phone}
+            onChange={(e) => updateField("phone", e.target.value)}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "16px",
+                height: "50px",
+                "&.Mui-focused fieldset": {
+                  borderColor: "#98b720",
+                  borderWidth: 1.5,
+                },
+              },
+            }}
+          />
         </Box>
       </Box>
 
@@ -125,27 +277,26 @@ export default function HotelBasicInfo() {
         <Typography fontSize={14} fontWeight={600} mb={0.8}>
           Mô tả (không bắt buộc)
         </Typography>
-        <Typography fontSize={12} color="#5D6679"  mb={1}>
+        <Typography fontSize={12}  mb={0.8}>
         Viết một đoạn giới thiệu ngắn gọn về khách sạn của bạn. Mô tả sẽ được hiển thị tại trang chủ của khách sạn trên Hotel Booking.
         </Typography>
         <TextField
           fullWidth
-          placeholder="Nhập mô tả về khách sạn của bạn"
           multiline
           rows={4}
-          sx={{"& .MuiOutlinedInput-root": {
-            borderRadius: "16px", 
-           
-            backgroundColor: "#fff",
-            "&.Mui-focused fieldset": {
-              borderColor: "#98b720",
-              borderWidth: 1.5,
+          value={formData.description}
+          onChange={(e) => updateField("description", e.target.value)}
+          placeholder="Nhập mô tả"
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "16px",
+              "&.Mui-focused fieldset": {
+                borderColor: "#98b720",
+                borderWidth: 1.5,
+              },
             },
-          }}}
+          }}
         />
-        <Typography fontSize={12} textAlign="right" mt={0.5} color="#999">
-          0/3000
-        </Typography>
       </Box>
 
       {/* Loại hình kinh doanh */}
@@ -154,7 +305,11 @@ export default function HotelBasicInfo() {
           Loại hình kinh doanh
         </Typography>
 
-        <RadioGroup row defaultValue="Tình yêu">
+        <RadioGroup
+          row
+          value={formData.businessType}
+          onChange={(e) => updateField("businessType", e.target.value)}
+        >
           {businessTypes.map((type) => (
             <FormControlLabel
               key={type}
@@ -173,19 +328,20 @@ export default function HotelBasicInfo() {
           Thời gian kinh doanh
         </Typography>
 
-        <Box
-          display="flex"
-          flexDirection={isMobile ? "column" : "row"}
-          gap={3}
-        >
+        <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={3}>
+          
           {/* Theo giờ */}
           {renderTimeCard("Theo giờ", [
             {
               label: "Bắt đầu",
-              startPlaceholder: "08:00",
+              startPlaceholder: "Chọn giờ",
+              endPlaceholder: "Chọn giờ",
               startDay: "T",
-              endPlaceholder: "21:00",
               endDay: "T",
+              startValue: formData.hourlyStart,
+              endValue: formData.hourlyEnd,
+              onStartChange: (v) => updateField("hourlyStart", v),
+              onEndChange: (v) => updateField("hourlyEnd", v),
             },
           ])}
 
@@ -193,10 +349,14 @@ export default function HotelBasicInfo() {
           {renderTimeCard("Qua đêm", [
             {
               label: "Bắt đầu",
-              startPlaceholder: "21:00",
+              startPlaceholder: "Chọn giờ",
+              endPlaceholder: "Chọn giờ",
               startDay: "T",
-              endPlaceholder: "08:00",
               endDay: "T+1",
+              startValue: formData.overnightStart,
+              endValue: formData.overnightEnd,
+              onStartChange: (v) => updateField("overnightStart", v),
+              onEndChange: (v) => updateField("overnightEnd", v),
             },
           ])}
 
@@ -204,14 +364,20 @@ export default function HotelBasicInfo() {
           {renderTimeCard("Theo ngày", [
             {
               label: "Bắt đầu",
-              startPlaceholder: "14:00",
+              startPlaceholder: "Chọn giờ",
+              endPlaceholder: "Chọn giờ",
               startDay: "T",
-              endPlaceholder: "12:00",
               endDay: "T+1",
+              startValue: formData.dailyStart,
+              endValue: formData.dailyEnd,
+              onStartChange: (v) => updateField("dailyStart", v),
+              onEndChange: (v) => updateField("dailyEnd", v),
             },
           ])}
         </Box>
       </Box>
+
+      
     </Box>
   );
 }

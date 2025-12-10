@@ -94,8 +94,8 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
   return (
     <Container
       maxWidth='lg'
-      sx={{ display: "flex", alignItems: "center", py: 8 }}>
-      <Grid container sx={{ alignItems: "center", minHeight: "60vh" }}>
+      sx={{ display: "flex", alignItems: "center" }}>
+      <Grid container sx={{ alignItems: "center", minHeight: "100vh" }}>
         {/* LEFT */}
         <Grid
           item

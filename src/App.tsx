@@ -27,6 +27,11 @@ const reducer = (state: any, action: any) => {
         ...state,
         user: action.payload.user,
       };
+      case "UPDATE_CREATE_HOTEL":
+        return {
+          ...state,
+          create_hotel: {...state.create_hotel,...action.payload.create_hotel},
+        };
     case "LOGOUT":
       return {
         ...state,
@@ -43,6 +48,7 @@ const App = () => {
     history: {},
     tts_text: "",
     tts_story: "",
+    create_hotel: {},
   });
   let user = localStorage.getItem("user");
   useEffect(() => {

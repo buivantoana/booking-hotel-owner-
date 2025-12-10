@@ -136,8 +136,8 @@ export default function NotificateView() {
                 fontSize: "15px",
                 fontWeight: 600,
               },
-              "& .Mui-selected": { color: "#98B720" },
-              "& .MuiTabs-indicator": { backgroundColor: "#98B720", height: 3 },
+              "& .Mui-selected": { color: "#98B720 !important"  },
+              "& .MuiTabs-indicator": { backgroundColor: "#98B720 !important", height: 3 },
             }}>
             <Tab label='Đặt phòng' />
             <Tab label='Đối soát và thanh toán' />
