@@ -7,6 +7,7 @@ const CreateHotelView = (props: Props) => {
   const [step, setStep] = useState(1);
   const [typeHotel, setTypeHotel] = useState("Khách sạn Listing");
   const [dataCreateHotel,setDataCreateHotel] = useState({})
+  const context = useBookingContext()
   const handleStepClick = (id) => {
     console.log("Bạn vừa chọn step:", id);
     setStep(id);
@@ -15,6 +16,7 @@ const CreateHotelView = (props: Props) => {
     console.log("Bạn đã chọn loại khách sạn", name);
     setTypeHotel(name);
   };
+  console.log("AAAAA context cha",context?.state?.create_hotel)
   return (
     <Box sx={{background:"#f7f7f7"}}>
     <Container maxWidth='lg' sx={{ py: 4,minHeight:"100vh" }}>
@@ -182,6 +184,7 @@ function StepIndicator({ activeStep = 1, onStepChange }) {
 import { Stack, Paper } from "@mui/material";
 
 import success from "../../images/Frame 1321317962.png";
+import { useBookingContext } from "../../App";
 
 const CreateSuccess = () => {
   const theme = useTheme();

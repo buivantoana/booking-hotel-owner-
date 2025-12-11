@@ -120,17 +120,17 @@ export default function RoomTypeManager() {
   // Lưu vào context khi unmount
   useEffect(() => {
     return () => {
-      
+        
         context.dispatch({
           type: 'UPDATE_CREATE_HOTEL',
           payload: {
-            roomTypes: dataRef.current.roomTypes,
-            activeRoomTab: dataRef.current.activeTab,
+            ...context.state,
+            create_hotel: { ...dataRef.current },
           },
         });
       }
     
-  }, [context?.dispatch]);
+  }, []);
 
   // Thêm loại phòng mới
   const addRoomType = () => {
