@@ -19,7 +19,12 @@ import { useBookingContext } from "../../App";
 
 const businessTypes = ["Tình yêu", "Du lịch", "Homestay", "Camping"];
 
-export default function HotelBasicInfo({setDataCreateHotel,dataCreateHotel}) {
+export default function HotelBasicInfo({setDataCreateHotel,
+  dataCreateHotel,
+  onTempChange,   
+  errors = {},
+  touched = {},
+  onFieldBlur}) {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   /** ===============================
@@ -51,7 +56,11 @@ export default function HotelBasicInfo({setDataCreateHotel,dataCreateHotel}) {
   },[context])
   /** Cập nhật field */
   const updateField = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value };
+      onTempChange?.(newData); // ← báo ngay cho CreateHotelView
+      return newData;
+    });
   };
 
   const latestValue = useRef();
@@ -73,7 +82,6 @@ export default function HotelBasicInfo({setDataCreateHotel,dataCreateHotel}) {
       console.log("unmount value:", latestValue.current); // ✔ lấy đúng giá trị mới nhất
     };
   }, []);
-  console.log("dataCreateHotel",dataCreateHotel);
   console.log("formData",formData);
   /** HOURS OPTIONS */
   const HOURS = [
@@ -84,6 +92,7 @@ export default function HotelBasicInfo({setDataCreateHotel,dataCreateHotel}) {
     "21:00", "22:00", "23:00", "00:00", "01:00", "02:00", "03:00",
   ];
 
+ 
   /** ===============================
    * COMPONENT RENDER CARD TIME
    =================================*/
@@ -234,7 +243,10 @@ export default function HotelBasicInfo({setDataCreateHotel,dataCreateHotel}) {
           <TextField
             fullWidth
             placeholder="Nhập tên khách sạn"
+            error={touched.hotelName && !!errors.hotelName}
+            helperText={touched.hotelName ? errors.hotelName : " "}
             value={formData.hotelName}
+            onBlur={() => onFieldBlur?.("hotelName")}
             onChange={(e) => updateField("hotelName", e.target.value)}
             sx={{
               "& .MuiOutlinedInput-root": {
@@ -255,9 +267,12 @@ export default function HotelBasicInfo({setDataCreateHotel,dataCreateHotel}) {
           </Typography>
           <TextField
             fullWidth
-            placeholder="Nhập số điện thoại"
-            value={formData.phone}
+            error={touched.phone && !!errors.phone}
+            helperText={touched.phone ? errors.phone : " "}
+            value={formData.phone || ""}
             onChange={(e) => updateField("phone", e.target.value)}
+            onBlur={() => onFieldBlur?.("phone")}
+            placeholder="Nhập số điện thoại"
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "16px",

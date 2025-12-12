@@ -130,3 +130,132 @@ export function formattedDateHHMMDDMMYYYY(data) {
   });
   return formatted
 }
+
+// src/utils/createHotelValidation.ts
+export const validateBasicInfo = (data: any) => {
+  const errors: Record<string, string> = {};
+
+  if (!data?.hotelName?.trim()) {
+    errors.hotelName = "Vui lòng nhập tên khách sạn";
+  }
+
+  if (!data?.phone?.trim()) {
+    errors.phone = "Vui lòng nhập số điện thoại";
+  } else if (!/^0\d{9}$/.test(data.phone.replace(/\D/g, ""))) {
+    errors.phone = "Số điện thoại phải có 10 số, bắt đầu bằng 0";
+  }
+
+  // Phải có ít nhất 1 khung giờ kinh doanh
+  const hasHourly = data?.hourlyStart && data?.hourlyEnd;
+  const hasOvernight = data?.overnightStart && data?.overnightEnd;
+  const hasDaily = data?.dailyStart && data?.dailyEnd;
+
+  if (!hasHourly && !hasOvernight && !hasDaily) {
+    errors.businessHours = "Vui lòng chọn ít nhất một khung giờ kinh doanh";
+  }
+
+  return {
+    errors,
+    isValid: Object.keys(errors).length === 0,
+  };
+};
+
+export const validateImageUpload = (data: any) => {
+  const errors: Record<string, string> = {};
+
+  const outsideCount = (data?.outsideImages || []).length;
+  const hotelCount = (data?.hotelImages || []).length;
+
+  if (outsideCount === 0) {
+    errors.outsideImages = "Vui lòng tải lên ít nhất 1 ảnh biển hiệu bên ngoài";
+  }
+
+  if (hotelCount < 5) {
+    errors.hotelImages = `Vui lòng tải lên ít nhất 5 ảnh khách sạn (hiện tại: ${hotelCount})`;
+  }
+
+  return {
+    errors,
+    isValid: Object.keys(errors).length === 0,
+  };
+};
+
+// src/utils/createHotelValidation.ts
+
+export const validateLocation = (data: any) => {
+  const errors: Record<string, string> = {};
+
+  if (!data?.selectedProvince) {
+    errors.selectedProvince = "Vui lòng chọn Tỉnh/Thành phố";
+  }
+
+  if (!data?.selectedDistrict) {
+    errors.selectedDistrict = "Vui lòng chọn Quận/Huyện";
+  }
+
+  if (!data?.address?.trim()) {
+    errors.address = "Vui lòng nhập địa chỉ chi tiết (số nhà, tên đường...)";
+  }
+
+  if (!data?.center?.lat || !data?.center?.lng) {
+    errors.map = "Vui lòng chọn vị trí khách sạn trên bản đồ";
+  }
+
+  return {
+    errors,
+    isValid: Object.keys(errors).length === 0,
+  };
+};
+
+// src/utils/createHotelValidation.ts
+
+export const validateRoomTypes = (data: any) => {
+  const errors: Record<string, string> = {};
+  const roomTypes = data?.roomTypes || [];
+
+  if (roomTypes.length === 0) {
+    errors.roomTypes = "Vui lòng thêm ít nhất một loại phòng";
+    return { errors, isValid: false };
+  }
+
+  // Validate từng loại phòng
+  roomTypes.forEach((room: any, index: number) => {
+    if (!room?.name?.trim()) {
+      errors[`room_${index}_name`] = `Loại phòng ${index + 1}: Vui lòng nhập tên loại phòng`;
+    }
+    if (!room?.quantity?.trim() || isNaN(parseInt(room.quantity)) || parseInt(room.quantity) <= 0) {
+      errors[`room_${index}_quantity`] = `Loại phòng ${index + 1}: Vui lòng nhập số lượng phòng hợp lệ (số nguyên > 0)`;
+    }
+    if (!room?.area?.trim() || isNaN(parseFloat(room.area)) || parseFloat(room.area) <= 0) {
+      errors[`room_${index}_area`] = `Loại phòng ${index + 1}: Vui lòng nhập diện tích phòng hợp lệ (số > 0)`;
+    }
+    if (!room?.bedType) {
+      errors[`room_${index}_bedType`] = `Loại phòng ${index + 1}: Vui lòng chọn loại giường`;
+    }
+    if (!room?.direction) {
+      errors[`room_${index}_direction`] = `Loại phòng ${index + 1}: Vui lòng chọn hướng phòng`;
+    }
+    if (!room?.description?.trim()) {
+      errors[`room_${index}_description`] = `Loại phòng ${index + 1}: Vui lòng nhập mô tả phòng`;
+    }
+    if ((room?.images || []).length < 3) {
+      errors[`room_${index}_images`] = `Loại phòng ${index + 1}: Vui lòng tải lên ít nhất 3 ảnh phòng`;
+    }
+
+    // Pricing: phải có ít nhất 1 loại kinh doanh enabled và có giá hợp lệ
+    const pricing = room?.pricing || {};
+    const hasValidPricing = 
+      (pricing.hourly?.enabled && pricing.hourly.firstHours?.trim() && pricing.hourly.extraHour?.trim() && pricing.hourly.maxHours) ||
+      (pricing.overnight?.enabled && pricing.overnight.price?.trim()) ||
+      (pricing.daily?.enabled && pricing.daily.price?.trim());
+
+    if (!hasValidPricing) {
+      errors[`room_${index}_pricing`] = `Loại phòng ${index + 1}: Vui lòng thiết lập ít nhất một loại giá phòng hợp lệ (theo giờ, qua đêm hoặc theo ngày)`;
+    }
+  });
+
+  return {
+    errors,
+    isValid: Object.keys(errors).length === 0,
+  };
+};

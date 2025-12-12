@@ -39,7 +39,10 @@ const wardsData: Record<string, string[]> = {
 
 const provinces = Object.keys(vietnamData);
 
-export default function HotelLocationInput({ dataCreateHotel, setDataCreateHotel }) {
+export default function HotelLocationInput({onTempChange,
+  errors = {},
+  touched = {},
+  onFieldTouch }) {
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedWard, setSelectedWard] = useState<string | null>(null);
@@ -66,15 +69,22 @@ export default function HotelLocationInput({ dataCreateHotel, setDataCreateHotel
   const onLoad = useCallback((map) => {
     mapRef.current = map;
   }, []);
+
   useEffect(() => {
-    dataRef.current = {
+    const newData = {
       selectedProvince,
       selectedDistrict,
       selectedWard,
       address,
       center
     };
+    dataRef.current = newData
+   
+    onTempChange?.(newData);
   }, [selectedProvince, selectedDistrict, selectedWard, address, center]);
+  const handleTouch = (field: string) => {
+    onFieldTouch?.(field);
+  };
   console.log("AAA dataCreateHotel",context?.state?.create_hotel)
   useEffect(() => {
     const saved = context?.state?.create_hotel;
@@ -196,13 +206,17 @@ export default function HotelLocationInput({ dataCreateHotel, setDataCreateHotel
       <Autocomplete
         options={provinces}
         value={selectedProvince}
-        onChange={(_, newValue) => setSelectedProvince(newValue)}
+        onChange={(_, newValue) => {
+          handleTouch("selectedProvince");
+          setSelectedProvince(newValue)}}
         renderInput={(params) => (
           <TextField
             {...params}
             placeholder="Tìm kiếm tỉnh/thành phố..."
             variant="outlined"
             fullWidth
+            error={touched.selectedProvince && !!errors.selectedProvince}
+            helperText={touched.selectedProvince && errors.selectedProvince}
             sx={{
               mb: 4,
               '& .MuiOutlinedInput-root': {
@@ -234,6 +248,9 @@ export default function HotelLocationInput({ dataCreateHotel, setDataCreateHotel
                 placeholder="Nhập số nhà, tên đường..."
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
+                onBlur={() => handleTouch("address")}
+            error={touched.address && !!errors.address}
+            helperText={touched.address ? errors.address : " "}
                 variant="outlined"
                 sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 , "&.Mui-focused fieldset": {
                     borderColor: '#a0d468',
@@ -285,13 +302,17 @@ export default function HotelLocationInput({ dataCreateHotel, setDataCreateHotel
               <Autocomplete
                 options={districts}
                 value={selectedDistrict}
-                onChange={(_, v) => setSelectedDistrict(v)}
+                onChange={(_, v) => {
+                  handleTouch("selectedDistrict");
+                  setSelectedDistrict(v)}}
                 disabled={!selectedProvince}
                 renderInput={(params) => (
                   <TextField
                     {...params}
                     placeholder="Chọn Quận/Huyện"
                     variant="outlined"
+                    error={touched.selectedDistrict && !!errors.selectedDistrict}
+                helperText={touched.selectedDistrict ? errors.selectedDistrict : " "}
                     InputProps={{
                       ...params.InputProps,
                       startAdornment: (

@@ -67,7 +67,10 @@ interface RoomType {
   pricing: Pricing;
 }
 
-export default function RoomTypeManager() {
+export default function RoomTypeManager({onTempChange,
+  errors = {},
+  touched = {},
+  onFieldTouch}) {
   const context = useBookingContext();
   const dataRef = useRef<{ roomTypes: RoomType[]; activeTab: number }>({
     roomTypes: [],
@@ -114,7 +117,12 @@ export default function RoomTypeManager() {
 
   // Cập nhật dataRef mỗi khi có thay đổi
   useEffect(() => {
-    dataRef.current = { roomTypes, activeTab };
+    const newData = {
+      roomTypes,
+      activeTab
+    };
+    dataRef.current = newData;
+    onTempChange?.(newData);
   }, [roomTypes, activeTab]);
 
   // Lưu vào context khi unmount
@@ -131,7 +139,9 @@ export default function RoomTypeManager() {
       }
     
   }, []);
-
+  const handleTouch = (field: string) => {
+    onFieldTouch?.(`room_${activeTab}_${field}`);
+  };
   // Thêm loại phòng mới
   const addRoomType = () => {
     const newRoom: RoomType = {
@@ -236,7 +246,12 @@ export default function RoomTypeManager() {
                   fullWidth
                   placeholder="Nhập tên loại phòng"
                   value={current?.name || ''}
-                  onChange={e => updateRoomField('name', e.target.value)}
+                  onChange={e => {
+                    updateRoomField('name', e.target.value);
+                    handleTouch('name');
+                  }}
+                  error={touched[`room_${activeTab}_name`] && !!errors[`room_${activeTab}_name`]}
+                  helperText={touched[`room_${activeTab}_name`] ? errors[`room_${activeTab}_name`] : " "}
                   variant="outlined"
                   sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 2, '&.Mui-focused fieldset': { borderColor: '#a0d468' } } }}
                 />
@@ -250,7 +265,12 @@ export default function RoomTypeManager() {
                   fullWidth
                   placeholder="Nhập số phòng"
                   value={current?.quantity || ''}
-                  onChange={e => updateRoomField('quantity', e.target.value)}
+                  onChange={e => {
+                    updateRoomField('quantity', e.target.value);
+                    handleTouch('quantity');
+                  }}
+                  error={touched[`room_${activeTab}_quantity`] && !!errors[`room_${activeTab}_quantity`]}
+                  helperText={touched[`room_${activeTab}_quantity`] ? errors[`room_${activeTab}_quantity`] : " "}
                   sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 2, '&.Mui-focused fieldset': { borderColor: '#a0d468' } } }}
                 />
               </Grid>
@@ -263,7 +283,12 @@ export default function RoomTypeManager() {
                   fullWidth
                   placeholder="Nhập diện tích phòng"
                   value={current?.area || ''}
-                  onChange={e => updateRoomField('area', e.target.value)}
+                  onChange={e => {
+                    updateRoomField('area', e.target.value);
+                    handleTouch('area');
+                  }}
+                  error={touched[`room_${activeTab}_area`] && !!errors[`room_${activeTab}_area`]}
+                  helperText={touched[`room_${activeTab}_area`] ? errors[`room_${activeTab}_area`] : " "}
                   InputProps={{ endAdornment: <InputAdornment position="end">m²</InputAdornment> }}
                   sx={{ '& .MuiOutlinedInput-root': { height: 50, borderRadius: 2, '&.Mui-focused fieldset': { borderColor: '#a0d468' } } }}
                 />
@@ -276,11 +301,16 @@ export default function RoomTypeManager() {
                 <Autocomplete
                   options={bedTypes}
                   value={current?.bedType || ''}
-                  onChange={(_, v) => updateRoomField('bedType', v || '')}
+                  onChange={(_, v) => {
+                    updateRoomField('bedType', v || '');
+                    handleTouch('bedType');
+                  }}
                   renderInput={params => (
                     <TextField
                       {...params}
                       placeholder="Chọn loại giường"
+                      error={touched[`room_${activeTab}_bedType`] && !!errors[`room_${activeTab}_bedType`]}
+                      helperText={touched[`room_${activeTab}_bedType`] ? errors[`room_${activeTab}_bedType`] : " "}
                       InputProps={{
                         ...params.InputProps,
                         startAdornment: <InputAdornment position="start"><BedIcon sx={{ color: '#999' }} /></InputAdornment>,
@@ -305,11 +335,16 @@ export default function RoomTypeManager() {
                 <Autocomplete
                   options={directions}
                   value={current?.direction || ''}
-                  onChange={(_, v) => updateRoomField('direction', v || '')}
+                  onChange={(_, v) => {
+                    updateRoomField('direction', v || '');
+                    handleTouch('direction');
+                  }}
                   renderInput={params => (
                     <TextField
                       {...params}
                       placeholder="Chọn hướng phòng"
+                      error={touched[`room_${activeTab}_direction`] && !!errors[`room_${activeTab}_direction`]}
+                      helperText={touched[`room_${activeTab}_direction`] ? errors[`room_${activeTab}_direction`] : " "}
                       InputProps={{
                         ...params.InputProps,
                         startAdornment: <InputAdornment position="start"><CompassCalibrationIcon sx={{ color: '#999' }} /></InputAdornment>,
@@ -340,7 +375,12 @@ export default function RoomTypeManager() {
                   rows={4}
                   placeholder="Nhập mô tả về loại phòng..."
                   value={current?.description || ''}
-                  onChange={e => updateRoomField('description', e.target.value)}
+                  onChange={e => {
+                    updateRoomField('description', e.target.value);
+                    handleTouch('description');
+                  }}
+                  error={touched[`room_${activeTab}_description`] && !!errors[`room_${activeTab}_description`]}
+                  helperText={touched[`room_${activeTab}_description`] ? errors[`room_${activeTab}_description`] : " "}
                   inputProps={{ maxLength: 3000 }}
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2, '&.Mui-focused fieldset': { borderColor: '#a0d468' } } }}
                 />

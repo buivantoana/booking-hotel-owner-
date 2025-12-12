@@ -1,13 +1,13 @@
-import { Button, Container, Typography, useTheme } from "@mui/material";
-import React, { useState } from "react";
+import { Button, CircularProgress, Container, Typography, useTheme } from "@mui/material";
+import React, { useEffect, useState } from "react";
 import LoginIcon from "@mui/icons-material/Login";
 type Props = {};
 
-const CreateHotelView = (props: Props) => {
+const CreateHotelView = ({submitCreateHotel}) => {
   const [step, setStep] = useState(1);
   const [typeHotel, setTypeHotel] = useState("Khách sạn Listing");
-  const [dataCreateHotel,setDataCreateHotel] = useState({})
   const context = useBookingContext()
+  const [loading,setLoading] = useState(false)
   const handleStepClick = (id) => {
     console.log("Bạn vừa chọn step:", id);
     setStep(id);
@@ -16,7 +16,116 @@ const CreateHotelView = (props: Props) => {
     console.log("Bạn đã chọn loại khách sạn", name);
     setTypeHotel(name);
   };
-  console.log("AAAAA context cha",context?.state?.create_hotel)
+  const persistedData = context?.state?.create_hotel || {};
+
+  // Dữ liệu tạm của step hiện tại (luôn mới nhất)
+  const [tempData, setTempData] = useState(persistedData);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  // Đồng bộ khi chuyển step
+  useEffect(() => {
+    setTempData(persistedData);
+    // Optional: reset touched khi chuyển step
+    setTouched({});
+  }, [step, persistedData]);
+
+  // Hàm helper để đánh dấu field đã được touch
+  const markAsTouched = (field: string) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+  };
+  const [canNext, setCanNext] = useState(true);
+  const [stepErrors, setStepErrors] = useState({});
+
+  useEffect(() => {
+    let isValid = true;
+  let errors: any = {};
+    if (step === 2) {
+      const result = validateBasicInfo(tempData);
+      errors = result.errors;
+      isValid = result.isValid;
+    }else if (step === 3) {
+      const result = validateImageUpload(tempData);
+      errors = result.errors;
+      isValid = result.isValid;
+    }else if (step === 4) {
+      const result = validateLocation(tempData);
+      errors = result.errors;
+      isValid = result.isValid;
+    }else if (step === 5) {
+      const result = validateRoomTypes(tempData);
+      errors = result.errors;
+      isValid = result.isValid;
+    } else {
+      setCanNext(true);
+    }
+    setStepErrors(errors);
+    setCanNext(isValid);
+  }, [tempData, step]);
+
+  const handleNext = async() => {
+    if (step === 2) {
+      setTouched({
+        hotelName: true,
+        phone: true,
+        businessHours: true,
+      });
+    }
+    if (step === 3) {
+      setTouched(prev => ({ ...prev, outsideImages: true, hotelImages: true, submitAttempt: true }));
+    }
+    if (step === 4) {
+      setTouched(prev => ({
+        ...prev,
+        selectedProvince: true,
+        selectedDistrict: true,
+        address: true,
+        map: true,
+        submitAttempt: true
+      }));
+    }
+    if (step === 5) {
+      const allTouched: Record<string, boolean> = { submitAttempt: true };
+      tempData.roomTypes?.forEach((_: any, index: number) => {
+        allTouched[`room_${index}_name`] = true;
+        allTouched[`room_${index}_quantity`] = true;
+        allTouched[`room_${index}_area`] = true;
+        allTouched[`room_${index}_bedType`] = true;
+        allTouched[`room_${index}_direction`] = true;
+        allTouched[`room_${index}_description`] = true;
+        allTouched[`room_${index}_images`] = true;
+        allTouched[`room_${index}_pricing`] = true;
+      });
+      setTouched(prev => ({ ...prev, ...allTouched }));
+      try {
+        setLoading(true);
+        let result =  await submitCreateHotel(context?.state?.create_hotel);
+        if(result.success){
+          toast.success("Tạo khách sạn thành công!");
+          setStep(step + 1);
+        }
+       
+        // Xóa context nếu muốn
+       
+      } catch (err) {
+        console.error(err);
+        toast.error(err?.message)
+      } finally {
+        setLoading(false);
+      }
+    }
+    if (canNext) {
+      // Khi nhấn Kế tiếp → ép lưu ngay vào context (đảm bảo dữ liệu mới nhất)
+      context.dispatch({
+        type: "UPDATE_CREATE_HOTEL",
+        payload: tempData,
+      });
+      if(step !== 5){
+
+        setStep(step + 1);
+      }
+    }
+  };
+  console.log("AAAA context" ,context?.state?.create_hotel)
   return (
     <Box sx={{background:"#f7f7f7"}}>
     <Container maxWidth='lg' sx={{ py: 4,minHeight:"100vh" }}>
@@ -39,11 +148,31 @@ const CreateHotelView = (props: Props) => {
         {step == 1 && (
           <HotelTypeSelect typeHotel={typeHotel} onSelect={handleSelectType} />
         )}
-        {step == 2 && <HotelBasicInfo dataCreateHotel={dataCreateHotel} setDataCreateHotel={setDataCreateHotel} />}
-        {step == 3 && <HotelImageUpload dataCreateHotel={dataCreateHotel} setDataCreateHotel={setDataCreateHotel} />}
-        {step == 4 && <HotelLocationInput  dataCreateHotel={dataCreateHotel}
-    setDataCreateHotel={setDataCreateHotel} />}
-        {step == 5 && <RoomTypeTabsModern />}
+        {step == 2 && <HotelBasicInfo dataCreateHotel={persistedData}
+          setDataCreateHotel={() => {}}
+          onTempChange={setTempData}          // 
+          errors={stepErrors} 
+          touched={touched}
+          onFieldBlur={markAsTouched}
+          
+          />
+          
+          }
+        {step == 3 && <HotelImageUpload  onTempChange={setTempData}
+    errors={stepErrors}
+    touched={touched}
+    onFieldTouch={(field) => setTouched(prev => ({ ...prev, [field]: true }))} />}
+        {step == 4 && <HotelLocationInput 
+
+onTempChange={setTempData}
+errors={stepErrors}
+touched={touched}
+onFieldTouch={(field) => setTouched(prev => ({ ...prev, [field]: true }))}
+    />}
+        {step == 5 && <RoomTypeTabsModern onTempChange={setTempData}
+    errors={stepErrors}
+    touched={touched}
+    onFieldTouch={(field) => setTouched(prev => ({ ...prev, [field]: true }))} />}
         {step == 6 && <CreateSuccess />}
       </Box>
       {step < 6 && (
@@ -56,7 +185,8 @@ const CreateHotelView = (props: Props) => {
           <Button
             fullWidth
             variant='contained'
-            onClick={() => setStep(step + 1)}
+            disabled={!canNext||loading}
+            onClick={handleNext}
             sx={{
               background: "#8BC34A",
               color: "white",
@@ -70,7 +200,13 @@ const CreateHotelView = (props: Props) => {
                 background: "#7CB342",
               },
             }}>
-            Kế tiếp
+              {loading?
+              <>
+              <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+              Đang tạo...
+              </>
+              :"Kế tiếp"}
+            
           </Button>
         </Box>
       )}
@@ -185,6 +321,8 @@ import { Stack, Paper } from "@mui/material";
 
 import success from "../../images/Frame 1321317962.png";
 import { useBookingContext } from "../../App";
+import { validateBasicInfo, validateImageUpload, validateLocation, validateRoomTypes } from "../../utils/utils";
+import { toast } from "react-toastify";
 
 const CreateSuccess = () => {
   const theme = useTheme();

@@ -1,9 +1,13 @@
 import api from "../core/api";
 
-export async function searchHotel(query: any) {
+export async function createHotel(body: any) {
   try {
-    const response = await api.get(`/hotel/search`, {
-      params: query,
+    let token = localStorage.getItem("access_token");
+    const response = await api.post(`/partner/hotel/create`, body,{
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
     });
     return response.data;
   } catch (error: any) {
@@ -19,10 +23,14 @@ export async function searchHotel(query: any) {
   }
 }
 
-export async function getLocation(query) {
+export async function createRoomHotel(id,body: any) {
   try {
-    const response = await api.get(`/user/locations`, {
-      params: query,
+    let token = localStorage.getItem("access_token");
+    const response = await api.post(`/partner/hotel/${id}/room-type/create`, body,{
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
     });
     return response.data;
   } catch (error: any) {
@@ -37,53 +45,4 @@ export async function getLocation(query) {
     }
   }
 }
-export async function getAmenities() {
-  try {
-    const response = await api.get(`/hotel/amenities`);
-    return response.data;
-  } catch (error: any) {
-    if (error.response) {
-      console.error("Error response data:", error.response.data);
-      console.error("Error response status:", error.response.status);
-      return error.response.data;
-    } else if (error.request) {
-      console.error("No response received:", error.request);
-    } else {
-      console.error("Error setting up request:", error.message);
-    }
-  }
-}
 
-export async function getDetailHotelApi(id) {
-  try {
-    const response = await api.get(`/hotel/detail/${id}`);
-    return response.data;
-  } catch (error: any) {
-    if (error.response) {
-      console.error("Error response data:", error.response.data);
-      console.error("Error response status:", error.response.status);
-      return error.response.data;
-    } else if (error.request) {
-      console.error("No response received:", error.request);
-    } else {
-      console.error("Error setting up request:", error.message);
-    }
-  }
-}
-
-export async function getReviewHotel(id) {
-  try {
-    const response = await api.get(`/review/hotel/${id}`);
-    return response.data;
-  } catch (error: any) {
-    if (error.response) {
-      console.error("Error response data:", error.response.data);
-      console.error("Error response status:", error.response.status);
-      return error.response.data;
-    } else if (error.request) {
-      console.error("No response received:", error.request);
-    } else {
-      console.error("Error setting up request:", error.message);
-    }
-  }
-}

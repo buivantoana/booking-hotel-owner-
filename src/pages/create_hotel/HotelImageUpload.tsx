@@ -4,7 +4,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import add from "../../images/gallery-add.png";
 import { useBookingContext } from "../../App";
 
-export default function HotelImageUpload({ isPadding, setDataCreateHotel,dataCreateHotel }) {
+export default function HotelImageUpload({ onTempChange,
+  errors = {},
+  touched = {},
+  onFieldTouch,
+  isPadding }) {
   const isMobile = useMediaQuery("(max-width:600px)");
 
   const [outsideImages, setOutsideImages] = useState([]);
@@ -27,12 +31,13 @@ export default function HotelImageUpload({ isPadding, setDataCreateHotel,dataCre
 
   // ⭐ Update ref mỗi khi dữ liệu thay đổi
   useEffect(() => {
-    dataRef.current = {
-      outsideImages,
-      hotelImages
-    };
+    const newData = { outsideImages, hotelImages };
+    dataRef.current = newData;
+    onTempChange?.(newData); // realtime cho validate
   }, [outsideImages, hotelImages]);
-
+  const markTouched = (field: "outsideImages" | "hotelImages") => {
+    onFieldTouch?.(field);
+  };
   // ⭐ Cleanup khi component unmount
   useEffect(() => {
     return () => {
@@ -48,13 +53,15 @@ export default function HotelImageUpload({ isPadding, setDataCreateHotel,dataCre
 
   // ------------------- UI Logic ----------------------
 
-  const handleUpload = (event, setter) => {
+  const handleUpload = (event: any, setter: any, field: "outsideImages" | "hotelImages") => {
+    markTouched(field); // đã tương tác
     const files = Array.from(event.target.files);
-    const newImgs = files.map((file) => ({ file, url: URL.createObjectURL(file) }));
-    setter((prev) => [...prev, ...newImgs]);
+    const newImgs = files.map((file: any) => ({ file, url: URL.createObjectURL(file) }));
+    setter((prev: any) => [...prev, ...newImgs]);
   };
 
-  const handleDelete = (index, setter, list) => {
+  const handleDelete = (index: number, setter: any, list: any[], field: "outsideImages" | "hotelImages") => {
+    markTouched(field);
     const updated = [...list];
     updated.splice(index, 1);
     setter(updated);
@@ -110,7 +117,7 @@ export default function HotelImageUpload({ isPadding, setDataCreateHotel,dataCre
     </Box>
   );
 
-  const Section = ({ title, desc, images, setter }) => (
+  const Section = ({ title, desc, images, setter,field }) => (
     <Box sx={{ mb: 4 }}>
       <Typography fontWeight={600} mb={1}>
         {title}
@@ -130,6 +137,11 @@ export default function HotelImageUpload({ isPadding, setDataCreateHotel,dataCre
           <UploadBox onSelect={(e) => handleUpload(e, setter)} />
         </Grid>
       </Grid>
+      {(touched[field] || touched.submitAttempt) && errors[field] && (
+        <Typography color="error" fontSize={13} mb={2}>
+          {errors[field]}
+        </Typography>
+      )}
     </Box>
   );
 
@@ -148,6 +160,7 @@ export default function HotelImageUpload({ isPadding, setDataCreateHotel,dataCre
         desc="Tải lên ít nhất 1 ảnh rõ nét về mặt tiền hoặc biển hiệu khách sạn. Ảnh này chỉ dùng để kiểm duyệt, không hiển thị trên Hotel Booking."
         images={outsideImages}
         setter={setOutsideImages}
+        field="outsideImages"
       />
 
       <Section
@@ -155,6 +168,7 @@ export default function HotelImageUpload({ isPadding, setDataCreateHotel,dataCre
         desc="Tải lên ít nhất 5 ảnh chụp từ nhiều góc độ khác nhau (sảnh, hành lang, khu vực chung, phòng, v.v.). Các ảnh này sẽ được hiển thị trên Hotel Booking."
         images={hotelImages}
         setter={setHotelImages}
+        field="hotelImages"
       />
     </Box>
   );
