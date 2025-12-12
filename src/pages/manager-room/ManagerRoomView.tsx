@@ -355,7 +355,8 @@ let datatestdaily = {
       booked_rooms: 1,
       remaining_rooms: 1,
       status: "available"
-    }
+    },
+    
   ],
   "price_daily": 227000,
   "currency": "VND"
@@ -452,7 +453,7 @@ export default function ManagerRoomView() {
                     sx={{ cursor: "pointer" }}
                     onClick={() => setActive(t.key)}>
                     <Typography
-                      fontSize={15}
+                      fontSize={17}
                       fontWeight={500}
                       sx={{
                         color: active === t.key ? "#8BC34A" : "#555",
@@ -470,22 +471,9 @@ export default function ManagerRoomView() {
               </Box>
 
               {/* Date Range */}
-              <Box
-                display='flex'
-                alignItems='center'
-                sx={{
-                  border: "1px solid #ddd",
-                  borderRadius: 1.5,
-                  px: 1.5,
-                  py: 0.6,
-                  minWidth: isMobile ? 150 : 220,
-                  cursor: "pointer",
-                }}>
-                <Typography fontSize={14} color='#444' flex={1}>
-                  {dateRange}
-                </Typography>
-                <KeyboardArrowDownIcon sx={{ fontSize: 20, color: "#555" }} />
-              </Box>
+              
+                <SimpleDateSearchBar/>
+             
             </Box>
             <Box py={3}>
               {active == "hourly" && (
@@ -920,7 +908,7 @@ function RoomScheduleTableHourly({
         }}
       >
         {/* BẢNG THẬT - CỘT TRÁI CỐ ĐỊNH, PHẦN PHẢI CUỘN */}
-        <Box > {/* Đảm bảo đủ rộng để có scroll */}
+        <Box  minWidth="fit-content"> {/* Đảm bảo đủ rộng để có scroll */}
 
           {/* HEADER */}
           <Box display="flex">
@@ -1003,16 +991,16 @@ function RoomScheduleTableHourly({
             <Box key={idx} display="flex" >
               {/* Cột trái cố định */}
               <Box
-                width="280px"
-                flexShrink={0}
-                bgcolor={idx === 0 ? "white" : "#fafafa"}
-                position="sticky"
-                left={0}
-                zIndex={10}
-                borderRight="2px solid #ddd"
-                borderBottom="1px solid #ddd"
+                 width="280px"
+                 flexShrink={0}
+                 bgcolor={idx === 0 ? "white" : "#fafafa"}
+                 position="sticky"
+                 left={0}
+                 zIndex={10}
+                 borderRight="2px solid #ddd"
+                 borderBottom="1px solid #ddd"
               >
-                <Box px={3} py={2.5} display="flex" justifyContent="space-between" alignItems="center">
+                <Box px={3} py={2} display="flex" justifyContent="space-between" alignItems="center">
                   {row.isName ? (
                     <>
                       <Typography fontWeight={700} fontSize={18} display="flex" alignItems="center" gap={1}>
@@ -1050,7 +1038,7 @@ function RoomScheduleTableHourly({
                     display="flex"
                     alignItems="center"
                     justifyContent="center"
-                    py={2}
+                    py={1}
                   >
                     {row.isStatus && (
                       <Box
@@ -1087,9 +1075,9 @@ function RoomScheduleTableHourly({
           ].map(p => (
             <Box key={p.label} display="flex" >
               <Box width="280px" flexShrink={0} bgcolor="#f8f9fa" position="sticky"  borderBottom="1px solid #ddd" left={0} zIndex={10} borderRight="2px solid #ddd">
-                <Box px={3} py={2.5}><Typography fontWeight={500}>{p.label}</Typography></Box>
+                <Box px={3} py={2}><Typography fontWeight={500}>{p.label}</Typography></Box>
               </Box>
-              <Box flex={1} display="flex"   alignItems="center" pl={4} py={2}>
+              <Box flex={1} display="flex"   alignItems="center" pl={4} >
                 <Box bgcolor={p.bg} color={p.color} px={4} py={1.5} borderRadius="50px" fontWeight={600} fontSize={15}>
                   {p.value}
                 </Box>
@@ -1237,7 +1225,7 @@ interface RoomScheduleTableDailyProps {
                 borderRight="2px solid #ddd"
                 borderBottom="1px solid #ddd"
               >
-                <Box px={3} py={2.5} display="flex" justifyContent="space-between" alignItems="center">
+                <Box px={3} py={2} display="flex" justifyContent="space-between" alignItems="center">
                   {row.isName ? (
                     <>
                       <Typography fontWeight={700} fontSize={18} display="flex" alignItems="center" gap={1}>
@@ -1320,11 +1308,11 @@ interface RoomScheduleTableDailyProps {
                 borderRight="2px solid #ddd"
                 borderBottom="1px solid #ddd"
               >
-                <Box px={3} py={2.5}>
+                <Box px={3} py={2}>
                   <Typography fontWeight={500}>{p.label}</Typography>
                 </Box>
               </Box>
-              <Box flex={1} display="flex" alignItems="center" pl={4} py={2}>
+              <Box flex={1} display="flex" alignItems="center" pl={4} >
                 <Box bgcolor={p.bg} color={p.color} px={4} py={1.5} borderRadius="50px" fontWeight={600} fontSize={15}>
                   {p.value}
                 </Box>
@@ -1448,7 +1436,7 @@ function RoomScheduleTableOvernight({
                 borderRight="2px solid #ddd"
                 borderBottom="1px solid #ddd"
               >
-                <Box px={3} py={2.5} display="flex" justifyContent="space-between" alignItems="center">
+                <Box px={3} py={2} display="flex" justifyContent="space-between" alignItems="center">
                   {row.isName ? (
                     <>
                       <Typography fontWeight={700} fontSize={18} display="flex" alignItems="center" gap={1}>
@@ -1531,11 +1519,11 @@ function RoomScheduleTableOvernight({
                 borderRight="2px solid #ddd"
                 borderBottom="1px solid #ddd"
               >
-                <Box px={3} py={2.5}>
+                <Box px={3} py={2}>
                   <Typography fontWeight={500}>{p.label}</Typography>
                 </Box>
               </Box>
-              <Box flex={1} display="flex" alignItems="center" pl={4} py={2}>
+              <Box flex={1} display="flex" alignItems="center" pl={4} >
                 <Box bgcolor={p.bg} color={p.color} px={4} py={1.5} borderRadius="50px" fontWeight={600} fontSize={15}>
                   {p.value}
                 </Box>
@@ -1558,6 +1546,7 @@ import { CalendarToday, AccessTime } from "@mui/icons-material";
 import "dayjs/locale/vi";
 import LockRoomSetup from "./LockRoomSetup";
 import CreateRoom from "./CreateRoom";
+import SimpleDateSearchBar from "../../components/SimpleDateSearchBar";
 
 dayjs.locale("vi");
 
