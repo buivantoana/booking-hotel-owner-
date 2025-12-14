@@ -1,5 +1,9 @@
-
 import CryptoJS from "crypto-js";
+import { Dayjs } from "dayjs";
+
+export const formatDateWithTimezone = (date: Dayjs) => {
+  return date.format("YYYY-MM-DDTHH:mm:ssZ").replace("+", "%2B");
+};
 
 // Hàm sắp xếp object theo thứ tự key tăng dần
 function sortObjectByKeys(obj: Record<string, any>) {
@@ -128,7 +132,7 @@ export function formattedDateHHMMDDMMYYYY(data) {
     year: "numeric",
     hour12: false,
   });
-  return formatted
+  return formatted;
 }
 
 // src/utils/createHotelValidation.ts
@@ -221,36 +225,63 @@ export const validateRoomTypes = (data: any) => {
   // Validate từng loại phòng
   roomTypes.forEach((room: any, index: number) => {
     if (!room?.name?.trim()) {
-      errors[`room_${index}_name`] = `Loại phòng ${index + 1}: Vui lòng nhập tên loại phòng`;
+      errors[`room_${index}_name`] = `Loại phòng ${
+        index + 1
+      }: Vui lòng nhập tên loại phòng`;
     }
-    if (!room?.quantity?.trim() || isNaN(parseInt(room.quantity)) || parseInt(room.quantity) <= 0) {
-      errors[`room_${index}_quantity`] = `Loại phòng ${index + 1}: Vui lòng nhập số lượng phòng hợp lệ (số nguyên > 0)`;
+    if (
+      !room?.quantity?.trim() ||
+      isNaN(parseInt(room.quantity)) ||
+      parseInt(room.quantity) <= 0
+    ) {
+      errors[`room_${index}_quantity`] = `Loại phòng ${
+        index + 1
+      }: Vui lòng nhập số lượng phòng hợp lệ (số nguyên > 0)`;
     }
-    if (!room?.area?.trim() || isNaN(parseFloat(room.area)) || parseFloat(room.area) <= 0) {
-      errors[`room_${index}_area`] = `Loại phòng ${index + 1}: Vui lòng nhập diện tích phòng hợp lệ (số > 0)`;
+    if (
+      !room?.area?.trim() ||
+      isNaN(parseFloat(room.area)) ||
+      parseFloat(room.area) <= 0
+    ) {
+      errors[`room_${index}_area`] = `Loại phòng ${
+        index + 1
+      }: Vui lòng nhập diện tích phòng hợp lệ (số > 0)`;
     }
     if (!room?.bedType) {
-      errors[`room_${index}_bedType`] = `Loại phòng ${index + 1}: Vui lòng chọn loại giường`;
+      errors[`room_${index}_bedType`] = `Loại phòng ${
+        index + 1
+      }: Vui lòng chọn loại giường`;
     }
     if (!room?.direction) {
-      errors[`room_${index}_direction`] = `Loại phòng ${index + 1}: Vui lòng chọn hướng phòng`;
+      errors[`room_${index}_direction`] = `Loại phòng ${
+        index + 1
+      }: Vui lòng chọn hướng phòng`;
     }
     if (!room?.description?.trim()) {
-      errors[`room_${index}_description`] = `Loại phòng ${index + 1}: Vui lòng nhập mô tả phòng`;
+      errors[`room_${index}_description`] = `Loại phòng ${
+        index + 1
+      }: Vui lòng nhập mô tả phòng`;
     }
     if ((room?.images || []).length < 3) {
-      errors[`room_${index}_images`] = `Loại phòng ${index + 1}: Vui lòng tải lên ít nhất 3 ảnh phòng`;
+      errors[`room_${index}_images`] = `Loại phòng ${
+        index + 1
+      }: Vui lòng tải lên ít nhất 3 ảnh phòng`;
     }
 
     // Pricing: phải có ít nhất 1 loại kinh doanh enabled và có giá hợp lệ
     const pricing = room?.pricing || {};
-    const hasValidPricing = 
-      (pricing.hourly?.enabled && pricing.hourly.firstHours?.trim() && pricing.hourly.extraHour?.trim() && pricing.hourly.maxHours) ||
+    const hasValidPricing =
+      (pricing.hourly?.enabled &&
+        pricing.hourly.firstHours?.trim() &&
+        pricing.hourly.extraHour?.trim() &&
+        pricing.hourly.maxHours) ||
       (pricing.overnight?.enabled && pricing.overnight.price?.trim()) ||
       (pricing.daily?.enabled && pricing.daily.price?.trim());
 
     if (!hasValidPricing) {
-      errors[`room_${index}_pricing`] = `Loại phòng ${index + 1}: Vui lòng thiết lập ít nhất một loại giá phòng hợp lệ (theo giờ, qua đêm hoặc theo ngày)`;
+      errors[`room_${index}_pricing`] = `Loại phòng ${
+        index + 1
+      }: Vui lòng thiết lập ít nhất một loại giá phòng hợp lệ (theo giờ, qua đêm hoặc theo ngày)`;
     }
   });
 

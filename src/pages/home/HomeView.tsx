@@ -56,7 +56,26 @@ import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Star } from "@mui/icons-material";
-
+const CARD_CONFIG = [
+  {
+    key: "hourly",
+    title: "Đặt phòng theo giờ",
+    icon: AccessTimeIcon,
+    color: "#FF6B6B",
+  },
+  {
+    key: "overnight",
+    title: "Đặt phòng qua đêm",
+    icon: NightShelterIcon,
+    color: "#4DABF7",
+  },
+  {
+    key: "daily",
+    title: "Đặt phòng theo ngày",
+    icon: FlightTakeoffIcon,
+    color: "#FFC048",
+  },
+];
 // Styled Components
 const CompareBar = styled(Box)({
   backgroundColor: "#f5f5f5",
@@ -590,7 +609,10 @@ const RevenueCompareChart = () => (
   </Card>
 );
 
-const RevenuePaymentChart = () => (
+const RevenuePaymentChart = ({
+  setDateRangeRevenueMethod,
+  dateRangeRevenueMethod,
+}) => (
   <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
     <CardContent>
       <Stack
@@ -606,6 +628,10 @@ const RevenuePaymentChart = () => (
             5.000.000đ
           </Typography>
         </Box>
+        <SimpleDatePopup
+          value={dateRangeRevenueMethod}
+          onChange={setDateRangeRevenueMethod}
+        />
       </Stack>
 
       <Box sx={{ height: 300, mt: 4 }}>
@@ -667,8 +693,41 @@ const RevenuePaymentChart = () => (
 );
 
 // Main Component
-export default function HomeView() {
+export default function HomeView({
+  setDateRange,
+  dateRange,
+  dataGeneral,
+  setDateRangeRevenueMethod,
+  dateRangeRevenueMethod,
+}) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const BOOKING_ITEMS = [
+    {
+      key: "total",
+      label: "Tổng số đơn",
+      color: "#495057",
+    },
+    {
+      key: "pending_hotel",
+      label: "Chờ khách sạn xác nhận",
+      color: "#FAB005",
+    },
+    {
+      key: "pending_checkin",
+      label: "Chờ nhận phòng",
+      color: "#4DABF7",
+    },
+    {
+      key: "checked_in",
+      label: "Đang ở",
+      color: "#51CF66",
+    },
+    {
+      key: "completed",
+      label: "Hoàn tất",
+      color: "#ADB5BD",
+    },
+  ];
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -715,75 +774,76 @@ export default function HomeView() {
       </Stack>
 
       {/* Tổng quan đặt phòng */}
-      <Typography variant='h6' fontWeight='bold' mb={1}>
-        Tổng quan đặt phòng
-      </Typography>
-      <Typography variant='body2' color='text.secondary' mb={4}>
-        Tổng quan đặt phòng khách sạn của bạn trong hôm nay
-      </Typography>
+      <Box display={"flex"} justifyContent={"space-between"}>
+        <Box>
+          <Typography variant='h6' fontWeight='bold' mb={1}>
+            Tổng quan đặt phòng
+          </Typography>
+          <Typography variant='body2' color='text.secondary' mb={4}>
+            Tổng quan đặt phòng khách sạn của bạn trong hôm nay
+          </Typography>
+        </Box>
+        <SimpleDateSearchBar value={dateRange} onChange={setDateRange} />
+      </Box>
 
       <Grid container spacing={3} mb={6}>
-        {[
-          {
-            title: "Đặt phòng theo giờ",
-            icon: AccessTimeIcon,
-            color: "#FF6B6B",
-          },
-          {
-            title: "Đặt phòng qua đêm",
-            icon: NightShelterIcon,
-            color: "#4DABF7",
-          },
-          {
-            title: "Đặt phòng theo ngày",
-            icon: FlightTakeoffIcon,
-            color: "#FFC048",
-          },
-        ].map((card, i) => (
-          <Grid item xs={12} md={4} key={i}>
-            <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
-              <CardContent>
-                <Stack
-                  direction='row'
-                  justifyContent='space-between'
-                  alignItems='center'
-                  mb={3}>
-                  <Avatar sx={{ bgcolor: card.color, width: 56, height: 56 }}>
-                    <card.icon sx={{ fontSize: 32, color: "white" }} />
-                  </Avatar>
-                  <Typography variant='h6' fontWeight='bold'>
-                    {card.title}
-                  </Typography>
-                </Stack>
-                {bookingItems.map((item, idx) => (
+        {CARD_CONFIG.map((card) => {
+          const cardData = dataGeneral[card.key as keyof typeof dataGeneral];
+
+          return (
+            <Grid item xs={12} md={4} key={card.key}>
+              <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
+                <CardContent>
                   <Stack
-                    key={idx}
                     direction='row'
                     justifyContent='space-between'
                     alignItems='center'
-                    py={0.8}>
-                    <Stack direction='row' alignItems='center' gap={1.5}>
-                      <Box
-                        sx={{
-                          width: 12,
-                          height: 12,
-                          borderRadius: "50%",
-                          bgcolor: item.color,
-                        }}
-                      />
-                      <Typography variant='body2' color='text.secondary'>
-                        {item.label}
-                      </Typography>
-                    </Stack>
-                    <Typography fontWeight='bold' fontSize='1rem'>
-                      {item.value}
+                    mb={3}>
+                    <Avatar
+                      sx={{
+                        bgcolor: card.color,
+                        width: 56,
+                        height: 56,
+                      }}>
+                      <card.icon sx={{ fontSize: 32, color: "white" }} />
+                    </Avatar>
+
+                    <Typography variant='h6' fontWeight='bold'>
+                      {card.title}
                     </Typography>
                   </Stack>
-                ))}
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
+
+                  {BOOKING_ITEMS.map((item) => (
+                    <Stack
+                      key={item.key}
+                      direction='row'
+                      justifyContent='space-between'
+                      alignItems='center'
+                      py={0.8}>
+                      <Stack direction='row' alignItems='center' gap={1.5}>
+                        <Box
+                          sx={{
+                            width: 12,
+                            height: 12,
+                            borderRadius: "50%",
+                            bgcolor: item.color,
+                          }}
+                        />
+                        <Typography variant='body2' color='text.secondary'>
+                          {item.label}
+                        </Typography>
+                      </Stack>
+
+                      <Typography fontWeight='bold' fontSize='1rem'>
+                        {cardData?.[item.key as keyof typeof cardData] ?? 0}
+                      </Typography>
+                    </Stack>
+                  ))}
+                </CardContent>
+              </Card>
+            </Grid>
+          );
+        })}
       </Grid>
 
       {/* Hiệu suất */}
@@ -823,7 +883,10 @@ export default function HomeView() {
           <RevenueCompareChart />
         </Grid>
         <Grid item xs={12} md={6}>
-          <RevenuePaymentChart />
+          <RevenuePaymentChart
+            setDateRangeRevenueMethod={setDateRangeRevenueMethod}
+            dateRangeRevenueMethod={dateRangeRevenueMethod}
+          />
         </Grid>
       </Grid>
       <Review />
@@ -1115,6 +1178,9 @@ import {
   Receipt,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import SimpleDateSearchBar from "../../components/SimpleDateSearchBar";
+import SimpleDateSelect from "../../components/SimpleDateSelect";
+import SimpleDatePopup from "../../components/SimpleDateSelect";
 
 const StyledPopover = styled(Popover)(({ theme }) => ({
   "& .MuiPopover-paper": {

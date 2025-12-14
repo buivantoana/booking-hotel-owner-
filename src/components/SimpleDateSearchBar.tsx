@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Box,
   Paper,
@@ -10,139 +10,162 @@ import {
   Popper,
   ClickAwayListener,
   Container,
-  useMediaQuery,
-  useTheme,
 } from "@mui/material";
-import { Search, KeyboardArrowDown } from "@mui/icons-material";
-import { DateCalendar, LocalizationProvider } from "@mui/x-date-pickers";
+import { LocalizationProvider, DateCalendar } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
-import { useNavigate } from "react-router-dom";
 
+/* ================== TYPES ================== */
 
+export interface DateRangeValue {
+  checkIn: Dayjs | null;
+  checkOut: Dayjs | null;
+}
 
-// Popup chọn ngày nhận - trả (chỉ dành cho đặt theo ngày)
+interface SimpleDateSearchBarProps {
+  value: DateRangeValue;
+  onChange: (value: DateRangeValue) => void;
+}
+
+/* ================== DATE RANGE PICKER ================== */
+
+interface DateRangePickerProps {
+  open: boolean;
+  anchorEl: HTMLElement | null;
+  value: DateRangeValue;
+  onClose: () => void;
+  onApply: (value: DateRangeValue) => void;
+}
+
 const DateRangePicker = ({
   open,
   anchorEl,
+  value,
   onClose,
   onApply,
-  initialCheckIn,
-  initialCheckOut,
-}: {
-  open: boolean;
-  anchorEl: HTMLElement | null;
-  onClose: () => void;
-  onApply: (checkIn: Dayjs | null, checkOut: Dayjs | null) => void;
-  initialCheckIn?: Dayjs | null;
-  initialCheckOut?: Dayjs | null;
-}) => {
-  const [checkIn, setCheckIn] = useState<Dayjs | null>(initialCheckIn || dayjs());
-  const [checkOut, setCheckOut] = useState<Dayjs | null>(initialCheckOut || dayjs().add(1, "day"));
+}: DateRangePickerProps) => {
+  const [checkIn, setCheckIn] = useState<Dayjs | null>(value.checkIn);
+  const [checkOut, setCheckOut] = useState<Dayjs | null>(value.checkOut);
+
+  useEffect(() => {
+    setCheckIn(value.checkIn);
+    setCheckOut(value.checkOut);
+  }, [value]);
 
   const handleDateClick = (date: Dayjs) => {
     if (!checkIn || (checkOut && date.isBefore(checkIn))) {
       setCheckIn(date);
       setCheckOut(null);
-    } else if (!checkOut && date.isAfter(checkIn)) {
-      setCheckOut(date);
-    } else {
-      setCheckIn(date);
-      setCheckOut(null);
+      return;
     }
+
+    if (!checkOut && date.isAfter(checkIn)) {
+      setCheckOut(date);
+      return;
+    }
+
+    setCheckIn(date);
+    setCheckOut(null);
   };
 
   const handleApply = () => {
-    onApply(checkIn, checkOut);
+    onApply({ checkIn, checkOut });
     onClose();
   };
 
-  const handleReset = () => {
-    setCheckIn(dayjs());
-    setCheckOut(dayjs().add(1, "day"));
-  };
+  const renderDay =
+    (start: Dayjs | null, end: Dayjs | null) => (props: any) => {
+      const day = props.day as Dayjs;
+      const today = dayjs().startOf("day");
+
+      const isPast = day.isBefore(today, "day");
+
+      const isStart = start?.isSame(day, "day");
+      const isEnd = end?.isSame(day, "day");
+      const isInRange = start && end && day.isAfter(start) && day.isBefore(end);
+
+      return (
+        <Button
+          {...props}
+          onClick={() => {
+            handleDateClick(day);
+          }}
+          sx={{
+            minWidth: 36,
+            height: 36,
+            borderRadius: "50%",
+            bgcolor:
+              isStart || isEnd
+                ? "#98b720"
+                : isInRange
+                ? "#f0f8f0"
+                : "transparent",
+            color: isStart || isEnd ? "#fff" : "inherit",
+            cursor: "pointer",
+            "&:hover": {
+              bgcolor: isPast ? "transparent" : "#e8f5e8",
+            },
+          }}>
+          {day.format("D")}
+        </Button>
+      );
+    };
 
   if (!open || !anchorEl) return null;
 
   return (
-    <Popper open={open} anchorEl={anchorEl} placement="bottom" sx={{ zIndex: 50 }}>
-      <Paper elevation={8} sx={{ mt: 1, borderRadius: "24px", overflow: "hidden", width: 680 }}>
+    <Popper
+      open={open}
+      anchorEl={anchorEl}
+      placement='bottom'
+      sx={{ zIndex: 50 }}>
+      <Paper sx={{ mt: 1, borderRadius: 3, width: 680, overflow: "hidden" }}>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <Stack>
-            <Box p={2} bgcolor="#f9f9f9" borderBottom="1px solid #eee">
-              <Typography fontWeight={600}>Chọn ngày nhận - trả phòng</Typography>
+            <Box p={2} bgcolor='#f9f9f9'>
+              <Typography fontWeight={600}>
+                Chọn ngày nhận - trả phòng
+              </Typography>
             </Box>
 
-            <Stack direction="row">
-              <Box sx={{ flex: 1, p: 1, borderRight: "1px solid #eee" }}>
-                <DateCalendar
-                  value={checkIn}
-                  disablePast
-                  slots={{
-                    day: (props) => {
-                      const isStart = checkIn?.isSame(props.day, "day");
-                      const isEnd = checkOut?.isSame(props.day, "day");
-                      const isInRange = checkIn && checkOut && props.day.isAfter(checkIn) && props.day.isBefore(checkOut);
-
-                      return (
-                        <Button
-                          {...props}
-                          onClick={() => handleDateClick(props.day)}
-                          sx={{
-                            minWidth: 36,
-                            height: 36,
-                            borderRadius: "50%",
-                            bgcolor: isStart || isEnd ? "#98b720" : isInRange ? "#f0f8f0" : "transparent",
-                            color: isStart || isEnd ? "white" : "inherit",
-                            "&:hover": { bgcolor: "#e8f5e8" },
-                          }}>
-                          {props.day.format("D")}
-                        </Button>
-                      );
-                    },
-                  }}
-                />
-              </Box>
-
-              <Box sx={{ flex: 1, p: 1 }}>
-                <DateCalendar
-                  value={checkIn}
-                  disablePast
-                  slots={{
-                    day: (props) => {
-                      const isStart = checkIn?.isSame(props.day, "day");
-                      const isEnd = checkOut?.isSame(props.day, "day");
-                      const isInRange = checkIn && checkOut && props.day.isAfter(checkIn) && props.day.isBefore(checkOut);
-
-                      return (
-                        <Button
-                          {...props}
-                          onClick={() => handleDateClick(props.day)}
-                          sx={{
-                            minWidth: 36,
-                            height: 36,
-                            borderRadius: "50%",
-                            bgcolor: isStart || isEnd ? "#98b720" : isInRange ? "#f0f0" : "transparent",
-                            color: isStart || isEnd ? "white" : "inherit",
-                            "&:hover": { bgcolor: "#e8f5e8" },
-                          }}>
-                          {props.day.format("D")}
-                        </Button>
-                      );
-                    },
-                  }}
-                />
-              </Box>
+            <Stack direction='row'>
+              {[0, 1].map((i) => (
+                <Box
+                  key={i}
+                  sx={{
+                    flex: 1,
+                    p: 1,
+                    borderRight: i === 0 ? "1px solid #eee" : "none",
+                  }}>
+                  <DateCalendar
+                    value={checkIn}
+                    slots={{ day: renderDay(checkIn, checkOut) }}
+                  />
+                </Box>
+              ))}
             </Stack>
 
-            <Stack direction="row" justifyContent="space-between" p={2} bgcolor="#f9f9f9" borderTop="1px solid #eee">
-              <Button variant="outlined" onClick={handleReset} sx={{ borderRadius: "50px" }}>
+            <Stack
+              direction='row'
+              justifyContent='space-between'
+              p={2}
+              bgcolor='#f9f9f9'>
+              <Button
+                variant='outlined'
+                onClick={() =>
+                  onApply({
+                    checkIn: dayjs(),
+                    checkOut: dayjs().add(1, "day"),
+                  })
+                }
+                sx={{ borderRadius: 5 }}>
                 Bất kỳ ngày nào
               </Button>
+
               <Button
-                variant="contained"
+                variant='contained'
                 onClick={handleApply}
-                sx={{ bgcolor: "#98b720", borderRadius: "50px", px: 4 }}>
+                sx={{ bgcolor: "#98b720", borderRadius: 5, px: 4 }}>
                 Áp dụng
               </Button>
             </Stack>
@@ -153,93 +176,51 @@ const DateRangePicker = ({
   );
 };
 
-// Component chính – siêu gọn
-export default function SimpleDateSearchBar() {
-  const navigate = useNavigate();
+/* ================== MAIN COMPONENT ================== */
+
+export default function SimpleDateSearchBar({
+  value,
+  onChange,
+}: SimpleDateSearchBarProps) {
   const dateRef = useRef<HTMLDivElement>(null);
-  const [pickerOpen, setPickerOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
-  const [checkIn, setCheckIn] = useState<Dayjs | null>(dayjs());
-  const [checkOut, setCheckOut] = useState<Dayjs | null>(dayjs().add(1, "day"));
-
-  const formatDate = (date: Dayjs | null, fallback: string) => {
-    return date ? date.format("DD/MM/YYYY") : fallback;
-  };
-
-  const handleSearch = () => {
-    if (!checkIn || !checkOut) return;
-
-    const params = new URLSearchParams({
-      checkIn: checkIn.format("YYYY-MM-DD"),
-      checkOut: checkOut.format("YYYY-MM-DD"),
-    });
-
-    navigate(`/rooms?${params.toString()}`);
-  };
+  const formatDate = (date: Dayjs | null) =>
+    date ? date.format("DD/MM/YYYY") : "Chọn ngày";
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <ClickAwayListener onClickAway={() => setPickerOpen(false)}>
-        <Box  zIndex={10}>
-          <Container maxWidth="md">
-          
-              <Stack
-                direction={{ xs: "column", md: "row" }}
-                spacing={2}
-                alignItems="center">
-                {/* Ô chọn ngày */}
-                <Box
-                  ref={dateRef}
-                  onClick={() => setPickerOpen(true)}
-                  sx={{
-                    flex: 1,
-                    cursor: "pointer",
-                    border: pickerOpen ? "2px solid #98b720" : "1px solid #eee",
-                    borderRadius: "16px",
-                    px: 2,
-                    bgcolor: pickerOpen ? "#f8fff8" : "white",
-                    transition: "all 0.2s",
-                    py:1
-                  }}>
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <Box textAlign="center">
-                     
-                      
-                      <Typography fontWeight={500} color="#333">
-                        {formatDate(checkIn, "Chọn ngày")}
-                      </Typography>
-                    </Box>
-
-                    <Typography color="#999" >-</Typography>
-
-                    <Box textAlign="center">
-                    
-                     
-                      <Typography fontWeight={500} color="#333">
-                        {formatDate(checkOut, "Chọn ngày")}
-                      </Typography>
-                    </Box>
-
-                    
-                  </Stack>
-                </Box>
-
-                {/* Nút tìm kiếm */}
-               
+      <ClickAwayListener onClickAway={() => setOpen(false)}>
+        <Box zIndex={10}>
+          <Container maxWidth='lg'>
+            <Box
+              ref={dateRef}
+              onClick={() => setOpen(true)}
+              sx={{
+                cursor: "pointer",
+                border: open ? "2px solid #98b720" : "1px solid #eee",
+                borderRadius: 2,
+                px: 2,
+                py: 1,
+                bgcolor: open ? "#f8fff8" : "#fff",
+              }}>
+              <Stack direction='row' spacing={2} alignItems='center'>
+                <Typography fontWeight={500}>
+                  {formatDate(value.checkIn)}
+                </Typography>
+                <Typography color='#999'>-</Typography>
+                <Typography fontWeight={500}>
+                  {formatDate(value.checkOut)}
+                </Typography>
               </Stack>
-            
+            </Box>
 
-            {/* Popup lịch */}
             <DateRangePicker
-              open={pickerOpen}
+              open={open}
               anchorEl={dateRef.current}
-              onClose={() => setPickerOpen(false)}
-              onApply={(ci, co) => {
-                setCheckIn(ci);
-                setCheckOut(co);
-              }}
-              initialCheckIn={checkIn}
-              initialCheckOut={checkOut}
+              value={value}
+              onClose={() => setOpen(false)}
+              onApply={onChange}
             />
           </Container>
         </Box>

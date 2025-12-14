@@ -3,7 +3,7 @@ import api from "../core/api";
 export async function createHotel(body: any) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.post(`/partner/hotel/create`, body,{
+    const response = await api.post(`/partner/hotel/create`, body, {
       headers: {
         "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${token}`,
@@ -23,12 +23,112 @@ export async function createHotel(body: any) {
   }
 }
 
-export async function createRoomHotel(id,body: any) {
+export async function createRoomHotel(id, body: any) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.post(`/partner/hotel/${id}/room-type/create`, body,{
+    const response = await api.post(
+      `/partner/hotel/${id}/room-type/create`,
+      body,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
+
+export async function getInventoryHotelHourly(id, params) {
+  try {
+    let token = localStorage.getItem("access_token");
+    const response = await api.get(
+      `/partner/hotel/${id}/inventory/hourly?${params}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
+export async function getInventoryHotelOvernight(id, params) {
+  try {
+    let token = localStorage.getItem("access_token");
+    const response = await api.get(
+      `/partner/hotel/${id}/inventory/overnight?${params}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
+
+export async function getInventoryHotelDaily(id, params) {
+  try {
+    let token = localStorage.getItem("access_token");
+    const response = await api.get(
+      `/partner/hotel/${id}/inventory/daily?${params}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
+
+export async function getGeneralStats(id, params) {
+  try {
+    let token = localStorage.getItem("access_token");
+    const response = await api.get(`/partner/stats/${id}/general?${params}`, {
       headers: {
-        "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${token}`,
       },
     });
@@ -46,11 +146,10 @@ export async function createRoomHotel(id,body: any) {
   }
 }
 
-
-export async function getInventoryHotelHourly(id,params) {
+export async function getGeneralWeek(id, params) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.post(`/partner/hotel/${id}/inventory/hourly?${params}`,{
+    const response = await api.get(`/partner/stats/${id}/revenue?${params}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -68,49 +167,3 @@ export async function getInventoryHotelHourly(id,params) {
     }
   }
 }
-export async function getInventoryHotelOvernight(id,params) {
-  try {
-    let token = localStorage.getItem("access_token");
-    const response = await api.post(`/partner/hotel/${id}/inventory/overnight?${params}`,{
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error: any) {
-    if (error.response) {
-      console.error("Error response data:", error.response.data);
-      console.error("Error response status:", error.response.status);
-      return error.response.data;
-    } else if (error.request) {
-      console.error("No response received:", error.request);
-    } else {
-      console.error("Error setting up request:", error.message);
-    }
-  }
-}
-
-export async function getInventoryHotelDaily(id,params) {
-  try {
-    let token = localStorage.getItem("access_token");
-    const response = await api.post(`/partner/hotel/${id}/inventory/daily?${params}`,{
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error: any) {
-    if (error.response) {
-      console.error("Error response data:", error.response.data);
-      console.error("Error response status:", error.response.status);
-      return error.response.data;
-    } else if (error.request) {
-      console.error("No response received:", error.request);
-    } else {
-      console.error("Error setting up request:", error.message);
-    }
-  }
-}
-
-
-

@@ -13,358 +13,17 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import LockIcon from "@mui/icons-material/Lock";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-let datatest ={
-  "room_type_id": "lD49C0cWJAUw",
-  "start_time": "2025-12-08T17:00:00+07:00",
-  "end_time": "2025-12-10T17:00:00+07:00",
-  "slots": [
-    {
-      "hour": "17:00",
-      "from": "2025-12-08T17:00:00+07:00",
-      "to": "2025-12-08T18:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "18:00",
-      "from": "2025-12-08T18:00:00+07:00",
-      "to": "2025-12-08T19:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "19:00",
-      "from": "2025-12-08T19:00:00+07:00",
-      "to": "2025-12-08T20:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "20:00",
-      "from": "2025-12-08T20:00:00+07:00",
-      "to": "2025-12-08T21:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "08:00",
-      "from": "2025-12-09T08:00:00+07:00",
-      "to": "2025-12-09T09:00:00+07:00",
-      "booked_rooms": 1,
-      "remaining_rooms": 1,
-      "status": "available"
-    },
-    {
-      "hour": "09:00",
-      "from": "2025-12-09T09:00:00+07:00",
-      "to": "2025-12-09T10:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "10:00",
-      "from": "2025-12-09T10:00:00+07:00",
-      "to": "2025-12-09T11:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "11:00",
-      "from": "2025-12-09T11:00:00+07:00",
-      "to": "2025-12-09T12:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "12:00",
-      "from": "2025-12-09T12:00:00+07:00",
-      "to": "2025-12-09T13:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "13:00",
-      "from": "2025-12-09T13:00:00+07:00",
-      "to": "2025-12-09T14:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "14:00",
-      "from": "2025-12-09T14:00:00+07:00",
-      "to": "2025-12-09T15:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "15:00",
-      "from": "2025-12-09T15:00:00+07:00",
-      "to": "2025-12-09T16:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "16:00",
-      "from": "2025-12-09T16:00:00+07:00",
-      "to": "2025-12-09T17:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "17:00",
-      "from": "2025-12-09T17:00:00+07:00",
-      "to": "2025-12-09T18:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "18:00",
-      "from": "2025-12-09T18:00:00+07:00",
-      "to": "2025-12-09T19:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "19:00",
-      "from": "2025-12-09T19:00:00+07:00",
-      "to": "2025-12-09T20:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "20:00",
-      "from": "2025-12-09T20:00:00+07:00",
-      "to": "2025-12-09T21:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "08:00",
-      "from": "2025-12-10T08:00:00+07:00",
-      "to": "2025-12-10T09:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "09:00",
-      "from": "2025-12-10T09:00:00+07:00",
-      "to": "2025-12-10T10:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "10:00",
-      "from": "2025-12-10T10:00:00+07:00",
-      "to": "2025-12-10T11:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "11:00",
-      "from": "2025-12-10T11:00:00+07:00",
-      "to": "2025-12-10T12:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "12:00",
-      "from": "2025-12-10T12:00:00+07:00",
-      "to": "2025-12-10T13:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "13:00",
-      "from": "2025-12-10T13:00:00+07:00",
-      "to": "2025-12-10T14:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "14:00",
-      "from": "2025-12-10T14:00:00+07:00",
-      "to": "2025-12-10T15:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "15:00",
-      "from": "2025-12-10T15:00:00+07:00",
-      "to": "2025-12-10T16:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    },
-    {
-      "hour": "16:00",
-      "from": "2025-12-10T16:00:00+07:00",
-      "to": "2025-12-10T17:00:00+07:00",
-      "booked_rooms": 0,
-      "remaining_rooms": 2,
-      "status": "available"
-    }
-  ],
-  "price_hourly": 129000,
-  "price_hourly_increment": 50000,
-  "currency": "VND"
-}
-let datatestdaily = {
-  "room_type_id": "lD49C0cWJAUw",
-  "start_time": "2025-12-08T17:00:00+07:00",
-  "end_time": "2025-12-10T17:00:00+07:00",
-  "daily_slots": [
-    {
-      date: "2025-12-08",
-      from: "2025-12-08T14:00:00+07:00",
-      to: "2025-12-09T12:00:00+07:00",
-      booked_rooms: 1,
-      remaining_rooms: 1,
-      status: "available"
-    },
-    {
-      date: "2025-12-09",
-      from: "2025-12-09T14:00:00+07:00",
-      to: "2025-12-10T12:00:00+07:00",
-      booked_rooms: 2,
-      remaining_rooms: 0,
-      status: "fully_booked"
-    },
-    {
-      date: "2025-12-10",
-      from: "2025-12-10T14:00:00+07:00",
-      to: "2025-12-11T12:00:00+07:00",
-      booked_rooms: 0,
-      remaining_rooms: 2,
-      status: "available"
-    },
-    {
-      date: "2025-12-11",
-      from: "2025-12-11T14:00:00+07:00",
-      to: "2025-12-12T12:00:00+07:00",
-      booked_rooms: 1,
-      remaining_rooms: 1,
-      status: "available"
-    },
-    {
-      date: "2025-12-12",
-      from: "2025-12-12T14:00:00+07:00",
-      to: "2025-12-13T12:00:00+07:00",
-      booked_rooms: 2,
-      remaining_rooms: 0,
-      status: "fully_booked"
-    },
-    {
-      date: "2025-12-13",
-      from: "2025-12-13T14:00:00+07:00",
-      to: "2025-12-14T12:00:00+07:00",
-      booked_rooms: 0,
-      remaining_rooms: 2,
-      status: "available"
-    },
-    {
-      date: "2025-12-14",
-      from: "2025-12-14T14:00:00+07:00",
-      to: "2025-12-15T12:00:00+07:00",
-      booked_rooms: 1,
-      remaining_rooms: 1,
-      status: "available"
-    },
-    {
-      date: "2025-12-15",
-      from: "2025-12-15T14:00:00+07:00",
-      to: "2025-12-16T12:00:00+07:00",
-      booked_rooms: 2,
-      remaining_rooms: 0,
-      status: "fully_booked"
-    },
-    {
-      date: "2025-12-16",
-      from: "2025-12-16T14:00:00+07:00",
-      to: "2025-12-17T12:00:00+07:00",
-      booked_rooms: 1,
-      remaining_rooms: 1,
-      status: "available"
-    },
-    {
-      date: "2025-12-17",
-      from: "2025-12-17T14:00:00+07:00",
-      to: "2025-12-18T12:00:00+07:00",
-      booked_rooms: 0,
-      remaining_rooms: 2,
-      status: "available"
-    },
-    {
-      date: "2025-12-18",
-      from: "2025-12-18T14:00:00+07:00",
-      to: "2025-12-19T12:00:00+07:00",
-      booked_rooms: 2,
-      remaining_rooms: 0,
-      status: "fully_booked"
-    },
-    {
-      date: "2025-12-19",
-      from: "2025-12-19T14:00:00+07:00",
-      to: "2025-12-20T12:00:00+07:00",
-      booked_rooms: 1,
-      remaining_rooms: 1,
-      status: "available"
-    },
-    {
-      date: "2025-12-20",
-      from: "2025-12-20T14:00:00+07:00",
-      to: "2025-12-21T12:00:00+07:00",
-      booked_rooms: 2,
-      remaining_rooms: 0,
-      status: "fully_booked"
-    },
-    {
-      date: "2025-12-21",
-      from: "2025-12-21T14:00:00+07:00",
-      to: "2025-12-22T12:00:00+07:00",
-      booked_rooms: 0,
-      remaining_rooms: 2,
-      status: "available"
-    },
-    {
-      date: "2025-12-22",
-      from: "2025-12-22T14:00:00+07:00",
-      to: "2025-12-23T12:00:00+07:00",
-      booked_rooms: 1,
-      remaining_rooms: 1,
-      status: "available"
-    },
-    
-  ],
-  "price_daily": 227000,
-  "currency": "VND"
-}
-export default function ManagerRoomView() {
+
+export default function ManagerRoomView({
+  setActive,
+  active,
+  setDateRange,
+  dateRange,
+  loading,
+  data,
+}) {
   const isMobile = useMediaQuery("(max-width:600px)");
-  const [active, setActive] = useState("hourly");
-  const [dateRange, setDateRange] = useState("19/11/2025 - 20/11/2025");
+
   const [openQuickBlock, setOpenQuickBlock] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [action, setAction] = useState("manager");
@@ -469,32 +128,29 @@ export default function ManagerRoomView() {
                   </Box>
                 ))}
               </Box>
-
               {/* Date Range */}
-              
-                <SimpleDateSearchBar/>
-             
+              <SimpleDateSearchBar value={dateRange} onChange={setDateRange} />
             </Box>
             <Box py={3}>
-              {active == "hourly" && (
+              {active == "hourly" && data?.daily_slots?.length > 0 && (
                 <RoomScheduleTableHourly
                   handleOpenQuickBlock={() => setOpenQuickBlock(true)}
                   handleOpenEdit={() => setOpenEdit(true)}
-                  data={datatest}
+                  data={data}
                 />
               )}
-              {active == "daily" && (
+              {active == "daily" && data?.slots?.length > 0 && (
                 <RoomScheduleTableDaily
                   handleOpenQuickBlock={() => setOpenQuickBlock(true)}
                   handleOpenEdit={() => setOpenEdit(true)}
-                  data={datatestdaily}
+                  data={data}
                 />
               )}
-              {active == "overnight" && (
+              {active == "overnight" && data?.slots?.length > 0 && (
                 <RoomScheduleTableOvernight
                   handleOpenQuickBlock={() => setOpenQuickBlock(true)}
                   handleOpenEdit={() => setOpenEdit(true)}
-                  data={datatestdaily}
+                  data={data}
                 />
               )}
             </Box>
@@ -833,7 +489,6 @@ import { MobileDatePicker, MobileTimePicker } from "@mui/x-date-pickers";
 
 // Định nghĩa type cho props
 
-
 interface Slot {
   hour: string;
   from: string;
@@ -861,7 +516,7 @@ interface RoomScheduleTableHourlyProps {
 const groupSlotsByDate = (slots: Slot[]) => {
   const groups: { [key: string]: Slot[] } = {};
 
-  slots.forEach((slot) => {
+  slots?.forEach((slot) => {
     const dateKey = slot.from.split("T")[0]; // "2025-12-08"
     if (!groups[dateKey]) groups[dateKey] = [];
     groups[dateKey].push(slot);
@@ -888,14 +543,14 @@ function RoomScheduleTableHourly({
   handleOpenEdit,
   data,
 }: RoomScheduleTableHourlyProps) {
-  const dayGroups = groupSlotsByDate(data.slots);
-  const totalSlots = data.slots.length;
+  const dayGroups = groupSlotsByDate(data?.slots);
+  const totalSlots = data?.slots?.length;
   const columnWidth = `${100 / totalSlots}%`;
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Box p={2} bgcolor="#fff">
+    <Box p={2} bgcolor='#fff'>
       {/* CHỈ 1 CONTAINER CUỘN DUY NHẤT */}
       <Box
         ref={scrollRef}
@@ -904,42 +559,57 @@ function RoomScheduleTableHourly({
           overflowY: "hidden",
           "&::-webkit-scrollbar": { height: 10 },
           "&::-webkit-scrollbar-thumb": { background: "#aaa", borderRadius: 5 },
-          border:"1px solid #ccc"
-        }}
-      >
+          border: "1px solid #ccc",
+        }}>
         {/* BẢNG THẬT - CỘT TRÁI CỐ ĐỊNH, PHẦN PHẢI CUỘN */}
-        <Box  minWidth="fit-content"> {/* Đảm bảo đủ rộng để có scroll */}
-
+        <Box minWidth='fit-content'>
+          {" "}
+          {/* Đảm bảo đủ rộng để có scroll */}
           {/* HEADER */}
-          <Box display="flex">
+          <Box display='flex'>
             {/* Cột trái cố định */}
-            <Box  width="280px"
-                flexShrink={0}
-                bgcolor={"white"}
-                position="sticky"
-                left={0}
-                zIndex={10}
-                borderRight="2px solid #ddd" 
-                borderBottom="2px solid #ddd"/>
+            <Box
+              width='280px'
+              flexShrink={0}
+              bgcolor={"white"}
+              position='sticky'
+              left={0}
+              zIndex={10}
+              borderRight='2px solid #ddd'
+              borderBottom='2px solid #ddd'
+            />
 
             {/* Header phải */}
             <Box flex={1}>
               {/* Tháng */}
-              <Box textAlign="start" py={1.5} px={2} borderBottom="1px solid #eee" bgcolor="#f9f9f9">
+              <Box
+                textAlign='start'
+                py={1.5}
+                px={2}
+                borderBottom='1px solid #eee'
+                bgcolor='#f9f9f9'>
                 <Typography fontWeight={600} fontSize={16}>
-                  {format(new Date(data.start_time), "MMMM yyyy", { locale: vi })}
+                  {format(new Date(data?.start_time), "MMMM yyyy", {
+                    locale: vi,
+                  })}
                 </Typography>
               </Box>
 
               {/* Các ngày - căn giữa trên nhóm slot */}
-              <Box borderBottom="1px solid #ddd" bgcolor="white">
-                <Box display="flex">
-                  {dayGroups.map(g => {
+              <Box borderBottom='1px solid #ddd' bgcolor='white'>
+                <Box display='flex'>
+                  {dayGroups.map((g) => {
                     const w = (g.slots.length / totalSlots) * 100;
                     return (
-                      <Box key={g.date} width={`${w}%`} minWidth={`${g.slots.length * 80}px`} display="flex" justifyContent="start" py={2}>
+                      <Box
+                        key={g.date}
+                        width={`${w}%`}
+                        minWidth={`${g.slots.length * 80}px`}
+                        display='flex'
+                        justifyContent='start'
+                        py={2}>
                         <Button
-                          variant="contained"
+                          variant='contained'
                           sx={{
                             bgcolor: "#98b720",
                             color: "white",
@@ -950,8 +620,7 @@ function RoomScheduleTableHourly({
                             borderRadius: "20px",
                             boxShadow: "0 4px 15px rgba(152,183,32,0.4)",
                             "&:hover": { bgcolor: "#80a61a" },
-                          }}
-                        >
+                          }}>
                           {g.dayOfMonth} {g.dayName}
                         </Button>
                       </Box>
@@ -961,18 +630,22 @@ function RoomScheduleTableHourly({
               </Box>
 
               {/* Header giờ */}
-              <Box display="flex" borderBottom="2px solid #ddd" bgcolor="#f5f5f5">
-                {data.slots.map((s, i) => (
+              <Box
+                display='flex'
+                borderBottom='2px solid #ddd'
+                bgcolor='#f5f5f5'>
+                {data?.slots.map((s, i) => (
                   <Box
                     key={i}
                     width={columnWidth}
-                    minWidth="150px"
+                    minWidth='150px'
                     py={2}
-                    textAlign="center"
-                    borderRight="1px solid #eee"
-                  >
-                    <Typography fontWeight={600} fontSize={15}>{s.hour}</Typography>
-                    <Typography fontSize={11} color="#888">
+                    textAlign='center'
+                    borderRight='1px solid #eee'>
+                    <Typography fontWeight={600} fontSize={15}>
+                      {s.hour}
+                    </Typography>
+                    <Typography fontSize={11} color='#888'>
                       {format(new Date(s.from), "dd/MM")}
                     </Typography>
                   </Box>
@@ -980,34 +653,57 @@ function RoomScheduleTableHourly({
               </Box>
             </Box>
           </Box>
-
           {/* CÁC DÒNG DỮ LIỆU */}
           {[
             { label: "Vip123", isName: true },
-            { label: "Tình trạng phòng", action: "Khóa nhanh", onClick: handleOpenQuickBlock, isStatus: true },
+            {
+              label: "Tình trạng phòng",
+              action: "Khóa nhanh",
+              onClick: handleOpenQuickBlock,
+              isStatus: true,
+            },
             { label: "Số phòng đặt", isBooked: true },
-            { label: "Số phòng còn lại", action: "Chỉnh sửa", onClick: handleOpenEdit, isRemaining: true },
+            {
+              label: "Số phòng còn lại",
+              action: "Chỉnh sửa",
+              onClick: handleOpenEdit,
+              isRemaining: true,
+            },
           ].map((row, idx) => (
-            <Box key={idx} display="flex" >
+            <Box key={idx} display='flex'>
               {/* Cột trái cố định */}
               <Box
-                 width="280px"
-                 flexShrink={0}
-                 bgcolor={idx === 0 ? "white" : "#fafafa"}
-                 position="sticky"
-                 left={0}
-                 zIndex={10}
-                 borderRight="2px solid #ddd"
-                 borderBottom="1px solid #ddd"
-              >
-                <Box px={3} py={2} display="flex" justifyContent="space-between" alignItems="center">
+                width='280px'
+                flexShrink={0}
+                bgcolor={idx === 0 ? "white" : "#fafafa"}
+                position='sticky'
+                left={0}
+                zIndex={10}
+                borderRight='2px solid #ddd'
+                borderBottom='1px solid #ddd'>
+                <Box
+                  px={3}
+                  py={2}
+                  display='flex'
+                  justifyContent='space-between'
+                  alignItems='center'>
                   {row.isName ? (
                     <>
-                      <Typography fontWeight={700} fontSize={18} display="flex" alignItems="center" gap={1}>
+                      <Typography
+                        fontWeight={700}
+                        fontSize={18}
+                        display='flex'
+                        alignItems='center'
+                        gap={1}>
                         Vip123 <KeyboardArrowUpIcon />
                       </Typography>
-                      <Typography color="#98b720" display="flex" alignItems="center" gap={0.5} sx={{ cursor: "pointer" }}>
-                        Xem <LaunchIcon fontSize="small" />
+                      <Typography
+                        color='#98b720'
+                        display='flex'
+                        alignItems='center'
+                        gap={0.5}
+                        sx={{ cursor: "pointer" }}>
+                        Xem <LaunchIcon fontSize='small' />
                       </Typography>
                     </>
                   ) : (
@@ -1016,8 +712,11 @@ function RoomScheduleTableHourly({
                       {row.action && (
                         <Typography
                           onClick={row.onClick}
-                          sx={{ cursor: "pointer", color: "#98b720", fontWeight: 600 }}
-                        >
+                          sx={{
+                            cursor: "pointer",
+                            color: "#98b720",
+                            fontWeight: 600,
+                          }}>
                           {row.action}
                         </Typography>
                       )}
@@ -1027,39 +726,47 @@ function RoomScheduleTableHourly({
               </Box>
 
               {/* Dữ liệu phải */}
-              <Box flex={1} display="flex">
+              <Box flex={1} display='flex'>
                 {data.slots.map((slot, i) => (
                   <Box
                     key={i}
                     width={columnWidth}
-                    minWidth="150px"
-                    borderRight="1px solid #eee"
-                    borderBottom="1px solid #eee"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    py={1}
-                  >
+                    minWidth='150px'
+                    borderRight='1px solid #eee'
+                    borderBottom='1px solid #eee'
+                    display='flex'
+                    alignItems='center'
+                    justifyContent='center'
+                    py={1}>
                     {row.isStatus && (
                       <Box
                         px={2}
                         py={1}
-                        borderRadius="50px"
+                        borderRadius='50px'
                         fontSize={13}
                         fontWeight={500}
-                        bgcolor={slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"}
-                        color={slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"}
-                      >
+                        bgcolor={
+                          slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"
+                        }
+                        color={
+                          slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"
+                        }>
                         {slot.remaining_rooms > 0 ? "Còn phòng" : "Hết phòng"}
                       </Box>
                     )}
-                    {row.isBooked && <Typography fontWeight={600} color="#333">{slot.booked_rooms}</Typography>}
+                    {row.isBooked && (
+                      <Typography fontWeight={600} color='#333'>
+                        {slot.booked_rooms}
+                      </Typography>
+                    )}
                     {row.isRemaining && (
                       <TextField
                         defaultValue={slot.remaining_rooms}
-                        size="small"
+                        size='small'
                         sx={{ width: 50 }}
-                        inputProps={{ style: { textAlign: "center", fontWeight: 600 } }}
+                        inputProps={{
+                          style: { textAlign: "center", fontWeight: 600 },
+                        }}
                       />
                     )}
                   </Box>
@@ -1067,18 +774,44 @@ function RoomScheduleTableHourly({
               </Box>
             </Box>
           ))}
-
           {/* GIÁ - CŨNG CỐ ĐỊNH TRÁI */}
           {[
-            { label: "Giá phòng/2h đầu", value: `${data.price_hourly.toLocaleString("vi-VN")}đ`, bg: "#fff3e9", color: "#e65e00" },
-            { label: "Giá 1 giờ thêm", value: `${data.price_hourly_increment.toLocaleString("vi-VN")}đ`, bg: "#eef1ff", color: "#4e6aff" },
-          ].map(p => (
-            <Box key={p.label} display="flex" >
-              <Box width="280px" flexShrink={0} bgcolor="#f8f9fa" position="sticky"  borderBottom="1px solid #ddd" left={0} zIndex={10} borderRight="2px solid #ddd">
-                <Box px={3} py={2}><Typography fontWeight={500}>{p.label}</Typography></Box>
+            {
+              label: "Giá phòng/2h đầu",
+              value: `${data.price_hourly.toLocaleString("vi-VN")}đ`,
+              bg: "#fff3e9",
+              color: "#e65e00",
+            },
+            {
+              label: "Giá 1 giờ thêm",
+              value: `${data.price_hourly_increment.toLocaleString("vi-VN")}đ`,
+              bg: "#eef1ff",
+              color: "#4e6aff",
+            },
+          ].map((p) => (
+            <Box key={p.label} display='flex'>
+              <Box
+                width='280px'
+                flexShrink={0}
+                bgcolor='#f8f9fa'
+                position='sticky'
+                borderBottom='1px solid #ddd'
+                left={0}
+                zIndex={10}
+                borderRight='2px solid #ddd'>
+                <Box px={3} py={2}>
+                  <Typography fontWeight={500}>{p.label}</Typography>
+                </Box>
               </Box>
-              <Box flex={1} display="flex"   alignItems="center" pl={4} >
-                <Box bgcolor={p.bg} color={p.color} px={4} py={1.5} borderRadius="50px" fontWeight={600} fontSize={15}>
+              <Box flex={1} display='flex' alignItems='center' pl={4}>
+                <Box
+                  bgcolor={p.bg}
+                  color={p.color}
+                  px={4}
+                  py={1.5}
+                  borderRadius='50px'
+                  fontWeight={600}
+                  fontSize={15}>
                   {p.value}
                 </Box>
               </Box>
@@ -1089,7 +822,6 @@ function RoomScheduleTableHourly({
     </Box>
   );
 }
-
 
 interface DailySlot {
   date: string;
@@ -1113,7 +845,7 @@ interface RoomScheduleTableDailyProps {
   };
 }
 
- function RoomScheduleTableDaily({
+function RoomScheduleTableDaily({
   handleOpenQuickBlock,
   handleOpenEdit,
   data,
@@ -1126,7 +858,7 @@ interface RoomScheduleTableDailyProps {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Box p={isMobile ? 1 : 2} bgcolor="#fff">
+    <Box p={isMobile ? 1 : 2} bgcolor='#fff'>
       {/* CHỈ 1 THANH CUỘN DUY NHẤT */}
       <Box
         ref={scrollRef}
@@ -1136,34 +868,40 @@ interface RoomScheduleTableDailyProps {
           "&::-webkit-scrollbar": { height: 10 },
           "&::-webkit-scrollbar-thumb": { background: "#aaa", borderRadius: 5 },
           border: "1px solid #ccc",
-        }}
-      >
-        <Box minWidth="fit-content">
+        }}>
+        <Box minWidth='fit-content'>
           {/* HEADER */}
-          <Box display="flex">
+          <Box display='flex'>
             {/* Cột trái cố định */}
             <Box
-              width="280px"
+              width='280px'
               flexShrink={0}
-              bgcolor="white"
-              position="sticky"
+              bgcolor='white'
+              position='sticky'
               left={0}
               zIndex={10}
-              borderRight="2px solid #ddd"
-              borderBottom="2px solid #ddd"
+              borderRight='2px solid #ddd'
+              borderBottom='2px solid #ddd'
             />
 
             {/* Header phải */}
             <Box flex={1}>
               {/* Tháng */}
-              <Box textAlign="start" py={1.5} px={2} borderBottom="1px solid #eee" bgcolor="#f9f9f9">
+              <Box
+                textAlign='start'
+                py={1.5}
+                px={2}
+                borderBottom='1px solid #eee'
+                bgcolor='#f9f9f9'>
                 <Typography fontWeight={600} fontSize={16}>
-                  {format(new Date(data.start_time), "MMMM yyyy", { locale: vi })}
+                  {format(new Date(data.start_time), "MMMM yyyy", {
+                    locale: vi,
+                  })}
                 </Typography>
               </Box>
 
               {/* Các ngày - mỗi ngày 1 cột */}
-              <Box display="flex" borderBottom="2px solid #ddd" bgcolor="white">
+              <Box display='flex' borderBottom='2px solid #ddd' bgcolor='white'>
                 {dailySlots.map((slot) => {
                   const dateObj = new Date(slot.date);
                   const dayNum = format(dateObj, "dd");
@@ -1176,15 +914,14 @@ interface RoomScheduleTableDailyProps {
                     <Box
                       key={slot.date}
                       width={columnWidth}
-                      minWidth="150px"
-                      display="flex"
-                      justifyContent="center"
-                      alignItems="center"
+                      minWidth='150px'
+                      display='flex'
+                      justifyContent='center'
+                      alignItems='center'
                       py={2}
-                      borderRight="1px solid #eee"
-                    >
+                      borderRight='1px solid #eee'>
                       <Button
-                        variant="contained"
+                        variant='contained'
                         sx={{
                           bgcolor: "#98b720",
                           color: "white",
@@ -1195,8 +932,7 @@ interface RoomScheduleTableDailyProps {
                           borderRadius: "20px",
                           boxShadow: "0 4px 15px rgba(152,183,32,0.4)",
                           "&:hover": { bgcolor: "#80a61a" },
-                        }}
-                      >
+                        }}>
                         {dayNum} {dayName}
                       </Button>
                     </Box>
@@ -1209,30 +945,54 @@ interface RoomScheduleTableDailyProps {
           {/* CÁC DÒNG DỮ LIỆU */}
           {[
             { label: "Vip123", isName: true },
-            { label: "Tình trạng phòng", action: "Khóa nhanh", onClick: handleOpenQuickBlock, isStatus: true },
+            {
+              label: "Tình trạng phòng",
+              action: "Khóa nhanh",
+              onClick: handleOpenQuickBlock,
+              isStatus: true,
+            },
             { label: "Số phòng đặt", isBooked: true },
-            { label: "Số phòng còn lại", action: "Chỉnh sửa", onClick: handleOpenEdit, isRemaining: true },
+            {
+              label: "Số phòng còn lại",
+              action: "Chỉnh sửa",
+              onClick: handleOpenEdit,
+              isRemaining: true,
+            },
           ].map((row, idx) => (
-            <Box key={idx} display="flex" borderBottom="1px solid #eee">
+            <Box key={idx} display='flex' borderBottom='1px solid #eee'>
               {/* Cột trái cố định */}
               <Box
-                width="280px"
+                width='280px'
                 flexShrink={0}
                 bgcolor={idx === 0 ? "white" : "#fafafa"}
-                position="sticky"
+                position='sticky'
                 left={0}
                 zIndex={10}
-                borderRight="2px solid #ddd"
-                borderBottom="1px solid #ddd"
-              >
-                <Box px={3} py={2} display="flex" justifyContent="space-between" alignItems="center">
+                borderRight='2px solid #ddd'
+                borderBottom='1px solid #ddd'>
+                <Box
+                  px={3}
+                  py={2}
+                  display='flex'
+                  justifyContent='space-between'
+                  alignItems='center'>
                   {row.isName ? (
                     <>
-                      <Typography fontWeight={700} fontSize={18} display="flex" alignItems="center" gap={1}>
+                      <Typography
+                        fontWeight={700}
+                        fontSize={18}
+                        display='flex'
+                        alignItems='center'
+                        gap={1}>
                         Vip123 <KeyboardArrowUpIcon />
                       </Typography>
-                      <Typography color="#98b720" display="flex" alignItems="center" gap={0.5} sx={{ cursor: "pointer" }}>
-                        Xem <LaunchIcon fontSize="small" />
+                      <Typography
+                        color='#98b720'
+                        display='flex'
+                        alignItems='center'
+                        gap={0.5}
+                        sx={{ cursor: "pointer" }}>
+                        Xem <LaunchIcon fontSize='small' />
                       </Typography>
                     </>
                   ) : (
@@ -1241,8 +1001,11 @@ interface RoomScheduleTableDailyProps {
                       {row.action && (
                         <Typography
                           onClick={row.onClick}
-                          sx={{ cursor: "pointer", color: "#98b720", fontWeight: 600 }}
-                        >
+                          sx={{
+                            cursor: "pointer",
+                            color: "#98b720",
+                            fontWeight: 600,
+                          }}>
                           {row.action}
                         </Typography>
                       )}
@@ -1252,39 +1015,47 @@ interface RoomScheduleTableDailyProps {
               </Box>
 
               {/* Dữ liệu phải - 3 cột */}
-              <Box flex={1} display="flex">
+              <Box flex={1} display='flex'>
                 {dailySlots.map((slot, i) => (
                   <Box
                     key={i}
                     width={columnWidth}
-                    minWidth="150px"
-                    borderRight="1px solid #eee"
-                    borderBottom="1px solid #eee"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    py={2}
-                  >
+                    minWidth='150px'
+                    borderRight='1px solid #eee'
+                    borderBottom='1px solid #eee'
+                    display='flex'
+                    alignItems='center'
+                    justifyContent='center'
+                    py={2}>
                     {row.isStatus && (
                       <Box
                         px={2}
                         py={1}
-                        borderRadius="50px"
+                        borderRadius='50px'
                         fontSize={13}
                         fontWeight={500}
-                        bgcolor={slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"}
-                        color={slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"}
-                      >
+                        bgcolor={
+                          slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"
+                        }
+                        color={
+                          slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"
+                        }>
                         {slot.remaining_rooms > 0 ? "Còn phòng" : "Hết phòng"}
                       </Box>
                     )}
-                    {row.isBooked && <Typography fontWeight={600} color="#333">{slot.booked_rooms}</Typography>}
+                    {row.isBooked && (
+                      <Typography fontWeight={600} color='#333'>
+                        {slot.booked_rooms}
+                      </Typography>
+                    )}
                     {row.isRemaining && (
                       <TextField
                         defaultValue={slot.remaining_rooms}
-                        size="small"
+                        size='small'
                         sx={{ width: 50 }}
-                        inputProps={{ style: { textAlign: "center", fontWeight: 600 } }}
+                        inputProps={{
+                          style: { textAlign: "center", fontWeight: 600 },
+                        }}
                       />
                     )}
                   </Box>
@@ -1295,25 +1066,36 @@ interface RoomScheduleTableDailyProps {
 
           {/* GIÁ */}
           {[
-            { label: "Giá phòng/đêm", value: `${data.price_daily.toLocaleString("vi-VN")}đ`, bg: "#fff3e9", color: "#e65e00" },
+            {
+              label: "Giá phòng/đêm",
+              value: `${data.price_daily.toLocaleString("vi-VN")}đ`,
+              bg: "#fff3e9",
+              color: "#e65e00",
+            },
           ].map((p) => (
-            <Box key={p.label} display="flex">
+            <Box key={p.label} display='flex'>
               <Box
-                width="280px"
+                width='280px'
                 flexShrink={0}
-                bgcolor="#f8f9fa"
-                position="sticky"
+                bgcolor='#f8f9fa'
+                position='sticky'
                 left={0}
                 zIndex={10}
-                borderRight="2px solid #ddd"
-                borderBottom="1px solid #ddd"
-              >
+                borderRight='2px solid #ddd'
+                borderBottom='1px solid #ddd'>
                 <Box px={3} py={2}>
                   <Typography fontWeight={500}>{p.label}</Typography>
                 </Box>
               </Box>
-              <Box flex={1} display="flex" alignItems="center" pl={4} >
-                <Box bgcolor={p.bg} color={p.color} px={4} py={1.5} borderRadius="50px" fontWeight={600} fontSize={15}>
+              <Box flex={1} display='flex' alignItems='center' pl={4}>
+                <Box
+                  bgcolor={p.bg}
+                  color={p.color}
+                  px={4}
+                  py={1.5}
+                  borderRadius='50px'
+                  fontWeight={600}
+                  fontSize={15}>
                   {p.value}
                 </Box>
               </Box>
@@ -1337,7 +1119,7 @@ function RoomScheduleTableOvernight({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Box p={isMobile ? 1 : 2} bgcolor="#fff">
+    <Box p={isMobile ? 1 : 2} bgcolor='#fff'>
       {/* CHỈ 1 THANH CUỘN DUY NHẤT */}
       <Box
         ref={scrollRef}
@@ -1347,34 +1129,40 @@ function RoomScheduleTableOvernight({
           "&::-webkit-scrollbar": { height: 10 },
           "&::-webkit-scrollbar-thumb": { background: "#aaa", borderRadius: 5 },
           border: "1px solid #ccc",
-        }}
-      >
-        <Box minWidth="fit-content">
+        }}>
+        <Box minWidth='fit-content'>
           {/* HEADER */}
-          <Box display="flex">
+          <Box display='flex'>
             {/* Cột trái cố định */}
             <Box
-              width="280px"
+              width='280px'
               flexShrink={0}
-              bgcolor="white"
-              position="sticky"
+              bgcolor='white'
+              position='sticky'
               left={0}
               zIndex={10}
-              borderRight="2px solid #ddd"
-              borderBottom="2px solid #ddd"
+              borderRight='2px solid #ddd'
+              borderBottom='2px solid #ddd'
             />
 
             {/* Header phải */}
             <Box flex={1}>
               {/* Tháng */}
-              <Box textAlign="start" py={1.5} px={2} borderBottom="1px solid #eee" bgcolor="#f9f9f9">
+              <Box
+                textAlign='start'
+                py={1.5}
+                px={2}
+                borderBottom='1px solid #eee'
+                bgcolor='#f9f9f9'>
                 <Typography fontWeight={600} fontSize={16}>
-                  {format(new Date(data.start_time), "MMMM yyyy", { locale: vi })}
+                  {format(new Date(data.start_time), "MMMM yyyy", {
+                    locale: vi,
+                  })}
                 </Typography>
               </Box>
 
               {/* Các ngày - mỗi ngày 1 cột */}
-              <Box display="flex" borderBottom="2px solid #ddd" bgcolor="white">
+              <Box display='flex' borderBottom='2px solid #ddd' bgcolor='white'>
                 {dailySlots.map((slot) => {
                   const dateObj = new Date(slot.date);
                   const dayNum = format(dateObj, "dd");
@@ -1387,15 +1175,14 @@ function RoomScheduleTableOvernight({
                     <Box
                       key={slot.date}
                       width={columnWidth}
-                      minWidth="150px"
-                      display="flex"
-                      justifyContent="center"
-                      alignItems="center"
+                      minWidth='150px'
+                      display='flex'
+                      justifyContent='center'
+                      alignItems='center'
                       py={2}
-                      borderRight="1px solid #eee"
-                    >
+                      borderRight='1px solid #eee'>
                       <Button
-                        variant="contained"
+                        variant='contained'
                         sx={{
                           bgcolor: "#98b720",
                           color: "white",
@@ -1406,8 +1193,7 @@ function RoomScheduleTableOvernight({
                           borderRadius: "20px",
                           boxShadow: "0 4px 15px rgba(152,183,32,0.4)",
                           "&:hover": { bgcolor: "#80a61a" },
-                        }}
-                      >
+                        }}>
                         {dayNum} {dayName}
                       </Button>
                     </Box>
@@ -1420,30 +1206,54 @@ function RoomScheduleTableOvernight({
           {/* CÁC DÒNG DỮ LIỆU */}
           {[
             { label: "Vip123", isName: true },
-            { label: "Tình trạng phòng", action: "Khóa nhanh", onClick: handleOpenQuickBlock, isStatus: true },
+            {
+              label: "Tình trạng phòng",
+              action: "Khóa nhanh",
+              onClick: handleOpenQuickBlock,
+              isStatus: true,
+            },
             { label: "Số phòng đặt", isBooked: true },
-            { label: "Số phòng còn lại", action: "Chỉnh sửa", onClick: handleOpenEdit, isRemaining: true },
+            {
+              label: "Số phòng còn lại",
+              action: "Chỉnh sửa",
+              onClick: handleOpenEdit,
+              isRemaining: true,
+            },
           ].map((row, idx) => (
-            <Box key={idx} display="flex" borderBottom="1px solid #eee">
+            <Box key={idx} display='flex' borderBottom='1px solid #eee'>
               {/* Cột trái cố định */}
               <Box
-                width="280px"
+                width='280px'
                 flexShrink={0}
                 bgcolor={idx === 0 ? "white" : "#fafafa"}
-                position="sticky"
+                position='sticky'
                 left={0}
                 zIndex={10}
-                borderRight="2px solid #ddd"
-                borderBottom="1px solid #ddd"
-              >
-                <Box px={3} py={2} display="flex" justifyContent="space-between" alignItems="center">
+                borderRight='2px solid #ddd'
+                borderBottom='1px solid #ddd'>
+                <Box
+                  px={3}
+                  py={2}
+                  display='flex'
+                  justifyContent='space-between'
+                  alignItems='center'>
                   {row.isName ? (
                     <>
-                      <Typography fontWeight={700} fontSize={18} display="flex" alignItems="center" gap={1}>
+                      <Typography
+                        fontWeight={700}
+                        fontSize={18}
+                        display='flex'
+                        alignItems='center'
+                        gap={1}>
                         Vip123 <KeyboardArrowUpIcon />
                       </Typography>
-                      <Typography color="#98b720" display="flex" alignItems="center" gap={0.5} sx={{ cursor: "pointer" }}>
-                        Xem <LaunchIcon fontSize="small" />
+                      <Typography
+                        color='#98b720'
+                        display='flex'
+                        alignItems='center'
+                        gap={0.5}
+                        sx={{ cursor: "pointer" }}>
+                        Xem <LaunchIcon fontSize='small' />
                       </Typography>
                     </>
                   ) : (
@@ -1452,8 +1262,11 @@ function RoomScheduleTableOvernight({
                       {row.action && (
                         <Typography
                           onClick={row.onClick}
-                          sx={{ cursor: "pointer", color: "#98b720", fontWeight: 600 }}
-                        >
+                          sx={{
+                            cursor: "pointer",
+                            color: "#98b720",
+                            fontWeight: 600,
+                          }}>
                           {row.action}
                         </Typography>
                       )}
@@ -1463,39 +1276,47 @@ function RoomScheduleTableOvernight({
               </Box>
 
               {/* Dữ liệu phải - 3 cột */}
-              <Box flex={1} display="flex">
+              <Box flex={1} display='flex'>
                 {dailySlots.map((slot, i) => (
                   <Box
                     key={i}
                     width={columnWidth}
-                    minWidth="150px"
-                    borderRight="1px solid #eee"
-                    borderBottom="1px solid #eee"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    py={2}
-                  >
+                    minWidth='150px'
+                    borderRight='1px solid #eee'
+                    borderBottom='1px solid #eee'
+                    display='flex'
+                    alignItems='center'
+                    justifyContent='center'
+                    py={2}>
                     {row.isStatus && (
                       <Box
                         px={2}
                         py={1}
-                        borderRadius="50px"
+                        borderRadius='50px'
                         fontSize={13}
                         fontWeight={500}
-                        bgcolor={slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"}
-                        color={slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"}
-                      >
+                        bgcolor={
+                          slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"
+                        }
+                        color={
+                          slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"
+                        }>
                         {slot.remaining_rooms > 0 ? "Còn phòng" : "Hết phòng"}
                       </Box>
                     )}
-                    {row.isBooked && <Typography fontWeight={600} color="#333">{slot.booked_rooms}</Typography>}
+                    {row.isBooked && (
+                      <Typography fontWeight={600} color='#333'>
+                        {slot.booked_rooms}
+                      </Typography>
+                    )}
                     {row.isRemaining && (
                       <TextField
                         defaultValue={slot.remaining_rooms}
-                        size="small"
+                        size='small'
                         sx={{ width: 50 }}
-                        inputProps={{ style: { textAlign: "center", fontWeight: 600 } }}
+                        inputProps={{
+                          style: { textAlign: "center", fontWeight: 600 },
+                        }}
                       />
                     )}
                   </Box>
@@ -1506,25 +1327,36 @@ function RoomScheduleTableOvernight({
 
           {/* GIÁ */}
           {[
-            { label: "Giá phòng/đêm", value: `${data.price_daily.toLocaleString("vi-VN")}đ`, bg: "#fff3e9", color: "#e65e00" },
+            {
+              label: "Giá phòng/đêm",
+              value: `${data.price_daily.toLocaleString("vi-VN")}đ`,
+              bg: "#fff3e9",
+              color: "#e65e00",
+            },
           ].map((p) => (
-            <Box key={p.label} display="flex">
+            <Box key={p.label} display='flex'>
               <Box
-                width="280px"
+                width='280px'
                 flexShrink={0}
-                bgcolor="#f8f9fa"
-                position="sticky"
+                bgcolor='#f8f9fa'
+                position='sticky'
                 left={0}
                 zIndex={10}
-                borderRight="2px solid #ddd"
-                borderBottom="1px solid #ddd"
-              >
+                borderRight='2px solid #ddd'
+                borderBottom='1px solid #ddd'>
                 <Box px={3} py={2}>
                   <Typography fontWeight={500}>{p.label}</Typography>
                 </Box>
               </Box>
-              <Box flex={1} display="flex" alignItems="center" pl={4} >
-                <Box bgcolor={p.bg} color={p.color} px={4} py={1.5} borderRadius="50px" fontWeight={600} fontSize={15}>
+              <Box flex={1} display='flex' alignItems='center' pl={4}>
+                <Box
+                  bgcolor={p.bg}
+                  color={p.color}
+                  px={4}
+                  py={1.5}
+                  borderRadius='50px'
+                  fontWeight={600}
+                  fontSize={15}>
                   {p.value}
                 </Box>
               </Box>
@@ -1547,6 +1379,7 @@ import "dayjs/locale/vi";
 import LockRoomSetup from "./LockRoomSetup";
 import CreateRoom from "./CreateRoom";
 import SimpleDateSearchBar from "../../components/SimpleDateSearchBar";
+import Loading from "../../components/Loading";
 
 dayjs.locale("vi");
 
