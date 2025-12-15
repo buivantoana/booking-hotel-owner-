@@ -26,11 +26,15 @@ const HomeController = (props: Props) => {
     checkOut: dayjs().endOf("isoWeek"),
   });
   const [roomTypeGeneral, setRoomTypeGeneral] = useState('all');
+  const [roomTypeBooking, setRoomTypeBooking] = useState('all');
+  const [roomTypeCheckin, setRoomTypeCheckin] = useState('all');
   const [dataGeneral, setDataGeneral] = useState({});
   const [dataGeneralMethod, setDataGeneralMethod] = useState([]);
   const [dataGeneralRoomType, setDataGeneralRoomType] = useState({});
   const [dataEventVisit, setDataEventVisit] = useState({});
   const [dataEventView, setDataEventView] = useState({});
+  const [dataEventBooked, setDataEventBooked] = useState({});
+  const [dataEventCheckin, setDataEventCheckin] = useState({});
   useEffect(() => {
     getGeneral();
   }, [dateRange]);
@@ -46,6 +50,12 @@ const HomeController = (props: Props) => {
   useEffect(() => {
     getEnventViewMonth();
   }, [dateRangeRevenueEventView]);
+  useEffect(() => {
+    getGeneralRoomTypeBooking();
+  }, [roomTypeBooking]);
+  useEffect(() => {
+    getGeneralRoomTypeCheckin();
+  }, [roomTypeCheckin]);
   const getGeneral = async () => {
     try {
       let params = new URLSearchParams({
@@ -134,40 +144,124 @@ const HomeController = (props: Props) => {
       console.log(error);
     }
   };
+  
+  const getGeneralRoomTypeBooking = async () => {
+    try {
+      let result = {
+        start:[],
+        end:[]
+      }
+      const startOfLastWeek = dayjs().subtract(1, 'week').startOf('isoWeek'); // Thứ 2 tuần trước
+    const endOfLastWeek = dayjs().subtract(1, 'week').endOf('isoWeek');     // Chủ nhật tuần trước
 
+    let params_start = new URLSearchParams({
+      start_time: startOfLastWeek.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ssZ"),
+      end_time: endOfLastWeek.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ssZ"),
+      rent_type: roomTypeBooking,
+      event_type:"booked"
+    });
+
+    // === TUẦN NÀY ===
+    const startOfThisWeek = dayjs().startOf('isoWeek'); // Thứ 2 tuần này
+    const endOfThisWeek = dayjs().endOf('isoWeek');     // Chủ nhật tuần này
+    // Nếu muốn chỉ lấy đến ngày hiện tại (thay vì cả chủ nhật tương lai), dùng dòng dưới:
+    // const endOfThisWeek = dayjs().hour(23).minute(59).second(59);
+
+    let params_end = new URLSearchParams({
+      start_time: startOfThisWeek.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ssZ"),
+      end_time: endOfThisWeek.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ssZ"),
+      rent_type: roomTypeBooking,
+      event_type:"booked"
+    });
+
+      let result_start = await getEventMonth("4kJ8wQz9aB2L", params_start);
+      if (result_start?.revenue_by_day) {
+        result.start = (result_start?.revenue_by_day);
+      }
+      let result_end = await getEventMonth("4kJ8wQz9aB2L", params_end);
+      if (result_end?.revenue_by_day) {
+        result.end =result_end?.revenue_by_day ;
+      }
+      setDataEventBooked(result)
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const getGeneralRoomTypeCheckin = async () => {
+    try {
+      let result = {
+        start:[],
+        end:[]
+      }
+      const startOfLastWeek = dayjs().subtract(1, 'week').startOf('isoWeek'); // Thứ 2 tuần trước
+    const endOfLastWeek = dayjs().subtract(1, 'week').endOf('isoWeek');     // Chủ nhật tuần trước
+
+    let params_start = new URLSearchParams({
+      start_time: startOfLastWeek.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ssZ"),
+      end_time: endOfLastWeek.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ssZ"),
+      rent_type: roomTypeCheckin,
+      event_type:"checked_in"
+    });
+
+    // === TUẦN NÀY ===
+    const startOfThisWeek = dayjs().startOf('isoWeek'); // Thứ 2 tuần này
+    const endOfThisWeek = dayjs().endOf('isoWeek');     // Chủ nhật tuần này
+    // Nếu muốn chỉ lấy đến ngày hiện tại (thay vì cả chủ nhật tương lai), dùng dòng dưới:
+    // const endOfThisWeek = dayjs().hour(23).minute(59).second(59);
+
+    let params_end = new URLSearchParams({
+      start_time: startOfThisWeek.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ssZ"),
+      end_time: endOfThisWeek.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ssZ"),
+      rent_type: roomTypeCheckin,
+      event_type:"checked_in"
+    });
+
+      let result_start = await getEventMonth("4kJ8wQz9aB2L", params_start);
+      if (result_start?.revenue_by_day) {
+        result.start = (result_start?.revenue_by_day);
+      }
+      let result_end = await getEventMonth("4kJ8wQz9aB2L", params_end);
+      if (result_end?.revenue_by_day) {
+        result.end =result_end?.revenue_by_day ;
+      }
+      setDataEventCheckin(result)
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const getEnventVisitMonth = async () => {
     try {
       let result = { start: [], end: [] };
   
+      const { mode, checkIn, checkOut } = dateRangeRevenueEvent;
+  
       let startPrev, endPrev, startCurrent, endCurrent;
   
-      if (dateRangeRevenueEvent.mode === "week") {
-        // ===== TUẦN =====
-        startPrev = dayjs().subtract(1, "week").startOf("isoWeek");
-        endPrev   = dayjs().subtract(1, "week").endOf("isoWeek");
+      if (mode === "week") {
+        startCurrent = checkIn.startOf("isoWeek");
+        endCurrent   = checkOut.endOf("isoWeek");
   
-        startCurrent = dayjs().startOf("isoWeek");
-        endCurrent   = dayjs().endOf("isoWeek");
+        startPrev = startCurrent.subtract(1, "week");
+        endPrev   = endCurrent.subtract(1, "week");
       }
   
-      if (dateRangeRevenueEvent.mode === "month") {
-        // ===== THÁNG =====
-        startPrev = dayjs().subtract(1, "month").startOf("month");
-        endPrev   = dayjs().subtract(1, "month").endOf("month");
+      if (mode === "month") {
+        startCurrent = checkIn.startOf("month");
+        endCurrent   = checkOut.endOf("month");
   
-        startCurrent = dayjs().startOf("month");
-        endCurrent   = dayjs().endOf("month");
+        startPrev = startCurrent.subtract(1, "month");
+        endPrev   = endCurrent.subtract(1, "month");
       }
   
       const params_start = new URLSearchParams({
-        start_time: startPrev.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ssZ"),
-        end_time: endPrev.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ssZ"),
+        start_time: startPrev.startOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
+        end_time: endPrev.endOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
         event_type: "visit",
       });
   
       const params_end = new URLSearchParams({
-        start_time: startCurrent.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ssZ"),
-        end_time: endCurrent.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ssZ"),
+        start_time: startCurrent.startOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
+        end_time: endCurrent.endOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
         event_type: "visit",
       });
   
@@ -182,40 +276,41 @@ const HomeController = (props: Props) => {
       console.log(error);
     }
   };
+  
   const getEnventViewMonth = async () => {
     try {
       let result = { start: [], end: [] };
   
+      const { mode, checkIn, checkOut } = dateRangeRevenueEventView;
+  
       let startPrev, endPrev, startCurrent, endCurrent;
   
-      if (dateRangeRevenueEvent.mode === "week") {
-        // ===== TUẦN =====
-        startPrev = dayjs().subtract(1, "week").startOf("isoWeek");
-        endPrev   = dayjs().subtract(1, "week").endOf("isoWeek");
+      if (mode === "week") {
+        startCurrent = checkIn.startOf("isoWeek");
+        endCurrent   = checkOut.endOf("isoWeek");
   
-        startCurrent = dayjs().startOf("isoWeek");
-        endCurrent   = dayjs().endOf("isoWeek");
+        startPrev = startCurrent.subtract(1, "week");
+        endPrev   = endCurrent.subtract(1, "week");
       }
   
-      if (dateRangeRevenueEvent.mode === "month") {
-        // ===== THÁNG =====
-        startPrev = dayjs().subtract(1, "month").startOf("month");
-        endPrev   = dayjs().subtract(1, "month").endOf("month");
+      if (mode === "month") {
+        startCurrent = checkIn.startOf("month");
+        endCurrent   = checkOut.endOf("month");
   
-        startCurrent = dayjs().startOf("month");
-        endCurrent   = dayjs().endOf("month");
+        startPrev = startCurrent.subtract(1, "month");
+        endPrev   = endCurrent.subtract(1, "month");
       }
   
       const params_start = new URLSearchParams({
-        start_time: startPrev.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ssZ"),
-        end_time: endPrev.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ssZ"),
-        event_type: "visit",
+        start_time: startPrev.startOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
+        end_time: endPrev.endOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
+        event_type: "view",
       });
   
       const params_end = new URLSearchParams({
-        start_time: startCurrent.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ssZ"),
-        end_time: endCurrent.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ssZ"),
-        event_type: "visit",
+        start_time: startCurrent.startOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
+        end_time: endCurrent.endOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
+        event_type: "view",
       });
   
       const result_start = await getEventMonth("4kJ8wQz9aB2L", params_start);
@@ -244,6 +339,10 @@ const HomeController = (props: Props) => {
       dataGeneralMethod={dataGeneralMethod}
       setRoomTypeGeneral={setRoomTypeGeneral}
       roomTypeGeneral={roomTypeGeneral}
+      setRoomTypeBooking={setRoomTypeBooking}
+      roomTypeBooking={roomTypeBooking}
+      setRoomTypeCheckin={setRoomTypeCheckin}
+      roomTypeCheckin={roomTypeCheckin}
       dataGeneralRoomType={dataGeneralRoomType}
       setDateRangeRevenueEvent={setDateRangeRevenueEvent}
       dateRangeRevenueEvent={dateRangeRevenueEvent}
@@ -251,6 +350,9 @@ const HomeController = (props: Props) => {
       dateRangeRevenueEventView={dateRangeRevenueEventView}
       dataEventView={dataEventView}
       dataEventVisit={dataEventVisit}
+      dataEventBooked={dataEventBooked}
+      dataEventCheckin={dataEventCheckin}
+      
     />
   );
 };

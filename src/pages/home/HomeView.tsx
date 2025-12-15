@@ -323,26 +323,7 @@ const CustomDot = (props: any) => {
   );
 };
 
-// Dữ liệu
-const visitData = [
-  { day: "Thứ 2", prev: 3, current: 4 },
-  { day: "Thứ 3", prev: 5, current: 6 },
-  { day: "Thứ 4", prev: 7, current: 9 },
-  { day: "Thứ 5", prev: 4, current: 5 },
-  { day: "Thứ 6", prev: 6, current: 7 },
-  { day: "Thứ 7", prev: 8, current: 10 },
-  { day: "Chủ nhật", prev: 2, current: 2 },
-];
 
-const viewData = [
-  { day: "Thứ 2", prev: 220, current: 240 },
-  { day: "Thứ 3", prev: 180, current: 220 },
-  { day: "Thứ 4", prev: 280, current: 320 },
-  { day: "Thứ 5", prev: 240, current: 260 },
-  { day: "Thứ 6", prev: 280, current: 300 },
-  { day: "Thứ 7", prev: 350, current: 380 },
-  { day: "Chủ nhật", prev: 150, current: 180 },
-];
 
 
 
@@ -360,7 +341,9 @@ const PerformanceChart = ({
   data,
   markedDate,
   dateRangeRevenueEvent,
-  setDateRangeRevenueEvent
+  setDateRangeRevenueEvent,
+  setRoomType,
+  roomType
 }: any) => {
   const isVisit = title.includes("ghé thăm");
   const [selectedPeriod, setSelectedPeriod] = useState<Dayjs | null>(dayjs());
@@ -379,10 +362,16 @@ const PerformanceChart = ({
   const currentMap = new Map(data?.end?.map(item => [item.date, item.value]));
   
   // Tạo mảng data cho chart (7 ngày đầy đủ, value = 0 nếu không có dữ liệu)
-  const chartData = dayLabels?.map((day, index) => {
-    const dateStr = dayjs('2025-12-08').add(index, 'day').format('YYYY-MM-DD');
+  
+  const isWeek = data?.end?.length === 7;
+
+  const chartData = data?.end?.map((item, index) => {
+    const dateStr = item.date;
+  
     return {
-      day,
+      day: isWeek
+        ? dayLabels[index]                  // Tuần → Thứ Hai, Thứ Ba...
+        : dayjs(dateStr).format("DD/MM"),   // Tháng → 01/12, 02/12...
       prev: prevMap?.get(dateStr) ?? 0,
       current: currentMap?.get(dateStr) ?? 0,
     };
@@ -417,7 +406,7 @@ const PerformanceChart = ({
           {subtitle}
         </Typography>
 
-        <Stack direction='row' alignItems='center' gap={2} mb={3}>
+        {!roomType&&<Stack direction='row' alignItems='center' gap={2} mb={3}>
           <Box width={"30%"}>
 
             <SimpleDatePopup
@@ -426,7 +415,13 @@ const PerformanceChart = ({
             />
           </Box>
           <CompareBar sx={{height:"35px",alignItems:"center",display:"flex", borderRadius: 2,}}>So sánh với  {dateRangeRevenueEvent.mode === "week" ? "Tuần trước" : "Tháng trước"}</CompareBar>
-        </Stack>
+        </Stack>}
+        {roomType&&  <Box>
+          <RoomTypeSelect
+            value={roomType}
+            onChange={(newValue) => setRoomType(newValue)}
+          />
+        </Box>}
 
         <Box sx={{ height: 280, position: "relative" }}>
           <ResponsiveContainer width='100%' height='100%'>
@@ -772,7 +767,13 @@ export default function HomeView({
       setDateRangeRevenueEventView,
       dateRangeRevenueEventView,
       dataEventView,
-      dataEventVisit
+      dataEventVisit,
+      setRoomTypeBooking,
+      roomTypeBooking,
+      setRoomTypeCheckin,
+      roomTypeCheckin,
+      dataEventCheckin,
+      dataEventBooked
 }) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const BOOKING_ITEMS = [
@@ -927,7 +928,7 @@ export default function HomeView({
             value='86'
             change='26% so với tuần trước'
             subtitle='Khách ghé thăm tăng – bạn hãy thêm những ưu đãi để hút khách hơn nữa'
-            data={dataEventView}
+            data={dataEventVisit}
             markedDate='04/11/2025'
             setDateRangeRevenueEvent={setDateRangeRevenueEvent}
             dateRangeRevenueEvent={dateRangeRevenueEvent}
@@ -939,12 +940,45 @@ export default function HomeView({
             value='260'
             change='26% so với tuần trước'
             subtitle='Khách ít quan tâm – bạn hãy thử chiến dịch truyền thông để kéo lại sự chú ý'
-            data={dataEventVisit}
+            data={dataEventView}
             markedDate='28/10/2025'
             setDateRangeRevenueEvent={setDateRangeRevenueEventView}
             dateRangeRevenueEvent={dateRangeRevenueEventView}
           />
         </Grid>
+        
+      </Grid>
+      <Grid container spacing={3} mb={8}>
+        <Grid item xs={12} md={6}>
+          <PerformanceChart
+            title='Lượt đặt phòng'
+            value='86'
+            change='26% so với tuần trước'
+            subtitle='Đặt phòng đang tăng -  bạn hãy thêm những ưu đãi để hút khách hơn nữa'
+            data={dataEventBooked}
+            markedDate='04/11/2025'
+            setDateRangeRevenueEvent={setDateRangeRevenueEvent}
+            dateRangeRevenueEvent={dateRangeRevenueEvent}
+            setRoomType={setRoomTypeBooking}
+            roomType={roomTypeBooking} 
+            
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <PerformanceChart
+            title='Lượt nhận phòng'
+            value='260'
+            change='26% so với tuần trước'
+            subtitle='Khách nhận phòng giảm -  cần xem lại trải nghiệm khách khi nhận phòng'
+            data={dataEventCheckin}
+            markedDate='28/10/2025'
+            setDateRangeRevenueEvent={setDateRangeRevenueEventView}
+            dateRangeRevenueEvent={dateRangeRevenueEventView}
+            setRoomType={setRoomTypeCheckin}
+            roomType={roomTypeCheckin} 
+          />
+        </Grid>
+        
       </Grid>
 
       {/* Doanh thu */}
