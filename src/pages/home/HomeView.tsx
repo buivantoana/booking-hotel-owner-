@@ -17,6 +17,7 @@ import {
   Tabs,
   Tab,
   LinearProgress,
+  OutlinedInput,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import {
@@ -343,25 +344,7 @@ const viewData = [
   { day: "Chủ nhật", prev: 150, current: 180 },
 ];
 
-const revenueCompareData = [
-  { day: "Thứ 2", prev: 250000, current: 320000 },
-  { day: "Thứ 3", prev: 280000, current: 350000 },
-  { day: "Thứ 4", prev: 300000, current: 380000 },
-  { day: "Thứ 5", prev: 220000, current: 290000 },
-  { day: "Thứ 6", prev: 400000, current: 720000 },
-  { day: "Thứ 7", prev: 450000, current: 800000 },
-  { day: "Chủ nhật", prev: 180000, current: 220000 },
-];
 
-const revenueStackData = [
-  { day: "Thứ 2", prepaid: 180000, onsite: 140000 },
-  { day: "Thứ 3", prepaid: 200000, onsite: 150000 },
-  { day: "Thứ 4", prepaid: 220000, onsite: 160000 },
-  { day: "Thứ 5", prepaid: 180000, onsite: 110000 },
-  { day: "Thứ 6", prepaid: 500000, onsite: 220000 },
-  { day: "Thứ 7", prepaid: 600000, onsite: 200000 },
-  { day: "Chủ nhật", prepaid: 150000, onsite: 70000 },
-];
 
 const formatCurrency = (value: number) =>
   value >= 1000000
@@ -376,14 +359,38 @@ const PerformanceChart = ({
   subtitle,
   data,
   markedDate,
+  dateRangeRevenueEvent,
+  setDateRangeRevenueEvent
 }: any) => {
   const isVisit = title.includes("ghé thăm");
   const [selectedPeriod, setSelectedPeriod] = useState<Dayjs | null>(dayjs());
-
+  const dayLabels = [
+    "Thứ Hai",    // 2025-12-08
+    "Thứ Ba",     // 2025-12-09
+    "Thứ Tư",     // 2025-12-10
+    "Thứ Năm",    // 2025-12-11
+    "Thứ Sáu",    // 2025-12-12
+    "Thứ Bảy",    // 2025-12-13
+    "Chủ Nhật" // 2025-12-14
+  ];
+  
+  // Tạo map nhanh để lấy value theo date
+  const prevMap = new Map(data?.start?.map(item => [item.date, item.value]));
+  const currentMap = new Map(data?.end?.map(item => [item.date, item.value]));
+  
+  // Tạo mảng data cho chart (7 ngày đầy đủ, value = 0 nếu không có dữ liệu)
+  const chartData = dayLabels?.map((day, index) => {
+    const dateStr = dayjs('2025-12-08').add(index, 'day').format('YYYY-MM-DD');
+    return {
+      day,
+      prev: prevMap?.get(dateStr) ?? 0,
+      current: currentMap?.get(dateStr) ?? 0,
+    };
+  });
   return (
     <Card sx={{ borderRadius: 3, boxShadow: 3, height: "100%" }}>
       <CardContent sx={{ pb: 4 }}>
-        <Typography variant='h6' fontWeight='bold' gutterBottom>
+        <Typography fontSize={"18px"} fontWeight='bold' gutterBottom>
           {title}
         </Typography>
 
@@ -411,17 +418,20 @@ const PerformanceChart = ({
         </Typography>
 
         <Stack direction='row' alignItems='center' gap={2} mb={3}>
-          <WeekMonthPicker
-            value={selectedPeriod}
-            onChange={setSelectedPeriod}
-          />
-          <CompareBar>So sánh với kỳ trước</CompareBar>
+          <Box width={"30%"}>
+
+            <SimpleDatePopup
+              value={dateRangeRevenueEvent}
+              onChange={setDateRangeRevenueEvent}
+            />
+          </Box>
+          <CompareBar sx={{height:"35px",alignItems:"center",display:"flex", borderRadius: 2,}}>So sánh với  {dateRangeRevenueEvent.mode === "week" ? "Tuần trước" : "Tháng trước"}</CompareBar>
         </Stack>
 
         <Box sx={{ height: 280, position: "relative" }}>
           <ResponsiveContainer width='100%' height='100%'>
             <LineChart
-              data={data}
+              data={chartData}
               margin={{ top: 40, right: 30, bottom: 30, left: 40 }}>
               <CartesianGrid
                 stroke='#f0f0f0'
@@ -519,178 +529,232 @@ const PerformanceChart = ({
 };
 
 // Doanh thu
-const RevenueCompareChart = () => (
-  <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
-    <CardContent>
-      <Stack
-        direction='row'
-        justifyContent='space-between'
-        alignItems='flex-start'
-        mb={2}>
-        <Box>
-          <Typography variant='h6' fontWeight='bold'>
-            Doanh thu hàng tuần
-          </Typography>
-          <Stack direction='row' alignItems='center' gap={2} mt={1}>
-            <Typography variant='h4' fontWeight='bold'>
-              5.000.000đ
+const RevenueCompareChart = ({
+  setRoomTypeGeneral,
+  roomTypeGeneral,
+  dataGeneralRoomType
+}) => {
+  const totalPrev = dataGeneralRoomType?.start?.reduce(
+    (sum, item) => sum + item.value,
+    0
+  );
+
+  const totalCurrent = dataGeneralRoomType?.end?.reduce(
+    (sum, item) => sum + item.value,
+    0
+  );
+  const percentChange =
+    totalPrev === 0
+      ? 0
+      : Math.round(((totalCurrent - totalPrev) / totalPrev) * 100);
+
+
+  const revenueCompareData = dataGeneralRoomType?.start?.map((item, index) => ({
+    day: dayjs(item.date).format("DD/MM"),
+    "Tuần trước": item.value,                          // Tuần trước
+    "Tuần này": dataGeneralRoomType?.end[index]?.value || 0 // Tuần này
+  }));
+
+  return (
+    <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
+      <CardContent>
+        <Stack
+          direction='row'
+          justifyContent='space-between'
+          alignItems='flex-start'
+          mb={2}>
+          <Box>
+            <Typography fontSize={"18px"} fontWeight='bold'>
+              Doanh thu hàng tuần
             </Typography>
-            <Chip
-              label='26% so với tuần trước'
-              sx={{ bgcolor: "#E6F4EA", color: "#1A9739", fontWeight: "bold" }}
-            />
-          </Stack>
-          <Typography variant='body2' color='text.secondary' mt={1}>
-            doanh thu đang tăng – bạn hãy thêm những ưu đãi để hút khách hơn nữa
-          </Typography>
+            <Stack direction='row' alignItems='center' gap={2} mt={1}>
+              <Typography variant='h6' fontWeight='bold'>
+                {totalCurrent?.toLocaleString()}đ
+              </Typography>
+              <Chip
+                label={`${percentChange}% so với tuần trước`}
+                sx={{
+                  bgcolor: percentChange >= 0 ? "#E6F4EA" : "#FDECEA",
+                  color: percentChange >= 0 ? "#1A9739" : "#D32F2F",
+                  fontWeight: "bold"
+                }}
+              />
+            </Stack>
+            <Typography variant='body2' color='text.secondary' mt={1}>
+              doanh thu đang tăng – bạn hãy thêm những ưu đãi để hút khách hơn nữa
+            </Typography>
+          </Box>
+        </Stack>
+        <Box>
+          <RoomTypeSelect
+            value={roomTypeGeneral}
+            onChange={(newValue) => setRoomTypeGeneral(newValue)}
+          />
         </Box>
-      </Stack>
 
-      <Box sx={{ height: 300, mt: 4 }}>
-        <ResponsiveContainer width='100%' height='100%'>
-          <BarChart
-            data={revenueCompareData}
-            margin={{ top: 20, right: 30, left: 50, bottom: 20 }}>
-            <CartesianGrid
-              strokeDasharray='3 3'
-              stroke='#f0f0f0'
-              vertical={false}
-            />
-            <XAxis
-              dataKey='day'
-              tick={{ fontSize: 12 }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              tick={{ fontSize: 12 }}
-              axisLine={false}
-              tickLine={false}
-              tickFormatter={formatCurrency}
-            />
-            <Tooltip
-              formatter={(value: number) => `${value.toLocaleString()}đ`}
-            />
-            <Bar
-              dataKey='prev'
-              fill='#BBDEFB'
-              radius={[8, 8, 0, 0]}
-              barSize={24}
-            />
-            <Bar
-              dataKey='current'
-              fill='#2196F3'
-              radius={[8, 8, 0, 0]}
-              barSize={24}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </Box>
+        <Box sx={{ height: 300, mt: 4 }}>
+          <ResponsiveContainer width='100%' height='100%'>
+            <BarChart
+              data={revenueCompareData}
+              margin={{ top: 20, right: 30, left: 50, bottom: 20 }}>
+              <CartesianGrid
+                strokeDasharray='3 3'
+                stroke='#f0f0f0'
+                vertical={false}
+              />
+              <XAxis
+                dataKey='day'
+                tick={{ fontSize: 12 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fontSize: 12 }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={formatCurrency}
+              />
+              <Tooltip
+                formatter={(value: number) => `${value.toLocaleString()}đ`}
+              />
+              <Bar
+                dataKey="Tuần trước"
+                fill='#BBDEFB'
+                radius={[8, 8, 0, 0]}
+                barSize={24}
+              />
+              <Bar
+                dataKey="Tuần này"
+                fill='#2196F3'
+                radius={[8, 8, 0, 0]}
+                barSize={24}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </Box>
 
-      <Stack direction='row' justifyContent='center' spacing={4} mt={2}>
-        <Stack direction='row' alignItems='center' gap={1.5}>
-          <Box
-            sx={{ width: 12, height: 12, borderRadius: 2, bgcolor: "#BBDEFB" }}
-          />
-          <Typography variant='body2' color='text.secondary'>
-            Tuần trước
-          </Typography>
+        <Stack direction='row' justifyContent='center' spacing={4} mt={2}>
+          <Stack direction='row' alignItems='center' gap={1.5}>
+            <Box
+              sx={{ width: 12, height: 12, borderRadius: 2, bgcolor: "#BBDEFB" }}
+            />
+            <Typography variant='body2' color='text.secondary'>
+              Tuần trước
+            </Typography>
+          </Stack>
+          <Stack direction='row' alignItems='center' gap={1.5}>
+            <Box
+              sx={{ width: 12, height: 12, borderRadius: 2, bgcolor: "#2196F3" }}
+            />
+            <Typography variant='body2' color='text.secondary'>
+              Tuần này
+            </Typography>
+          </Stack>
         </Stack>
-        <Stack direction='row' alignItems='center' gap={1.5}>
-          <Box
-            sx={{ width: 12, height: 12, borderRadius: 2, bgcolor: "#2196F3" }}
-          />
-          <Typography variant='body2' color='text.secondary'>
-            Tuần này
-          </Typography>
-        </Stack>
-      </Stack>
-    </CardContent>
-  </Card>
-);
+      </CardContent>
+    </Card>
+  )
+};
 
 const RevenuePaymentChart = ({
   setDateRangeRevenueMethod,
   dateRangeRevenueMethod,
-}) => (
-  <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
-    <CardContent>
-      <Stack
-        direction='row'
-        justifyContent='space-between'
-        alignItems='flex-start'
-        mb={2}>
-        <Box>
-          <Typography variant='h6' fontWeight='bold'>
-            Khách hàng thanh toán
-          </Typography>
-          <Typography variant='h4' fontWeight='bold' mt={1}>
-            5.000.000đ
-          </Typography>
+  dataGeneralMethod
+}) => {
+
+  const totalRevenue = dataGeneralMethod.reduce(
+    (sum, item) => sum + item.online + item.offline,
+    0
+  );
+  const revenueStackData = dataGeneralMethod.map((item) => ({
+    day: dayjs(item.date).format("DD/MM"),
+    "Trả trước": item.online,
+    "Trả tại khách sạn": item.offline
+  }));
+  return (
+    <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
+      <CardContent>
+        <Stack
+          direction='row'
+          justifyContent='space-between'
+          alignItems='flex-start'
+          mb={2}>
+          <Box>
+            <Typography fontSize={"18px"} fontWeight='bold'>
+              Khách hàng thanh toán
+            </Typography>
+            <Typography variant='h6' fontWeight='bold' mt={1}>
+              {totalRevenue.toLocaleString()}đ
+            </Typography>
+          </Box>
+
+        </Stack>
+        <Box width={"50%"}>
+
+          <SimpleDatePopup
+            value={dateRangeRevenueMethod}
+            onChange={setDateRangeRevenueMethod}
+          />
         </Box>
-        <SimpleDatePopup
-          value={dateRangeRevenueMethod}
-          onChange={setDateRangeRevenueMethod}
-        />
-      </Stack>
 
-      <Box sx={{ height: 300, mt: 4 }}>
-        <ResponsiveContainer width='100%' height='100%'>
-          <BarChart
-            data={revenueStackData}
-            margin={{ top: 20, right: 30, left: 50, bottom: 20 }}>
-            <CartesianGrid
-              strokeDasharray='3 3'
-              stroke='#f0f0f0'
-              vertical={false}
-            />
-            <XAxis
-              dataKey='day'
-              tick={{ fontSize: 12 }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              tick={{ fontSize: 12 }}
-              axisLine={false}
-              tickLine={false}
-              tickFormatter={formatCurrency}
-            />
-            <Tooltip
-              formatter={(value: number) => `${value.toLocaleString()}đ`}
-            />
-            <Bar dataKey='prepaid' stackId='a' fill='#FFB300' />
-            <Bar
-              dataKey='onsite'
-              stackId='a'
-              fill='#42A5F5'
-              radius={[8, 8, 0, 0]}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </Box>
+        <Box sx={{ height: 300, mt: 4 }}>
+          <ResponsiveContainer width='100%' height='100%'>
+            <BarChart
+              data={revenueStackData}
+              margin={{ top: 20, right: 30, left: 50, bottom: 20 }}>
+              <CartesianGrid
+                strokeDasharray='3 3'
+                stroke='#f0f0f0'
+                vertical={false}
+              />
+              <XAxis
+                dataKey='day'
+                tick={{ fontSize: 12 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fontSize: 12 }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={formatCurrency}
+              />
+              <Tooltip
+                formatter={(value: number) => `${value.toLocaleString()}đ`}
+              />
+              <Bar dataKey='Trả trước' stackId='a' fill='#FFB300' />
+              <Bar
+                dataKey='Trả tại khách sạn'
+                stackId='a'
+                fill='#42A5F5'
+                radius={[8, 8, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </Box>
 
-      <Stack direction='row' justifyContent='center' spacing={4} mt={2}>
-        <Stack direction='row' alignItems='center' gap={1.5}>
-          <Box
-            sx={{ width: 12, height: 12, borderRadius: 2, bgcolor: "#FFB300" }}
-          />
-          <Typography variant='body2' color='text.secondary'>
-            Trả trước
-          </Typography>
+        <Stack direction='row' justifyContent='center' spacing={4} mt={2}>
+          <Stack direction='row' alignItems='center' gap={1.5}>
+            <Box
+              sx={{ width: 12, height: 12, borderRadius: 2, bgcolor: "#FFB300" }}
+            />
+            <Typography variant='body2' color='text.secondary'>
+              Trả trước
+            </Typography>
+          </Stack>
+          <Stack direction='row' alignItems='center' gap={1.5}>
+            <Box
+              sx={{ width: 12, height: 12, borderRadius: 2, bgcolor: "#42A5F5" }}
+            />
+            <Typography variant='body2' color='text.secondary'>
+              Trả tại khách sạn
+            </Typography>
+          </Stack>
         </Stack>
-        <Stack direction='row' alignItems='center' gap={1.5}>
-          <Box
-            sx={{ width: 12, height: 12, borderRadius: 2, bgcolor: "#42A5F5" }}
-          />
-          <Typography variant='body2' color='text.secondary'>
-            Trả tại khách sạn
-          </Typography>
-        </Stack>
-      </Stack>
-    </CardContent>
-  </Card>
-);
+      </CardContent>
+    </Card>
+  )
+};
 
 // Main Component
 export default function HomeView({
@@ -699,6 +763,16 @@ export default function HomeView({
   dataGeneral,
   setDateRangeRevenueMethod,
   dateRangeRevenueMethod,
+  dataGeneralMethod,
+  setRoomTypeGeneral,
+  roomTypeGeneral,
+  dataGeneralRoomType,
+  setDateRangeRevenueEvent,
+      dateRangeRevenueEvent,
+      setDateRangeRevenueEventView,
+      dateRangeRevenueEventView,
+      dataEventView,
+      dataEventVisit
 }) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const BOOKING_ITEMS = [
@@ -732,12 +806,7 @@ export default function HomeView({
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
-  const bookingItems = [
-    { label: "Chờ nhận phòng", value: 1, color: "#FF6B6B" },
-    { label: "Đã nhận phòng", value: 0, color: "#4DABF7" },
-    { label: "Chờ Hotel Booking xử lý", value: 0, color: "#FFC048" },
-    { label: "Hoàn thành", value: 1, color: "#1A9739" },
-  ];
+  
 
   return (
     <Box sx={{ bgcolor: "#f9f9f9", p: { xs: 2, sm: 3, md: 4 } }}>
@@ -858,8 +927,10 @@ export default function HomeView({
             value='86'
             change='26% so với tuần trước'
             subtitle='Khách ghé thăm tăng – bạn hãy thêm những ưu đãi để hút khách hơn nữa'
-            data={visitData}
+            data={dataEventView}
             markedDate='04/11/2025'
+            setDateRangeRevenueEvent={setDateRangeRevenueEvent}
+            dateRangeRevenueEvent={dateRangeRevenueEvent}
           />
         </Grid>
         <Grid item xs={12} md={6}>
@@ -868,8 +939,10 @@ export default function HomeView({
             value='260'
             change='26% so với tuần trước'
             subtitle='Khách ít quan tâm – bạn hãy thử chiến dịch truyền thông để kéo lại sự chú ý'
-            data={viewData}
+            data={dataEventVisit}
             markedDate='28/10/2025'
+            setDateRangeRevenueEvent={setDateRangeRevenueEventView}
+            dateRangeRevenueEvent={dateRangeRevenueEventView}
           />
         </Grid>
       </Grid>
@@ -880,12 +953,15 @@ export default function HomeView({
       </Typography>
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
-          <RevenueCompareChart />
+          <RevenueCompareChart setRoomTypeGeneral={setRoomTypeGeneral}
+            dataGeneralRoomType={dataGeneralRoomType}
+            roomTypeGeneral={roomTypeGeneral} />
         </Grid>
         <Grid item xs={12} md={6}>
           <RevenuePaymentChart
             setDateRangeRevenueMethod={setDateRangeRevenueMethod}
             dateRangeRevenueMethod={dateRangeRevenueMethod}
+            dataGeneralMethod={dataGeneralMethod}
           />
         </Grid>
       </Grid>
@@ -1340,121 +1416,206 @@ function NotificationPopover({ handleClick, anchorEl, setAnchorEl }) {
           <Box maxHeight='70vh' sx={{ overflowY: "auto" }}>
             {tab === 0
               ? // Tab Đặt phòng
-                bookingNotifications.map((notif, i) => (
-                  <NotificationItem key={i}>
-                    <Stack direction='row' spacing={2} alignItems='flex-start'>
-                      <Badge
-                        badgeContent=' '
-                        color='error'
-                        variant='dot'
-                        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+              bookingNotifications.map((notif, i) => (
+                <NotificationItem key={i}>
+                  <Stack direction='row' spacing={2} alignItems='flex-start'>
+                    <Badge
+                      badgeContent=' '
+                      color='error'
+                      variant='dot'
+                      anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                      sx={{
+                        "& .MuiBadge-badge": {
+                          width: 12,
+                          height: 12,
+                          borderRadius: "50%",
+                        },
+                      }}>
+                      <Avatar
                         sx={{
-                          "& .MuiBadge-badge": {
-                            width: 12,
-                            height: 12,
-                            borderRadius: "50%",
-                          },
-                        }}>
-                        <Avatar
-                          sx={{
-                            bgcolor:
-                              notif.type === "success"
-                                ? "#e8f5e9"
-                                : notif.type === "cancel"
+                          bgcolor:
+                            notif.type === "success"
+                              ? "#e8f5e9"
+                              : notif.type === "cancel"
                                 ? "#ffebee"
                                 : "#fff3e0",
-                            width: 44,
-                            height: 44,
-                          }}>
-                          {notif.type === "success" ? (
-                            <CheckCircle sx={{ color: "#4caf50" }} />
-                          ) : notif.type === "cancel" ? (
-                            <Cancel sx={{ color: "#e53935" }} />
-                          ) : (
-                            <Hotel sx={{ color: "#fb8c00" }} />
-                          )}
-                        </Avatar>
-                      </Badge>
+                          width: 44,
+                          height: 44,
+                        }}>
+                        {notif.type === "success" ? (
+                          <CheckCircle sx={{ color: "#4caf50" }} />
+                        ) : notif.type === "cancel" ? (
+                          <Cancel sx={{ color: "#e53935" }} />
+                        ) : (
+                          <Hotel sx={{ color: "#fb8c00" }} />
+                        )}
+                      </Avatar>
+                    </Badge>
 
-                      <Box flex={1}>
-                        <Typography fontWeight={600} fontSize='15px' mb={0.5}>
-                          {notif.title}
-                        </Typography>
-                        <Typography variant='body2' color='text.secondary'>
-                          • Khách sạn: {notif.hotel}
-                        </Typography>
-                        <Typography variant='body2' color='text.secondary'>
-                          • Loại phòng: {notif.roomType}
-                        </Typography>
-                        <Typography variant='body2' color='text.secondary'>
-                          • Thời gian: {notif.time}
-                        </Typography>
-                        <TimeText>{notif.timeAgo}</TimeText>
-                      </Box>
-                    </Stack>
-                    {i < bookingNotifications.length - 1 && (
-                      <Divider sx={{ mt: 2 }} />
-                    )}
-                  </NotificationItem>
-                ))
+                    <Box flex={1}>
+                      <Typography fontWeight={600} fontSize='15px' mb={0.5}>
+                        {notif.title}
+                      </Typography>
+                      <Typography variant='body2' color='text.secondary'>
+                        • Khách sạn: {notif.hotel}
+                      </Typography>
+                      <Typography variant='body2' color='text.secondary'>
+                        • Loại phòng: {notif.roomType}
+                      </Typography>
+                      <Typography variant='body2' color='text.secondary'>
+                        • Thời gian: {notif.time}
+                      </Typography>
+                      <TimeText>{notif.timeAgo}</TimeText>
+                    </Box>
+                  </Stack>
+                  {i < bookingNotifications.length - 1 && (
+                    <Divider sx={{ mt: 2 }} />
+                  )}
+                </NotificationItem>
+              ))
               : // Tab Đối soát và thanh toán
-                paymentNotifications.map((notif, i) => (
-                  <NotificationItem key={i}>
-                    <Stack direction='row' spacing={2} alignItems='flex-start'>
-                      <Badge
-                        badgeContent=' '
-                        color='error'
-                        variant='dot'
-                        invisible={notif.type === "completed"}
-                        anchorOrigin={{ vertical: "top", horizontal: "right" }}>
-                        <Avatar
-                          sx={{
-                            bgcolor:
-                              notif.type === "pending"
-                                ? "#fff3e0"
-                                : notif.type === "completed"
+              paymentNotifications.map((notif, i) => (
+                <NotificationItem key={i}>
+                  <Stack direction='row' spacing={2} alignItems='flex-start'>
+                    <Badge
+                      badgeContent=' '
+                      color='error'
+                      variant='dot'
+                      invisible={notif.type === "completed"}
+                      anchorOrigin={{ vertical: "top", horizontal: "right" }}>
+                      <Avatar
+                        sx={{
+                          bgcolor:
+                            notif.type === "pending"
+                              ? "#fff3e0"
+                              : notif.type === "completed"
                                 ? "#e8f5e9"
                                 : "#fff8e1",
-                            width: 44,
-                            height: 44,
-                          }}>
-                          <Receipt
-                            sx={{
-                              color:
-                                notif.type === "pending"
-                                  ? "#fb8c00"
-                                  : notif.type === "completed"
+                          width: 44,
+                          height: 44,
+                        }}>
+                        <Receipt
+                          sx={{
+                            color:
+                              notif.type === "pending"
+                                ? "#fb8c00"
+                                : notif.type === "completed"
                                   ? "#4caf50"
                                   : "#ef6c00",
-                            }}
-                          />
-                        </Avatar>
-                      </Badge>
+                          }}
+                        />
+                      </Avatar>
+                    </Badge>
 
-                      <Box flex={1}>
-                        <Typography fontWeight={600} fontSize='15px' mb={0.5}>
-                          {notif.title}
-                        </Typography>
-                        <Typography variant='body2' color='text.secondary'>
-                          • Khách sạn: {notif.hotel}
-                        </Typography>
-                        <Typography variant='body2' color='text.secondary'>
-                          • Tổng cộng nợ: {notif.amount}
-                        </Typography>
-                        <Typography variant='body2' color='text.secondary'>
-                          • Số lượng đặt phòng: {notif.rooms}
-                        </Typography>
-                        <TimeText>{notif.timeAgo}</TimeText>
-                      </Box>
-                    </Stack>
-                    {i < paymentNotifications.length - 1 && (
-                      <Divider sx={{ mt: 2 }} />
-                    )}
-                  </NotificationItem>
-                ))}
+                    <Box flex={1}>
+                      <Typography fontWeight={600} fontSize='15px' mb={0.5}>
+                        {notif.title}
+                      </Typography>
+                      <Typography variant='body2' color='text.secondary'>
+                        • Khách sạn: {notif.hotel}
+                      </Typography>
+                      <Typography variant='body2' color='text.secondary'>
+                        • Tổng cộng nợ: {notif.amount}
+                      </Typography>
+                      <Typography variant='body2' color='text.secondary'>
+                        • Số lượng đặt phòng: {notif.rooms}
+                      </Typography>
+                      <TimeText>{notif.timeAgo}</TimeText>
+                    </Box>
+                  </Stack>
+                  {i < paymentNotifications.length - 1 && (
+                    <Divider sx={{ mt: 2 }} />
+                  )}
+                </NotificationItem>
+              ))}
           </Box>
         </Box>
       </StyledPopover>
     </>
   );
 }
+
+
+import {
+  Select,
+  MenuItem,
+  FormControl,
+
+  SelectChangeEvent,
+  SelectProps,
+} from '@mui/material';
+
+
+type RoomType = 'all' | 'hourly' | 'overnight' | 'daily';
+
+interface RoomTypeSelectProps extends Omit<SelectProps<RoomType>, 'onChange'> {
+  value?: RoomType;
+  onChange?: (value: RoomType) => void;
+}
+
+const RoomTypeSelect: React.FC<RoomTypeSelectProps> = ({
+  value: controlledValue,
+  onChange: controlledOnChange,
+  ...props
+}) => {
+  // Nếu không truyền value/onChange từ props thì dùng state nội bộ
+  const [internalValue, setInternalValue] = React.useState<RoomType>('all');
+  const isControlled = controlledValue !== undefined;
+  const value = isControlled ? controlledValue : internalValue;
+
+  const handleChange = (event: SelectChangeEvent<RoomType>) => {
+    const newValue = event.target.value as RoomType;
+    if (!isControlled) {
+      setInternalValue(newValue);
+    }
+    controlledOnChange?.(newValue);
+  };
+
+  const getDisplayText = (val: RoomType) => {
+    switch (val) {
+      case 'hourly': return 'Theo giờ';
+      case 'overnight': return 'Qua đêm';
+      case 'daily': return 'Theo ngày';
+      default: return 'Tất cả các loại đặt phòng';
+    }
+  };
+
+  return (
+    <FormControl {...props}>
+
+      <Select<RoomType>
+        labelId="room-type-select-label"
+
+        value={value}
+        onChange={handleChange}
+        IconComponent={KeyboardArrowDownIcon}
+        displayEmpty // Để hiển thị placeholder khi value là 'all'
+        renderValue={(selected) => getDisplayText(selected as RoomType)}
+        input={
+          <OutlinedInput
+
+            sx={{
+              height: 40,
+              borderRadius: "12px",
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: "#ddd",
+              },
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                borderColor: "#98b720",
+                borderWidth: 2,
+              },
+            }}
+          />
+        }
+      >
+
+
+        <MenuItem value="all">Tất cả các loại đặt phòng</MenuItem>
+        <MenuItem value="hourly">Theo giờ</MenuItem>
+        <MenuItem value="overnight">Qua đêm</MenuItem>
+        <MenuItem value="daily">Theo ngày</MenuItem>
+      </Select>
+    </FormControl>
+  );
+};
+
