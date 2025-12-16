@@ -15,6 +15,7 @@ import ManagerRoomController from "../pages/manager-room/ManagerRoomController";
 import InforHotelController from "../pages/infor-hotel/InforHotelController";
 import ManagerBookingController from "../pages/manager-booking/ManagerBookingController";
 import ReconciliationController from "../pages/reconciliation/ReconciliationController";
+import ProfileController from "../pages/profile/ProfileController";
 
 const Router = () => {
   const context: any = useBookingContext();
@@ -57,6 +58,14 @@ const Router = () => {
             element={
               <PrivateRouter>
                 <ManagerRoomController />
+              </PrivateRouter>
+            }
+          />
+           <Route
+            path='/manager-profile'
+            element={
+              <PrivateRouter>
+                <ProfileController />
               </PrivateRouter>
             }
           />

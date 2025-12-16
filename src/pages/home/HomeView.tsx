@@ -335,8 +335,7 @@ const formatCurrency = (value: number) =>
 // Performance Chart
 const PerformanceChart = ({
   title,
-  value,
-  change,
+
   subtitle,
   data,
   markedDate,
@@ -356,18 +355,18 @@ const PerformanceChart = ({
     "Thứ Bảy",    // 2025-12-13
     "Chủ Nhật" // 2025-12-14
   ];
-  
+
   // Tạo map nhanh để lấy value theo date
   const prevMap = new Map(data?.start?.map(item => [item.date, item.value]));
   const currentMap = new Map(data?.end?.map(item => [item.date, item.value]));
-  
+
   // Tạo mảng data cho chart (7 ngày đầy đủ, value = 0 nếu không có dữ liệu)
-  
+
   const isWeek = data?.end?.length === 7;
 
   const chartData = data?.end?.map((item, index) => {
     const dateStr = item.date;
-  
+
     return {
       day: isWeek
         ? dayLabels[index]                  // Tuần → Thứ Hai, Thứ Ba...
@@ -376,6 +375,25 @@ const PerformanceChart = ({
       current: currentMap?.get(dateStr) ?? 0,
     };
   });
+  // ===== TÍNH VALUE & CHANGE TỪ DATA =====
+  const prevTotal =
+    data?.start?.reduce((sum, item) => sum + (item.value || 0), 0) || 0;
+
+  const currentTotal =
+    data?.end?.reduce((sum, item) => sum + (item.value || 0), 0) || 0;
+
+  const value = currentTotal;
+
+  // Tính % thay đổi
+  let changePercent = 0;
+  if (prevTotal === 0) {
+    changePercent = currentTotal > 0 ? 100 : 0;
+  } else {
+    changePercent = ((currentTotal - prevTotal) / prevTotal) * 100;
+  }
+
+  // Format text hiển thị
+  const change = `${changePercent >= 0 ? "+" : ""}${changePercent.toFixed(1)}%`;
   return (
     <Card sx={{ borderRadius: 3, boxShadow: 3, height: "100%" }}>
       <CardContent sx={{ pb: 4 }}>
@@ -406,7 +424,7 @@ const PerformanceChart = ({
           {subtitle}
         </Typography>
 
-        {!roomType&&<Stack direction='row' alignItems='center' gap={2} mb={3}>
+        {!roomType && <Stack direction='row' alignItems='center' gap={2} mb={3}>
           <Box width={"30%"}>
 
             <SimpleDatePopup
@@ -414,9 +432,9 @@ const PerformanceChart = ({
               onChange={setDateRangeRevenueEvent}
             />
           </Box>
-          <CompareBar sx={{height:"35px",alignItems:"center",display:"flex", borderRadius: 2,}}>So sánh với  {dateRangeRevenueEvent.mode === "week" ? "Tuần trước" : "Tháng trước"}</CompareBar>
+          <CompareBar sx={{ height: "35px", alignItems: "center", display: "flex", borderRadius: 2, }}>So sánh với  {dateRangeRevenueEvent.mode === "week" ? "Tuần trước" : "Tháng trước"}</CompareBar>
         </Stack>}
-        {roomType&&  <Box>
+        {roomType && <Box>
           <RoomTypeSelect
             value={roomType}
             onChange={(newValue) => setRoomType(newValue)}
@@ -763,17 +781,17 @@ export default function HomeView({
   roomTypeGeneral,
   dataGeneralRoomType,
   setDateRangeRevenueEvent,
-      dateRangeRevenueEvent,
-      setDateRangeRevenueEventView,
-      dateRangeRevenueEventView,
-      dataEventView,
-      dataEventVisit,
-      setRoomTypeBooking,
-      roomTypeBooking,
-      setRoomTypeCheckin,
-      roomTypeCheckin,
-      dataEventCheckin,
-      dataEventBooked
+  dateRangeRevenueEvent,
+  setDateRangeRevenueEventView,
+  dateRangeRevenueEventView,
+  dataEventView,
+  dataEventVisit,
+  setRoomTypeBooking,
+  roomTypeBooking,
+  setRoomTypeCheckin,
+  roomTypeCheckin,
+  dataEventCheckin,
+  dataEventBooked
 }) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const BOOKING_ITEMS = [
@@ -807,7 +825,7 @@ export default function HomeView({
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
-  
+
 
   return (
     <Box sx={{ bgcolor: "#f9f9f9", p: { xs: 2, sm: 3, md: 4 } }}>
@@ -946,7 +964,7 @@ export default function HomeView({
             dateRangeRevenueEvent={dateRangeRevenueEventView}
           />
         </Grid>
-        
+
       </Grid>
       <Grid container spacing={3} mb={8}>
         <Grid item xs={12} md={6}>
@@ -960,8 +978,8 @@ export default function HomeView({
             setDateRangeRevenueEvent={setDateRangeRevenueEvent}
             dateRangeRevenueEvent={dateRangeRevenueEvent}
             setRoomType={setRoomTypeBooking}
-            roomType={roomTypeBooking} 
-            
+            roomType={roomTypeBooking}
+
           />
         </Grid>
         <Grid item xs={12} md={6}>
@@ -975,10 +993,10 @@ export default function HomeView({
             setDateRangeRevenueEvent={setDateRangeRevenueEventView}
             dateRangeRevenueEvent={dateRangeRevenueEventView}
             setRoomType={setRoomTypeCheckin}
-            roomType={roomTypeCheckin} 
+            roomType={roomTypeCheckin}
           />
         </Grid>
-        
+
       </Grid>
 
       {/* Doanh thu */}
