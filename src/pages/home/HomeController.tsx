@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import HomeView from "./HomeView";
 import dayjs from "dayjs";
-import { getEventMonth, getGeneralStats, getGeneralWeek, getGeneralWeekRoomType } from "../../service/hotel";
+import { getEventMonth, getGeneralStats, getGeneralWeek, getGeneralWeekRoomType, getReviewstats } from "../../service/hotel";
 
 type Props = {};
 
@@ -35,6 +35,7 @@ const HomeController = (props: Props) => {
   const [dataEventView, setDataEventView] = useState({});
   const [dataEventBooked, setDataEventBooked] = useState({});
   const [dataEventCheckin, setDataEventCheckin] = useState({});
+  const [dataReview, setDataReview] = useState([]);
   useEffect(() => {
     getGeneral();
   }, [dateRange]);
@@ -324,6 +325,22 @@ const HomeController = (props: Props) => {
       console.log(error);
     }
   };
+  useEffect(()=>{
+    getDataReview()
+  },[])
+  const getDataReview = async () => {
+    try {
+      let result = await getReviewstats("4kJ8wQz9aB2L");
+      if(Object.keys(result)?.length>0){
+        setDataReview(result);
+      }
+      console.log("AAAA result review",result)
+  
+      
+    } catch (error) {
+      console.log(error);
+    }
+  };
   
   console.log("AAAA dateRangeRevenueMethod",dateRangeRevenueMethod)
   console.log("AAA dataGeneralMethod",dataGeneralMethod)
@@ -352,6 +369,7 @@ const HomeController = (props: Props) => {
       dataEventVisit={dataEventVisit}
       dataEventBooked={dataEventBooked}
       dataEventCheckin={dataEventCheckin}
+      dataReview={dataReview}
       
     />
   );

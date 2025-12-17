@@ -29,12 +29,14 @@ import {
 } from "@mui/icons-material";
 import { useState } from "react";
 import remove from "../../images/delete.png";
+import success from "../../images/Frame.png";
 import HotelDetail from "./HotelDetail";
 import HotelEditForm from "./HotelEditForm";
 import RoomDetail from "./RoomDetail";
+import { toggleHotels } from "../../service/hotel";
 
 // Component menu thao tác
-function ActionMenu({ setAction, setDeleteDialogOpen }) {
+function ActionMenu({ setAction, setDeleteDialogOpen,setIdHotel,hotel }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -87,19 +89,26 @@ function ActionMenu({ setAction, setDeleteDialogOpen }) {
           Nhận bản
         </MenuItem>
         <MenuItem
-          onClick={() => setDeleteDialogOpen(true)}
-          sx={{ gap: 1.5, fontSize: 14, color: "#d32f2f" }}>
+          onClick={() =>{
+            setIdHotel(hotel)
+            setDeleteDialogOpen(true)}}
+          sx={{ gap: 1.5, fontSize: 14, color: hotel?.status == "active"? "#d32f2f":"unset" }}>
           <PauseCircleIcon fontSize='small' />
-          Ngừng kinh doanh
+         {hotel?.status == "paused"? "Tiếp tục kinh doanh":"Ngừng kinh doanh"}
         </MenuItem>
       </Menu>
     </>
   );
 }
 
-export default function InforHotelView() {
+export default function InforHotelView({ hotels,getDataHotels }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [action, setAction] = useState("manager");
+  const [idHotel,setIdHotel] = useState(null)
+  const total = hotels.length;
+  const active = hotels.filter(h => h.status === "active").length;
+  const inactive = total - active;
+  console.log("AAAA idHotel",idHotel)
   return (
     <Box sx={{ p: 3, bgcolor: "#f5f7fa", minHeight: "100vh" }}>
       {action == "detail" && <RoomDetail onNext={setAction} />}
@@ -149,21 +158,9 @@ export default function InforHotelView() {
             }}>
             <Box sx={{ mb: 3 }}>
               <Stack direction='row' spacing={4} color='#555' fontSize={14}>
-                <Box>
-                  Tất cả <strong>100</strong>
-                </Box>
-                <Box>
-                  Dạng hoạt động <strong>90</strong>
-                </Box>
-                <Box>
-                  Ngừng kinh doanh <strong>10</strong>
-                </Box>
-                <Box>
-                  Bị từ chối <strong>10</strong>
-                </Box>
-                <Box>
-                  Ngừng hợp tác <strong>10</strong>
-                </Box>
+                <Box>Tất cả <strong>{total}</strong></Box>
+                <Box>Dạng hoạt động <strong>{active}</strong></Box>
+                <Box>Ngừng kinh doanh <strong>{inactive}</strong></Box>
               </Stack>
             </Box>
             <TableContainer>
@@ -189,41 +186,47 @@ export default function InforHotelView() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {/* Dòng có menu thao tác (giống hệt ảnh) */}
-                  <TableRow hover>
-                    <TableCell>1</TableCell>
-                    <TableCell
-                      onClick={() => setAction("edit_detail")}
-                      fontWeight={500}>
-                      Khách sạn 123
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label='Contract'
-                        size='small'
-                        sx={{ bgcolor: "#e3f2fd", color: "#1976d2" }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label='Đang hoạt động'
-                        size='small'
-                        color='success'
-                      />
-                    </TableCell>
-                    <TableCell sx={{ maxWidth: 280 }}>
-                      110 Đ. Cầu Giấy, Quan Hoa, Cầu Giấy, Hà Nội
-                    </TableCell>
-                    <TableCell>16%</TableCell>
-                    <TableCell>Cả hai</TableCell>
-                    <TableCell>
-                      <ActionMenu
-                        setAction={setAction}
-                        setDeleteDialogOpen={setDeleteDialogOpen}
-                      />{" "}
-                      {/* ← Đây chính là popup menu 3 mục */}
-                    </TableCell>
-                  </TableRow>
+                  {hotels?.map((hotel, index) => (
+                    <TableRow hover key={hotel.id}>
+                      <TableCell>{index + 1}</TableCell>
+
+                      <TableCell
+                        onClick={() => setAction("edit_detail")}
+                        sx={{ fontWeight: 500, cursor: "pointer" }}
+                      >
+                        {parseLang(hotel.name)}
+                      </TableCell>
+
+                      <TableCell>
+                        {renderCooperationChip(hotel.cooperation_type)}
+                      </TableCell>
+
+                      <TableCell>
+                        {renderStatusChip(hotel.status)}
+                      </TableCell>
+
+                      <TableCell sx={{ maxWidth: 280 }}>
+                        {parseLang(hotel.address)}
+                      </TableCell>
+
+                      <TableCell>
+                        {hotel.commission_rate}%
+                      </TableCell>
+
+                      <TableCell>
+                        {hotel.cooperation_type === "listing" ? "Online" : "Cả hai"}
+                      </TableCell>
+
+                      <TableCell>
+                        <ActionMenu
+                          hotel={hotel}
+                          setIdHotel={setIdHotel}
+                          setAction={setAction}
+                          setDeleteDialogOpen={setDeleteDialogOpen}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -248,7 +251,7 @@ export default function InforHotelView() {
                     mx: "auto",
                     mb: 2,
                   }}>
-                  <img src={remove} alt='' />
+                  <img src={idHotel?.status == "paused"?success:remove} alt='' />
                 </Box>
                 <IconButton
                   onClick={() => setDeleteDialogOpen(false)}
@@ -259,12 +262,11 @@ export default function InforHotelView() {
             </DialogTitle>
             <DialogContent sx={{ textAlign: "center", px: 4, pb: 3 }}>
               <Typography fontWeight={600} fontSize='20px' mb={1}>
-                Cảnh báo
+              {idHotel?.status == "paused"?"Xác nhận mở lại kinh doanh":"Cảnh báo"}  
               </Typography>
               <Typography fontSize='14px' color='#666'>
-                Khách sẽ không nhìn thấy khách sạn này sau khi bạn ngừng kinh
-                doanh khách sạn. Bạn có thể mở kinh doanh lại loại phòng trong
-                tương lai.
+              {idHotel?.status == "paused"?"Hãy đảm bảo cập nhật đầu đủ thông tin, giá và tình trạng sãn sàng trước khi mở lại hoạt động kinh doanh để tránh sai sót trong quá trình đặt phòng.":" Khách sẽ không nhìn thấy khách sạn này sau khi bạn ngừng kinh doanh khách sạn. Bạn có thể mở kinh doanh lại loại phòng trong tương lai."}  
+               
               </Typography>
             </DialogContent>
             <DialogActions
@@ -275,7 +277,18 @@ export default function InforHotelView() {
                 flexDirection: "column",
               }}>
               <Button
-                onClick={() => {}}
+                onClick={async() => {
+                  try {
+                    let result = await toggleHotels(idHotel?.id);
+                    if(result?.hotel_id){
+                      getDataHotels()
+                      setDeleteDialogOpen(false)
+                    }
+                  } catch (error) {
+                    console.log(error)
+                  }
+
+                 }}
                 variant='contained'
                 sx={{
                   borderRadius: "24px",
@@ -284,7 +297,7 @@ export default function InforHotelView() {
                   "&:hover": { bgcolor: "#8ab020" },
                   width: "100%",
                 }}>
-                Xác nhận ngừng kinh doanh
+               {idHotel?.status == "paused"?"Gửi duyệt":"Xác nhận ngừng kinh doanh"} 
               </Button>
               <Button
                 onClick={() => setDeleteDialogOpen(false)}
@@ -305,3 +318,31 @@ export default function InforHotelView() {
     </Box>
   );
 }
+
+const parseLang = (str) => {
+  try {
+    const obj = JSON.parse(str);
+    return obj.vi || obj.en || "";
+  } catch {
+    return "";
+  }
+};
+const renderStatusChip = (status) => {
+  if (status === "active") {
+    return <Chip label='Đang hoạt động' size='small' sx={{ bgcolor: "#98B720", color: "white" }} />;
+  }
+  return <Chip label='Ngừng hoạt động' size='small' color='default' />;
+};
+
+const renderCooperationChip = (type) => {
+  if (type === "listing") {
+    return (
+      <Chip
+        label='Listing'
+        size='small'
+        sx={{ bgcolor: "#e3f2fd", color: "#1976d2" }}
+      />
+    );
+  }
+  return <Chip label={type} size='small' />;
+};

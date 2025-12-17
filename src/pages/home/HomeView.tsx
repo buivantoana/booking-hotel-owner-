@@ -791,7 +791,8 @@ export default function HomeView({
   setRoomTypeCheckin,
   roomTypeCheckin,
   dataEventCheckin,
-  dataEventBooked
+  dataEventBooked,
+  dataReview
 }) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const BOOKING_ITEMS = [
@@ -1017,75 +1018,19 @@ export default function HomeView({
           />
         </Grid>
       </Grid>
-      <Review />
+      <Review dataReview={dataReview} />
     </Box>
   );
 }
+const Review = ({ dataReview }) => {
+  const {
+    total_reviews = 0,
+    avg_rating = 0,
+    rating_stats = {},
+    recent_reviews = [],
+  } = dataReview || {};
 
-const Review = () => {
-  let reviews = [
-    {
-      id: "0wCyv2zNIl4K",
-      hotel_id: "bW8lRnD4jVq1",
-      booking_id: null,
-      user_id: null,
-      user_name: "David Brown",
-      avatar: "https://randomuser.me/api/portraits/women/12.jpg",
-      rate: 3,
-      hashtags: [],
-      comment: "Phòng cách âm chưa tốt nhưng tổng thể ổn.",
-      created_at: "2025-12-03T04:22:37",
-      owner_reply: null,
-      owner_reply_at: null,
-      attachments: [],
-    },
-    {
-      id: "7Vlop3EOohec",
-      hotel_id: "bW8lRnD4jVq1",
-      booking_id: null,
-      user_id: null,
-      user_name: "Emma Smith",
-      avatar: "https://randomuser.me/api/portraits/men/31.jpg",
-      rate: 4,
-      hashtags: [],
-      comment: "Phòng cách âm chưa tốt nhưng tổng thể ổn.",
-      created_at: "2025-12-03T04:22:37",
-      owner_reply: null,
-      owner_reply_at: null,
-      attachments: [],
-    },
-    {
-      id: "jkQk8ZVGUzgq",
-      hotel_id: "bW8lRnD4jVq1",
-      booking_id: null,
-      user_id: null,
-      user_name: "Emma Smith",
-      avatar: "https://randomuser.me/api/portraits/men/31.jpg",
-      rate: 3,
-      hashtags: [],
-      comment: "Bữa sáng ngon, view đẹp, rất hài lòng!",
-      created_at: "2025-12-03T04:22:37",
-      owner_reply: null,
-      owner_reply_at: null,
-      attachments: [],
-    },
-    {
-      id: "ZBibS9MKBdvq",
-      hotel_id: "bW8lRnD4jVq1",
-      booking_id: null,
-      user_id: null,
-      user_name: "Daniel Chen",
-      avatar: "https://randomuser.me/api/portraits/women/25.jpg",
-      rate: 5,
-      hashtags: [],
-      comment: "Dịch vụ tốt nhưng phòng hơi nhỏ.",
-      created_at: "2025-12-03T04:22:37",
-      owner_reply: null,
-      owner_reply_at: null,
-      attachments: [],
-    },
-  ];
-  const renderStars = (rating: number) => {
+  const renderStars = (rating) => {
     return [...Array(5)].map((_, i) => (
       <Star
         key={i}
@@ -1096,205 +1041,159 @@ const Review = () => {
       />
     ));
   };
-  const avgRate =
-    reviews.reduce((acc, r) => acc + r.rate, 0) / (reviews.length || 1);
-  const starCounts = [5, 4, 3, 2, 1].map(
-    (star) => reviews.filter((r) => r.rate === star).length
-  );
+
+  const starOrder = [5, 4, 3, 2, 1];
 
   return (
     <Stack mt={5} spacing={4}>
-      <Box
-        display={"flex"}
-        alignItems={"center"}
-        justifyContent={"space-between"}>
-        <Typography variant='h6' fontWeight='bold'>
+      {/* HEADER */}
+      <Box display="flex" alignItems="center" justifyContent="space-between">
+        <Typography variant="h6" fontWeight="bold">
           Tổng quan Đánh giá
         </Typography>
 
         <Button
-          variant='outlined'
+          variant="outlined"
           sx={{
             borderColor: "#98b720",
             color: "#98b720",
             borderRadius: "12px",
             textTransform: "none",
             fontWeight: 600,
-            mt: 3,
             px: 2,
             py: 1,
-            alignSelf: "flex-start",
             "&:hover": { borderColor: "#7a9a1a", bgcolor: "#f0f8f0" },
-          }}>
+          }}
+        >
           Show All Reviews
         </Button>
       </Box>
 
-      {/* TỔNG ĐIỂM */}
       <Card sx={{ borderRadius: 3, boxShadow: 3, p: 4 }}>
-        <Paper
-          elevation={0}
-          sx={{
-            borderRadius: "16px",
-            py: 3,
-
-            px: 0,
-          }}>
-          <Grid container alignItems='center'>
-            {/* Tổng điểm */}
-            <Grid item xs={12} md={6}>
-              <Box display={"flex"} gap={2}>
-                <Box
-                  sx={{
-                    bgcolor: "#98b720",
-                    color: "white",
-                    borderRadius: "12px",
-                    px: 5,
-                    py: 2.5,
-                    fontSize: "2rem",
-                    fontWeight: 700,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}>
-                  <Typography variant='h2'>{avgRate.toFixed(1)}</Typography>
-                </Box>
-                <Box>
-                  <Typography
-                    fontWeight={600}
-                    fontSize='1.4rem'
-                    color='rgba(152, 183, 32, 1)'>
-                    Xuất sắc
-                  </Typography>
-                  <Typography fontSize='0.85rem' color='rgba(43, 47, 56, 1)'>
-                    Từ {reviews.length} đánh giá
-                  </Typography>
-                  <Typography fontSize='0.8rem' color='#999'>
-                    Bởi người dùng trong Booking Hotel
-                  </Typography>
-                </Box>
+        <Grid container alignItems="center">
+          {/* AVG SCORE */}
+          <Grid item xs={12} md={6}>
+            <Box display="flex" gap={2}>
+              <Box
+                sx={{
+                  bgcolor: "#98b720",
+                  color: "white",
+                  borderRadius: "12px",
+                  px: 5,
+                  py: 2.5,
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <Typography variant="h2">
+                  {avg_rating.toFixed(1)}
+                </Typography>
               </Box>
-            </Grid>
 
-            {/* Biểu đồ rating */}
-            <Grid item xs={12} md={6}>
-              <Stack spacing={2}>
-                {[5, 4, 3, 2, 1].map((star, idx) => (
-                  <Stack
-                    key={star}
-                    direction='row'
-                    alignItems='center'
-                    spacing={2}>
-                    <Typography
-                      width={40}
-                      fontSize='0.9rem'
-                      display={"flex"}
-                      alignItems={"center"}
-                      gap={1}
-                      color='#666'>
-                      {star} <img src={start} alt='' />
+              <Box>
+                <Typography fontWeight={600} fontSize="1.4rem" color="#98b720">
+                  Xuất sắc
+                </Typography>
+                <Typography fontSize="0.85rem">
+                  Từ {total_reviews} đánh giá
+                </Typography>
+                <Typography fontSize="0.8rem" color="#999">
+                  Bởi người dùng trong Booking Hotel
+                </Typography>
+              </Box>
+            </Box>
+          </Grid>
+
+          {/* RATING STATS */}
+          <Grid item xs={12} md={6}>
+            <Stack spacing={2}>
+              {starOrder.map((star) => {
+                const count = rating_stats[star] || 0;
+                const percent = total_reviews
+                  ? (count / total_reviews) * 100
+                  : 0;
+
+                return (
+                  <Stack key={star} direction="row" alignItems="center" spacing={2}>
+                    <Typography width={40} fontSize="0.9rem">
+                      {star} ⭐
                     </Typography>
+
                     <Box sx={{ flex: 1 }}>
                       <LinearProgress
-                        variant='determinate'
-                        value={starCounts[idx]}
+                      
+                        variant="determinate"
+                        value={percent}
                         sx={{
                           height: 8,
                           borderRadius: 4,
                           bgcolor: "#e0e0e0",
                           "& .MuiLinearProgress-bar": {
                             bgcolor: "#98b720",
-                            borderRadius: 4,
                           },
                         }}
                       />
                     </Box>
-                    <Typography
-                      fontWeight={600}
-                      fontSize='0.9rem'
-                      color='#98b720'>
-                      {starCounts[idx]}/100
+
+                    <Typography fontWeight={600} fontSize="0.9rem" color="#98b720">
+                      {count}
                     </Typography>
                   </Stack>
-                ))}
-              </Stack>
-            </Grid>
+                );
+              })}
+            </Stack>
           </Grid>
-        </Paper>
+        </Grid>
 
-        {/* DANH SÁCH REVIEW */}
-        <Grid mt={5} container justifyContent={"space-between"}>
-          {reviews.slice(0, 3).map((review) => {
-            return (
-              <Grid item xs={12} md={3.8} key={review.id}>
+        {/* RECENT REVIEWS */}
+        <Grid mt={5} container spacing={3}>
+          {recent_reviews.length === 0 ? (
+            <Typography color="#999" textAlign="center" width="100%">
+              Chưa có đánh giá nào
+            </Typography>
+          ) : (
+            recent_reviews.slice(0, 3).map((review) => (
+              <Grid item xs={12} md={4} key={review.id}>
                 <Paper
-                  elevation={0}
                   sx={{
                     borderRadius: "16px",
                     p: 2.5,
                     border: "1px solid #eee",
-                    bgcolor: "white",
-                  }}>
+                  }}
+                >
                   <Stack spacing={1.5}>
-                    <Stack
-                      direction='row'
-                      spacing={1.5}
-                      justifyContent={"space-between"}
-                      alignItems='center'>
+                    <Stack direction="row" spacing={1.5}>
                       <img
-                        src={review?.avatar}
+                        src={review.avatar}
                         width={40}
                         height={40}
                         style={{ borderRadius: "50%" }}
-                        alt=''
+                        alt=""
                       />
-                      <Box
-                        display={"flex"}
-                        width={"90%"}
-                        justifyContent={"space-between"}>
-                        <Box>
-                          <Typography
-                            fontWeight={600}
-                            fontSize='0.95rem'
-                            color='#333'>
-                            {review.user_name}
-                          </Typography>
-                          <Stack direction='row' spacing={0.5}>
-                            {renderStars(review.rate)}
-                          </Stack>
-                        </Box>
-
-                        <Box display={"flex"} alignItems={"start"} gap={1}>
-                          <Typography fontSize='0.75rem' color='#999'>
-                            {review.created_at}
-                          </Typography>
-                        </Box>
+                      <Box>
+                        <Typography fontWeight={600}>
+                          {review.user_name}
+                        </Typography>
+                        <Stack direction="row" spacing={0.5}>
+                          {renderStars(review.rate)}
+                        </Stack>
                       </Box>
                     </Stack>
 
-                    <Typography
-                      fontSize='0.9rem'
-                      color='#666'
-                      lineHeight={1.6}
-                      sx={{
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        display: "-webkit-box",
-
-                        WebkitBoxOrient: "vertical",
-                      }}>
+                    <Typography fontSize="0.9rem" color="#666">
                       {review.comment}
                     </Typography>
                   </Stack>
                 </Paper>
               </Grid>
-            );
-          })}
+            ))
+          )}
         </Grid>
       </Card>
     </Stack>
   );
 };
+
 
 import { Popover, Divider, Badge } from "@mui/material";
 import {
