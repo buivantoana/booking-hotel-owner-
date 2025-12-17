@@ -13,13 +13,45 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
 } from "@mui/material";
-import React, { useState } from "react";
-import RoomDetail from "./RoomDetail";
+import React from "react";
 
-type Props = {};
+type Props = {
+  onNext: (action: string, roomId?: string) => void;
+  detailHotel: any; // dữ liệu hotel từ props
+};
+const formatPrice = (price: number | null | undefined): string => {
+  if (!price || price === 0) return "-";
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    minimumFractionDigits: 0,
+  }).format(price);
+};
+const ManagerRooms = ({ onNext, detailHotel, setRoom }: Props) => {
+  // Parse room_types từ props
+  const roomTypes = React.useMemo(() => {
+    if (!detailHotel || !Array.isArray(detailHotel.room_types)) {
+      return [];
+    }
 
-const ManagerRooms = ({ onNext }) => {
+    return detailHotel.room_types.map((room: any) => ({
+      ...room,
+      parsedName: JSON.parse(room.name || '{"vi":""}')?.vi || "Không có tên",
+      price_hourly_formatted: formatPrice(room.price_hourly),
+      price_overnight_formatted: formatPrice(room.price_overnight),
+      price_daily_formatted: formatPrice(room.price_daily),
+    }));
+  }, [detailHotel]);
+
+  const handleRoomClick = (room) => {
+    setRoom(room);
+    onNext("detail");
+  };
+
+  const totalRooms = roomTypes.length;
+
   return (
     <>
       <Paper
@@ -30,25 +62,27 @@ const ManagerRooms = ({ onNext }) => {
           border: "1px solid #eee",
           padding: 3,
         }}>
+        {/* Thống kê */}
         <Box sx={{ mb: 3 }}>
           <Stack direction='row' spacing={4} color='#555' fontSize={14}>
             <Box>
-              Tất cả <strong>100</strong>
+              Tất cả <strong>{totalRooms}</strong>
             </Box>
             <Box>
-              Dạng hoạt động <strong>90</strong>
+              Đang hoạt động <strong>{totalRooms}</strong>
             </Box>
             <Box>
-              Ngừng kinh doanh <strong>10</strong>
+              Ngừng kinh doanh <strong>0</strong>
             </Box>
             <Box>
-              Bị từ chối <strong>10</strong>
+              Bị từ chối <strong>0</strong>
             </Box>
             <Box>
-              Ngừng hợp tác <strong>10</strong>
+              Ngừng hợp tác <strong>0</strong>
             </Box>
           </Stack>
         </Box>
+
         <TableContainer>
           <Table sx={{ minWidth: 1000 }}>
             <TableHead>
@@ -71,34 +105,58 @@ const ManagerRooms = ({ onNext }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {/* Dòng có menu thao tác (giống hệt ảnh) */}
-              <TableRow hover>
-                <TableCell onClick={() => onNext("detail")} fontWeight={500}>
-                  Khách sạn 123
-                </TableCell>
-                <TableCell>
-                  <Chip
-                    label='Contract'
-                    size='small'
-                    sx={{ bgcolor: "#e3f2fd", color: "#1976d2" }}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Chip label='Đang hoạt động' size='small' color='success' />
-                </TableCell>
-                <TableCell sx={{ maxWidth: 280 }}>
-                  110 Đ. Cầu Giấy, Quan Hoa, Cầu Giấy, Hà Nội
-                </TableCell>
-                <TableCell>16%</TableCell>
-                <TableCell>Cả hai</TableCell>
-                <TableCell>
-                  <ActionMenu /> {/* ← Đây chính là popup menu 3 mục */}
-                </TableCell>
-              </TableRow>
+              {roomTypes.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} align='center' sx={{ py: 6 }}>
+                    <Typography color='#999'>Chưa có loại phòng nào</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                roomTypes.map((room: any) => (
+                  <TableRow key={room.id} hover>
+                    {/* Tên loại phòng */}
+                    <TableCell
+                      onClick={() => handleRoomClick(room)}
+                      sx={{
+                        fontWeight: 500,
+                        cursor: "pointer",
+                        "&:hover": {
+                          textDecoration: "underline",
+                          color: "#98B720",
+                        },
+                      }}>
+                      {room.parsedName}
+                    </TableCell>
 
-              {/* Các dòng khác (giữ nguyên) */}
+                    {/* Trang thái */}
+                    <TableCell>
+                      <Chip
+                        label='Đang hoạt động'
+                        size='small'
+                        color='success'
+                        variant='outlined'
+                      />
+                    </TableCell>
 
-              {/* Thêm các dòng khác nếu cần... */}
+                    {/* SL phòng bán - chưa có dữ liệu thực tế */}
+                    <TableCell>-</TableCell>
+
+                    {/* Giá theo giờ */}
+                    <TableCell>{room.price_hourly_formatted}</TableCell>
+
+                    {/* Giá qua đêm */}
+                    <TableCell>{room.price_overnight_formatted}</TableCell>
+
+                    {/* Giá qua ngày */}
+                    <TableCell>{room.price_daily_formatted}</TableCell>
+
+                    {/* Thao tác */}
+                    <TableCell align='right'>
+                      <ActionMenu />
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -109,8 +167,9 @@ const ManagerRooms = ({ onNext }) => {
 
 export default ManagerRooms;
 
+// Menu thao tác
 function ActionMenu() {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -131,11 +190,14 @@ function ActionMenu() {
         sx={{
           borderRadius: "20px",
           textTransform: "none",
-          borderColor: "rgba(152, 183, 32, 1)",
-          color: "rgba(152, 183, 32, 1)",
+          borderColor: "#98B720",
+          color: "#98B720",
           fontWeight: 500,
           minWidth: 110,
-          "&:hover": { borderColor: "#bbb" },
+          "&:hover": {
+            borderColor: "#98B720",
+            bgcolor: "rgba(152, 183, 32, 0.04)",
+          },
         }}>
         Thao tác
       </Button>

@@ -1,68 +1,145 @@
 import { Box, Typography, Button, Chip } from "@mui/material";
-import { ArrowBackIos, Edit as EditIcon } from "@mui/icons-material";
+import { ArrowBackIos, Edit as EditIcon, Star } from "@mui/icons-material";
+import { Grid, Paper, Stack, Divider } from "@mui/material";
+import ManagerRooms from "./ManagerRooms";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { getHotel } from "../../service/hotel";
 
-export default function HotelDetail({ setAction }) {
+export default function HotelDetail({ setAction, setRoom }) {
   return (
     <Box sx={{ minHeight: "100vh" }}>
-      <Box
-        sx={{
-          py: 3,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          borderBottom: "1px solid #eee",
-          pt: 0,
-        }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <ArrowBackIos
-            sx={{
-              fontSize: 20,
-              color: "#666",
-              cursor: "pointer",
-              "&:hover": { color: "#333" },
-            }}
-            onClick={() => setAction("manager")}
-          />
-
-          <Box>
-            <Typography
-              fontSize={22}
-              fontWeight={700}
-              color='#222'
-              sx={{ lineHeight: 1.2 }}>
-              Khách sạn 123
-            </Typography>
-          </Box>
-
-          {/* Badge trạng thái */}
-          <Chip
-            label='Đang hoạt động'
-            size='small'
-            sx={{
-              bgcolor: "#98B720",
-              color: "white",
-              fontWeight: 600,
-              fontSize: 13,
-              height: 28,
-              borderRadius: "16px",
-            }}
-          />
-        </Box>
-        <Box />
-      </Box>
-      <HotelInfoDetail onNext={setAction} />
+      <HotelHeader setAction={setAction} />
+      <HotelInfoDetail onNext={setAction} setRoom={setRoom} />
     </Box>
   );
 }
 
-import { Grid, Paper, Avatar, Stack, Divider } from "@mui/material";
-import { LocationOn, Star, Edit } from "@mui/icons-material";
-import image from "../../images/Rectangle 29975.png";
-import ManagerRooms from "./ManagerRooms";
-import RoomDetail from "./RoomDetail";
-import { useState } from "react";
-function HotelInfoDetail({ onNext }) {
+function HotelHeader({ setAction }) {
+  const [detailHotel, setDetailHotel] = useState({});
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("id")) {
+      (async () => {
+        try {
+          let result = await getHotel(searchParams.get("id"));
+          if (result?.id) {
+            setDetailHotel(result);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      })();
+    }
+  }, [searchParams]);
+
+  const parseVi = (str) => {
+    if (!str) return "";
+    try {
+      const parsed = JSON.parse(str);
+      return parsed.vi || "";
+    } catch {
+      return str;
+    }
+  };
+
+  const hotelName = parseVi(detailHotel.name) || "Khách sạn";
+
+  return (
+    <Box
+      sx={{
+        py: 3,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        borderBottom: "1px solid #eee",
+        pt: 0,
+      }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+        <ArrowBackIos
+          sx={{
+            fontSize: 20,
+            color: "#666",
+            cursor: "pointer",
+            "&:hover": { color: "#333" },
+          }}
+          onClick={() => setAction("manager")}
+        />
+
+        <Box>
+          <Typography
+            fontSize={22}
+            fontWeight={700}
+            color='#222'
+            sx={{ lineHeight: 1.2 }}>
+            {hotelName}
+          </Typography>
+        </Box>
+
+        <Chip
+          label='Đang hoạt động'
+          size='small'
+          sx={{
+            bgcolor: "#98B720",
+            color: "white",
+            fontWeight: 600,
+            fontSize: 13,
+            height: 28,
+            borderRadius: "16px",
+          }}
+        />
+      </Box>
+      <Box />
+    </Box>
+  );
+}
+
+function HotelInfoDetail({ onNext, setRoom }) {
   const [action, setAction] = useState("manager");
+  const [detailHotel, setDetailHotel] = useState({});
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("id")) {
+      (async () => {
+        try {
+          let result = await getHotel(searchParams.get("id"));
+          if (result?.id) {
+            setDetailHotel(result);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      })();
+    }
+  }, [searchParams]);
+
+  const parseVi = (str) => {
+    if (!str) return "";
+    try {
+      const parsed = JSON.parse(str);
+      return parsed.vi || "";
+    } catch {
+      return str;
+    }
+  };
+
+  const hotelName = parseVi(detailHotel.name);
+  const hotelAddress = parseVi(detailHotel.address);
+  const hotelDescription = parseVi(detailHotel.description);
+  const phone = detailHotel.phone || "0123456789";
+  const rentTypes = detailHotel.rent_types
+    ? JSON.parse(detailHotel.rent_types)
+    : {};
+  const rentStr = `08:00 ~ 22:00 / ${rentTypes.overnight?.from || "22:00"} ~ ${
+    rentTypes.overnight?.to || "08:00"
+  } / ${rentTypes.daily?.from || "14:00"} ~ ${rentTypes.daily?.to || "12:00"}`;
+
+  const images = detailHotel.images ? JSON.parse(detailHotel.images) : [];
+  const mainImage = images[0] || null;
+  const thumbImages = images.slice(0, 3);
+
   return (
     <Paper
       elevation={0}
@@ -80,7 +157,6 @@ function HotelInfoDetail({ onNext }) {
           alignItems: "center",
           mb: 3,
         }}>
-        {/* Tab điều hướng */}
         <Box sx={{ display: "flex", gap: 4 }}>
           <Typography
             fontSize={16}
@@ -107,13 +183,10 @@ function HotelInfoDetail({ onNext }) {
           </Typography>
         </Box>
 
-        {/* Nút Chỉnh sửa */}
         <Button
           variant='contained'
           startIcon={<EditIcon />}
-          onClick={() => {
-            onNext("edit_form");
-          }}
+          onClick={() => onNext("edit_form")}
           sx={{
             bgcolor: "#98B720",
             color: "white",
@@ -127,9 +200,16 @@ function HotelInfoDetail({ onNext }) {
           Chỉnh sửa
         </Button>
       </Box>
-      {action == "rooms" && <ManagerRooms onNext={onNext} />}
 
-      {action == "manager" && (
+      {action === "rooms" && (
+        <ManagerRooms
+          onNext={onNext}
+          setRoom={setRoom}
+          detailHotel={detailHotel}
+        />
+      )}
+
+      {action === "manager" && (
         <>
           <Grid container spacing={{ xs: 3, md: 4 }}>
             {/* Cột 1: Hình ảnh khách sạn */}
@@ -138,24 +218,24 @@ function HotelInfoDetail({ onNext }) {
                 Hình ảnh khách sạn
               </Typography>
 
-              {/* Ảnh chính */}
-              <Box
-                sx={{
-                  borderRadius: "16px",
-                  overflow: "hidden",
-                  mb: 2,
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                }}>
-                <img
-                  src={image} // thay bằng ảnh thật của bạn
-                  alt='Phòng khách sạn'
-                  style={{ width: "100%", height: "auto", display: "block" }}
-                />
-              </Box>
+              {mainImage ? (
+                <Box
+                  sx={{
+                    borderRadius: "16px",
+                    overflow: "hidden",
+                    mb: 2,
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                  }}>
+                  <img
+                    src={mainImage}
+                    alt='Khách sạn chính'
+                    style={{ width: "100%", display: "block" }}
+                  />
+                </Box>
+              ) : null}
 
-              {/* 3 ảnh nhỏ bên dưới */}
               <Stack direction='row' spacing={1}>
-                {[1, 2, 3].map((i) => (
+                {thumbImages.map((img, i) => (
                   <Box
                     key={i}
                     sx={{
@@ -165,8 +245,8 @@ function HotelInfoDetail({ onNext }) {
                       boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                     }}>
                     <img
-                      src={image}
-                      alt={`Ảnh ${i}`}
+                      src={img}
+                      alt={`Ảnh ${i + 1}`}
                       style={{
                         width: "100%",
                         height: "auto",
@@ -184,7 +264,7 @@ function HotelInfoDetail({ onNext }) {
                 Tên khách sạn/ Mã
               </Typography>
               <Typography fontSize={18} fontWeight={700} color='#222' mb={3}>
-                Khách sạn 123 (ABC_123456)
+                {hotelName} ({detailHotel.id || "ABC_123456"})
               </Typography>
 
               <Stack spacing={2.5}>
@@ -202,7 +282,7 @@ function HotelInfoDetail({ onNext }) {
                     Số điện thoại
                   </Typography>
                   <Typography fontSize={15} color='#333'>
-                    0123456789
+                    {phone}
                   </Typography>
                 </Box>
 
@@ -211,7 +291,7 @@ function HotelInfoDetail({ onNext }) {
                     Theo giờ/ Qua đêm/ Theo ngày
                   </Typography>
                   <Typography fontSize={15} color='#333'>
-                    08:00 ~ 22:00 / 22:00 ~ 08:00 / 14:00 ~ 12:00
+                    {rentStr}
                   </Typography>
                 </Box>
 
@@ -238,7 +318,7 @@ function HotelInfoDetail({ onNext }) {
                     Tỉnh thành/ Quận
                   </Typography>
                   <Typography fontSize={15} color='#333'>
-                    Nam Từ Liêm/ TP.Hà Nội
+                    Bắc Từ Liêm/ TP.Hà Nội
                   </Typography>
                 </Box>
 
@@ -247,7 +327,7 @@ function HotelInfoDetail({ onNext }) {
                     Địa chỉ
                   </Typography>
                   <Typography fontSize={15} color='#333'>
-                    Nam Từ Liêm, Việt Nam
+                    {hotelAddress || "Kinh Van, Bắc Từ Liêm, Việt Nam"}
                   </Typography>
                 </Box>
               </Stack>
@@ -261,7 +341,7 @@ function HotelInfoDetail({ onNext }) {
                     Mô tả
                   </Typography>
                   <Typography fontSize={15} color='#333'>
-                    Có
+                    {hotelDescription ? "Có" : "Không"}
                   </Typography>
                 </Box>
 
@@ -332,37 +412,58 @@ function HotelInfoDetail({ onNext }) {
               </Stack>
             </Grid>
           </Grid>
+
           <Divider sx={{ my: 4 }} />
-          <RoomTypeCard />
+
+          {/* Các loại phòng - render động nhưng giữ đúng layout cũ */}
+          <Box>
+            {(detailHotel.room_types || []).map((room) => (
+              <RoomTypeCard key={room.id} room={room} />
+            ))}
+          </Box>
         </>
       )}
     </Paper>
   );
 }
 
-function RoomTypeCard() {
-  return (
-    <Grid container spacing={{ xs: 3, md: 4 }}>
-      {/* Cột 1: Hình ảnh khách sạn */}
-      <Grid item xs={12} md={4}>
-        {/* Ảnh chính */}
-        <Box
-          sx={{
-            borderRadius: "16px",
-            overflow: "hidden",
-            mb: 2,
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-          }}>
-          <img
-            src={image} // thay bằng ảnh thật của bạn
-            alt='Phòng khách sạn'
-            style={{ width: "100%", height: "auto", display: "block" }}
-          />
-        </Box>
+function RoomTypeCard({ room }) {
+  const parseVi = (str) => {
+    if (!str) return "";
+    try {
+      const parsed = JSON.parse(str);
+      return parsed.vi || "";
+    } catch {
+      return str;
+    }
+  };
 
-        {/* 3 ảnh nhỏ bên dưới */}
+  const roomName = parseVi(room.name) || "Vip 206";
+  const images = room.images ? JSON.parse(room.images) : [];
+  const mainImage = images[0] || null;
+  const thumbImages = images.slice(0, 3);
+
+  return (
+    <Grid container spacing={{ xs: 3, md: 4 }} mb={4}>
+      <Grid item xs={12} md={4}>
+        {mainImage && (
+          <Box
+            sx={{
+              borderRadius: "16px",
+              overflow: "hidden",
+              mb: 2,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            }}>
+            <img
+              src={mainImage}
+              alt={roomName}
+              style={{ width: "100%", height: "auto", display: "block" }}
+            />
+          </Box>
+        )}
+
         <Stack direction='row' spacing={1}>
-          {[1, 2, 3].map((i) => (
+          {thumbImages.map((img, i) => (
             <Box
               key={i}
               sx={{
@@ -372,8 +473,8 @@ function RoomTypeCard() {
                 boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
               }}>
               <img
-                src={image}
-                alt={`Ảnh ${i}`}
+                src={img}
+                alt={`Ảnh phòng ${i + 1}`}
                 style={{ width: "100%", height: "auto", display: "block" }}
               />
             </Box>
@@ -381,7 +482,6 @@ function RoomTypeCard() {
         </Stack>
       </Grid>
 
-      {/* Cột 2: Thông tin chính */}
       <Grid item xs={12} md={4}>
         <Stack spacing={2.5}>
           <Box>
@@ -389,7 +489,7 @@ function RoomTypeCard() {
               Loại phòng
             </Typography>
             <Typography fontSize={15} color='#333'>
-              Vip 206
+              {roomName}
             </Typography>
           </Box>
 
@@ -398,7 +498,9 @@ function RoomTypeCard() {
               Giá 2 giờ đầu
             </Typography>
             <Typography fontSize={15} color='#333'>
-              0123456789
+              {room.price_hourly
+                ? `${room.price_hourly.toLocaleString()} VND`
+                : "0123456789"}
             </Typography>
           </Box>
 
@@ -407,7 +509,9 @@ function RoomTypeCard() {
               Giá thêm giờ
             </Typography>
             <Typography fontSize={15} color='#333'>
-              08:00 ~ 22:00 / 22:00 ~ 08:00 / 14:00 ~ 12:00
+              {room.price_hourly_increment
+                ? `${room.price_hourly_increment.toLocaleString()} VND`
+                : "08:00 ~ 22:00 / 22:00 ~ 08:00 / 14:00 ~ 12:00"}
             </Typography>
           </Box>
 
@@ -416,7 +520,9 @@ function RoomTypeCard() {
               Giá qua đêm
             </Typography>
             <Typography fontSize={15} color='#333'>
-              Tin nhắn/ Email/ Ứng dụng Hotel Booking
+              {room.price_overnight
+                ? `${room.price_overnight.toLocaleString()} VND`
+                : "Tin nhắn/ Email/ Ứng dụng Hotel Booking"}
             </Typography>
           </Box>
 
@@ -425,7 +531,9 @@ function RoomTypeCard() {
               Giá qua ngày
             </Typography>
             <Typography fontSize={15} color='#333'>
-              Trả trước/ Trả tại khách sạn
+              {room.price_daily
+                ? `${room.price_daily.toLocaleString()} VND`
+                : "Trả trước/ Trả tại khách sạn"}
             </Typography>
           </Box>
         </Stack>

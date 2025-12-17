@@ -18,17 +18,57 @@ import {
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import RoomTypeManager from "../create_hotel/RoomTypeManager";
+import RoomTypeManager from "./RoomTypeManager";
 import { Close, ContentCopy, Edit, PauseCircle } from "@mui/icons-material";
 import remove from "../../images/delete.png";
 import confirm from "../../images/Frame.png";
 
-export default function RoomDetail({ onNext }) {
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(true);
-  const [confirmDialogOpen, setConfirmDialogOpen] = useState(true);
+export default function RoomDetail({ onNext, room }) {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [action, setAction] = useState("detail");
+
+  // Parse dữ liệu từ room props
+  const parsedName = room
+    ? JSON.parse(room.name || '{"vi":""}').vi || "Không có tên"
+    : "";
+  const parsedBedType = room?.bed_type
+    ? typeof room.bed_type === "string"
+      ? JSON.parse(room.bed_type).vi
+      : room.bed_type
+    : "-";
+  const parsedDirection = room?.direction
+    ? typeof room.direction === "string"
+      ? JSON.parse(room.direction).vi
+      : room.direction
+    : "-";
+  const area = room?.area_m2 ? `${room.area_m2}m²` : "-";
+
+  // Parse hình ảnh phòng
+  const roomImages = React.useMemo(() => {
+    if (!room?.images) return [];
+    try {
+      const urls = JSON.parse(room.images);
+      return Array.isArray(urls) ? urls : [];
+    } catch (e) {
+      return [];
+    }
+  }, [room]);
+
+  // Format giá tiền VND
+  const formatPrice = (price) => {
+    if (!price || price === 0) return "-";
+    return (
+      new Intl.NumberFormat("vi-VN", {
+        style: "decimal",
+        minimumFractionDigits: 0,
+      }).format(price) + "đ"
+    );
+  };
+
   return (
     <Box sx={{ p: 2, minHeight: "100vh" }}>
+      {/* Dialog ngừng kinh doanh */}
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
@@ -53,7 +93,7 @@ export default function RoomDetail({ onNext }) {
             </Box>
             <IconButton
               onClick={() => setDeleteDialogOpen(false)}
-              sx={{ position: "absolute", top: -40, left: -30 }}>
+              sx={{ position: "absolute", top: -40, right: 8 }}>
               <Close />
             </IconButton>
           </Box>
@@ -75,7 +115,7 @@ export default function RoomDetail({ onNext }) {
             flexDirection: "column",
           }}>
           <Button
-            onClick={() => {}}
+            onClick={() => setDeleteDialogOpen(false)}
             variant='contained'
             sx={{
               borderRadius: "24px",
@@ -100,6 +140,8 @@ export default function RoomDetail({ onNext }) {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Dialog mở lại kinh doanh */}
       <Dialog
         open={confirmDialogOpen}
         onClose={() => setConfirmDialogOpen(false)}
@@ -112,7 +154,7 @@ export default function RoomDetail({ onNext }) {
               sx={{
                 width: 64,
                 height: 64,
-                bgcolor: "#ffebee",
+                bgcolor: "#e8f5e9",
                 borderRadius: "50%",
                 display: "flex",
                 alignItems: "center",
@@ -124,7 +166,7 @@ export default function RoomDetail({ onNext }) {
             </Box>
             <IconButton
               onClick={() => setConfirmDialogOpen(false)}
-              sx={{ position: "absolute", top: -40, left: -30 }}>
+              sx={{ position: "absolute", top: -40, right: 8 }}>
               <Close />
             </IconButton>
           </Box>
@@ -134,7 +176,7 @@ export default function RoomDetail({ onNext }) {
             Xác nhận mở lại kinh doanh
           </Typography>
           <Typography fontSize='14px' color='#666'>
-            Hãy đảm bảo cập nhật đầu đủ thông tin, giá và tình trạng sãn sàng
+            Hãy đảm bảo cập nhật đầy đủ thông tin, giá và tình trạng sẵn sàng
             trước khi mở lại hoạt động kinh doanh để tránh sai sót trong quá
             trình đặt phòng.
           </Typography>
@@ -147,7 +189,7 @@ export default function RoomDetail({ onNext }) {
             flexDirection: "column",
           }}>
           <Button
-            onClick={() => {}}
+            onClick={() => setConfirmDialogOpen(false)}
             variant='contained'
             sx={{
               borderRadius: "24px",
@@ -172,7 +214,9 @@ export default function RoomDetail({ onNext }) {
           </Button>
         </DialogActions>
       </Dialog>
-      {action == "detail" && (
+
+      {/* View chi tiết */}
+      {action === "detail" && room && (
         <>
           {/* Header */}
           <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
@@ -182,9 +226,9 @@ export default function RoomDetail({ onNext }) {
             />
             <Box>
               <Typography variant='h5' fontWeight={600}>
-                Vip 123
+                {parsedName}
               </Typography>
-              <Typography color='gray'>Khách sạn 123</Typography>
+              <Typography color='gray'>Kia Hai Hotel</Typography>
             </Box>
 
             <Chip
@@ -220,7 +264,7 @@ export default function RoomDetail({ onNext }) {
             </Button>
           </Box>
 
-          {/* Container White */}
+          {/* Container chính */}
           <Box
             sx={{
               background: "white",
@@ -235,10 +279,10 @@ export default function RoomDetail({ onNext }) {
 
             <Grid container spacing={2} mb={4}>
               {[
-                { label: "Số lượng phòng bán", value: "10" },
-                { label: "Diện tích", value: "25m2" },
-                { label: "Loại giường", value: "1 giường đơn" },
-                { label: "Hướng phòng", value: "Hướng thành phố" },
+                { label: "Số lượng phòng bán", value: "Không giới hạn" },
+                { label: "Diện tích", value: area },
+                { label: "Loại giường", value: parsedBedType },
+                { label: "Hướng phòng", value: parsedDirection },
               ].map((item, idx) => (
                 <Grid item xs={12} sm={6} md={3} key={idx}>
                   <Box
@@ -257,71 +301,52 @@ export default function RoomDetail({ onNext }) {
               ))}
             </Grid>
 
-            {/* Tiện ích phòng */}
+            {/* Tiện ích phòng - tạm để trống nếu không có dữ liệu rõ ràng */}
             <Typography fontWeight={700} mt={8} mb={2}>
               Tiện ích phòng
             </Typography>
-
-            <Box sx={{ display: "flex", gap: 2, mb: 4 }}>
-              <Chip
-                label='Bảo quản hành lý'
-                clickable
-                sx={{
-                  background: "#E8F5E9",
-                  color: "#2E7D32",
-                  borderRadius: 3,
-                  px: 2,
-                  fontWeight: 600,
-                }}
-              />
-              <Chip
-                label='Thang máy'
-                clickable
-                sx={{
-                  background: "#E8F5E9",
-                  color: "#2E7D32",
-                  borderRadius: 3,
-                  px: 2,
-                  fontWeight: 600,
-                }}
-              />
+            <Box sx={{ mb: 4 }}>
+              <Typography color='#999' fontStyle='italic'>
+                Chưa có tiện ích nào được thiết lập
+              </Typography>
             </Box>
 
             {/* Hình ảnh */}
             <Typography fontWeight={700} mb={2}>
-              Hình ảnh khách sạn
+              Hình ảnh phòng
             </Typography>
 
-            <Grid container spacing={2} mb={4}>
-              {[1, 2, 3].map((i) => (
-                <Grid item xs={12} sm={4} key={i}>
-                  <Box
-                    component='img'
-                    src='https://i.imgur.com/4ZQZ4ZQ.jpeg'
-                    sx={{
-                      width: "100%",
-                      height: 200,
-                      objectFit: "cover",
-                      borderRadius: 3,
-                    }}
-                  />
-                </Grid>
-              ))}
-            </Grid>
+            {roomImages.length === 0 ? (
+              <Typography color='#999'>Chưa có hình ảnh</Typography>
+            ) : (
+              <Grid container spacing={2} mb={4}>
+                {roomImages.map((url, i) => (
+                  <Grid item xs={12} sm={6} md={4} key={i}>
+                    <Box
+                      component='img'
+                      src={url}
+                      alt={`Room image ${i + 1}`}
+                      sx={{
+                        width: "100%",
+                        height: 220,
+                        objectFit: "cover",
+                        borderRadius: 3,
+                      }}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+            )}
 
             {/* Giá phòng */}
             <Typography fontWeight={700} mb={2}>
               Giá phòng
             </Typography>
 
-            <Grid container spacing={2}>
+            <Grid container spacing={3}>
               {/* Theo giờ */}
               <Grid item xs={12} md={4}>
-                <Card
-                  sx={{
-                    borderRadius: 3,
-                    border: "1px solid #DCEFD8",
-                  }}>
+                <Card sx={{ borderRadius: 3, border: "1px solid #DCEFD8" }}>
                   <CardContent>
                     <Box
                       sx={{
@@ -335,23 +360,28 @@ export default function RoomDetail({ onNext }) {
                       }}>
                       Theo giờ
                     </Box>
-                    <Box display={"flex"} justifyContent={"space-between"}>
+                    <Box display='flex' justifyContent='space-between'>
                       <Box>
                         <Typography fontWeight={600}>Giá 2 giờ đầu</Typography>
-                        <Typography color='#82B440' fontWeight={700} mb={1}>
-                          160.000đ
+                        <Typography
+                          color='#82B440'
+                          fontWeight={700}
+                          fontSize='1.2rem'>
+                          {formatPrice(room.price_hourly)}
                         </Typography>
                       </Box>
                       <Box>
                         <Typography fontWeight={600}>Giá giờ thêm</Typography>
-                        <Typography color='#82B440' fontWeight={700} mb={1}>
-                          100.000đ
+                        <Typography
+                          color='#82B440'
+                          fontWeight={700}
+                          fontSize='1.2rem'>
+                          {formatPrice(room.price_hourly_increment)}
                         </Typography>
                       </Box>
                     </Box>
-
-                    <Typography fontSize={13} mt={1}>
-                      ✓ Cho phép khách đặt tối đa thêm 4 giờ với mỗi đặt phòng
+                    <Typography fontSize={13} mt={2} color='#666'>
+                      ✓ Cho phép khách đặt tối đa thêm giờ tùy theo quy định
                     </Typography>
                   </CardContent>
                 </Card>
@@ -373,10 +403,12 @@ export default function RoomDetail({ onNext }) {
                       }}>
                       Qua đêm
                     </Box>
-
                     <Typography fontWeight={600}>Giá 1 đêm</Typography>
-                    <Typography color='#1565C0' fontWeight={700}>
-                      500.000đ
+                    <Typography
+                      color='#1565C0'
+                      fontWeight={700}
+                      fontSize='1.4rem'>
+                      {formatPrice(room.price_overnight)}
                     </Typography>
                   </CardContent>
                 </Card>
@@ -398,10 +430,12 @@ export default function RoomDetail({ onNext }) {
                       }}>
                       Theo ngày
                     </Box>
-
                     <Typography fontWeight={600}>Giá 1 ngày</Typography>
-                    <Typography color='#DAA200' fontWeight={700}>
-                      750.000đ
+                    <Typography
+                      color='#DAA200'
+                      fontWeight={700}
+                      fontSize='1.4rem'>
+                      {formatPrice(room.price_daily)}
                     </Typography>
                   </CardContent>
                 </Card>
@@ -410,7 +444,9 @@ export default function RoomDetail({ onNext }) {
           </Box>
         </>
       )}
-      {action == "edit" && (
+
+      {/* View chỉnh sửa */}
+      {action === "edit" && (
         <Box>
           <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
             <KeyboardArrowLeftIcon
@@ -419,9 +455,9 @@ export default function RoomDetail({ onNext }) {
             />
             <Box>
               <Typography variant='h5' fontWeight={600}>
-                Chỉnh sửa phòng
+                Chỉnh sửa loại phòng
               </Typography>
-              <Typography color='gray'>Khách sạn 123</Typography>
+              <Typography color='gray'>Kia Hai Hotel</Typography>
             </Box>
 
             <Box sx={{ flexGrow: 1 }} />
@@ -435,21 +471,22 @@ export default function RoomDetail({ onNext }) {
                 px: 3,
                 "&:hover": { background: "#6fa336" },
               }}>
-              Duyệt phòng
+              Cập nhật
             </Button>
           </Box>
-          <RoomTypeManager />
+          <RoomTypeManager room={room} />
         </Box>
       )}
     </Box>
   );
 }
 
-function ActionMenu({ setConfirmDialogOpen }) {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+// Menu thao tác (3 chấm)
+function ActionMenu({ setDeleteDialogOpen, setConfirmDialogOpen }) {
+  const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -466,12 +503,14 @@ function ActionMenu({ setConfirmDialogOpen }) {
         sx={{
           borderRadius: "20px",
           textTransform: "none",
-          borderColor: "rgba(152, 183, 32, 1)",
-          color: "rgba(152, 183, 32, 1)",
+          borderColor: "#98B720",
+          color: "#98B720",
           fontWeight: 500,
-          mr: 1,
-
-          "&:hover": { borderColor: "#bbb" },
+          mr: 2,
+          "&:hover": {
+            borderColor: "#98B720",
+            bgcolor: "rgba(152,183,32,0.04)",
+          },
         }}>
         Thao tác
       </Button>
@@ -496,7 +535,10 @@ function ActionMenu({ setConfirmDialogOpen }) {
           Nhận bản
         </MenuItem>
         <MenuItem
-          onClick={handleClose}
+          onClick={() => {
+            handleClose();
+            setDeleteDialogOpen(true);
+          }}
           sx={{ gap: 1.5, fontSize: 14, color: "#d32f2f" }}>
           <PauseCircle fontSize='small' />
           Ngừng kinh doanh
