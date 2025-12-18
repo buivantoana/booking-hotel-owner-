@@ -24,9 +24,10 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import remove from "../../images/delete.png";
 import { ArrowBackIos } from "@mui/icons-material";
-import RoomTypeManager from "../create_hotel/RoomTypeManager";
+import RoomTypeManager from "../infor-hotel/RoomTypeManager";
 
-export default function CreateRoom({ setAction }) {
+
+export default function CreateRoom({ setAction,idHotel }) {
   const [hotel, setHotel] = React.useState("");
   const [roomType, setRoomType] = React.useState("");
   const [bookingType, setBookingType] = React.useState("");
@@ -38,16 +39,16 @@ export default function CreateRoom({ setAction }) {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ p: 3, background: "#F7F9FB", minHeight: "100vh" }}>
-        <Box
+        {/* <Box
           display={"flex"}
           justifyContent={"space-between"}
           mb={4}
           alignItems={"center"}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            {/* Nút back (có thể thay bằng Link hoặc onClick) */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+           
             <ArrowBackIos
               sx={{
-                fontSize: 30,
+                fontSize: 22,
                 color: "#666",
                 cursor: "pointer",
                 "&:hover": { color: "#333" },
@@ -56,16 +57,13 @@ export default function CreateRoom({ setAction }) {
             />
 
             <Box>
-              <Typography sx={{ fontSize: 24, fontWeight: 700 }}>
+              <Typography sx={{ fontSize: 22, fontWeight: 700 }}>
                 Tạo loại phòng
-              </Typography>
-              <Typography fontSize={13} color='#888' fontWeight={500}>
-                Khách sạn 123
               </Typography>
             </Box>
           </Box>
 
-          {/* Nút Duyệt phòng bên phải */}
+          
           <Button
             variant='contained'
             sx={{
@@ -85,8 +83,8 @@ export default function CreateRoom({ setAction }) {
             }}>
             Duyệt phòng
           </Button>
-        </Box>
-        <RoomTypeManager />
+        </Box> */}
+        <RoomTypeManager setAction={setAction} idHotel={idHotel} isCreate={true} />
       </Box>
     </LocalizationProvider>
   );

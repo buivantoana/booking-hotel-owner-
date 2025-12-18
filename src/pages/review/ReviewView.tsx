@@ -96,7 +96,7 @@ const Review = ({ reviews, hotels, idHotel, setIdHotel }) => {
         </Box>
       </Box>
 
-      <Card sx={{ borderRadius: 3, boxShadow: 3, p: 4 }}>
+      <Card sx={{ borderRadius: 3, p: 4 }}>
         <Paper elevation={0} sx={{ borderRadius: "16px", py: 3, px: 0 }}>
           <Grid container alignItems="start">
             <Grid item xs={12} md={6}>
@@ -224,7 +224,7 @@ function HotelReview({ reviews,getReview }) {
           Danh sách đánh giá
         </Typography>
       </Box>
-      <Card sx={{ borderRadius: 3, boxShadow: 3, p: 4 }}>
+      <Card sx={{ borderRadius: 3, p: 4 }}>
         {/* Tabs + Sort button - giữ nguyên 100% */}
         <Box
           display={"flex"}

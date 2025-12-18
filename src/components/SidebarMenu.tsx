@@ -76,12 +76,33 @@ export default function SidebarMenu() {
                 "&:hover": {
                   bgcolor: isActive ? "#EAF7D3" : "#f5f5f5",
                 },
-              }}>
+                fontWeight: isActive ? 700 : 500,
+              }}
+            >
               <ListItemIcon
-                sx={{ color: isActive ? "#7CB518" : "#8B93A1", minWidth: 40 }}>
+                sx={{ color: isActive ? "#7CB518" : "#8B93A1", minWidth: 40 }}
+              >
                 {item.icon}
               </ListItemIcon>
-              <ListItemText primary={item.label} />
+
+              <ListItemText
+                primary={item.label}
+                // Set fontSize ở đây là tốt nhất
+                sx={{
+                  "& .MuiTypography-root": {
+                    fontSize: "18px", // hoặc "1rem"
+                    fontWeight: "inherit", // Kế thừa fontWeight từ ListItemButton
+                  }
+                }}
+
+                // Hoặc dùng primaryTypographyProps
+                primaryTypographyProps={{
+                  sx: {
+                    fontSize: "16px",
+                    fontWeight: "inherit",
+                  }
+                }}
+              />
             </ListItemButton>
           );
         })}

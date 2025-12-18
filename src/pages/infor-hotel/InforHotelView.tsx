@@ -40,7 +40,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-
+  const navigate = useNavigate()
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -80,7 +80,11 @@ function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
           },
         }}>
         <MenuItem
-          onClick={() => setAction("edit_form")}
+          onClick={() => {
+
+            setAction("edit_form")
+            navigate(`/info-hotel?id=${hotel.id}`);
+          }}
           sx={{ gap: 1.5, fontSize: 14 }}>
           <EditIcon fontSize='small' sx={{ color: "#666" }} />
           Chỉnh sửa
@@ -126,13 +130,13 @@ export default function InforHotelView({ hotels, getDataHotels }) {
       getHotelDetail()
     }
   }, [searchParams]);
-  const getHotelDetail =  async () => {
+  const getHotelDetail = async () => {
     try {
       let result = await getHotel(searchParams.get("id"));
       if (result?.id) {
         setDetailHotel(result);
-        if(room.id){
-          setRoom(result?.room_types.find((item)=>item.id == room.id))
+        if (room.id) {
+          setRoom(result?.room_types.find((item) => item.id == room.id))
         }
       }
     } catch (error) {
@@ -164,6 +168,9 @@ export default function InforHotelView({ hotels, getDataHotels }) {
 
             <Button
               variant='contained'
+              onClick={()=>{
+                navigate("/create-hotel")
+              }}
               startIcon={<AddIcon />}
               sx={{
                 bgcolor: "#98B720",

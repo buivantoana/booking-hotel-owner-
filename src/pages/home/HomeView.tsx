@@ -395,7 +395,7 @@ const PerformanceChart = ({
   // Format text hiển thị
   const change = `${changePercent >= 0 ? "+" : ""}${changePercent.toFixed(1)}%`;
   return (
-    <Card sx={{ borderRadius: 3, boxShadow: 3, height: "100%" }}>
+    <Card sx={{ borderRadius: 3, height: "100%" }}>
       <CardContent sx={{ pb: 4 }}>
         <Typography fontSize={"18px"} fontWeight='bold' gutterBottom>
           {title}
@@ -445,7 +445,7 @@ const PerformanceChart = ({
           <ResponsiveContainer width='100%' height='100%'>
             <LineChart
               data={chartData}
-              margin={{ top: 40, right: 30, bottom: 30, left: 40 }}>
+              margin={{  left: -20,right:10 }}>
               <CartesianGrid
                 stroke='#f0f0f0'
                 vertical={false}
@@ -569,7 +569,7 @@ const RevenueCompareChart = ({
   }));
 
   return (
-    <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
+    <Card sx={{ borderRadius: 3 }}>
       <CardContent>
         <Stack
           direction='row'
@@ -609,7 +609,8 @@ const RevenueCompareChart = ({
           <ResponsiveContainer width='100%' height='100%'>
             <BarChart
               data={revenueCompareData}
-              margin={{ top: 20, right: 30, left: 50, bottom: 20 }}>
+              margin={{  left: -20,right:10 }}
+             >
               <CartesianGrid
                 strokeDasharray='3 3'
                 stroke='#f0f0f0'
@@ -685,7 +686,7 @@ const RevenuePaymentChart = ({
     "Trả tại khách sạn": item.offline
   }));
   return (
-    <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
+    <Card sx={{ borderRadius: 3 }}>
       <CardContent>
         <Stack
           direction='row'
@@ -714,7 +715,8 @@ const RevenuePaymentChart = ({
           <ResponsiveContainer width='100%' height='100%'>
             <BarChart
               data={revenueStackData}
-              margin={{ top: 20, right: 30, left: 50, bottom: 20 }}>
+              margin={{  left: -20,right:10 }}
+             >
               <CartesianGrid
                 strokeDasharray='3 3'
                 stroke='#f0f0f0'
@@ -889,7 +891,7 @@ export default function HomeView({
 
           return (
             <Grid item xs={12} md={4} key={card.key}>
-              <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
+              <Card sx={{ borderRadius: 3 }}>
                 <CardContent>
                   <Stack
                     direction='row'
@@ -1077,7 +1079,7 @@ const Review = ({ dataReview }) => {
         </Button>
       </Box>
 
-      <Card sx={{ borderRadius: 3, boxShadow: 3, p: 4 }}>
+      <Card sx={{ borderRadius: 3, p: 4 }}>
         <Grid container alignItems="center">
           {/* AVG SCORE */}
           <Grid item xs={12} md={6}>

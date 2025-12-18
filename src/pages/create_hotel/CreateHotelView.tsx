@@ -8,6 +8,7 @@ const CreateHotelView = ({submitCreateHotel}) => {
   const [typeHotel, setTypeHotel] = useState("Khách sạn Listing");
   const context = useBookingContext()
   const [loading,setLoading] = useState(false)
+  const navigate = useNavigate()
   const handleStepClick = (id) => {
     console.log("Bạn vừa chọn step:", id);
     setStep(id);
@@ -178,9 +179,11 @@ onFieldTouch={(field) => setTouched(prev => ({ ...prev, [field]: true }))}
       {step < 6 && (
         <Box my={5} display={"flex"} justifyContent={"space-between"}>
           <Typography
-            sx={{ display: "flex", alignItems: "center", gap: 1 }}
-            color='#FF3030'>
-            <LoginIcon color='#FF3030' /> Đăng xuất
+            sx={{ display: "flex", alignItems: "center", gap: 1,cursor:"pointer" }}
+            color='#FF3030' onClick={()=>{
+              navigate("/")
+            }}>
+            <LoginIcon color='#FF3030' /> Trở về
           </Typography>
           <Button
             fullWidth
@@ -323,6 +326,7 @@ import success from "../../images/Frame 1321317962.png";
 import { useBookingContext } from "../../App";
 import { validateBasicInfo, validateImageUpload, validateLocation, validateRoomTypes } from "../../utils/utils";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const CreateSuccess = () => {
   const theme = useTheme();

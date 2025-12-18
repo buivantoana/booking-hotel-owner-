@@ -21,6 +21,9 @@ export default function ManagerRoomView({
   dateRange,
   loading,
   data,
+  hotels,
+  idHotel,
+  setIdHotel,
 }) {
   const isMobile = useMediaQuery("(max-width:600px)");
 
@@ -36,7 +39,7 @@ export default function ManagerRoomView({
 
   return (
     <>
-      {action == "create" && <CreateRoom setAction={setAction} />}
+      {action == "create" && <CreateRoom idHotel={idHotel} setAction={setAction} />}
       {action == "lock" && <LockRoomSetup setAction={setAction} />}
       {action == "manager" && (
         <Box py={2} px={isMobile ? 1 : 3}>
@@ -51,11 +54,13 @@ export default function ManagerRoomView({
               </Typography>
 
               <Box display='flex' alignItems='center' gap={1}>
-                <Typography fontSize={14} color='grey.700' fontWeight={500}>
-                  Khách sạn 123
-                </Typography>
-                <KeyboardArrowDownIcon
-                  sx={{ fontSize: 20, color: "grey.700" }}
+                <HotelSelect
+                  value={idHotel}
+                  hotelsData={hotels}
+                  onChange={(id) => {
+                    setIdHotel(id);
+                    console.log("ID khách sạn được chọn:", id);
+                  }}
                 />
 
                 <Box display='flex' alignItems='center' gap={0.5} ml={2}>
@@ -548,7 +553,7 @@ function RoomScheduleTableHourly({
   const columnWidth = `${100 / totalSlots}%`;
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  console.log("AAAA",dayGroups)
+  console.log("AAAA", dayGroups)
   return (
     <Box p={2} bgcolor='#fff'>
       {/* CHỈ 1 CONTAINER CUỘN DUY NHẤT */}
@@ -905,7 +910,7 @@ function RoomScheduleTableDaily({
                 {dailySlots?.map((slot) => {
                   const dateObj = new Date(slot.date);
                   const dayNum = dateObj && format(dateObj, "dd");
-                  const dayName = dateObj&& format(dateObj, "EEEE", { locale: vi })
+                  const dayName = dateObj && format(dateObj, "EEEE", { locale: vi })
                     .replace("Chủ nhật", "CN")
                     .replace("Thứ ", "thứ ")
                     .toLowerCase();
@@ -1165,8 +1170,8 @@ function RoomScheduleTableOvernight({
               <Box display='flex' borderBottom='2px solid #ddd' bgcolor='white'>
                 {dailySlots?.map((slot) => {
                   const dateObj = new Date(slot?.date);
-                  const dayNum = dateObj&& format(dateObj, "dd");
-                  const dayName = dateObj&& format(dateObj, "EEEE", { locale: vi })
+                  const dayNum = dateObj && format(dateObj, "dd");
+                  const dayName = dateObj && format(dateObj, "EEEE", { locale: vi })
                     .replace("Chủ nhật", "CN")
                     .replace("Thứ ", "thứ ")
                     .toLowerCase();
@@ -1380,6 +1385,7 @@ import LockRoomSetup from "./LockRoomSetup";
 import CreateRoom from "./CreateRoom";
 import SimpleDateSearchBar from "../../components/SimpleDateSearchBar";
 import Loading from "../../components/Loading";
+import HotelSelect from "../../components/HotelSelect";
 
 dayjs.locale("vi");
 

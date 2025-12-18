@@ -25,7 +25,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import { useBookingContext } from "../../App"; // Điều chỉnh đường dẫn nếu cần
 import { KeyboardArrowLeft } from "@mui/icons-material";
-import { updateRoom } from "../../service/hotel";
+import { createRoomHotel, updateRoom } from "../../service/hotel";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -96,7 +96,7 @@ interface RoomTypeManagerProps {
   room?: RoomFromAPI | null;
 }
 
-export default function RoomTypeManager({ room, setAction, getHotelDetail }: RoomTypeManagerProps) {
+export default function RoomTypeManager({ room, setAction, getHotelDetail,isCreate,idHotel }: RoomTypeManagerProps) {
   const dataRef = useRef<{ roomTypes: RoomType[]; activeTab: number }>({
     roomTypes: [],
     activeTab: 0,
@@ -282,98 +282,112 @@ export default function RoomTypeManager({ room, setAction, getHotelDetail }: Roo
   };
 
   const handleSubmitRoomType = async () => {
-    // Vì UI hiện tại chỉ hiển thị 1 loại phòng (tabs bị comment), nên lấy roomTypes[0]
-    const room = roomTypes[0];
 
-    const formData = new FormData();
-
-    // Helper: chuyển string → {"vi": "giá trị"}
-    const toViJson = (value: string): string => {
-      return JSON.stringify({ vi: (value || "").trim() });
+    const toViJson = (value: string): string =>
+      JSON.stringify({ vi: (value || "").trim() });
+  
+    const buildFormData = (room) => {
+      const formData = new FormData();
+  
+      formData.append("name", toViJson(room.name));
+      formData.append("description", toViJson(room.description || ""));
+      formData.append("facilities", "{}");
+      formData.append("currency", "VND");
+      formData.append("number", room.quantity || "1");
+      formData.append("area_m2", room.area || "");
+      formData.append("max_guests", "2");
+  
+      formData.append("bed_type", toViJson(room.bedType));
+      formData.append("direction", toViJson(room.direction));
+  
+      if (room.pricing.hourly.enabled) {
+        if (room.pricing.hourly.firstHours) {
+          formData.append("price_hourly", room.pricing.hourly.firstHours);
+        }
+        if (room.pricing.hourly.extraHour) {
+          formData.append("price_hourly_increment", room.pricing.hourly.extraHour);
+        }
+      }
+  
+      if (room.pricing.overnight.enabled && room.pricing.overnight.price) {
+        formData.append("price_overnight", room.pricing.overnight.price);
+      }
+  
+      if (room.pricing.daily.enabled && room.pricing.daily.price) {
+        formData.append("price_daily", room.pricing.daily.price);
+      }
+  
+      if (room.images?.length) {
+        room.images.forEach((file: File) => {
+          if (file instanceof File) {
+            formData.append("images", file);
+          }
+        });
+      }
+  
+      return formData;
     };
-
-    // === Các field bắt buộc theo đúng curl của bạn ===
-    formData.append("name", toViJson(room.name));
-    formData.append("description", toViJson(room.description || ""));
-    formData.append("facilities", "{}"); // chưa có UI → để object rỗng
-    formData.append("currency", "VND");
-    formData.append("number", room.quantity || "1");        // số lượng phòng bán
-    formData.append("area_m2", room.area || "");
-    formData.append("max_guests", "2");                     // tạm hardcode (có thể thêm field sau)
-
-    // bed_type & direction → bọc trong {"vi": "..."}
-    formData.append("bed_type", toViJson(room.bedType));
-    formData.append("direction", toViJson(room.direction));
-
-    // === Giá phòng ===
-    if (room.pricing.hourly.enabled) {
-      if (room.pricing.hourly.firstHours) {
-        formData.append("price_hourly", room.pricing.hourly.firstHours);
-      }
-      if (room.pricing.hourly.extraHour) {
-        formData.append("price_hourly_increment", room.pricing.hourly.extraHour);
-      }
-    }
-
-    if (room.pricing.overnight.enabled && room.pricing.overnight.price) {
-      formData.append("price_overnight", room.pricing.overnight.price);
-    }
-
-    if (room.pricing.daily.enabled && room.pricing.daily.price) {
-      formData.append("price_daily", room.pricing.daily.price);
-    }
-
-    // === Ảnh ===
-    // Ưu tiên file mới upload (File object)
-    if (room.images && room.images.length > 0) {
-      room.images.forEach((file: File) => {
-        formData.append("images", file); // backend nhận nhiều images cùng tên field
-      });
-    }
-    // Nếu không có file mới → backend sẽ giữ ảnh cũ (nếu có id)
-
-    // Nếu là edit → gửi kèm id để update
-    if (room.id && room.id.length > 10) { // tránh id tạm từ Date.now()
-      formData.append("id", room.id);
-    }
-
-    // Debug: xem FormData trước khi gửi
-    console.log("=== FormData sẽ gửi ===");
-    for (let [key, value] of formData.entries()) {
-      if (value instanceof File) {
-        console.log(key, value.name, `(size: ${(value.size / 1024 / 1024).toFixed(2)} MB)`);
-      } else {
-        console.log(key, value);
-      }
-    }
-
+  
     try {
-      let result = await updateRoom(searchParams.get("id"), room.id, formData)
-      console.log("AAAA result", result)
-      if (result?.room_type_id) {
-
-        toast.success(result?.message)
-        getHotelDetail()
-      } else {
-        toast.error(result?.message)
+      // ======================
+      // 🔹 CREATE (LẶP roomTypes)
+      // ======================
+      if (isCreate) {
+        for (const room of roomTypes) {
+          const formData = buildFormData(room);
+  
+          const result = await createRoomHotel(idHotel,formData);
+  
+          if (!result?.room_type_id) {
+            toast.error(result?.message || "Create room type failed");
+            return;
+          }
+        }
+  
+        toast.success("Tạo loại phòng thành công");
+        getHotelDetail();
+        return;
       }
+  
+      // ======================
+      // 🔹 UPDATE (1 room)
+      // ======================
+      const room = roomTypes[0];
+      const formData = buildFormData(room);
+      formData.append("id", room.id);
+  
+      const result = await updateRoom(
+        searchParams.get("id"),
+        room.id,
+        formData
+      );
+  
+      if (result?.room_type_id) {
+        toast.success(result?.message);
+        getHotelDetail();
+      } else {
+        toast.error(result?.message || "Update room type failed");
+      }
+  
     } catch (error) {
-      console.log(error)
+      console.error(error);
+      toast.error("Có lỗi xảy ra");
     }
-
   };
+  
   return (
     <>
+  
       <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
         <KeyboardArrowLeft
-          onClick={() => setAction("detail")}
+          onClick={() => setAction(isCreate?"manager":"detail")}
           sx={{ fontSize: 30, mr: 1, cursor: "pointer" }}
         />
         <Box>
           <Typography variant='h5' fontWeight={600}>
-            Chỉnh sửa loại phòng
+           {isCreate?"Tạo loại phòng":"Chỉnh sửa loại phòng" }
           </Typography>
-          <Typography color='gray'>Kia Hai Hotel</Typography>
+          
         </Box>
 
         <Box sx={{ flexGrow: 1 }} />
@@ -388,59 +402,59 @@ export default function RoomTypeManager({ room, setAction, getHotelDetail }: Roo
             px: 3,
             "&:hover": { background: "#6fa336" },
           }}>
-          Cập nhật
+         {isCreate?"Duyệt":"Cập nhật"} 
         </Button>
       </Box>
       <Box sx={{ p: { xs: 2, md: 3 }, bgcolor: "white", borderRadius: 3 }}>
         {/* Tabs loại phòng */}
-        {/* <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
-          flexWrap: "wrap",
-          mb: 4,
-          pt: 2,
-        }}>
-        {roomTypes.map((_, index) => (
-          <Chip
-            key={index}
-            label={`Phòng ${index + 1}`}
-            onClick={() => setActiveTab(index)}
-            onDelete={
-              roomTypes.length > 1 ? () => removeRoomType(index) : undefined
-            }
-            deleteIcon={<CloseIcon />}
-            sx={{
-              bgcolor: activeTab === index ? "#fff" : "#f0f0f0",
-              border:
-                activeTab === index ? "2px solid #4caf50" : "1px solid #ddd",
-              color: activeTab === index ? "#4caf50" : "#666",
-              fontWeight: 600,
-              height: 36,
-              fontSize: "0.95rem",
-              "& .MuiChip-deleteIcon": { color: "#999", fontSize: 18 },
-            }}
-          />
-        ))}
-        <Button
-          variant='contained'
-          startIcon={<AddCircleOutlineIcon />}
-          onClick={addRoomType}
+      {isCreate&&<Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 2,
+        flexWrap: "wrap",
+        mb: 4,
+        pt: 2,
+      }}>
+      {roomTypes.map((_, index) => (
+        <Chip
+          key={index}
+          label={`Phòng ${index + 1}`}
+          onClick={() => setActiveTab(index)}
+          onDelete={
+            roomTypes.length > 1 ? () => removeRoomType(index) : undefined
+          }
+          deleteIcon={<CloseIcon />}
           sx={{
-            bgcolor: "#fff8e1",
-            color: "#ef6c00",
+            bgcolor: activeTab === index ? "#fff" : "#f0f0f0",
+            border:
+              activeTab === index ? "2px solid #4caf50" : "1px solid #ddd",
+            color: activeTab === index ? "#4caf50" : "#666",
             fontWeight: 600,
-            borderRadius: 20,
-            textTransform: "none",
             height: 36,
-            px: 3,
-            boxShadow: "0 2px 8px rgba(239,108,0,0.2)",
-            "&:hover": { bgcolor: "#ffe082" },
-          }}>
-          Thêm loại phòng
-        </Button>
-      </Box> */}
+            fontSize: "0.95rem",
+            "& .MuiChip-deleteIcon": { color: "#999", fontSize: 18 },
+          }}
+        />
+      ))}
+      <Button
+        variant='contained'
+        startIcon={<AddCircleOutlineIcon />}
+        onClick={addRoomType}
+        sx={{
+          bgcolor: "#fff8e1",
+          color: "#ef6c00",
+          fontWeight: 600,
+          borderRadius: 20,
+          textTransform: "none",
+          height: 36,
+          px: 3,
+          boxShadow: "0 2px 8px rgba(239,108,0,0.2)",
+          "&:hover": { bgcolor: "#ffe082" },
+        }}>
+        Thêm loại phòng
+      </Button>
+    </Box>}
 
         {/* Các phần UI còn lại giữ nguyên */}
         <Box sx={{ py: 2 }}>

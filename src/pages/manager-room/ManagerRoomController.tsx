@@ -76,6 +76,9 @@ const ManagerRoomController = (props: Props) => {
       setDateRange={setDateRange}
       loading={loading}
       data={data}
+      hotels={hotels}
+      idHotel={idHotel}
+      setIdHotel={setIdHotel}
     />
   );
 };
