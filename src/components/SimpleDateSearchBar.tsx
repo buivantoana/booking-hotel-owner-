@@ -192,14 +192,14 @@ export default function SimpleDateSearchBar({
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <ClickAwayListener onClickAway={() => setOpen(false)}>
         <Box zIndex={10}>
-          <Container maxWidth='lg'>
+          <Box maxWidth='lg'>
             <Box
               ref={dateRef}
               onClick={() => setOpen(true)}
               sx={{
                 cursor: "pointer",
-                border: open ? "2px solid #98b720" : "1px solid #eee",
-                borderRadius: 2,
+                border: open ? "1px solid #98b720" : "1px solid #eee",
+                borderRadius: 3,
                 px: 2,
                 py: 1,
                 bgcolor: open ? "#f8fff8" : "#fff",
@@ -222,7 +222,7 @@ export default function SimpleDateSearchBar({
               onClose={() => setOpen(false)}
               onApply={onChange}
             />
-          </Container>
+          </Box>
         </Box>
       </ClickAwayListener>
     </LocalizationProvider>

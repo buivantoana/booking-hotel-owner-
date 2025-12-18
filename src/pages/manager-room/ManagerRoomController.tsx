@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import ManagerRoomView from "./ManagerRoomView";
 import dayjs from "dayjs";
 import {
+  getHotels,
   getInventoryHotelDaily,
   getInventoryHotelHourly,
   getInventoryHotelOvernight,
@@ -14,14 +15,19 @@ const ManagerRoomController = (props: Props) => {
   const [active, setActive] = useState("hourly");
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [hotels, setHotels] = useState([]);
+  const [idHotel, setIdHotel] = useState(null);
   const [dateRange, setDateRange] = useState({
     checkIn: dayjs(),
     checkOut: dayjs().add(1, "day"),
   });
 
   useEffect(() => {
-    getData();
-  }, [dateRange,active]);
+    if(idHotel){
+      getData();
+
+    }
+  }, [dateRange,active,idHotel]);
   const getData = async () => {
     setLoading(true);
     try {
@@ -47,6 +53,20 @@ const ManagerRoomController = (props: Props) => {
     }
     setLoading(false);
   };
+  useEffect(() => {
+    getListHotel()
+  }, [])
+  const getListHotel = async () => {
+    try {
+      let result = await getHotels();
+      if (result?.hotels) {
+        setIdHotel(result?.hotels[0]?.id)
+        setHotels(result?.hotels)
+      }
+    } catch (error) {
+
+    }
+  }
   console.log("AAAA data",data)
   return (
     <ManagerRoomView

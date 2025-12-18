@@ -63,7 +63,9 @@ export default function ManagerBookingView({
   pagination,         // ← Thêm
   loading,            // ← Thêm
   onPageChange,       // ← Thêm
-  fetchBookings
+  fetchBookings,
+  dateRange,
+  setDateRange
 }: {
   hotels: any[];
   idHotel: string | null;
@@ -78,9 +80,11 @@ export default function ManagerBookingView({
   const [fromDate, setFromDate] = useState<dayjs.Dayjs | null>(null);
   const [toDate, setToDate] = useState<dayjs.Dayjs | null>(null);
   const [openNote, setOpenNote] = useState(false);
-  const [idBooking, setIdBooking] = useState(null); 
+  const [idBooking, setIdBooking] = useState(null);
   const [openCancel, setOpenCancel] = useState(false);
   const [openAccepp, setOpenAccepp] = useState(false);
+
+  const [openCheckin, setOpenCheckin] = useState(false);
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -130,8 +134,25 @@ export default function ManagerBookingView({
                     "& .MuiOutlinedInput-root": {
                       height: 40,
                       borderRadius: "24px",
-                      border: "2px solid #cddc39",
+
                       backgroundColor: "#fff",
+                      "& fieldset": {
+                        borderColor: "#cddc39", // Border mặc định
+                        borderWidth: "1px",     // Tăng độ dày nếu muốn nổi bật hơn
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#c0ca33", // Hover: đậm hơn một chút (tùy chọn)
+                        borderWidth: "1px",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#cddc39 !important", // QUAN TRỌNG: Khi focus vẫn giữ màu này
+                        borderWidth: "1px",
+                        boxShadow: "0 0 0 3px rgba(205, 220, 57, 0.2)", // Hiệu ứng glow nhẹ (tùy chọn)
+                      },
+                      // Tắt màu legend primary khi focus (nếu có label)
+                      "&.Mui-focused .MuiInputLabel-root": {
+                        color: "#666",
+                      },
                     },
                   }}
                 />
@@ -140,109 +161,49 @@ export default function ManagerBookingView({
                 <Typography sx={{ mb: 1.5 }}>Loại đặt phòng</Typography>
                 <Select
                   displayEmpty
-                  defaultValue=''
+                  defaultValue=""
+                 
                   sx={{
                     width: 200,
                     height: 40,
                     borderRadius: "24px",
                     bgcolor: "#fff",
-                  }}>
-                  <MenuItem value='' disabled>
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#cddc39", // Màu đỏ mặc định (có thể dùng #f44336, #d32f2f...)
+                      borderWidth: "1px",
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#cddc39", // Hover: đỏ đậm hơn
+                      borderWidth: "1px",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#cddc39 !important", // QUAN TRỌNG: Focus vẫn màu đỏ rực
+                      borderWidth: "1px !important",
+                     
+                    },
+                    // Tùy chọn: đổi màu mũi tên dropdown cho đồng bộ
+                    "& .MuiSelect-icon": {
+                      color: "#cddc39",
+                    },
+                    // Nếu có label, giữ màu khi focus
+                    "&.Mui-focused .MuiInputLabel-root": {
+                      color: "#cddc39",
+                    },
+                  }}
+                >
+                  <MenuItem value="" disabled>
                     Chọn loại đặt phòng
                   </MenuItem>
-                  <MenuItem value='theogio'>Theo giờ</MenuItem>
-                  <MenuItem value='quadem'>Qua đêm</MenuItem>
+                  <MenuItem value="theogio">Theo giờ</MenuItem>
+                  <MenuItem value="quadem">Qua đêm</MenuItem>
+                  <MenuItem value="quangay">Qua ngày</MenuItem> {/* Nếu cần thêm */}
                 </Select>
               </Box>
 
               {/* 2 ô DatePicker – ĐÃ FIX LỖI 100% */}
               <Box>
                 <Typography sx={{ mb: 1.5 }}>Thời gian nhận phòng</Typography>
-                <Stack direction='row' alignItems='center' spacing={1} sx={{}}>
-                  <DatePicker
-                    value={fromDate}
-                    onChange={setFromDate}
-                    slotProps={{
-                      textField: {
-                        fullWidth: true,
-                        InputProps: {
-                          sx: {
-                            height: 40,
-                            borderRadius: "20px",
-                            // Input text
-                            width: "160px",
-                            "& .MuiInputBase-input": {
-                              height: "40px",
-                              padding: "0 12px",
-                              boxSizing: "border-box",
-                              borderRadius: "20px",
-                            },
-
-                            // Outline
-                            "& .MuiOutlinedInput-notchedOutline": {
-                              top: 0,
-                            },
-                          },
-                        },
-
-                        // 👉 FIX LABEL BỊ LỆCH
-                        InputLabelProps: {
-                          sx: {
-                            lineHeight: "1", // Giữ độ cao label
-                            transform: "translate(14px, 12px) scale(1)", // Vị trí khi chưa focus
-                            "&.MuiInputLabel-shrink": {
-                              transform: "translate(14px, -8px) scale(0.75)", // Vị trí khi nổi lên
-                            },
-                          },
-                        },
-                      },
-                    }}
-                    // ← Dòng này fix lỗi ngay lập tức
-                    format='DD/MM/YYYY'
-                  />
-
-                  <Typography sx={{ color: "#999" }}>-</Typography>
-
-                  <DatePicker
-                    value={toDate}
-                    onChange={setToDate}
-                    slotProps={{
-                      textField: {
-                        fullWidth: true,
-                        InputProps: {
-                          sx: {
-                            height: 40,
-                            borderRadius: "20px",
-                            // Input text
-                            width: "160px",
-                            "& .MuiInputBase-input": {
-                              height: "40px",
-                              padding: "0 12px",
-                              boxSizing: "border-box",
-                            },
-
-                            // Outline
-                            "& .MuiOutlinedInput-notchedOutline": {
-                              top: 0,
-                            },
-                          },
-                        },
-
-                        // 👉 FIX LABEL BỊ LỆCH
-                        InputLabelProps: {
-                          sx: {
-                            lineHeight: "1", // Giữ độ cao label
-                            transform: "translate(14px, 12px) scale(1)", // Vị trí khi chưa focus
-                            "&.MuiInputLabel-shrink": {
-                              transform: "translate(14px, -8px) scale(0.75)", // Vị trí khi nổi lên
-                            },
-                          },
-                        },
-                      },
-                    }}
-                    format='DD/MM/YYYY'
-                  />
-                </Stack>
+               <SimpleDateSearchBar value={dateRange} onChange={setDateRange} />
               </Box>
 
               {/* Nút */}
@@ -251,7 +212,7 @@ export default function ManagerBookingView({
                   variant='contained'
                   sx={{
                     borderRadius: "24px",
-                    bgcolor: "#8bc34a",
+                    bgcolor: "#98b720",
                     height: 40,
                     minWidth: 120,
                   }}>
@@ -290,7 +251,7 @@ export default function ManagerBookingView({
                   sx={{
                     borderRadius: "18px",
                     height: 36,
-                    bgcolor: item.active ? "#8bc34a" : "transparent",
+                    bgcolor: item.active ? "#98b720" : "transparent",
                     color: item.active ? "white" : "#666",
                     border: item.active ? "none" : "1px solid #e0e0e0",
                     fontWeight: item.active ? "bold" : "normal",
@@ -404,7 +365,7 @@ export default function ManagerBookingView({
                         <TableCell>
                           <Tooltip title={row.note || "Không có ghi chú"}>
                             <IconButton size="small">
-                              <EditIcon onClick={()=>{
+                              <EditIcon onClick={() => {
                                 setIdBooking(row)
                                 setOpenNote(true)
                               }} fontSize="small" />
@@ -414,8 +375,10 @@ export default function ManagerBookingView({
                         <TableCell align="center">
                           <ActionMenu
                             booking={row}
-                            setOpenAccepp={setOpenAccepp}
+                            setIdBooking={setIdBooking}
+                            setOpenCheckOut={setOpenAccepp}
                             setOpenCancel={setOpenCancel}
+                            setOpenCheckIn={setOpenCheckin}
                           />
                         </TableCell>
                       </TableRow>
@@ -435,7 +398,31 @@ export default function ManagerBookingView({
               boundaryCount={1}
               color="primary"
               size={isMobile ? "medium" : "large"}
-              
+              sx={{
+                // Tùy chỉnh trang active
+                "& .MuiPaginationItem-root.Mui-selected": {
+                  backgroundColor: "#98b720 !important", // Màu xanh lá bạn đang dùng trong app
+                  color: "white",
+                  fontWeight: "bold",
+                  boxShadow: "0 4px 8px rgba(139,195,74,0.4)",
+                  "&:hover": {
+                    backgroundColor: "#7cb342 !important",
+                  },
+                },
+                // Tùy chỉnh các trang thường (nếu muốn)
+                "& .MuiPaginationItem-root": {
+                  borderRadius: "8px",
+                  margin: "0 4px",
+                  "&:hover": {
+                    backgroundColor: "#e8f5e9",
+                  },
+                },
+                // Tùy chỉnh nút ellipsis (...) nếu cần
+                "& .MuiPaginationItem-ellipsis": {
+                  color: "#666",
+                },
+              }}
+
             />
 
           </Stack>
@@ -450,10 +437,20 @@ export default function ManagerBookingView({
       <CancelBookingModal
         openCancel={openCancel}
         onClose={() => setOpenCancel(false)}
+        booking={idBooking}
+        fetchBookings={fetchBookings} idHotel={idHotel}
       />
       <CheckoutConfirmModal
         openAccepp={openAccepp}
         onClose={() => setOpenAccepp(false)}
+        booking={idBooking}
+        fetchBookings={fetchBookings} idHotel={idHotel}
+      />
+      <CheckinConfirmModal
+        openCheckin={openCheckin}
+        onClose={() => setOpenCheckin(false)}
+        booking={idBooking}
+        fetchBookings={fetchBookings} idHotel={idHotel}
       />
     </LocalizationProvider>
   );
@@ -463,7 +460,7 @@ import { Dialog, DialogContent, DialogTitle, Divider } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
-function NoteModal({ openNote, onClose, booking,fetchBookings,idHotel }) {
+function NoteModal({ openNote, onClose, booking, fetchBookings, idHotel }) {
   const [note, setNote] = useState("");
 
   // Khi modal mở và có booking, điền sẵn ghi chú hiện tại (nếu có)
@@ -489,10 +486,10 @@ function NoteModal({ openNote, onClose, booking,fetchBookings,idHotel }) {
     booking.rent_type === "hourly"
       ? "Theo giờ"
       : booking.rent_type === "daily"
-      ? "Qua ngày"
-      : booking.rent_type === "overnight"
-      ? "Qua đêm"
-      : "Không xác định";
+        ? "Qua ngày"
+        : booking.rent_type === "overnight"
+          ? "Qua đêm"
+          : "Không xác định";
 
   // Map trạng thái để hiển thị chip
   const statusLabel = {
@@ -515,13 +512,13 @@ function NoteModal({ openNote, onClose, booking,fetchBookings,idHotel }) {
 
   const roomName = booking.room_types?.[0]?.name || "N/A";
 
-  const handleNoteBooking = async()=>{
+  const handleNoteBooking = async () => {
     try {
-      let result  = await updateBooking(booking.id,{note:note})
-      if(result?.booking_id){
+      let result = await updateBooking(booking.id, { note: note })
+      if (result?.booking_id) {
         toast.success(result?.message)
         fetchBookings(idHotel)
-      }else{
+      } else {
         toast.success(result?.message)
       }
     } catch (error) {
@@ -664,7 +661,7 @@ function NoteModal({ openNote, onClose, booking,fetchBookings,idHotel }) {
             sx={{
               borderRadius: 8,
               px: 5,
-              bgcolor: "#8bc34a",
+              bgcolor: "#98b720",
               color: "white",
               fontWeight: "bold",
               boxShadow: "0 4px 12px rgba(139,195,74,0.4)",
@@ -689,7 +686,8 @@ function ActionMenu({
   booking,
   setOpenCheckIn,     // Mở modal nhận phòng
   setOpenCheckOut,    // Mở modal trả phòng
-  setOpenCancel,      // Mở modal hủy
+  setOpenCancel,
+  setIdBooking    // Mở modal hủy
 }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -745,6 +743,7 @@ function ActionMenu({
             borderRadius: "12px",
             boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
             mt: 1,
+            padding: 0
           },
         }}
       >
@@ -752,6 +751,7 @@ function ActionMenu({
         {showCheckIn && (
           <MenuItem
             onClick={() => {
+              setIdBooking(booking)
               setOpenCheckIn(true);
               handleClose();
             }}
@@ -766,6 +766,7 @@ function ActionMenu({
         {showCheckOut && (
           <MenuItem
             onClick={() => {
+              setIdBooking(booking)
               setOpenCheckOut(true);
               handleClose();
             }}
@@ -780,6 +781,7 @@ function ActionMenu({
         {showCancel && (
           <MenuItem
             onClick={() => {
+              setIdBooking(booking)
               setOpenCancel(true);
               handleClose();
             }}
@@ -800,8 +802,30 @@ import { RadioGroup, FormControlLabel, Radio } from "@mui/material";
 import HotelSelect from "../../components/HotelSelect";
 import { updateBooking } from "../../service/booking";
 import { toast } from "react-toastify";
+import SimpleDateSearchBar from "../../components/SimpleDateSearchBar";
 
-function CancelBookingModal({ openCancel, onClose }) {
+const formatTime = (dateString: string) => {
+  return dayjs(dateString).format("HH:mm");
+};
+
+const formatDate = (dateString: string) => {
+  return dayjs(dateString).format("DD/MM/YYYY");
+};
+
+// Map loại đặt phòng
+const getRentTypeLabel = (rent_type: string) => {
+  switch (rent_type) {
+    case "hourly": return "Theo giờ";
+    case "daily": return "Qua ngày";
+    case "overnight": return "Qua đêm";
+    default: return "Không xác định";
+  }
+};
+
+// ===================================================================
+// 1. Modal HỦY ĐẶT PHÒNG
+// ===================================================================
+function CancelBookingModal({ openCancel, onClose, booking, fetchBookings, idHotel }) {
   const [reason, setReason] = useState("");
 
   const reasons = [
@@ -810,29 +834,34 @@ function CancelBookingModal({ openCancel, onClose }) {
     "Khách sạn muốn dừng hợp tác",
     "Lý do bất khả kháng: Thiên tai/ mất điện / mất nước",
     "Hư hỏng thiết bị, Cơ sở vật chất",
-    "Khách sạn cái đặt sai giá phòng",
+    "Khách sạn đặt sai giá phòng",
     "Khách có dấu hiệu vi phạm pháp luật",
   ];
 
+  if (!booking) return null;
+
+  const roomName = booking.room_types?.[0]?.name || "N/A";
+  const rentType = getRentTypeLabel(booking.rent_type);
+
+  const handleCancelBooking = async () => {
+    try {
+      let result = await updateBooking(booking.id, { reason: reason, status: "cancelled" })
+      if (result?.booking_id) {
+        toast.success(result?.message)
+        fetchBookings(idHotel)
+      } else {
+        toast.success(result?.message)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
-    <Dialog
-      open={openCancel}
-      onClose={onClose}
-      maxWidth='sm'
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 4,
-          boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
-        },
-      }}>
-      {/* Header */}
+    <Dialog open={openCancel} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ pb: 1 }}>
-        <Stack
-          direction='row'
-          justifyContent='space-between'
-          alignItems='center'>
-          <Typography variant='h6' fontWeight='bold'>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Typography variant="h6" fontWeight="bold">
             Hủy đặt phòng
           </Typography>
           <IconButton onClick={onClose}>
@@ -842,7 +871,7 @@ function CancelBookingModal({ openCancel, onClose }) {
       </DialogTitle>
 
       <DialogContent sx={{ pt: 2 }}>
-        {/* Thông tin đặt phòng - giống hệt ảnh */}
+        {/* Thông tin đặt phòng */}
         <Paper
           elevation={0}
           sx={{
@@ -851,33 +880,30 @@ function CancelBookingModal({ openCancel, onClose }) {
             borderRadius: 3,
             p: 2,
             mb: 3,
-          }}>
+          }}
+        >
           <Stack spacing={1.5}>
-            <Stack direction='row' justifyContent='space-between'>
-              <Typography fontSize='0.95rem'>Loại phòng:</Typography>
-              <Typography fontWeight='bold' color='#7cb342'>
-                Vip123
+            <Stack direction="row" justifyContent="space-between">
+              <Typography fontSize="0.95rem">Loại phòng:</Typography>
+              <Typography fontWeight="bold" color="#7cb342">
+                {roomName}
               </Typography>
             </Stack>
             <Divider sx={{ bgcolor: "#d0e8a0" }} />
-            <Stack
-              direction='row'
-              alignItems='center'
-              spacing={1}
-              justifyContent='space-between'>
-              <Stack direction='row' alignItems='center' spacing={1}>
+            <Stack direction="row" alignItems="center" spacing={1} justifyContent="space-between">
+              <Stack direction="row" alignItems="center" spacing={1}>
                 <AccessTimeIcon sx={{ fontSize: 18, color: "#999" }} />
-                <Typography fontSize='0.95rem'>Theo giờ</Typography>
+                <Typography fontSize="0.95rem">{rentType}</Typography>
               </Stack>
-              <Typography fontWeight='medium'>
-                09:00 - 12:00 ngày 21/11/2025
+              <Typography fontWeight="medium">
+                {formatTime(booking.check_in)} - {formatTime(booking.check_out)} ngày {formatDate(booking.check_in)}
               </Typography>
             </Stack>
           </Stack>
         </Paper>
 
-        {/* Chọn lý do hủy - BẮT BUỘC */}
-        <Typography fontWeight='medium' mb={2}>
+        {/* Chọn lý do hủy */}
+        <Typography fontWeight="medium" mb={2}>
           Chọn lý do hủy phòng{" "}
           <span style={{ color: "#ef6c00" }}>(bắt buộc)</span>
         </Typography>
@@ -888,17 +914,8 @@ function CancelBookingModal({ openCancel, onClose }) {
               <FormControlLabel
                 key={item}
                 value={item}
-                control={
-                  <Radio
-                    size='small'
-                    sx={{ "& .MuiSvgIcon-root": { fontSize: 20 } }}
-                  />
-                }
-                label={
-                  <Typography fontSize='0.95rem' sx={{ ml: 0.5 }}>
-                    {item}
-                  </Typography>
-                }
+                control={<Radio size="small" sx={{ "& .MuiSvgIcon-root": { fontSize: 20 } }} />}
+                label={<Typography fontSize="0.95rem" sx={{ ml: 0.5 }}>{item}</Typography>}
                 sx={{
                   bgcolor: "#fafafa",
                   borderRadius: 2,
@@ -912,35 +929,32 @@ function CancelBookingModal({ openCancel, onClose }) {
           </Stack>
         </RadioGroup>
 
-        {/* Nút hành động */}
-        <Stack direction='row' justifyContent='flex-end' spacing={2} mt={5}>
-          <Button
-            variant='outlined'
-            onClick={onClose}
-            sx={{
-              borderRadius: 8,
-              px: 4,
-              textTransform: "none",
-              color: "#666",
-              borderColor: "#ddd",
-            }}>
+        {/* Nút */}
+        <Stack direction="row" justifyContent="flex-end" spacing={2} mt={5}>
+          <Button variant="outlined" onClick={onClose} sx={{ borderRadius: 8, px: 4, textTransform: "none", color: "#666", borderColor: "#ddd" }}>
             Hủy
           </Button>
           <Button
-            variant='contained'
+            variant="contained"
             disabled={!reason}
+            onClick={() => {
+              // TODO: Gọi API hủy booking với reason
+              handleCancelBooking()
+              onClose();
+            }}
             sx={{
               borderRadius: 8,
               px: 5,
               minWidth: 140,
-              bgcolor: "#8bc34a",
+              bgcolor: "#98b720",
               color: "white",
               fontWeight: "bold",
               boxShadow: "0 4px 15px rgba(139,195,74,0.4)",
               "&:hover": { bgcolor: "#7cb342" },
               "&:disabled": { bgcolor: "#c8e6c9" },
               textTransform: "none",
-            }}>
+            }}
+          >
             Hủy đặt phòng
           </Button>
         </Stack>
@@ -949,56 +963,52 @@ function CancelBookingModal({ openCancel, onClose }) {
   );
 }
 
-function CheckoutConfirmModal({ openAccepp, onClose }) {
+// ===================================================================
+// 2. Modal XÁC NHẬN KHÁCH TRẢ PHÒNG
+// ===================================================================
+function CheckoutConfirmModal({ openAccepp, onClose, booking, fetchBookings, idHotel }) {
+  if (!booking) return null;
+
+  const roomName = booking.room_types?.[0]?.name || "N/A";
+  const rentType = getRentTypeLabel(booking.rent_type);
+  const handleCheckoutBooking = async () => {
+    try {
+      let result = await updateBooking(booking.id, { status: "checked_out" })
+      if (result?.booking_id) {
+        toast.success(result?.message)
+        fetchBookings(idHotel)
+      } else {
+        toast.success(result?.message)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
   return (
-    <Dialog
-      open={openAccepp}
-      onClose={onClose}
-      maxWidth='sm'
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 4,
-          boxShadow: "0 12px 40px rgba(0,0,0,0.18)",
-          overflow: "hidden",
-        },
-      }}>
-      {/* Header */}
+    <Dialog open={openAccepp} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ pb: 1, pt: 3 }}>
-        <Stack
-          direction='row'
-          justifyContent='space-between'
-          alignItems='center'>
-          <Typography variant='h6' fontWeight='bold'>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Typography variant="h6" fontWeight="bold">
             Xác nhận Khách trả phòng
           </Typography>
-          <IconButton onClick={onClose} size='small'>
+          <IconButton onClick={onClose} size="small">
             <CloseIcon />
           </IconButton>
         </Stack>
       </DialogTitle>
 
       <DialogContent sx={{ pt: 2, pb: 4 }}>
-        {/* Thông tin khách sạn & mã đặt phòng */}
         <Stack spacing={2} mb={3}>
-          <Stack direction='row' justifyContent='space-between'>
-            <Typography color='text.secondary' fontSize='0.95rem'>
-              Khách sạn:
-            </Typography>
-            <Typography fontWeight='bold'>Khách sạn 123</Typography>
+          <Stack direction="row" justifyContent="space-between">
+            <Typography color="text.secondary" fontSize="0.95rem">Khách sạn:</Typography>
+            <Typography fontWeight="bold">{booking.hotel_name || "Khách sạn XYZ"}</Typography>
           </Stack>
-
-          <Stack direction='row' justifyContent='space-between'>
-            <Typography color='text.secondary' fontSize='0.95rem'>
-              Mã đặt phòng:
-            </Typography>
-            <Typography fontWeight='bold' fontSize='1.1rem'>
-              123456
-            </Typography>
+          <Stack direction="row" justifyContent="space-between">
+            <Typography color="text.secondary" fontSize="0.95rem">Mã đặt phòng:</Typography>
+            <Typography fontWeight="bold" fontSize="1.1rem">{booking.code}</Typography>
           </Stack>
         </Stack>
 
-        {/* Khung thông tin phòng - giống hệt ảnh */}
         <Paper
           elevation={0}
           sx={{
@@ -1007,66 +1017,159 @@ function CheckoutConfirmModal({ openAccepp, onClose }) {
             borderRadius: 3,
             p: 2.5,
             mb: 4,
-          }}>
+          }}
+        >
           <Stack spacing={2}>
-            <Stack direction='row' justifyContent='space-between'>
-              <Typography fontSize='0.95rem'>Loại phòng:</Typography>
-              <Typography fontWeight='bold' color='#7cb342'>
-                Vip123
-              </Typography>
+            <Stack direction="row" justifyContent="space-between">
+              <Typography fontSize="0.95rem">Loại phòng:</Typography>
+              <Typography fontWeight="bold" color="#7cb342">{roomName}</Typography>
             </Stack>
-
             <Divider sx={{ bgcolor: "#d0e8a0" }} />
-
-            <Stack
-              direction='row'
-              alignItems='center'
-              justifyContent='space-between'>
-              <Stack direction='row' alignItems='center' spacing={1.5}>
-                <CheckCircleOutlineIcon
-                  sx={{ color: "#8bc34a", fontSize: 20 }}
-                />
-                <Typography fontWeight='medium'>Theo giờ</Typography>
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Stack direction="row" alignItems="center" spacing={1.5}>
+                <CheckCircleOutlineIcon sx={{ color: "#98b720", fontSize: 20 }} />
+                <Typography fontWeight="medium">{rentType}</Typography>
               </Stack>
-
-              <Typography fontWeight='medium' textAlign='right'>
-                09:00 - 12:00 ngày 21/11/2025
+              <Typography fontWeight="medium" textAlign="right">
+                {formatTime(booking.check_in)} - {formatTime(booking.check_out)} ngày {formatDate(booking.check_in)}
               </Typography>
             </Stack>
           </Stack>
         </Paper>
 
-        {/* Nút hành động */}
-        <Stack direction='row' justifyContent='flex-end' spacing={2} mt={2}>
-          <Button
-            variant='outlined'
-            onClick={onClose}
-            sx={{
-              borderRadius: 8,
-              px: 4,
-              minWidth: 120,
-              textTransform: "none",
-              color: "#666",
-              borderColor: "#ddd",
-            }}>
+        <Stack direction="row" justifyContent="flex-end" spacing={2} mt={2}>
+          <Button variant="outlined" onClick={onClose} sx={{ borderRadius: 8, px: 4, minWidth: 120, textTransform: "none", color: "#666", borderColor: "#ddd" }}>
             Hủy
           </Button>
-
           <Button
-            variant='contained'
+            variant="contained"
             startIcon={<CheckCircleOutlineIcon />}
+            onClick={() => {
+              // TODO: Gọi API xác nhận trả phòng
+              console.log("Xác nhận trả phòng cho booking:", booking.id);
+              handleCheckoutBooking()
+              onClose();
+            }}
             sx={{
               borderRadius: 8,
               px: 5,
               minWidth: 180,
-              bgcolor: "#8bc34a",
+              bgcolor: "#98b720",
               color: "white",
               fontWeight: "bold",
               boxShadow: "0 4px 15px rgba(139,195,74,0.4)",
               "&:hover": { bgcolor: "#7cb342" },
               textTransform: "none",
-            }}>
+            }}
+          >
             Khách trả phòng
+          </Button>
+        </Stack>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ===================================================================
+// 3. Modal XÁC NHẬN KHÁCH NHẬN PHÒNG
+// ===================================================================
+function CheckinConfirmModal({ openCheckin, onClose, booking, fetchBookings, idHotel }) {
+  if (!booking) return null;
+
+  const roomName = booking.room_types?.[0]?.name || "N/A";
+  const rentType = getRentTypeLabel(booking.rent_type);
+  const handleCheckinBooking = async () => {
+    try {
+      let result = await updateBooking(booking.id, { status: "checked_in" })
+      if (result?.booking_id) {
+        toast.success(result?.message)
+        fetchBookings(idHotel)
+      } else {
+        toast.success(result?.message)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  return (
+    <Dialog open={openCheckin} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle sx={{ pb: 1, pt: 3 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Typography variant="h6" fontWeight="bold">
+            Xác nhận khách đến nhận phòng
+          </Typography>
+          <IconButton onClick={onClose} size="small">
+            <CloseIcon />
+          </IconButton>
+        </Stack>
+      </DialogTitle>
+
+      <DialogContent sx={{ pt: 2, pb: 4 }}>
+        <Stack spacing={2} mb={3}>
+          <Stack direction="row" justifyContent="space-between">
+            <Typography color="text.secondary" fontSize="0.95rem">Khách sạn:</Typography>
+            <Typography fontWeight="bold">{booking.hotel_name || "Khách sạn XYZ"}</Typography>
+          </Stack>
+          <Stack direction="row" justifyContent="space-between">
+            <Typography color="text.secondary" fontSize="0.95rem">Mã đặt phòng:</Typography>
+            <Typography fontWeight="bold" fontSize="1.1rem">{booking.code}</Typography>
+          </Stack>
+        </Stack>
+
+        <Paper
+          elevation={0}
+          sx={{
+            bgcolor: "#f9ffe6",
+            border: "1px solid #d0e8a0",
+            borderRadius: 3,
+            p: 2.5,
+            mb: 4,
+          }}
+        >
+          <Stack spacing={2}>
+            <Stack direction="row" justifyContent="space-between">
+              <Typography fontSize="0.95rem">Loại phòng:</Typography>
+              <Typography fontWeight="bold" color="#7cb342">{roomName}</Typography>
+            </Stack>
+            <Divider sx={{ bgcolor: "#d0e8a0" }} />
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Stack direction="row" alignItems="center" spacing={1.5}>
+                <CheckCircleOutlineIcon sx={{ color: "#98b720", fontSize: 20 }} />
+                <Typography fontWeight="medium">{rentType}</Typography>
+              </Stack>
+              <Typography fontWeight="medium" textAlign="right">
+                {formatTime(booking.check_in)} - {formatTime(booking.check_out)} ngày {formatDate(booking.check_in)}
+              </Typography>
+            </Stack>
+          </Stack>
+        </Paper>
+
+        <Stack direction="row" justifyContent="flex-end" spacing={2} mt={2}>
+          <Button variant="outlined" onClick={onClose} sx={{ borderRadius: 8, px: 4, minWidth: 120, textTransform: "none", color: "#666", borderColor: "#ddd" }}>
+            Hủy
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<CheckCircleOutlineIcon />}
+            onClick={() => {
+              // TODO: Gọi API xác nhận nhận phòng
+              console.log("Xác nhận nhận phòng cho booking:", booking.id);
+              handleCheckinBooking()
+              onClose();
+            }}
+            sx={{
+              borderRadius: 8,
+              px: 5,
+              minWidth: 180,
+              bgcolor: "#98b720",
+              color: "white",
+              fontWeight: "bold",
+              boxShadow: "0 4px 15px rgba(139,195,74,0.4)",
+              "&:hover": { bgcolor: "#7cb342" },
+              textTransform: "none",
+            }}
+          >
+            Nhận phòng
           </Button>
         </Stack>
       </DialogContent>

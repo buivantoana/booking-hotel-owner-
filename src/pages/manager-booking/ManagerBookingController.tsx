@@ -3,11 +3,15 @@ import React, { useEffect, useState } from "react";
 import ManagerBookingView from "./ManagerBookingView";
 import { getHotels } from "../../service/hotel";
 import { listBooking } from "../../service/booking";
+import dayjs from "dayjs";
 
 const ManagerBookingController = () => {
   const [hotels, setHotels] = useState([]);
   const [idHotel, setIdHotel] = useState<string | null>(null);
-
+  const [dateRange, setDateRange] = useState({
+    checkIn: dayjs(),
+    checkOut: dayjs().add(1, "day"),
+  });
   // State cho booking và phân trang
   const [bookings, setBookings] = useState<any[]>([]);
   const [pagination, setPagination] = useState({
@@ -81,6 +85,8 @@ const ManagerBookingController = () => {
       loading={loading}
       onPageChange={handlePageChange}
       fetchBookings={fetchBookings}
+      setDateRange={setDateRange}
+      dateRange={dateRange}
     />
   );
 };

@@ -146,7 +146,7 @@ export default function ManagerRoomView({
                   data={data}
                 />
               )}
-              {active == "overnight" && data?.slots?.length > 0 && (
+              {active == "overnight" && data?.slots?.length > 0 && data?.price_overnight && (
                 <RoomScheduleTableOvernight
                   handleOpenQuickBlock={() => setOpenQuickBlock(true)}
                   handleOpenEdit={() => setOpenEdit(true)}
@@ -598,8 +598,8 @@ function RoomScheduleTableHourly({
               {/* Các ngày - căn giữa trên nhóm slot */}
               <Box borderBottom='1px solid #ddd' bgcolor='white'>
                 <Box display='flex'>
-                  {dayGroups.map((g) => {
-                    const w = (g.slots.length / totalSlots) * 100;
+                  {dayGroups?.map((g) => {
+                    const w = (g?.slots?.length / totalSlots) * 100;
                     return (
                       <Box
                         key={g.date}
@@ -634,7 +634,7 @@ function RoomScheduleTableHourly({
                 display='flex'
                 borderBottom='2px solid #ddd'
                 bgcolor='#f5f5f5'>
-                {data?.slots.map((s, i) => (
+                {data?.slots?.map((s, i) => (
                   <Box
                     key={i}
                     width={columnWidth}
@@ -727,7 +727,7 @@ function RoomScheduleTableHourly({
 
               {/* Dữ liệu phải */}
               <Box flex={1} display='flex'>
-                {data.slots.map((slot, i) => (
+                {data?.slots?.map((slot, i) => (
                   <Box
                     key={i}
                     width={columnWidth}
@@ -778,13 +778,13 @@ function RoomScheduleTableHourly({
           {[
             {
               label: "Giá phòng/2h đầu",
-              value: `${data.price_hourly.toLocaleString("vi-VN")}đ`,
+              value: `${data?.price_hourly?.toLocaleString("vi-VN")}đ`,
               bg: "#fff3e9",
               color: "#e65e00",
             },
             {
               label: "Giá 1 giờ thêm",
-              value: `${data.price_hourly_increment.toLocaleString("vi-VN")}đ`,
+              value: `${data?.price_hourly_increment?.toLocaleString("vi-VN")}đ`,
               bg: "#eef1ff",
               color: "#4e6aff",
             },
@@ -851,7 +851,7 @@ function RoomScheduleTableDaily({
   data,
 }: RoomScheduleTableDailyProps) {
   const isMobile = useMediaQuery("(max-width:768px)");
-  const dailySlots = data.daily_slots; // 3 ngày
+  const dailySlots = data?.daily_slots; // 3 ngày
   const totalDays = dailySlots.length; // 3
   const columnWidth = `${100 / totalDays}%`;
 
@@ -902,10 +902,10 @@ function RoomScheduleTableDaily({
 
               {/* Các ngày - mỗi ngày 1 cột */}
               <Box display='flex' borderBottom='2px solid #ddd' bgcolor='white'>
-                {dailySlots.map((slot) => {
+                {dailySlots?.map((slot) => {
                   const dateObj = new Date(slot.date);
-                  const dayNum = format(dateObj, "dd");
-                  const dayName = format(dateObj, "EEEE", { locale: vi })
+                  const dayNum = dateObj && format(dateObj, "dd");
+                  const dayName = dateObj&& format(dateObj, "EEEE", { locale: vi })
                     .replace("Chủ nhật", "CN")
                     .replace("Thứ ", "thứ ")
                     .toLowerCase();
@@ -1016,7 +1016,7 @@ function RoomScheduleTableDaily({
 
               {/* Dữ liệu phải - 3 cột */}
               <Box flex={1} display='flex'>
-                {dailySlots.map((slot, i) => (
+                {dailySlots?.map((slot, i) => (
                   <Box
                     key={i}
                     width={columnWidth}
@@ -1068,7 +1068,7 @@ function RoomScheduleTableDaily({
           {[
             {
               label: "Giá phòng/đêm",
-              value: `${data.price_daily.toLocaleString("vi-VN")}đ`,
+              value: `${data?.price_daily?.toLocaleString("vi-VN")}đ`,
               bg: "#fff3e9",
               color: "#e65e00",
             },
@@ -1164,9 +1164,9 @@ function RoomScheduleTableOvernight({
               {/* Các ngày - mỗi ngày 1 cột */}
               <Box display='flex' borderBottom='2px solid #ddd' bgcolor='white'>
                 {dailySlots?.map((slot) => {
-                  const dateObj = new Date(slot.date);
-                  const dayNum = format(dateObj, "dd");
-                  const dayName = format(dateObj, "EEEE", { locale: vi })
+                  const dateObj = new Date(slot?.date);
+                  const dayNum = dateObj&& format(dateObj, "dd");
+                  const dayName = dateObj&& format(dateObj, "EEEE", { locale: vi })
                     .replace("Chủ nhật", "CN")
                     .replace("Thứ ", "thứ ")
                     .toLowerCase();
