@@ -6,34 +6,16 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getHotel } from "../../service/hotel";
 
-export default function HotelDetail({ setAction, setRoom }) {
+export default function HotelDetail({ setAction, setRoom,detailHotel ,getHotelDetail}) {
   return (
     <Box sx={{ minHeight: "100vh" }}>
-      <HotelHeader setAction={setAction} />
-      <HotelInfoDetail onNext={setAction} setRoom={setRoom} />
+      <HotelHeader detailHotel={detailHotel} setAction={setAction} />
+      <HotelInfoDetail detailHotel={detailHotel} onNext={setAction} getHotelDetail={getHotelDetail} setRoom={setRoom} />
     </Box>
   );
 }
 
-function HotelHeader({ setAction }) {
-  const [detailHotel, setDetailHotel] = useState({});
-  const [searchParams] = useSearchParams();
-
-  useEffect(() => {
-    if (searchParams.get("id")) {
-      (async () => {
-        try {
-          let result = await getHotel(searchParams.get("id"));
-          if (result?.id) {
-            setDetailHotel(result);
-          }
-        } catch (error) {
-          console.log(error);
-        }
-      })();
-    }
-  }, [searchParams]);
-
+function HotelHeader({ setAction,detailHotel }) {
   const parseVi = (str) => {
     if (!str) return "";
     try {
@@ -95,26 +77,8 @@ function HotelHeader({ setAction }) {
   );
 }
 
-function HotelInfoDetail({ onNext, setRoom }) {
+function HotelInfoDetail({ onNext, setRoom ,detailHotel,getHotelDetail}) {
   const [action, setAction] = useState("manager");
-  const [detailHotel, setDetailHotel] = useState({});
-  const [searchParams] = useSearchParams();
-
-  useEffect(() => {
-    if (searchParams.get("id")) {
-      (async () => {
-        try {
-          let result = await getHotel(searchParams.get("id"));
-          if (result?.id) {
-            setDetailHotel(result);
-          }
-        } catch (error) {
-          console.log(error);
-        }
-      })();
-    }
-  }, [searchParams]);
-
   const parseVi = (str) => {
     if (!str) return "";
     try {
@@ -124,7 +88,14 @@ function HotelInfoDetail({ onNext, setRoom }) {
       return str;
     }
   };
-
+  const [searchParams,setSearchParams] = useSearchParams();
+  useEffect(()=>{
+    if (searchParams.get("manager_room") == "true") {
+      searchParams.delete("manager_room");
+      setAction("rooms")
+      setSearchParams(searchParams, { replace: true });
+    }
+  },[searchParams])
   const hotelName = parseVi(detailHotel.name);
   const hotelAddress = parseVi(detailHotel.address);
   const hotelDescription = parseVi(detailHotel.description);
@@ -206,6 +177,7 @@ function HotelInfoDetail({ onNext, setRoom }) {
           onNext={onNext}
           setRoom={setRoom}
           detailHotel={detailHotel}
+          getHotelDetail={getHotelDetail}
         />
       )}
 

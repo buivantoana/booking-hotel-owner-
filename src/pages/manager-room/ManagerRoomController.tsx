@@ -21,7 +21,7 @@ const ManagerRoomController = (props: Props) => {
 
   useEffect(() => {
     getData();
-  }, [dateRange]);
+  }, [dateRange,active]);
   const getData = async () => {
     setLoading(true);
     try {
@@ -47,6 +47,7 @@ const ManagerRoomController = (props: Props) => {
     }
     setLoading(false);
   };
+  console.log("AAAA data",data)
   return (
     <ManagerRoomView
       setActive={setActive}

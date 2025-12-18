@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Paper,
@@ -53,87 +53,32 @@ const statusColors: Record<
   "Hoàn thành": "success",
 };
 
-const data = [
-  {
-    id: "123456",
-    amount: "160.000đ",
-    payment: "Đã thanh toán",
-    type: "Theo giờ",
-    time: "21/10/2025, 09:00",
-    checkin: "21/10/2025, 12:00",
-    status: "Chờ nhận phòng",
-  },
-  {
-    id: "123456 (G)",
-    amount: "160.000đ",
-    payment: "Đã thanh toán",
-    type: "Theo giờ",
-    time: "21/10/2025, 09:00",
-    checkin: "21/10/2025, 12:00",
-    status: "Chờ nhận phòng",
-  },
-  {
-    id: "123456",
-    amount: "160.000đ",
-    payment: "Thanh toán tại KS",
-    type: "Theo giờ",
-    time: "21/10/2025, 09:00",
-    checkin: "21/10/2025, 12:00",
-    status: "Đã nhận phòng",
-  },
-  {
-    id: "123456",
-    amount: "160.000đ",
-    payment: "Đã hoàn tiền",
-    type: "Theo giờ",
-    time: "21/10/2025, 09:00",
-    checkin: "21/10/2025, 12:00",
-    status: "Hủy phòng",
-  },
-  {
-    id: "123456",
-    amount: "160.000đ",
-    payment: "Đã thanh toán",
-    type: "Theo giờ",
-    time: "21/10/2025, 09:00",
-    checkin: "21/10/2025, 12:00",
-    status: "Không nhận phòng",
-  },
-  {
-    id: "123456",
-    amount: "160.000đ",
-    payment: "Chờ thanh toán",
-    type: "Theo giờ",
-    time: "21/10/2025, 09:00",
-    checkin: "21/10/2025, 12:00",
-    status: "Chờ khách xác nhận",
-  },
-  {
-    id: "123456",
-    amount: "160.000đ",
-    payment: "Chờ xử lý",
-    type: "Theo giờ",
-    time: "21/10/2025, 09:00",
-    checkin: "21/10/2025, 12:00",
-    status: "Chờ xử lý",
-  },
-  {
-    id: "123456",
-    amount: "160.000đ",
-    payment: "Đã thanh toán",
-    type: "Theo giờ",
-    time: "21/10/2025, 09:00",
-    checkin: "21/10/2025, 12:00",
-    status: "Hoàn thành",
-  },
-];
 
-export default function ManagerBookingView() {
+
+export default function ManagerBookingView({
+  hotels,
+  idHotel,
+  setIdHotel,
+  bookings,           // ← Thêm
+  pagination,         // ← Thêm
+  loading,            // ← Thêm
+  onPageChange,       // ← Thêm
+  fetchBookings
+}: {
+  hotels: any[];
+  idHotel: string | null;
+  setIdHotel: (id: string) => void;
+  bookings: any[];
+  pagination: { page: number; total_pages: number; total: number };
+  loading: boolean;
+  onPageChange: (event: React.ChangeEvent<unknown>, page: number) => void;
+}) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [fromDate, setFromDate] = useState<dayjs.Dayjs | null>(null);
   const [toDate, setToDate] = useState<dayjs.Dayjs | null>(null);
   const [openNote, setOpenNote] = useState(false);
+  const [idBooking, setIdBooking] = useState(null); 
   const [openCancel, setOpenCancel] = useState(false);
   const [openAccepp, setOpenAccepp] = useState(false);
 
@@ -141,24 +86,21 @@ export default function ManagerBookingView() {
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ p: { xs: 2, md: 3 } }}>
         {/* Header */}
-        <Typography variant='h5' fontWeight='bold' mb={3}>
+        <Typography variant='h5' fontWeight='bold' mb={1}>
           Quản lý đặt phòng
         </Typography>
 
         {/* Hotel Selector */}
-        <FormControl fullWidth sx={{ mb: 3, maxWidth: 300 }}>
-          <InputLabel>Khách sạn</InputLabel>
-          <Select
-            sx={{
-              width: 200,
-              height: 40,
-              borderRadius: "24px",
-              bgcolor: "#fff",
+        <FormControl fullWidth sx={{ mb: 3, ml: 1, maxWidth: 300 }}>
+
+          <HotelSelect
+            value={idHotel}
+            hotelsData={hotels}
+            onChange={(id) => {
+              setIdHotel(id);
+              console.log("ID khách sạn được chọn:", id);
             }}
-            defaultValue='123'
-            label='Khách sạn'>
-            <MenuItem value='123'>Khách sạn 123</MenuItem>
-          </Select>
+          />
         </FormControl>
 
         {/* Filters */}
@@ -388,73 +330,123 @@ export default function ManagerBookingView() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {data.map((row) => (
-                  <TableRow key={row.id} hover>
-                    <TableCell
-                      sx={{
-                        fontWeight: row.id.includes("(G)") ? "bold" : "normal",
-                        color: row.id.includes("(G)") ? "#1976d2" : "inherit",
-                      }}>
-                      {row.id}
-                    </TableCell>
-                    <TableCell>
-                      <div>{row.amount}</div>
-                      <div style={{ fontSize: "0.875rem", color: "#666" }}>
-                        {row.payment}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {row.type}
-                      <br />
-                      <span style={{ color: "#666", fontSize: "0.875rem" }}>
-                        Vip 123
-                      </span>
-                    </TableCell>
-                    <TableCell>{row.time}</TableCell>
-                    <TableCell>{row.checkin}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={row.status}
-                        color={statusColors[row.status]}
-                        size='small'
-                        sx={{ minWidth: 110 }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Tooltip title='Chỉnh sửa ghi chú'>
-                        <IconButton
-                          onClick={() => setOpenNote(true)}
-                          size='small'>
-                          <EditIcon fontSize='small' />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell align='center'>
-                      <ActionMenu
-                        setOpenAccepp={setOpenAccepp}
-                        setOpenCancel={setOpenCancel}
-                      />
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={8} align="center">
+                      <Typography>Đang tải...</Typography>
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : bookings.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} align="center">
+                      <Typography>Không có dữ liệu đặt phòng</Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  bookings.map((row) => {
+                    // Format ngày giờ
+                    const formatDateTime = (dateString: string) => {
+                      return dayjs(dateString).format("DD/MM/YYYY, HH:mm");
+                    };
+
+                    const rentTypeLabel =
+                      row.rent_type === "hourly"
+                        ? "Theo giờ"
+                        : row.rent_type === "daily"
+                          ? "Qua ngày"
+                          : row.rent_type === "overnight"
+                            ? "Qua đêm"
+                            : "Không xác định";
+
+                    const statusLabel = {
+                      pending: "Chờ nhận phòng",
+                      confirmed: "Chờ khách xác nhận",
+                      checked_in: "Đã nhận phòng",
+                      checked_out: "Hoàn thành",
+                      cancelled: "Hủy phòng",
+                      no_show: "Không nhận phòng",
+                    }[row.status] || "Chờ xử lý";
+
+                    const roomName = row.room_types?.[0]?.name || "N/A";
+
+                    return (
+                      <TableRow key={row.id} hover>
+                        <TableCell
+                          sx={{
+                            fontWeight: row.code.includes("(G)") ? "bold" : "normal",
+                            color: row.code.includes("(G)") ? "#1976d2" : "inherit",
+                          }}>
+                          {row.code}
+                        </TableCell>
+                        <TableCell>
+                          <div>{row.total_price.toLocaleString()}đ</div>
+                          <div style={{ fontSize: "0.875rem", color: "#666" }}>
+                            {row.status === "cancelled" ? "Đã hoàn tiền" : "Đã thanh toán"}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {rentTypeLabel}
+                          <br />
+                          <span style={{ color: "#666", fontSize: "0.875rem" }}>
+                            {roomName}
+                          </span>
+                        </TableCell>
+                        <TableCell>{formatDateTime(row.created_at)}</TableCell>
+                        <TableCell>{formatDateTime(row.check_in)}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={statusLabel}
+                            color={statusColors[statusLabel] || "default"}
+                            size="small"
+                            sx={{ minWidth: 110 }}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Tooltip title={row.note || "Không có ghi chú"}>
+                            <IconButton size="small">
+                              <EditIcon onClick={()=>{
+                                setIdBooking(row)
+                                setOpenNote(true)
+                              }} fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                        <TableCell align="center">
+                          <ActionMenu
+                            booking={row}
+                            setOpenAccepp={setOpenAccepp}
+                            setOpenCancel={setOpenCancel}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
               </TableBody>
             </Table>
           </TableContainer>
+          <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
+            <Pagination
+              key={pagination.page} // ← THÊM DÒNG NÀY ĐỂ FORCE RE-RENDER KHI PAGE THAY ĐỔI
+              count={pagination.total_pages}
+              page={pagination.page}
+              onChange={onPageChange}
+              siblingCount={1}
+              boundaryCount={1}
+              color="primary"
+              size={isMobile ? "medium" : "large"}
+              
+            />
+
+          </Stack>
         </Paper>
 
         {/* Table */}
 
         {/* Pagination */}
-        <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
-          <Pagination
-            count={10}
-            defaultPage={1}
-            siblingCount={1}
-            boundaryCount={1}
-          />
-        </Stack>
+
       </Box>
-      <NoteModal openNote={openNote} onClose={() => setOpenNote(false)} />
+      <NoteModal openNote={openNote} fetchBookings={fetchBookings} idHotel={idHotel} booking={idBooking} onClose={() => setOpenNote(false)} />
       <CancelBookingModal
         openCancel={openCancel}
         onClose={() => setOpenCancel(false)}
@@ -471,14 +463,77 @@ import { Dialog, DialogContent, DialogTitle, Divider } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
-function NoteModal({ openNote, onClose }) {
+function NoteModal({ openNote, onClose, booking,fetchBookings,idHotel }) {
   const [note, setNote] = useState("");
+
+  // Khi modal mở và có booking, điền sẵn ghi chú hiện tại (nếu có)
+  useEffect(() => {
+    if (openNote && booking?.note) {
+      setNote(booking.note || "");
+    } else if (openNote) {
+      setNote(""); // Reset nếu không có note
+    }
+  }, [openNote, booking]);
+
+  if (!booking) {
+    return null; // Tránh render khi chưa có booking
+  }
+
+  // Format thời gian
+  const formatDateTime = (dateString) => {
+    return dayjs(dateString).format("HH:mm, DD/MM/YYYY");
+  };
+
+  // Map loại đặt phòng
+  const rentTypeLabel =
+    booking.rent_type === "hourly"
+      ? "Theo giờ"
+      : booking.rent_type === "daily"
+      ? "Qua ngày"
+      : booking.rent_type === "overnight"
+      ? "Qua đêm"
+      : "Không xác định";
+
+  // Map trạng thái để hiển thị chip
+  const statusLabel = {
+    pending: "Chờ nhận phòng",
+    confirmed: "Chờ khách xác nhận",
+    checked_in: "Đã nhận phòng",
+    checked_out: "Hoàn thành",
+    cancelled: "Hủy phòng",
+    no_show: "Không nhận phòng",
+  }[booking.status] || "Chờ xử lý";
+
+  const statusColor = {
+    pending: { bg: "#e3f2fd", color: "#1976d2" },
+    confirmed: { bg: "#fff3e0", color: "#ef6c00" },
+    checked_in: { bg: "#e8f5e9", color: "#388e3c" },
+    checked_out: { bg: "#e8f5e9", color: "#388e3c" },
+    cancelled: { bg: "#ffebee", color: "#d32f2f" },
+    no_show: { bg: "#ffebee", color: "#d32f2f" },
+  }[booking.status] || { bg: "#f5f5f5", color: "#666" };
+
+  const roomName = booking.room_types?.[0]?.name || "N/A";
+
+  const handleNoteBooking = async()=>{
+    try {
+      let result  = await updateBooking(booking.id,{note:note})
+      if(result?.booking_id){
+        toast.success(result?.message)
+        fetchBookings(idHotel)
+      }else{
+        toast.success(result?.message)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   return (
     <Dialog
       open={openNote}
       onClose={onClose}
-      maxWidth='sm'
+      maxWidth="sm"
       fullWidth
       PaperProps={{
         sx: {
@@ -486,17 +541,15 @@ function NoteModal({ openNote, onClose }) {
           boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
           overflow: "hidden",
         },
-      }}>
+      }}
+    >
       {/* Header */}
       <DialogTitle sx={{ pb: 1, pt: 3, px: 2 }}>
-        <Stack
-          direction='row'
-          justifyContent='space-between'
-          alignItems='center'>
-          <Typography variant='h6' fontWeight='bold'>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Typography variant="h6" fontWeight="bold">
             Ghi chú
           </Typography>
-          <IconButton onClick={onClose} size='small'>
+          <IconButton onClick={onClose} size="small">
             <CloseIcon />
           </IconButton>
         </Stack>
@@ -505,31 +558,29 @@ function NoteModal({ openNote, onClose }) {
       <DialogContent sx={{ px: 2, pb: 4 }}>
         {/* Mã đặt phòng */}
         <Stack spacing={0.5} mb={3}>
-          <Typography color='text.secondary' fontSize='0.875rem'>
+          <Typography color="text.secondary" fontSize="0.875rem">
             Mã đặt phòng:
           </Typography>
-          <Typography fontWeight='bold' fontSize='1.1rem'>
-            123456
+          <Typography fontWeight="bold" fontSize="1.1rem">
+            {booking.code}
           </Typography>
         </Stack>
 
         {/* Ô nhập ghi chú */}
         <Stack spacing={1} mb={3}>
-          <Typography fontSize='0.875rem' color='text.secondary'>
+          <Typography fontSize="0.875rem" color="text.secondary">
             Nhập nội dung (không bắt buộc)
           </Typography>
           <TextField
             multiline
             rows={4}
-            placeholder='Nhập ghi chú...'
+            placeholder="Nhập ghi chú..."
             value={note}
             onChange={(e) => setNote(e.target.value)}
             InputProps={{
               endAdornment: (
-                <InputAdornment
-                  position='end'
-                  sx={{ alignSelf: "flex-end", mb: 1, mr: 1 }}>
-                  <Typography variant='caption' color='text.disabled'>
+                <InputAdornment position="end" sx={{ alignSelf: "flex-end", mb: 1, mr: 1 }}>
+                  <Typography variant="caption" color="text.disabled">
                     {note.length}/300
                   </Typography>
                 </InputAdornment>
@@ -548,58 +599,51 @@ function NoteModal({ openNote, onClose }) {
         <Divider sx={{ my: 3 }} />
 
         {/* Thông tin đặt phòng */}
-        <Box
-          display={"flex"}
-          justifyContent={"space-between"}
-          alignItems={"center"}>
-          <Typography fontWeight='bold' mb={2} color='primary'>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Typography fontWeight="bold" color="primary">
             Thông tin đặt phòng
           </Typography>
-          <Box sx={{}}>
-            <Chip
-              label='Chờ khách xác nhận'
-              size='small'
-              sx={{
-                bgcolor: "#fff3e0",
-                color: "#ef6c00",
-                fontWeight: "medium",
-                borderRadius: 2,
-              }}
-            />
-          </Box>
+          <Chip
+            label={statusLabel}
+            size="small"
+            sx={{
+              bgcolor: statusColor.bg,
+              color: statusColor.color,
+              fontWeight: "medium",
+              borderRadius: 2,
+            }}
+          />
         </Box>
 
         <Stack spacing={2}>
-          <Stack direction='row' justifyContent='space-between'>
-            <Typography color='text.secondary'>Loại đặt phòng:</Typography>
-            <Typography fontWeight='medium'>Theo giờ</Typography>
+          <Stack direction="row" justifyContent="space-between">
+            <Typography color="text.secondary">Loại đặt phòng:</Typography>
+            <Typography fontWeight="medium">{rentTypeLabel}</Typography>
           </Stack>
 
-          <Stack direction='row' justifyContent='space-between'>
-            <Typography color='text.secondary'>Loại phòng:</Typography>
-            <Typography fontWeight='medium'>Vip123</Typography>
+          <Stack direction="row" justifyContent="space-between">
+            <Typography color="text.secondary">Loại phòng:</Typography>
+            <Typography fontWeight="medium">{roomName}</Typography>
           </Stack>
 
-          <Stack
-            direction='row'
-            justifyContent='space-between'
-            alignItems='center'>
-            <Typography color='text.secondary'>Thời gian:</Typography>
-            <Stack direction='row' alignItems='center' spacing={1}>
-              <AccessTimeIcon fontSize='small' sx={{ color: "#999" }} />
-              <Typography fontWeight='medium'>
-                09:00, 19/11/2025 - 11:00, 19/11/2025
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography color="text.secondary">Thời gian:</Typography>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <AccessTimeIcon fontSize="small" sx={{ color: "#999" }} />
+              <Typography fontWeight="medium">
+                {formatDateTime(booking.check_in)} - {formatDateTime(booking.check_out)}
               </Typography>
             </Stack>
           </Stack>
-
-          {/* Trạng thái */}
         </Stack>
+
         <Divider sx={{ my: 3 }} />
+
         {/* Nút hành động */}
-        <Stack direction='row' justifyContent='flex-end' spacing={2} mt={5}>
+        <Stack direction="row" justifyContent="flex-end" spacing={2} mt={5}>
           <Button
-            variant='outlined'
+            variant="outlined"
+            onClick={onClose}
             sx={{
               borderRadius: 8,
               px: 4,
@@ -607,11 +651,16 @@ function NoteModal({ openNote, onClose }) {
               color: "#666",
               borderColor: "#ddd",
             }}
-            onClick={onClose}>
+          >
             Hủy
           </Button>
           <Button
-            variant='contained'
+            variant="contained"
+            onClick={() => {
+              // TODO: Gọi API lưu ghi chú ở đây
+              handleNoteBooking()
+              onClose();
+            }}
             sx={{
               borderRadius: 8,
               px: 5,
@@ -621,17 +670,27 @@ function NoteModal({ openNote, onClose }) {
               boxShadow: "0 4px 12px rgba(139,195,74,0.4)",
               "&:hover": { bgcolor: "#7cb342" },
               textTransform: "none",
-            }}>
-            Ghi chú
+            }}
+          >
+            Lưu ghi chú
           </Button>
         </Stack>
       </DialogContent>
     </Dialog>
   );
 }
+
+
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
-function ActionMenu({ setOpenCancel, setOpenAccepp }) {
+import LogoutIcon from "@mui/icons-material/Logout"; // Icon cho trả phòng
+
+function ActionMenu({
+  booking,
+  setOpenCheckIn,     // Mở modal nhận phòng
+  setOpenCheckOut,    // Mở modal trả phòng
+  setOpenCancel,      // Mở modal hủy
+}) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -643,11 +702,25 @@ function ActionMenu({ setOpenCancel, setOpenAccepp }) {
     setAnchorEl(null);
   };
 
+  if (!booking) return null;
+
+  const status = booking.status;
+
+  // Quyết định hiển thị những action nào
+  const showCheckIn = status === "pending";                    // Chờ nhận phòng → cho nhận phòng
+  const showCheckOut = status === "checked_in";                // Đã nhận phòng → cho trả phòng
+  const showCancel = ["pending", "confirmed"].includes(status); // Chờ xử lý hoặc chờ xác nhận → cho hủy
+
+  // Nếu không có action nào thì không hiển thị nút
+  if (!showCheckIn && !showCheckOut && !showCancel) {
+    return null; // hoặc return một Typography nhỏ "Không có thao tác"
+  }
+
   return (
     <>
       <Button
-        variant='outlined'
-        size='small'
+        variant="outlined"
+        size="small"
         endIcon={<MoreVertIcon />}
         onClick={handleClick}
         sx={{
@@ -658,7 +731,8 @@ function ActionMenu({ setOpenCancel, setOpenAccepp }) {
           fontWeight: 500,
           minWidth: 110,
           "&:hover": { borderColor: "#bbb" },
-        }}>
+        }}
+      >
         Thao tác
       </Button>
 
@@ -672,26 +746,60 @@ function ActionMenu({ setOpenCancel, setOpenAccepp }) {
             boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
             mt: 1,
           },
-        }}>
-        <MenuItem
-          onClick={() => setOpenAccepp(true)}
-          sx={{ gap: 1.5, fontSize: 14 }}>
-          <CheckCircleOutlineIcon fontSize='small' sx={{ color: "#666" }} />
-          Khách nhận phòng
-        </MenuItem>
+        }}
+      >
+        {/* Khách nhận phòng - chỉ hiện khi pending */}
+        {showCheckIn && (
+          <MenuItem
+            onClick={() => {
+              setOpenCheckIn(true);
+              handleClose();
+            }}
+            sx={{ gap: 1.5, fontSize: 14 }}
+          >
+            <CheckCircleOutlineIcon fontSize="small" sx={{ color: "#388e3c" }} />
+            Khách nhận phòng
+          </MenuItem>
+        )}
 
-        <MenuItem
-          onClick={() => setOpenCancel(true)}
-          sx={{ gap: 1.5, fontSize: 14, color: "#d32f2f" }}>
-          <HighlightOffIcon fontSize='small' />
-          Hủy đặt phòng
-        </MenuItem>
+        {/* Khách trả phòng - chỉ hiện khi checked_in */}
+        {showCheckOut && (
+          <MenuItem
+            onClick={() => {
+              setOpenCheckOut(true);
+              handleClose();
+            }}
+            sx={{ gap: 1.5, fontSize: 14 }}
+          >
+            <LogoutIcon fontSize="small" sx={{ color: "#1976d2" }} />
+            Khách trả phòng
+          </MenuItem>
+        )}
+
+        {/* Hủy đặt phòng - chỉ hiện khi pending hoặc confirmed */}
+        {showCancel && (
+          <MenuItem
+            onClick={() => {
+              setOpenCancel(true);
+              handleClose();
+            }}
+            sx={{ gap: 1.5, fontSize: 14, color: "#d32f2f" }}
+          >
+            <HighlightOffIcon fontSize="small" />
+            Hủy đặt phòng
+          </MenuItem>
+        )}
       </Menu>
     </>
   );
 }
 
+
+
 import { RadioGroup, FormControlLabel, Radio } from "@mui/material";
+import HotelSelect from "../../components/HotelSelect";
+import { updateBooking } from "../../service/booking";
+import { toast } from "react-toastify";
 
 function CancelBookingModal({ openCancel, onClose }) {
   const [reason, setReason] = useState("");

@@ -22,15 +22,19 @@ import RoomTypeManager from "./RoomTypeManager";
 import { Close, ContentCopy, Edit, PauseCircle } from "@mui/icons-material";
 import remove from "../../images/delete.png";
 import confirm from "../../images/Frame.png";
+import { useSearchParams } from "react-router-dom";
 
-export default function RoomDetail({ onNext, room }) {
+export default function RoomDetail({ onNext, room ,getHotelDetail,detailHotel}) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [action, setAction] = useState("detail");
-
+  const [searchParams, setSearchParams] = useSearchParams();
   // Parse dữ liệu từ room props
   const parsedName = room
     ? JSON.parse(room.name || '{"vi":""}').vi || "Không có tên"
+    : "";
+    const parsedNameHotel = detailHotel
+    ? JSON.parse(detailHotel.name || '{"vi":""}').vi || "Không có tên"
     : "";
   const parsedBedType = room?.bed_type
     ? typeof room.bed_type === "string"
@@ -65,7 +69,7 @@ export default function RoomDetail({ onNext, room }) {
       }).format(price) + "đ"
     );
   };
-
+  
   return (
     <Box sx={{ p: 2, minHeight: "100vh" }}>
       {/* Dialog ngừng kinh doanh */}
@@ -221,14 +225,18 @@ export default function RoomDetail({ onNext, room }) {
           {/* Header */}
           <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
             <KeyboardArrowLeftIcon
-              onClick={() => onNext("edit_detail")}
+              onClick={() => {
+                const params = new URLSearchParams(searchParams);
+                params.set("manager_room", "true"); // thêm params mới
+                setSearchParams(params);
+                onNext("edit_detail")}}
               sx={{ fontSize: 30, mr: 1, cursor: "pointer" }}
             />
             <Box>
               <Typography variant='h5' fontWeight={600}>
                 {parsedName}
               </Typography>
-              <Typography color='gray'>Kia Hai Hotel</Typography>
+              <Typography color='gray'>{parsedNameHotel}</Typography>
             </Box>
 
             <Chip
@@ -448,33 +456,8 @@ export default function RoomDetail({ onNext, room }) {
       {/* View chỉnh sửa */}
       {action === "edit" && (
         <Box>
-          <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-            <KeyboardArrowLeftIcon
-              onClick={() => setAction("detail")}
-              sx={{ fontSize: 30, mr: 1, cursor: "pointer" }}
-            />
-            <Box>
-              <Typography variant='h5' fontWeight={600}>
-                Chỉnh sửa loại phòng
-              </Typography>
-              <Typography color='gray'>Kia Hai Hotel</Typography>
-            </Box>
-
-            <Box sx={{ flexGrow: 1 }} />
-
-            <Button
-              variant='contained'
-              sx={{
-                background: "#82B440",
-                borderRadius: 3,
-                textTransform: "none",
-                px: 3,
-                "&:hover": { background: "#6fa336" },
-              }}>
-              Cập nhật
-            </Button>
-          </Box>
-          <RoomTypeManager room={room} />
+          
+          <RoomTypeManager getHotelDetail={getHotelDetail} setAction={setAction} room={room} />
         </Box>
       )}
     </Box>

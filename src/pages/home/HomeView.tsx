@@ -792,7 +792,10 @@ export default function HomeView({
   roomTypeCheckin,
   dataEventCheckin,
   dataEventBooked,
-  dataReview
+  dataReview,
+  hotels,
+  idHotel,
+  setIdHotel,
 }) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const BOOKING_ITEMS = [
@@ -842,9 +845,14 @@ export default function HomeView({
           <Typography variant='h5' fontWeight='bold'>
             Trang chủ
           </Typography>
-          <Typography variant='body1' color='text.secondary'>
-            Khách sạn 123
-          </Typography>
+          <HotelSelect
+      value={idHotel}
+      hotelsData={hotels}
+      onChange={(id) => {
+        setIdHotel(id);
+        console.log("ID khách sạn được chọn:", id);
+      }}
+    />
         </Box>
         <Stack direction='row' gap={2} alignItems='center'>
           <Chip
@@ -1495,6 +1503,7 @@ import {
   SelectChangeEvent,
   SelectProps,
 } from '@mui/material';
+import HotelSelect from "../../components/HotelSelect";
 
 
 type RoomType = 'all' | 'hourly' | 'overnight' | 'daily';

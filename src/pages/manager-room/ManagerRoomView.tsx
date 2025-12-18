@@ -132,14 +132,14 @@ export default function ManagerRoomView({
               <SimpleDateSearchBar value={dateRange} onChange={setDateRange} />
             </Box>
             <Box py={3}>
-              {active == "hourly" && data?.daily_slots?.length > 0 && (
+              {active == "hourly" && data?.slots?.length > 0 && (
                 <RoomScheduleTableHourly
                   handleOpenQuickBlock={() => setOpenQuickBlock(true)}
                   handleOpenEdit={() => setOpenEdit(true)}
                   data={data}
                 />
               )}
-              {active == "daily" && data?.slots?.length > 0 && (
+              {active == "daily" && data?.daily_slots?.length > 0 && (
                 <RoomScheduleTableDaily
                   handleOpenQuickBlock={() => setOpenQuickBlock(true)}
                   handleOpenEdit={() => setOpenEdit(true)}
@@ -548,7 +548,7 @@ function RoomScheduleTableHourly({
   const columnWidth = `${100 / totalSlots}%`;
 
   const scrollRef = useRef<HTMLDivElement>(null);
-
+  console.log("AAAA",dayGroups)
   return (
     <Box p={2} bgcolor='#fff'>
       {/* CHỈ 1 CONTAINER CUỘN DUY NHẤT */}
@@ -1112,8 +1112,8 @@ function RoomScheduleTableOvernight({
   data,
 }: RoomScheduleTableDailyProps) {
   const isMobile = useMediaQuery("(max-width:768px)");
-  const dailySlots = data.daily_slots; // 3 ngày
-  const totalDays = dailySlots.length; // 3
+  const dailySlots = data?.slots; // 3 ngày
+  const totalDays = dailySlots?.length; // 3
   const columnWidth = `${100 / totalDays}%`;
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -1163,7 +1163,7 @@ function RoomScheduleTableOvernight({
 
               {/* Các ngày - mỗi ngày 1 cột */}
               <Box display='flex' borderBottom='2px solid #ddd' bgcolor='white'>
-                {dailySlots.map((slot) => {
+                {dailySlots?.map((slot) => {
                   const dateObj = new Date(slot.date);
                   const dayNum = format(dateObj, "dd");
                   const dayName = format(dateObj, "EEEE", { locale: vi })
@@ -1219,7 +1219,7 @@ function RoomScheduleTableOvernight({
               onClick: handleOpenEdit,
               isRemaining: true,
             },
-          ].map((row, idx) => (
+          ]?.map((row, idx) => (
             <Box key={idx} display='flex' borderBottom='1px solid #eee'>
               {/* Cột trái cố định */}
               <Box
@@ -1277,7 +1277,7 @@ function RoomScheduleTableOvernight({
 
               {/* Dữ liệu phải - 3 cột */}
               <Box flex={1} display='flex'>
-                {dailySlots.map((slot, i) => (
+                {dailySlots?.map((slot, i) => (
                   <Box
                     key={i}
                     width={columnWidth}
@@ -1329,7 +1329,7 @@ function RoomScheduleTableOvernight({
           {[
             {
               label: "Giá phòng/đêm",
-              value: `${data.price_daily.toLocaleString("vi-VN")}đ`,
+              value: `${data?.price_overnight?.toLocaleString("vi-VN")}đ`,
               bg: "#fff3e9",
               color: "#e65e00",
             },

@@ -298,10 +298,56 @@ export async function updateHotel(id, body) {
     }
   }
 }
+
+export async function updateRoom(id,idRoom, body) {
+  try {
+    let token = localStorage.getItem("access_token");
+    const response = await api.post(`/partner/hotel/${id}/room-type/${idRoom}/update`, body, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
 export async function toggleHotels(id) {
   try {
     let token = localStorage.getItem("access_token");
     const response = await api.post(`/partner/hotel/${id}/toggle-status`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
+
+
+export async function getHotelReview(id) {
+  try {
+    let token = localStorage.getItem("access_token");
+    const response = await api.get(`/partner/hotel/${id}/detail`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

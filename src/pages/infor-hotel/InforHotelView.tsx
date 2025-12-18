@@ -27,14 +27,14 @@ import {
   PauseCircleOutline as PauseCircleIcon,
   Close,
 } from "@mui/icons-material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import remove from "../../images/delete.png";
 import success from "../../images/Frame.png";
 import HotelDetail from "./HotelDetail";
 import HotelEditForm from "./HotelEditForm";
 import RoomDetail from "./RoomDetail";
-import { toggleHotels } from "../../service/hotel";
-import { useNavigate } from "react-router-dom";
+import { getHotel, toggleHotels } from "../../service/hotel";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 // Component menu thao tác
 function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
@@ -118,15 +118,35 @@ export default function InforHotelView({ hotels, getDataHotels }) {
   const navigate = useNavigate();
   const active = hotels.filter((h) => h.status === "active").length;
   const inactive = total - active;
-  console.log("AAAA idHotel", idHotel);
+  const [detailHotel, setDetailHotel] = useState({});
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("id")) {
+      getHotelDetail()
+    }
+  }, [searchParams]);
+  const getHotelDetail =  async () => {
+    try {
+      let result = await getHotel(searchParams.get("id"));
+      if (result?.id) {
+        setDetailHotel(result);
+        if(room.id){
+          setRoom(result?.room_types.find((item)=>item.id == room.id))
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
   return (
     <Box sx={{ p: 3, bgcolor: "#f5f7fa", minHeight: "100vh" }}>
-      {action == "detail" && <RoomDetail room={room} onNext={setAction} />}
+      {action == "detail" && <RoomDetail getHotelDetail={getHotelDetail} detailHotel={detailHotel} room={room} onNext={setAction} />}
       {action == "edit_form" && (
         <HotelEditForm setAction={setAction} setRoom={setRoom} />
       )}
       {action == "edit_detail" && (
-        <HotelDetail setRoom={setRoom} setAction={setAction} />
+        <HotelDetail detailHotel={detailHotel} getHotelDetail={getHotelDetail} setRoom={setRoom} setAction={setAction} />
       )}
       {action == "manager" && (
         <>

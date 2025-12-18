@@ -24,6 +24,10 @@ import CompassCalibrationIcon from "@mui/icons-material/CompassCalibration";
 import CheckIcon from "@mui/icons-material/Check";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import { useBookingContext } from "../../App"; // Điều chỉnh đường dẫn nếu cần
+import { KeyboardArrowLeft } from "@mui/icons-material";
+import { updateRoom } from "../../service/hotel";
+import { useSearchParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const bedTypes = [
   "1 giường đơn",
@@ -92,13 +96,12 @@ interface RoomTypeManagerProps {
   room?: RoomFromAPI | null;
 }
 
-export default function RoomTypeManager({ room }: RoomTypeManagerProps) {
-  const context = useBookingContext();
+export default function RoomTypeManager({ room, setAction, getHotelDetail }: RoomTypeManagerProps) {
   const dataRef = useRef<{ roomTypes: RoomType[]; activeTab: number }>({
     roomTypes: [],
     activeTab: 0,
   });
-
+  const [searchParams] = useSearchParams();
   // Helper parse JSON đa ngôn ngữ
   const parseVi = (field?: string) => {
     if (!field) return "";
@@ -130,28 +133,16 @@ export default function RoomTypeManager({ room }: RoomTypeManagerProps) {
 
   // Khởi tạo dữ liệu
   const getInitialData = (): { roomTypes: RoomType[]; activeTab: number } => {
-    const saved = context?.state?.create_hotel;
-    if (
-      saved?.roomTypes &&
-      Array.isArray(saved.roomTypes) &&
-      saved.roomTypes.length > 0
-    ) {
-      return {
-        roomTypes: saved.roomTypes,
-        activeTab: saved.activeRoomTab ?? 0,
-      };
-    }
-
     // Nếu có prop room → chế độ edit
     if (room) {
       const imagesArr = room.images
         ? (() => {
-            try {
-              return JSON.parse(room.images);
-            } catch {
-              return [];
-            }
-          })()
+          try {
+            return JSON.parse(room.images);
+          } catch {
+            return [];
+          }
+        })()
         : [];
 
       return {
@@ -235,21 +226,6 @@ export default function RoomTypeManager({ room }: RoomTypeManagerProps) {
   }, [roomTypes, activeTab]);
 
   // Lưu vào context khi unmount
-  useEffect(() => {
-    return () => {
-      context?.dispatch({
-        type: "UPDATE_CREATE_HOTEL",
-        payload: {
-          ...context.state,
-          create_hotel: {
-            ...context.state.create_hotel,
-            roomTypes,
-            activeRoomTab: activeTab,
-          },
-        },
-      });
-    };
-  }, []);
 
   const handleTouch = (field: string) => {
     // onFieldTouch?.(`room_${activeTab}_${field}`);
@@ -305,10 +281,119 @@ export default function RoomTypeManager({ room }: RoomTypeManagerProps) {
     updateRoomField("pricing", newPricing);
   };
 
+  const handleSubmitRoomType = async () => {
+    // Vì UI hiện tại chỉ hiển thị 1 loại phòng (tabs bị comment), nên lấy roomTypes[0]
+    const room = roomTypes[0];
+
+    const formData = new FormData();
+
+    // Helper: chuyển string → {"vi": "giá trị"}
+    const toViJson = (value: string): string => {
+      return JSON.stringify({ vi: (value || "").trim() });
+    };
+
+    // === Các field bắt buộc theo đúng curl của bạn ===
+    formData.append("name", toViJson(room.name));
+    formData.append("description", toViJson(room.description || ""));
+    formData.append("facilities", "{}"); // chưa có UI → để object rỗng
+    formData.append("currency", "VND");
+    formData.append("number", room.quantity || "1");        // số lượng phòng bán
+    formData.append("area_m2", room.area || "");
+    formData.append("max_guests", "2");                     // tạm hardcode (có thể thêm field sau)
+
+    // bed_type & direction → bọc trong {"vi": "..."}
+    formData.append("bed_type", toViJson(room.bedType));
+    formData.append("direction", toViJson(room.direction));
+
+    // === Giá phòng ===
+    if (room.pricing.hourly.enabled) {
+      if (room.pricing.hourly.firstHours) {
+        formData.append("price_hourly", room.pricing.hourly.firstHours);
+      }
+      if (room.pricing.hourly.extraHour) {
+        formData.append("price_hourly_increment", room.pricing.hourly.extraHour);
+      }
+    }
+
+    if (room.pricing.overnight.enabled && room.pricing.overnight.price) {
+      formData.append("price_overnight", room.pricing.overnight.price);
+    }
+
+    if (room.pricing.daily.enabled && room.pricing.daily.price) {
+      formData.append("price_daily", room.pricing.daily.price);
+    }
+
+    // === Ảnh ===
+    // Ưu tiên file mới upload (File object)
+    if (room.images && room.images.length > 0) {
+      room.images.forEach((file: File) => {
+        formData.append("images", file); // backend nhận nhiều images cùng tên field
+      });
+    }
+    // Nếu không có file mới → backend sẽ giữ ảnh cũ (nếu có id)
+
+    // Nếu là edit → gửi kèm id để update
+    if (room.id && room.id.length > 10) { // tránh id tạm từ Date.now()
+      formData.append("id", room.id);
+    }
+
+    // Debug: xem FormData trước khi gửi
+    console.log("=== FormData sẽ gửi ===");
+    for (let [key, value] of formData.entries()) {
+      if (value instanceof File) {
+        console.log(key, value.name, `(size: ${(value.size / 1024 / 1024).toFixed(2)} MB)`);
+      } else {
+        console.log(key, value);
+      }
+    }
+
+    try {
+      let result = await updateRoom(searchParams.get("id"), room.id, formData)
+      console.log("AAAA result", result)
+      if (result?.room_type_id) {
+
+        toast.success(result?.message)
+        getHotelDetail()
+      } else {
+        toast.error(result?.message)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+
+  };
   return (
-    <Box sx={{ p: { xs: 2, md: 3 }, bgcolor: "white", borderRadius: 3 }}>
-      {/* Tabs loại phòng */}
-      <Box
+    <>
+      <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+        <KeyboardArrowLeft
+          onClick={() => setAction("detail")}
+          sx={{ fontSize: 30, mr: 1, cursor: "pointer" }}
+        />
+        <Box>
+          <Typography variant='h5' fontWeight={600}>
+            Chỉnh sửa loại phòng
+          </Typography>
+          <Typography color='gray'>Kia Hai Hotel</Typography>
+        </Box>
+
+        <Box sx={{ flexGrow: 1 }} />
+
+        <Button
+          variant='contained'
+          onClick={handleSubmitRoomType}
+          sx={{
+            background: "#82B440",
+            borderRadius: 3,
+            textTransform: "none",
+            px: 3,
+            "&:hover": { background: "#6fa336" },
+          }}>
+          Cập nhật
+        </Button>
+      </Box>
+      <Box sx={{ p: { xs: 2, md: 3 }, bgcolor: "white", borderRadius: 3 }}>
+        {/* Tabs loại phòng */}
+        {/* <Box
         sx={{
           display: "flex",
           alignItems: "center",
@@ -355,269 +440,267 @@ export default function RoomTypeManager({ room }: RoomTypeManagerProps) {
           }}>
           Thêm loại phòng
         </Button>
-      </Box>
+      </Box> */}
 
-      {/* Các phần UI còn lại giữ nguyên */}
-      <Box sx={{ py: 2 }}>
-        <Box display='flex' justifyContent='space-between' gap={4}>
-          <Box width={{ xs: "100%", md: "30%" }}>
-            <Typography variant='h6' fontWeight={600} gutterBottom>
-              Thông tin phòng
-            </Typography>
-            <Typography variant='body2' color='text.secondary'>
-              Thiết lập các thông tin cơ bản của phòng
-            </Typography>
-          </Box>
+        {/* Các phần UI còn lại giữ nguyên */}
+        <Box sx={{ py: 2 }}>
+          <Box display='flex' justifyContent='space-between' gap={4}>
+            <Box width={{ xs: "100%", md: "30%" }}>
+              <Typography variant='h6' fontWeight={600} gutterBottom>
+                Thông tin phòng
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                Thiết lập các thông tin cơ bản của phòng
+              </Typography>
+            </Box>
 
-          <Box width={{ xs: "100%", md: "65%" }}>
-            <Grid container spacing={3}>
-              {/* Các field giống file gốc, chỉ thay current?.xxx */}
-              <Grid item xs={12}>
-                <Typography
-                  variant='subtitle2'
-                  color='text.secondary'
-                  gutterBottom>
-                  Tên loại phòng
-                </Typography>
-                <TextField
-                  fullWidth
-                  placeholder='Nhập tên loại phòng'
-                  value={current?.name || ""}
-                  onChange={(e) => {
-                    updateRoomField("name", e.target.value);
-                    handleTouch("name");
-                  }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      height: 50,
-                      borderRadius: 2,
-                      "&.Mui-focused fieldset": { borderColor: "#a0d468" },
-                    },
-                  }}
-                />
-              </Grid>
+            <Box width={{ xs: "100%", md: "65%" }}>
+              <Grid container spacing={3}>
+                {/* Các field giống file gốc, chỉ thay current?.xxx */}
+                <Grid item xs={12}>
+                  <Typography
+                    variant='subtitle2'
+                    color='text.secondary'
+                    gutterBottom>
+                    Tên loại phòng
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    placeholder='Nhập tên loại phòng'
+                    value={current?.name || ""}
+                    onChange={(e) => {
+                      updateRoomField("name", e.target.value);
+                      handleTouch("name");
+                    }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        height: 50,
+                        borderRadius: 2,
+                        "&.Mui-focused fieldset": { borderColor: "#a0d468" },
+                      },
+                    }}
+                  />
+                </Grid>
 
-              <Grid item xs={12} md={6}>
-                <Typography
-                  variant='subtitle2'
-                  color='text.secondary'
-                  gutterBottom>
-                  Số lượng phòng bán
-                </Typography>
-                <TextField
-                  fullWidth
-                  placeholder='Nhập số phòng'
-                  value={current?.quantity || ""}
-                  onChange={(e) => {
-                    updateRoomField("quantity", e.target.value);
-                    handleTouch("quantity");
-                  }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      height: 50,
-                      borderRadius: 2,
-                      "&.Mui-focused fieldset": { borderColor: "#a0d468" },
-                    },
-                  }}
-                />
-              </Grid>
+                <Grid item xs={12} md={6}>
+                  <Typography
+                    variant='subtitle2'
+                    color='text.secondary'
+                    gutterBottom>
+                    Số lượng phòng bán
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    placeholder='Nhập số phòng'
+                    value={current?.quantity || ""}
+                    onChange={(e) => {
+                      updateRoomField("quantity", e.target.value);
+                      handleTouch("quantity");
+                    }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        height: 50,
+                        borderRadius: 2,
+                        "&.Mui-focused fieldset": { borderColor: "#a0d468" },
+                      },
+                    }}
+                  />
+                </Grid>
 
-              <Grid item xs={12} md={6}>
-                <Typography
-                  variant='subtitle2'
-                  color='text.secondary'
-                  gutterBottom>
-                  Diện tích phòng (m²)
-                </Typography>
-                <TextField
-                  fullWidth
-                  placeholder='Nhập diện tích phòng'
-                  value={current?.area || ""}
-                  onChange={(e) => {
-                    updateRoomField("area", e.target.value);
-                    handleTouch("area");
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position='end'>m²</InputAdornment>
-                    ),
-                  }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      height: 50,
-                      borderRadius: 2,
-                      "&.Mui-focused fieldset": { borderColor: "#a0d468" },
-                    },
-                  }}
-                />
-              </Grid>
+                <Grid item xs={12} md={6}>
+                  <Typography
+                    variant='subtitle2'
+                    color='text.secondary'
+                    gutterBottom>
+                    Diện tích phòng (m²)
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    placeholder='Nhập diện tích phòng'
+                    value={current?.area || ""}
+                    onChange={(e) => {
+                      updateRoomField("area", e.target.value);
+                      handleTouch("area");
+                    }}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position='end'>m²</InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        height: 50,
+                        borderRadius: 2,
+                        "&.Mui-focused fieldset": { borderColor: "#a0d468" },
+                      },
+                    }}
+                  />
+                </Grid>
 
-              <Grid item xs={12}>
-                <Typography
-                  variant='subtitle2'
-                  color='text.secondary'
-                  gutterBottom>
-                  Loại giường
-                </Typography>
-                <Autocomplete
-                  options={bedTypes}
-                  value={current?.bedType || ""}
-                  onChange={(_, v) => {
-                    updateRoomField("bedType", v || "");
-                    handleTouch("bedType");
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      placeholder='Chọn loại giường'
-                      InputProps={{
-                        ...params.InputProps,
-                        startAdornment: (
-                          <InputAdornment position='start'>
-                            <BedIcon sx={{ color: "#999" }} />
-                          </InputAdornment>
-                        ),
-                      }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          height: 50,
-                          borderRadius: 1.5,
-                          "&.Mui-focused fieldset": { borderColor: "#a0d468" },
-                        },
-                      }}
-                    />
-                  )}
-                  renderOption={(props, option, { selected }) => (
-                    <li {...props}>
-                      <BedIcon sx={{ mr: 2, color: "#999", fontSize: 20 }} />
-                      {option}
-                      {selected && (
-                        <CheckIcon sx={{ ml: "auto", color: "#4caf50" }} />
-                      )}
-                    </li>
-                  )}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <Typography
-                  variant='subtitle2'
-                  color='text.secondary'
-                  gutterBottom>
-                  Hướng phòng
-                </Typography>
-                <Autocomplete
-                  options={directions}
-                  value={current?.direction || ""}
-                  onChange={(_, v) => {
-                    updateRoomField("direction", v || "");
-                    handleTouch("direction");
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      placeholder='Chọn hướng phòng'
-                      InputProps={{
-                        ...params.InputProps,
-                        startAdornment: (
-                          <InputAdornment position='start'>
-                            <CompassCalibrationIcon sx={{ color: "#999" }} />
-                          </InputAdornment>
-                        ),
-                      }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          height: 50,
-                          borderRadius: 1.5,
-                          "&.Mui-focused fieldset": { borderColor: "#a0d468" },
-                        },
-                      }}
-                    />
-                  )}
-                  renderOption={(props, option, { selected }) => (
-                    <li {...props}>
-                      <CompassCalibrationIcon
-                        sx={{ mr: 2, color: "#999", fontSize: 20 }}
+                <Grid item xs={12}>
+                  <Typography
+                    variant='subtitle2'
+                    color='text.secondary'
+                    gutterBottom>
+                    Loại giường
+                  </Typography>
+                  <Autocomplete
+                    options={bedTypes}
+                    value={current?.bedType || ""}
+                    onChange={(_, v) => {
+                      updateRoomField("bedType", v || "");
+                      handleTouch("bedType");
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder='Chọn loại giường'
+                        InputProps={{
+                          ...params.InputProps,
+                          startAdornment: (
+                            <InputAdornment position='start'>
+                              <BedIcon sx={{ color: "#999" }} />
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            height: 50,
+                            borderRadius: 1.5,
+                            "&.Mui-focused fieldset": { borderColor: "#a0d468" },
+                          },
+                        }}
                       />
-                      {option}
-                      {selected && (
-                        <CheckIcon sx={{ ml: "auto", color: "#4caf50" }} />
-                      )}
-                    </li>
-                  )}
-                />
-              </Grid>
+                    )}
+                    renderOption={(props, option, { selected }) => (
+                      <li {...props}>
+                        <BedIcon sx={{ mr: 2, color: "#999", fontSize: 20 }} />
+                        {option}
+                        {selected && (
+                          <CheckIcon sx={{ ml: "auto", color: "#4caf50" }} />
+                        )}
+                      </li>
+                    )}
+                  />
+                </Grid>
 
-              <Grid item xs={12}>
-                <Typography
-                  variant='subtitle2'
-                  color='text.secondary'
-                  gutterBottom>
-                  Mô tả phòng (Không bắt buộc)
-                </Typography>
-                <Typography
-                  variant='body2'
-                  color='text.secondary'
-                  fontSize='0.875rem'
-                  sx={{ mb: 1 }}>
-                  Một đoạn giới thiệu ngắn gọn về loại phòng
-                </Typography>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={4}
-                  placeholder='Nhập mô tả về loại phòng...'
-                  value={current?.description || ""}
-                  onChange={(e) => {
-                    updateRoomField("description", e.target.value);
-                    handleTouch("description");
-                  }}
-                  inputProps={{ maxLength: 3000 }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: 2,
-                      "&.Mui-focused fieldset": { borderColor: "#a0d468" },
-                    },
-                  }}
-                />
-                <Typography
-                  variant='caption'
-                  color='text.secondary'
-                  sx={{ float: "right", mt: 0.5 }}>
-                  {(current?.description || "").length}/3000
-                </Typography>
+                <Grid item xs={12}>
+                  <Typography
+                    variant='subtitle2'
+                    color='text.secondary'
+                    gutterBottom>
+                    Hướng phòng
+                  </Typography>
+                  <Autocomplete
+                    options={directions}
+                    value={current?.direction || ""}
+                    onChange={(_, v) => {
+                      updateRoomField("direction", v || "");
+                      handleTouch("direction");
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder='Chọn hướng phòng'
+                        InputProps={{
+                          ...params.InputProps,
+                          startAdornment: (
+                            <InputAdornment position='start'>
+                              <CompassCalibrationIcon sx={{ color: "#999" }} />
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            height: 50,
+                            borderRadius: 1.5,
+                            "&.Mui-focused fieldset": { borderColor: "#a0d468" },
+                          },
+                        }}
+                      />
+                    )}
+                    renderOption={(props, option, { selected }) => (
+                      <li {...props}>
+                        <CompassCalibrationIcon
+                          sx={{ mr: 2, color: "#999", fontSize: 20 }}
+                        />
+                        {option}
+                        {selected && (
+                          <CheckIcon sx={{ ml: "auto", color: "#4caf50" }} />
+                        )}
+                      </li>
+                    )}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Typography
+                    variant='subtitle2'
+                    color='text.secondary'
+                    gutterBottom>
+                    Mô tả phòng (Không bắt buộc)
+                  </Typography>
+                  <Typography
+                    variant='body2'
+                    color='text.secondary'
+                    fontSize='0.875rem'
+                    sx={{ mb: 1 }}>
+                    Một đoạn giới thiệu ngắn gọn về loại phòng
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={4}
+                    placeholder='Nhập mô tả về loại phòng...'
+                    value={current?.description || ""}
+                    onChange={(e) => {
+                      updateRoomField("description", e.target.value);
+                      handleTouch("description");
+                    }}
+                    inputProps={{ maxLength: 3000 }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 2,
+                        "&.Mui-focused fieldset": { borderColor: "#a0d468" },
+                      },
+                    }}
+                  />
+                  <Typography
+                    variant='caption'
+                    color='text.secondary'
+                    sx={{ float: "right", mt: 0.5 }}>
+                    {(current?.description || "").length}/3000
+                  </Typography>
+                </Grid>
               </Grid>
-            </Grid>
+            </Box>
           </Box>
         </Box>
+
+        <Divider sx={{ my: 4 }} />
+
+        {/* Upload ảnh */}
+        <RoomImagesUpload
+          previews={current?.imagePreviews || []}
+          files={current?.images || []}
+          onChange={(previews, files) => {
+            setRoomTypes((prev) =>
+              prev.map((r, i) =>
+                i === activeTab
+                  ? { ...r, imagePreviews: previews, images: files }
+                  : r
+              )
+            );
+          }}
+        />
+
+        <Divider sx={{ my: 4 }} />
+        <RoomPricingSection pricing={current?.pricing} onChange={updatePricing} />
       </Box>
-
-      <Divider sx={{ my: 4 }} />
-
-      {/* Upload ảnh */}
-      <RoomImagesUpload
-        previews={current?.imagePreviews || []}
-        files={current?.images || []}
-        onChange={(previews, files) => {
-          setRoomTypes((prev) =>
-            prev.map((r, i) =>
-              i === activeTab
-                ? { ...r, imagePreviews: previews, images: files }
-                : r
-            )
-          );
-        }}
-      />
-
-      <Divider sx={{ my: 4 }} />
-
-      {/* Giá phòng */}
-      <RoomPricingSection pricing={current?.pricing} onChange={updatePricing} />
-    </Box>
+    </>
   );
 }
 
-// Component Upload ảnh (giữ nguyên)
 function RoomImagesUpload({
   previews,
   files,

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import HomeView from "./HomeView";
 import dayjs from "dayjs";
-import { getEventMonth, getGeneralStats, getGeneralWeek, getGeneralWeekRoomType, getReviewstats } from "../../service/hotel";
+import { getEventMonth, getGeneralStats, getGeneralWeek, getGeneralWeekRoomType, getHotels, getReviewstats } from "../../service/hotel";
 
 type Props = {};
 
@@ -36,27 +36,36 @@ const HomeController = (props: Props) => {
   const [dataEventBooked, setDataEventBooked] = useState({});
   const [dataEventCheckin, setDataEventCheckin] = useState({});
   const [dataReview, setDataReview] = useState([]);
+  const [hotels, setHotels] = useState([]);
+  const [idHotel, setIdHotel] = useState(null);
   useEffect(() => {
-    getGeneral();
-  }, [dateRange]);
+    if (idHotel)
+      getGeneral();
+  }, [dateRange, idHotel]);
   useEffect(() => {
-    getGeneralMethod();
-  }, [dateRangeRevenueMethod]);
+    if (idHotel)
+      getGeneralMethod();
+  }, [dateRangeRevenueMethod, idHotel]);
   useEffect(() => {
-    getGeneralRoomTypeWeek();
-  }, [roomTypeGeneral]);
+    if (idHotel)
+      getGeneralRoomTypeWeek();
+  }, [roomTypeGeneral, idHotel]);
   useEffect(() => {
-    getEnventVisitMonth();
-  }, [dateRangeRevenueEvent]);
+    if (idHotel)
+      getEnventVisitMonth();
+  }, [dateRangeRevenueEvent, idHotel]);
   useEffect(() => {
-    getEnventViewMonth();
-  }, [dateRangeRevenueEventView]);
+    if (idHotel)
+      getEnventViewMonth();
+  }, [dateRangeRevenueEventView, idHotel]);
   useEffect(() => {
-    getGeneralRoomTypeBooking();
-  }, [roomTypeBooking]);
+    if (idHotel)
+      getGeneralRoomTypeBooking();
+  }, [roomTypeBooking, idHotel]);
   useEffect(() => {
-    getGeneralRoomTypeCheckin();
-  }, [roomTypeCheckin]);
+    if (idHotel)
+      getGeneralRoomTypeCheckin();
+  }, [roomTypeCheckin, idHotel]);
   const getGeneral = async () => {
     try {
       let params = new URLSearchParams({
@@ -73,7 +82,7 @@ const HomeController = (props: Props) => {
         room_type_id: "lD49C0cWJAUw",
       });
 
-      let result = await getGeneralStats("4kJ8wQz9aB2L", params);
+      let result = await getGeneralStats(idHotel, params);
       if (result?.hourly) {
         setDataGeneral(result);
       }
@@ -94,10 +103,10 @@ const HomeController = (props: Props) => {
           .minute(59)
           .second(59)
           .format("YYYY-MM-DDTHH:mm:ssZ"),
-          rent_type: "all",
+        rent_type: "all",
       });
 
-      let result = await getGeneralWeek("4kJ8wQz9aB2L", params);
+      let result = await getGeneralWeek(idHotel, params);
       if (result?.revenue_by_method) {
         setDataGeneralMethod(result?.revenue_by_method);
       }
@@ -108,80 +117,80 @@ const HomeController = (props: Props) => {
   const getGeneralRoomTypeWeek = async () => {
     try {
       let result = {
-        start:[],
-        end:[]
+        start: [],
+        end: []
       }
       const startOfLastWeek = dayjs().subtract(1, 'week').startOf('isoWeek'); // Thứ 2 tuần trước
-    const endOfLastWeek = dayjs().subtract(1, 'week').endOf('isoWeek');     // Chủ nhật tuần trước
+      const endOfLastWeek = dayjs().subtract(1, 'week').endOf('isoWeek');     // Chủ nhật tuần trước
 
-    let params_start = new URLSearchParams({
-      start_time: startOfLastWeek.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ssZ"),
-      end_time: endOfLastWeek.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ssZ"),
-      rent_type: roomTypeGeneral,
-    });
+      let params_start = new URLSearchParams({
+        start_time: startOfLastWeek.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ssZ"),
+        end_time: endOfLastWeek.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ssZ"),
+        rent_type: roomTypeGeneral,
+      });
 
-    // === TUẦN NÀY ===
-    const startOfThisWeek = dayjs().startOf('isoWeek'); // Thứ 2 tuần này
-    const endOfThisWeek = dayjs().endOf('isoWeek');     // Chủ nhật tuần này
-    // Nếu muốn chỉ lấy đến ngày hiện tại (thay vì cả chủ nhật tương lai), dùng dòng dưới:
-    // const endOfThisWeek = dayjs().hour(23).minute(59).second(59);
+      // === TUẦN NÀY ===
+      const startOfThisWeek = dayjs().startOf('isoWeek'); // Thứ 2 tuần này
+      const endOfThisWeek = dayjs().endOf('isoWeek');     // Chủ nhật tuần này
+      // Nếu muốn chỉ lấy đến ngày hiện tại (thay vì cả chủ nhật tương lai), dùng dòng dưới:
+      // const endOfThisWeek = dayjs().hour(23).minute(59).second(59);
 
-    let params_end = new URLSearchParams({
-      start_time: startOfThisWeek.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ssZ"),
-      end_time: endOfThisWeek.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ssZ"),
-      rent_type: roomTypeGeneral,
-    });
+      let params_end = new URLSearchParams({
+        start_time: startOfThisWeek.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ssZ"),
+        end_time: endOfThisWeek.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ssZ"),
+        rent_type: roomTypeGeneral,
+      });
 
-      let result_start = await getGeneralWeekRoomType("4kJ8wQz9aB2L", params_start);
+      let result_start = await getGeneralWeekRoomType(idHotel, params_start);
       if (result_start?.revenue_by_day) {
         result.start = (result_start?.revenue_by_day);
       }
-      let result_end = await getGeneralWeekRoomType("4kJ8wQz9aB2L", params_end);
+      let result_end = await getGeneralWeekRoomType(idHotel, params_end);
       if (result_end?.revenue_by_day) {
-        result.end =result_end?.revenue_by_day ;
+        result.end = result_end?.revenue_by_day;
       }
       setDataGeneralRoomType(result)
     } catch (error) {
       console.log(error);
     }
   };
-  
+
   const getGeneralRoomTypeBooking = async () => {
     try {
       let result = {
-        start:[],
-        end:[]
+        start: [],
+        end: []
       }
       const startOfLastWeek = dayjs().subtract(1, 'week').startOf('isoWeek'); // Thứ 2 tuần trước
-    const endOfLastWeek = dayjs().subtract(1, 'week').endOf('isoWeek');     // Chủ nhật tuần trước
+      const endOfLastWeek = dayjs().subtract(1, 'week').endOf('isoWeek');     // Chủ nhật tuần trước
 
-    let params_start = new URLSearchParams({
-      start_time: startOfLastWeek.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ssZ"),
-      end_time: endOfLastWeek.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ssZ"),
-      rent_type: roomTypeBooking,
-      event_type:"booked"
-    });
+      let params_start = new URLSearchParams({
+        start_time: startOfLastWeek.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ssZ"),
+        end_time: endOfLastWeek.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ssZ"),
+        rent_type: roomTypeBooking,
+        event_type: "booked"
+      });
 
-    // === TUẦN NÀY ===
-    const startOfThisWeek = dayjs().startOf('isoWeek'); // Thứ 2 tuần này
-    const endOfThisWeek = dayjs().endOf('isoWeek');     // Chủ nhật tuần này
-    // Nếu muốn chỉ lấy đến ngày hiện tại (thay vì cả chủ nhật tương lai), dùng dòng dưới:
-    // const endOfThisWeek = dayjs().hour(23).minute(59).second(59);
+      // === TUẦN NÀY ===
+      const startOfThisWeek = dayjs().startOf('isoWeek'); // Thứ 2 tuần này
+      const endOfThisWeek = dayjs().endOf('isoWeek');     // Chủ nhật tuần này
+      // Nếu muốn chỉ lấy đến ngày hiện tại (thay vì cả chủ nhật tương lai), dùng dòng dưới:
+      // const endOfThisWeek = dayjs().hour(23).minute(59).second(59);
 
-    let params_end = new URLSearchParams({
-      start_time: startOfThisWeek.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ssZ"),
-      end_time: endOfThisWeek.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ssZ"),
-      rent_type: roomTypeBooking,
-      event_type:"booked"
-    });
+      let params_end = new URLSearchParams({
+        start_time: startOfThisWeek.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ssZ"),
+        end_time: endOfThisWeek.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ssZ"),
+        rent_type: roomTypeBooking,
+        event_type: "booked"
+      });
 
-      let result_start = await getEventMonth("4kJ8wQz9aB2L", params_start);
+      let result_start = await getEventMonth(idHotel, params_start);
       if (result_start?.revenue_by_day) {
         result.start = (result_start?.revenue_by_day);
       }
-      let result_end = await getEventMonth("4kJ8wQz9aB2L", params_end);
+      let result_end = await getEventMonth(idHotel, params_end);
       if (result_end?.revenue_by_day) {
-        result.end =result_end?.revenue_by_day ;
+        result.end = result_end?.revenue_by_day;
       }
       setDataEventBooked(result)
     } catch (error) {
@@ -191,39 +200,39 @@ const HomeController = (props: Props) => {
   const getGeneralRoomTypeCheckin = async () => {
     try {
       let result = {
-        start:[],
-        end:[]
+        start: [],
+        end: []
       }
       const startOfLastWeek = dayjs().subtract(1, 'week').startOf('isoWeek'); // Thứ 2 tuần trước
-    const endOfLastWeek = dayjs().subtract(1, 'week').endOf('isoWeek');     // Chủ nhật tuần trước
+      const endOfLastWeek = dayjs().subtract(1, 'week').endOf('isoWeek');     // Chủ nhật tuần trước
 
-    let params_start = new URLSearchParams({
-      start_time: startOfLastWeek.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ssZ"),
-      end_time: endOfLastWeek.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ssZ"),
-      rent_type: roomTypeCheckin,
-      event_type:"checked_in"
-    });
+      let params_start = new URLSearchParams({
+        start_time: startOfLastWeek.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ssZ"),
+        end_time: endOfLastWeek.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ssZ"),
+        rent_type: roomTypeCheckin,
+        event_type: "checked_in"
+      });
 
-    // === TUẦN NÀY ===
-    const startOfThisWeek = dayjs().startOf('isoWeek'); // Thứ 2 tuần này
-    const endOfThisWeek = dayjs().endOf('isoWeek');     // Chủ nhật tuần này
-    // Nếu muốn chỉ lấy đến ngày hiện tại (thay vì cả chủ nhật tương lai), dùng dòng dưới:
-    // const endOfThisWeek = dayjs().hour(23).minute(59).second(59);
+      // === TUẦN NÀY ===
+      const startOfThisWeek = dayjs().startOf('isoWeek'); // Thứ 2 tuần này
+      const endOfThisWeek = dayjs().endOf('isoWeek');     // Chủ nhật tuần này
+      // Nếu muốn chỉ lấy đến ngày hiện tại (thay vì cả chủ nhật tương lai), dùng dòng dưới:
+      // const endOfThisWeek = dayjs().hour(23).minute(59).second(59);
 
-    let params_end = new URLSearchParams({
-      start_time: startOfThisWeek.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ssZ"),
-      end_time: endOfThisWeek.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ssZ"),
-      rent_type: roomTypeCheckin,
-      event_type:"checked_in"
-    });
+      let params_end = new URLSearchParams({
+        start_time: startOfThisWeek.hour(0).minute(0).second(0).format("YYYY-MM-DDTHH:mm:ssZ"),
+        end_time: endOfThisWeek.hour(23).minute(59).second(59).format("YYYY-MM-DDTHH:mm:ssZ"),
+        rent_type: roomTypeCheckin,
+        event_type: "checked_in"
+      });
 
-      let result_start = await getEventMonth("4kJ8wQz9aB2L", params_start);
+      let result_start = await getEventMonth(idHotel, params_start);
       if (result_start?.revenue_by_day) {
         result.start = (result_start?.revenue_by_day);
       }
-      let result_end = await getEventMonth("4kJ8wQz9aB2L", params_end);
+      let result_end = await getEventMonth(idHotel, params_end);
       if (result_end?.revenue_by_day) {
-        result.end =result_end?.revenue_by_day ;
+        result.end = result_end?.revenue_by_day;
       }
       setDataEventCheckin(result)
     } catch (error) {
@@ -233,119 +242,134 @@ const HomeController = (props: Props) => {
   const getEnventVisitMonth = async () => {
     try {
       let result = { start: [], end: [] };
-  
+
       const { mode, checkIn, checkOut } = dateRangeRevenueEvent;
-  
+
       let startPrev, endPrev, startCurrent, endCurrent;
-  
+
       if (mode === "week") {
         startCurrent = checkIn.startOf("isoWeek");
-        endCurrent   = checkOut.endOf("isoWeek");
-  
+        endCurrent = checkOut.endOf("isoWeek");
+
         startPrev = startCurrent.subtract(1, "week");
-        endPrev   = endCurrent.subtract(1, "week");
+        endPrev = endCurrent.subtract(1, "week");
       }
-  
+
       if (mode === "month") {
         startCurrent = checkIn.startOf("month");
-        endCurrent   = checkOut.endOf("month");
-  
+        endCurrent = checkOut.endOf("month");
+
         startPrev = startCurrent.subtract(1, "month");
-        endPrev   = endCurrent.subtract(1, "month");
+        endPrev = endCurrent.subtract(1, "month");
       }
-  
+
       const params_start = new URLSearchParams({
         start_time: startPrev.startOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
         end_time: endPrev.endOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
         event_type: "visit",
       });
-  
+
       const params_end = new URLSearchParams({
         start_time: startCurrent.startOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
         end_time: endCurrent.endOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
         event_type: "visit",
       });
-  
-      const result_start = await getEventMonth("4kJ8wQz9aB2L", params_start);
+
+      const result_start = await getEventMonth(idHotel, params_start);
       if (result_start?.daily) result.start = result_start.daily;
-  
-      const result_end = await getEventMonth("4kJ8wQz9aB2L", params_end);
+
+      const result_end = await getEventMonth(idHotel, params_end);
       if (result_end?.daily) result.end = result_end.daily;
-  
+
       setDataEventVisit(result);
     } catch (error) {
       console.log(error);
     }
   };
-  
+
   const getEnventViewMonth = async () => {
     try {
       let result = { start: [], end: [] };
-  
+
       const { mode, checkIn, checkOut } = dateRangeRevenueEventView;
-  
+
       let startPrev, endPrev, startCurrent, endCurrent;
-  
+
       if (mode === "week") {
         startCurrent = checkIn.startOf("isoWeek");
-        endCurrent   = checkOut.endOf("isoWeek");
-  
+        endCurrent = checkOut.endOf("isoWeek");
+
         startPrev = startCurrent.subtract(1, "week");
-        endPrev   = endCurrent.subtract(1, "week");
+        endPrev = endCurrent.subtract(1, "week");
       }
-  
+
       if (mode === "month") {
         startCurrent = checkIn.startOf("month");
-        endCurrent   = checkOut.endOf("month");
-  
+        endCurrent = checkOut.endOf("month");
+
         startPrev = startCurrent.subtract(1, "month");
-        endPrev   = endCurrent.subtract(1, "month");
+        endPrev = endCurrent.subtract(1, "month");
       }
-  
+
       const params_start = new URLSearchParams({
         start_time: startPrev.startOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
         end_time: endPrev.endOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
         event_type: "view",
       });
-  
+
       const params_end = new URLSearchParams({
         start_time: startCurrent.startOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
         end_time: endCurrent.endOf("day").format("YYYY-MM-DDTHH:mm:ssZ"),
         event_type: "view",
       });
-  
-      const result_start = await getEventMonth("4kJ8wQz9aB2L", params_start);
+
+      const result_start = await getEventMonth(idHotel, params_start);
       if (result_start?.daily) result.start = result_start.daily;
-  
-      const result_end = await getEventMonth("4kJ8wQz9aB2L", params_end);
+
+      const result_end = await getEventMonth(idHotel, params_end);
       if (result_end?.daily) result.end = result_end.daily;
-  
+
       setDataEventView(result);
     } catch (error) {
       console.log(error);
     }
   };
-  useEffect(()=>{
-    getDataReview()
-  },[])
+  useEffect(() => {
+    if (idHotel)
+      getDataReview()
+  }, [idHotel])
+  useEffect(() => {
+    getListHotel()
+  }, [])
+  const getListHotel = async () => {
+    try {
+      let result = await getHotels();
+      if (result?.hotels) {
+        setIdHotel(result?.hotels[0]?.id)
+        setHotels(result?.hotels)
+      }
+    } catch (error) {
+
+    }
+  }
   const getDataReview = async () => {
     try {
-      let result = await getReviewstats("4kJ8wQz9aB2L");
-      if(Object.keys(result)?.length>0){
+      let result = await getReviewstats(idHotel);
+      if (Object.keys(result)?.length > 0) {
         setDataReview(result);
       }
-      console.log("AAAA result review",result)
-  
-      
+      console.log("AAAA result review", result)
+
+
     } catch (error) {
       console.log(error);
     }
   };
-  
-  console.log("AAAA dateRangeRevenueMethod",dateRangeRevenueMethod)
-  console.log("AAA dataGeneralMethod",dataGeneralMethod)
-  console.log("AAA dataGeneralRoomType",dataGeneralRoomType)
-  console.log("AAA dataEventVisit",dataEventVisit)
+
+  console.log("AAAA dateRangeRevenueMethod", dateRangeRevenueMethod)
+  console.log("AAA dataGeneralMethod", dataGeneralMethod)
+  console.log("AAA dataGeneralRoomType", dataGeneralRoomType)
+  console.log("AAA dataEventVisit", dataEventVisit)
   return (
     <HomeView
       setDateRange={setDateRange}
@@ -370,7 +394,10 @@ const HomeController = (props: Props) => {
       dataEventBooked={dataEventBooked}
       dataEventCheckin={dataEventCheckin}
       dataReview={dataReview}
-      
+      hotels={hotels}
+      idHotel={idHotel}
+      setIdHotel={setIdHotel}
+
     />
   );
 };
