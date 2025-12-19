@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Box,
     Paper,
@@ -24,7 +24,7 @@ import {
     Theme,
     Divider,
 } from '@mui/material';
-import { CheckCircle, Search as SearchIcon } from '@mui/icons-material';
+import { CheckCircle, KeyboardArrowLeft, Search as SearchIcon } from '@mui/icons-material';
 
 interface HotelRow {
     id: number;
@@ -44,7 +44,14 @@ const data: HotelRow[] = [
     { id: 4, name: 'Khách sạn 123', address: '110 Đ. Cầu Giấy, Quan Hoa, Cầu Giấy, Hà Nội', month: 'Tháng 11.2025', status: 'Chờ thanh toán', rooms: 3, total: 5000000, dueDate: '31/12/2025' },
     { id: 5, name: 'Khách sạn 123', address: '110 Đ. Cầu Giấy, Quan Hoa, Cầu Giấy, Hà Nội', month: 'Tháng 11.2025', status: 'Hoàn thành', rooms: 3, total: 5000000, dueDate: '31/12/2025' },
 ];
-
+const parseLang = (value: string, lang = "vi") => {
+    try {
+        const obj = JSON.parse(value);
+        return obj[lang] || Object.values(obj)[0] || "";
+    } catch {
+        return value;
+    }
+};
 const getStatusColor = (status: string) => {
     switch (status) {
         case 'Chưa đối soát': return { bg: '#FFF0F0', color: '#E53935' };
@@ -60,18 +67,39 @@ const formatCurrency = (amount: number) => {
 };
 
 export default function ReconciliationView({ hotels,
+    pagination,
+    setSettlement,
+    settlement,
+    onPageChange,
     idHotel,
-    setIdHotel,}) {
+    setIdHotel,
+    dataSettlement }) {
     const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
     const isTablet = useMediaQuery((theme: Theme) => theme.breakpoints.between('sm', 'md'));
-
+    const STATUS_LABEL: Record<string, string> = {
+        confirmed: "Chờ thanh toán",
+        paid: "Đã thanh toán",
+        carried: "Chuyển kỳ sau",
+    };
+    const tableData = dataSettlement.map((item, index) => ({
+        id: index + 1, // hoặc item.id nếu muốn
+        name: parseLang(item.hotel_name, "vi"),
+        address: parseLang(item.hotel_address, "en"),
+        month: item.period_month, // 2025-11
+        status: STATUS_LABEL[item.status] ?? item.status, // confirmed
+        rooms: "-", // API chưa có → placeholder
+        total: item.closing_balance, // Tổng công nợ
+        hotel_id: item.hotel_id, // Tổng công nợ
+        _id: item.id,
+        dueDate: new Date(item.confirm_deadline).toLocaleDateString("vi-VN"),
+    }));
     return (
         <>
-            <HotelDetailFinal hotels={hotels}
-            isMobile={isMobile}
-    idHotel={idHotel}
-    setIdHotel={setIdHotel} />
-            {false && <Box sx={{ p: { xs: 2, md: 4 }, backgroundColor: '#f9fafb', minHeight: '100vh' }}>
+            {settlement && <HotelDetailFinal settlement={settlement} setSettlement={setSettlement} hotels={hotels}
+                isMobile={isMobile}
+                idHotel={idHotel}
+                setIdHotel={setIdHotel} />}
+            {!settlement && <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, backgroundColor: '#f9fafb', minHeight: '100vh' }}>
                 {/* Header */}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
                     <Typography variant="h5" fontWeight="600" color="#1a1a1a">
@@ -135,7 +163,9 @@ export default function ReconciliationView({ hotels,
                                 sx={{
                                     borderRadius: 3,
                                     textTransform: 'none',
-                                    bgcolor: tab === 'Tất cả' ? '#1976d2' : 'transparent',
+                                    color: tab === 'Tất cả' ? "white" : "#98b720",
+                                    borderColor: "#98b720",
+                                    bgcolor: tab === 'Tất cả' ? '#98b720' : 'transparent',
                                     '&:hover': { bgcolor: tab === 'Tất cả' ? '#1565c0' : '#f5f5f5' },
                                 }}
                             >
@@ -158,25 +188,36 @@ export default function ReconciliationView({ hotels,
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {data.map((row) => {
+                                {tableData?.map((row, index) => {
                                     const statusStyle = getStatusColor(row.status);
+
                                     return (
-                                        <TableRow key={row.id} hover>
+                                        <TableRow key={index} hover>
                                             <TableCell>{row.id}</TableCell>
+
                                             <TableCell>
-                                                <Typography fontWeight="500">{row.name}</Typography>
+                                                <Typography sx={{ cursor: "pointer" }} onClick={() => { setSettlement(dataSettlement[index]) }} fontWeight="500">{row.name}</Typography>
                                                 {isMobile && (
-                                                    <Typography variant="caption" color="text.secondary" display="block">
+                                                    <Typography
+                                                        variant="caption"
+                                                        color="text.secondary"
+                                                        display="block"
+                                                    >
                                                         {row.address}
                                                     </Typography>
                                                 )}
                                             </TableCell>
-                                            {!isMobile && <TableCell>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    {row.address}
-                                                </Typography>
-                                            </TableCell>}
+
+                                            {!isMobile && (
+                                                <TableCell>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        {row.address}
+                                                    </Typography>
+                                                </TableCell>
+                                            )}
+
                                             <TableCell>{row.month}</TableCell>
+
                                             <TableCell>
                                                 <Chip
                                                     label={row.status}
@@ -189,10 +230,19 @@ export default function ReconciliationView({ hotels,
                                                     }}
                                                 />
                                             </TableCell>
+
                                             <TableCell align="center">{row.rooms}</TableCell>
-                                            <TableCell align="right" sx={{ color: row.total < 0 ? '#e53935' : 'inherit', fontWeight: 500 }}>
+
+                                            <TableCell
+                                                align="right"
+                                                sx={{
+                                                    color: row.total < 0 ? "#e53935" : "inherit",
+                                                    fontWeight: 500,
+                                                }}
+                                            >
                                                 {formatCurrency(row.total)}
                                             </TableCell>
+
                                             <TableCell align="center">{row.dueDate}</TableCell>
                                         </TableRow>
                                     );
@@ -203,7 +253,41 @@ export default function ReconciliationView({ hotels,
 
                     {/* Pagination */}
                     <Box sx={{ p: 2, borderTop: '1px solid #e0e0e0', display: 'flex', justifyContent: 'center' }}>
-                        <Pagination count={10} page={1} color="primary" />
+                        <Pagination
+                            key={pagination.page} // ← THÊM DÒNG NÀY ĐỂ FORCE RE-RENDER KHI PAGE THAY ĐỔI
+                            count={pagination.total_pages}
+                            page={pagination.page}
+                            onChange={onPageChange}
+                            siblingCount={1}
+                            boundaryCount={1}
+                            color="primary"
+                            size={isMobile ? "medium" : "large"}
+                            sx={{
+                                // Tùy chỉnh trang active
+                                "& .MuiPaginationItem-root.Mui-selected": {
+                                    backgroundColor: "#98b720 !important", // Màu xanh lá bạn đang dùng trong app
+                                    color: "white",
+                                    fontWeight: "bold",
+                                    boxShadow: "0 4px 8px rgba(139,195,74,0.4)",
+                                    "&:hover": {
+                                        backgroundColor: "#7cb342 !important",
+                                    },
+                                },
+                                // Tùy chỉnh các trang thường (nếu muốn)
+                                "& .MuiPaginationItem-root": {
+                                    borderRadius: "8px",
+                                    margin: "0 4px",
+                                    "&:hover": {
+                                        backgroundColor: "#e8f5e9",
+                                    },
+                                },
+                                // Tùy chỉnh nút ellipsis (...) nếu cần
+                                "& .MuiPaginationItem-ellipsis": {
+                                    color: "#666",
+                                },
+                            }}
+
+                        />
                     </Box>
                 </Paper>
 
@@ -230,42 +314,113 @@ import {
 
 
 
-function HotelDetailFinal({ hotels,isMobile,
+function HotelDetailFinal({ hotels, isMobile,
+    setSettlement,
+    settlement,
     idHotel,
-    setIdHotel}) {
+    setIdHotel }) {
+    const [dataSettlementBooking, setDataSettlementBooking] = useState([]);
+    const [openModal, setOpenModal] = useState(false)
+    const [pagination, setPagination] = useState({
+        page: 1,
+        limit: 10,
+        total: 0,
+        total_pages: 0,
+    });
+
+    useEffect(() => {
+        if (settlement) {
+            fetchBooking(1);
+        }
+    }, [settlement]);
+
+    const fetchBooking = async (page: number = 1) => {
+        try {
+            const query = new URLSearchParams({ ...pagination, page }).toString()
+            const result = await listBookingSettlement(settlement?.id, query);
+            // Giả sử API trả về cấu trúc như mẫu bạn cung cấp
+            setDataSettlementBooking(result.bookings || []);
+            setPagination({
+                page: result.page || 1,
+                limit: result.limit || 10,
+                total: result.total || 0,
+                total_pages: result.total_pages || 1,
+            });
+        } catch (error) {
+            console.error("Lỗi lấy danh sách booking:", error);
+            setDataSettlementBooking([]);
+        } finally {
+
+        }
+    };
+    const handlePageChange = (event: React.ChangeEvent<unknown>, newPage: number) => {
+        fetchBooking(newPage);
+    };
+
+    const formatCurrency = (value: number) =>
+        value?.toLocaleString("vi-VN") + "đ";
+
+    const formatDateTime = (date: string) =>
+        new Date(date).toLocaleString("vi-VN", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+
+    const rentTypeLabel = (type: string) => {
+        if (type === "hourly") return "Theo giờ";
+        if (type === "daily") return "Theo ngày";
+        return type;
+    };
+
+
+    const formatDate = (date: string) =>
+        new Date(date).toLocaleDateString("vi-VN");
+
+    const formatTime = (date: string) =>
+        new Date(date).toLocaleTimeString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    const debtInMonth = settlement?.total_booking_amount;        // Công nợ phát sinh
+    const deductedDebt = settlement?.commission_amount;          // Công nợ khấu trừ
+    const totalDebt = settlement?.closing_balance;                // Tổng công nợ
+
+    const periodText = `${formatDate(settlement?.start_time)} - ${formatDate(settlement?.end_time)}`;
+
+    const deadlineText = `${formatTime(settlement?.confirm_deadline)}, ${formatDate(
+        settlement?.confirm_deadline
+    )}`;
     return (
         <Box sx={{ bgcolor: '#f9fafb', minHeight: '100vh' }}>
             {/* Header – giống 100% */}
 
 
-            <Box sx={{  p: { xs: 2, sm: 3, md: 4 } }}>
-            <Box
-            display='flex'
-            alignItems='center'
-            justifyContent='space-between'>
-            {/* Left section */}
-            <Box display='flex' flexDirection='column' gap={0.5}>
-              <Typography variant='h5' fontWeight='bold'>
-              Quản lý đối soát
-              </Typography>
+            <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+                <Box
+                    display='flex'
+                    alignItems='center'
+                    justifyContent='space-between'>
+                    {/* Left section */}
+                    <Box display='flex' flexDirection='row' alignItems={"center"} gap={0.5}>
+                        <KeyboardArrowLeft
+                            onClick={() => {
+                                setSettlement(null)
+                            }}
+                            sx={{ fontSize: 32, mr: 1, cursor: "pointer" }}
+                        />
+                        <Typography variant='h5' fontWeight='bold'>
+                            {parseLang(settlement?.hotel_name)}
+                        </Typography>
 
-              <Box display='flex' alignItems='center' gap={1}>
-                <HotelSelect
-                  value={idHotel}
-                  hotelsData={hotels}
-                  onChange={(id) => {
-                    setIdHotel(id);
-                    console.log("ID khách sạn được chọn:", id);
-                  }}
-                />
 
-               
-              </Box>
-            </Box>
+                    </Box>
 
-            
-           
-          </Box>
+
+
+                </Box>
 
 
 
@@ -278,7 +433,6 @@ function HotelDetailFinal({ hotels,isMobile,
                             border: '1px solid #98B720',
                             borderRadius: 4,
                             p: { xs: 2.5, sm: 3 },
-
                             mx: 'auto',
                             fontFamily: 'Roboto, sans-serif',
                             mb: 2
@@ -290,27 +444,30 @@ function HotelDetailFinal({ hotels,isMobile,
                             alignItems={{ md: 'flex-start' }}
                             justifyContent="space-between"
                         >
-                            {/* Cột trái: Các dòng công nợ */}
+                            {/* Cột trái */}
                             <Box sx={{ flex: 1, minWidth: 0 }}>
-                                {/* Dòng 1 */}
+                                {/* Công nợ phát sinh */}
                                 <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1.5}>
                                     <Typography variant="body1" color="#424242">
                                         Công nợ phát sinh trong tháng
                                     </Typography>
                                     <Typography variant="h6" fontWeight={600} color="#98B720">
-                                        5.000.000đ
+                                        {formatCurrency(debtInMonth)}
                                     </Typography>
                                 </Stack>
+
                                 <Divider sx={{ my: 2 }} />
-                                {/* Dòng 2 */}
+
+                                {/* Công nợ khấu trừ */}
                                 <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1.5}>
                                     <Typography variant="body1" color="#424242">
                                         Công nợ khấu trừ
                                     </Typography>
                                     <Typography variant="h6" fontWeight={600} color="#E53935">
-                                        -16.000đ
+                                        -{formatCurrency(deductedDebt)}
                                     </Typography>
                                 </Stack>
+
                                 <Divider sx={{ my: 2 }} />
                                 <Box sx={{ height: 1, bgcolor: '#E0E0E0', my: 2 }} />
 
@@ -320,78 +477,90 @@ function HotelDetailFinal({ hotels,isMobile,
                                         Tổng công nợ
                                     </Typography>
                                     <Typography variant="h5" fontWeight={700} color="#98B720">
-                                        4.984.000đ
+                                        {formatCurrency(totalDebt)}
                                     </Typography>
                                 </Stack>
 
-
-                                {/* Ghi chú + - */}
-                                <Typography variant="caption" color="#E53935" sx={{ lineHeight: 1.5, fontSize: '0.8125rem' }}>
-                                    (+) Hotel Booking sẽ thanh toán cho KS<br />
+                                <Typography variant="caption" color="#E53935" sx={{ lineHeight: 1.5 }}>
+                                    <span style={{ color: "#33AE3F" }}> (+) Hotel Booking sẽ thanh toán cho KS</span> <br />
                                     (-) KS cần thanh toán cho Hotel Booking
                                 </Typography>
                             </Box>
 
-                            {/* Cột giữa: Thông tin phụ */}
-                            <Box sx={{ textAlign: { xs: 'left', md: 'left' }, flexShrink: 0 }}>
+                            {/* Cột giữa */}
+                            <Box sx={{ textAlign: 'left', flexShrink: 0 }}>
                                 <Typography variant="body2" color="#616161" gutterBottom>
                                     Thời gian ghi nhận đặt phòng
                                 </Typography>
-                                <Typography variant="body1" fontWeight={500} color="#424242">
-                                    01/11/2025 - 30/11/2025
+                                <Typography variant="body1" fontWeight={500}>
+                                    {periodText}
                                 </Typography>
 
                                 <Typography variant="body2" color="#616161" mt={2} gutterBottom>
                                     Số lượng đặt phòng
                                 </Typography>
                                 <Typography variant="h6" fontWeight={600} color="#1976D2">
-                                    10
+                                    {/* API chưa có → placeholder */}
+                                    --
                                 </Typography>
                             </Box>
 
-                            {/* Cột phải: Nút + ghi chú */}
+                            {/* Cột phải */}
                             <Box sx={{ textAlign: { xs: 'left', md: 'right' }, flexShrink: 0 }}>
                                 <Button
                                     variant="contained"
+                                    onClick={() => { setOpenModal(true) }}
                                     sx={{
                                         bgcolor: '#98B720',
-                                        color: 'white',
                                         borderRadius: 10,
                                         px: 5,
                                         py: 1.5,
-                                        fontSize: '1rem',
                                         fontWeight: 600,
                                         textTransform: 'none',
                                         boxShadow: 'none',
                                         mb: 2,
-                                        '&:hover': {
-                                            bgcolor: '#388E3C',
-                                            boxShadow: 'none',
-                                        },
                                     }}
                                 >
                                     Hoàn tất đối soát
                                 </Button>
 
-                                <Typography
-                                    variant="body2"
-                                    color="#616161"
-                                    sx={{
-                                        fontSize: '0.875rem',
-                                        lineHeight: 1.5,
-                                        maxWidth: 340,
-                                    }}
-                                >
-                                    Vui lòng hoàn tất đối soát trước <strong>14:30, 31/12/2025</strong> để nhận thanh toán đúng hạn vào ngày làm việc kế tiếp
+                                <Typography variant="body2" color="#616161" sx={{ maxWidth: 340 }}>
+                                    Vui lòng hoàn tất đối soát trước <strong>{deadlineText}</strong> để nhận
+                                    thanh toán đúng hạn
                                 </Typography>
                             </Box>
                         </Stack>
                     </Box>
+
                     <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end' }}>
                         <TextField
                             placeholder="Tìm theo mã đặt phòng"
                             size="small"
-                            sx={{ width: { xs: '100%', sm: 340 } }}
+                            sx={{
+                                width: { xs: '100%', sm: 340 }, "& .MuiOutlinedInput-root": {
+                                    height: 40,
+                                    borderRadius: "24px",
+
+                                    backgroundColor: "#fff",
+                                    "& fieldset": {
+                                        borderColor: "#cddc39", // Border mặc định
+                                        borderWidth: "1px",     // Tăng độ dày nếu muốn nổi bật hơn
+                                    },
+                                    "&:hover fieldset": {
+                                        borderColor: "#c0ca33", // Hover: đậm hơn một chút (tùy chọn)
+                                        borderWidth: "1px",
+                                    },
+                                    "&.Mui-focused fieldset": {
+                                        borderColor: "#cddc39 !important", // QUAN TRỌNG: Khi focus vẫn giữ màu này
+                                        borderWidth: "1px",
+                                        boxShadow: "0 0 0 3px rgba(205, 220, 57, 0.2)", // Hiệu ứng glow nhẹ (tùy chọn)
+                                    },
+                                    // Tắt màu legend primary khi focus (nếu có label)
+                                    "&.Mui-focused .MuiInputLabel-root": {
+                                        color: "#666",
+                                    },
+                                },
+                            }}
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
@@ -418,35 +587,113 @@ function HotelDetailFinal({ hotels,isMobile,
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {[1, 2, 3, 4, 5].map((i) => {
-                                    const isNegative = i === 2;
+                                {dataSettlementBooking.map((row, index) => {
+                                    const debt = row.partner_amount; // Công nợ
+                                    const isNegative = debt < 0;
+
                                     return (
-                                        <TableRow key={i} hover>
-                                            <TableCell>{i}</TableCell>
-                                            <TableCell sx={{ fontWeight: 500 }}>123456</TableCell>
-                                            <TableCell>Vip23 - Theo giờ</TableCell>
-                                            <TableCell sx={{ color: '#616161', fontSize: '0.875rem', lineHeight: 1.4 }}>
-                                                21/10/2025, 09:00<br />21/10/2025, 12:00
+                                        <TableRow key={row.id} hover>
+                                            {/* # */}
+                                            <TableCell>{index + 1}</TableCell>
+
+                                            {/* Mã đặt phòng */}
+                                            <TableCell sx={{ fontWeight: 500 }}>
+                                                {row.booking_code}
                                             </TableCell>
-                                            <TableCell>160.000đ</TableCell>
-                                            <TableCell>160.000đ</TableCell>
-                                            <TableCell sx={{ color: '#616161' }}>16.000đ</TableCell>
-                                            <TableCell align="right" sx={{ fontWeight: 600, color: isNegative ? '#E53935' : '#98B720' }}>
-                                                {isNegative ? '-16.000đ' : '144.000đ'}
+
+                                            {/* Loại phòng */}
+                                            <TableCell>
+                                                {row.room_type_name} - {rentTypeLabel(row.rent_type)}
+                                            </TableCell>
+
+                                            {/* Thời gian */}
+                                            <TableCell
+                                                sx={{
+                                                    color: "#616161",
+                                                    fontSize: "0.875rem",
+                                                    lineHeight: 1.4,
+                                                }}
+                                            >
+                                                {formatDateTime(row.check_in)}
+                                                <br />
+                                                {formatDateTime(row.check_out)}
+                                            </TableCell>
+
+                                            {/* Tiền phòng */}
+                                            <TableCell>
+                                                {formatCurrency(row.booking_amount)}
+                                            </TableCell>
+
+                                            {/* Tổng thanh toán */}
+                                            <TableCell>
+                                                {formatCurrency(row.booking_amount)}
+                                            </TableCell>
+
+                                            {/* Phí hoa hồng */}
+                                            <TableCell sx={{ color: "#616161" }}>
+                                                {formatCurrency(row.commission_amount)}
+                                            </TableCell>
+
+                                            {/* Công nợ */}
+                                            <TableCell
+                                                align="right"
+                                                sx={{
+                                                    fontWeight: 600,
+                                                    color: isNegative ? "#E53935" : "#98B720",
+                                                }}
+                                            >
+                                                {isNegative
+                                                    ? `-${formatCurrency(Math.abs(debt))}`
+                                                    : formatCurrency(debt)}
                                             </TableCell>
                                         </TableRow>
                                     );
                                 })}
                             </TableBody>
+
                         </Table>
                     </TableContainer>
 
                     <Box sx={{ p: 2, borderTop: '1px solid #e0e0e0', display: 'flex', justifyContent: 'center' }}>
-                        <Pagination count={10} page={1} shape="rounded" />
+                        <Pagination
+                            key={pagination.page} // ← THÊM DÒNG NÀY ĐỂ FORCE RE-RENDER KHI PAGE THAY ĐỔI
+                            count={pagination.total_pages}
+                            page={pagination.page}
+                            onChange={handlePageChange}
+                            siblingCount={1}
+                            boundaryCount={1}
+                            color="primary"
+                            size={isMobile ? "medium" : "large"}
+                            sx={{
+                                // Tùy chỉnh trang active
+                                "& .MuiPaginationItem-root.Mui-selected": {
+                                    backgroundColor: "#98b720 !important", // Màu xanh lá bạn đang dùng trong app
+                                    color: "white",
+                                    fontWeight: "bold",
+                                    boxShadow: "0 4px 8px rgba(139,195,74,0.4)",
+                                    "&:hover": {
+                                        backgroundColor: "#7cb342 !important",
+                                    },
+                                },
+                                // Tùy chỉnh các trang thường (nếu muốn)
+                                "& .MuiPaginationItem-root": {
+                                    borderRadius: "8px",
+                                    margin: "0 4px",
+                                    "&:hover": {
+                                        backgroundColor: "#e8f5e9",
+                                    },
+                                },
+                                // Tùy chỉnh nút ellipsis (...) nếu cần
+                                "& .MuiPaginationItem-ellipsis": {
+                                    color: "#666",
+                                },
+                            }}
+
+                        />
                     </Box>
                 </Paper>
             </Box>
-            <ConfirmCompleteModal />
+            <ConfirmCompleteModal open={openModal} settlement={settlement} onClose={() => setOpenModal(false)} />
         </Box>
     );
 }
@@ -460,7 +707,25 @@ import {
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 
-function ConfirmCompleteModal({ open = false, onClose = () => { } }) {
+function ConfirmCompleteModal({ open = false, onClose = () => { } ,settlement}) {
+    let [action, setAction] = useState(1)
+    let [banks, setBanks] = useState([])
+    let [bankPrimary, setBankPrimary] = useState(null)
+    
+    useEffect(()=>{
+       (async()=>{
+        try {
+            let result = await getbankPartner(settlement?.hotel_id);
+            console.log(result)
+            if(result?.banks?.length>0){
+                setBankPrimary(result?.banks.find((item)=>item.is_default == 1))
+            }
+        } catch (error) {
+            console.log(error)
+        }
+
+       })() 
+    },[])
     return (
         <Dialog
             open={open}
@@ -534,116 +799,174 @@ function ConfirmCompleteModal({ open = false, onClose = () => { } }) {
                     </Typography>
                 </Stack>
             </Stack>
-            <DialogContent sx={{ px: 4, pb: 3 }}>
+            {action == 1 && <DialogContent sx={{ px: 4, pb: 3 }}>
 
-            <Typography variant="body1" color="#424242" lineHeight={1.7} mb={4}>
-        Bằng việc <strong>xác nhận đối soát ngay</strong>, Hotel Booking và khách sạn thống nhất nội dung đối soát. 
-        Sau khi đối soát hoàn tất, các bên sẽ thực hiện nghĩa vụ thanh toán như trong hợp đồng được ký kết.
-      </Typography>
-
-      {/* Tiêu đề yêu cầu */}
-      <Typography variant="body1" color="#424242" fontWeight={600} mb={3}>
-        Vui lòng đánh dấu xác nhận các mục bên dưới để hoàn tất:
-      </Typography>
-
-      {/* 2 mục tick xanh */}
-      <Stack spacing={2.5} mb={5}>
-        <Stack direction="row" alignItems="flex-start" spacing={2}>
-          <CheckCircle sx={{ color: '#98B720', fontSize: 28, flexShrink: 0, mt: 0.3 }} />
-          <Typography variant="body1" color="#424242" lineHeight={1.7}>
-            Bảng đối soát hiện tại <strong>đúng và đủ</strong> các đặt phòng trong kỳ đối soát.
-          </Typography>
-        </Stack>
-
-        <Stack direction="row" alignItems="flex-start" spacing={2}>
-          <CheckCircle sx={{ color: '#98B720', fontSize: 28, flexShrink: 0, mt: 0.3 }} />
-          <Typography variant="body1" color="#424242" lineHeight={1.7}>
-            Số tiền công nợ <strong>là đúng</strong> theo số tiền trong kỳ đối soát
-          </Typography>
-        </Stack>
-      </Stack>
-
-      {/* Dòng cảnh báo đỏ – giống hệt ảnh */}
-      <Typography
-        variant="body2"
-        color="#E53935"
-        fontWeight={500}
-        lineHeight={1.7}
-        sx={{
-          bgcolor: '#FFEBEE',
-          padding: '14px 20px',
-          borderRadius: 2,
-          borderLeft: '4px solid #E53935',
-        }}
-      >
-        Lưu ý: Nếu bạn thấy <strong>đối tượng</strong> thông tin tài khoản thanh toán, bạn cần chờ Hotel Booking xử lý yêu cầu và cập nhật thông tin trên hệ thống.
-      </Typography>
-            </DialogContent>
-            {false && <DialogContent sx={{ px: 4, pb: 3 }}>
-
-            <PaymentQRInfo/>
-            </DialogContent>}
-           {false&& <DialogContent sx={{ px: 4, pb: 3 }}>
-                <Typography variant="h6" fontWeight={600} color="#111" mb={4}>
-                    Thông tin tài khoản thanh toán
+                <Typography variant="body1" color="#424242" lineHeight={1.7} mb={4}>
+                    Bằng việc <strong>xác nhận đối soát ngay</strong>, Hotel Booking và khách sạn thống nhất nội dung đối soát.
+                    Sau khi đối soát hoàn tất, các bên sẽ thực hiện nghĩa vụ thanh toán như trong hợp đồng được ký kết.
                 </Typography>
 
-                <Stack spacing={3.5}>
+                {/* Tiêu đề yêu cầu */}
+                <Typography variant="body1" color="#424242" fontWeight={600} mb={3}>
+                    Vui lòng đánh dấu xác nhận các mục bên dưới để hoàn tất:
+                </Typography>
+
+                {/* 2 mục tick xanh */}
+                <Stack spacing={2.5} mb={5}>
+                    <Stack direction="row" alignItems="flex-start" spacing={2}>
+                        <CheckCircle sx={{ color: '#98B720', fontSize: 28, flexShrink: 0, mt: 0.3 }} />
+                        <Typography variant="body1" color="#424242" lineHeight={1.7}>
+                            Bảng đối soát hiện tại <strong>đúng và đủ</strong> các đặt phòng trong kỳ đối soát.
+                        </Typography>
+                    </Stack>
+
+                    <Stack direction="row" alignItems="flex-start" spacing={2}>
+                        <CheckCircle sx={{ color: '#98B720', fontSize: 28, flexShrink: 0, mt: 0.3 }} />
+                        <Typography variant="body1" color="#424242" lineHeight={1.7}>
+                            Số tiền công nợ <strong>là đúng</strong> theo số tiền trong kỳ đối soát
+                        </Typography>
+                    </Stack>
+                </Stack>
+
+                {/* Dòng cảnh báo đỏ – giống hệt ảnh */}
+                <Typography
+                    variant="body2"
+                    color="#E53935"
+                    fontWeight={500}
+                    lineHeight={1.7}
+                    sx={{
+                        bgcolor: '#FFEBEE',
+                        padding: '14px 20px',
+                        borderRadius: 2,
+                        borderLeft: '4px solid #E53935',
+                    }}
+                >
+                    Lưu ý: Nếu bạn thấy <strong>đối tượng</strong> thông tin tài khoản thanh toán, bạn cần chờ Hotel Booking xử lý yêu cầu và cập nhật thông tin trên hệ thống.
+                </Typography>
+            </DialogContent>}
+            {false && <DialogContent sx={{ px: 4, pb: 3 }}>
+
+                <PaymentQRInfo />
+            </DialogContent>}
+            {action == 2 && <DialogContent sx={{ px: 4, pb: 3 }}>
+                <Box display={"flex"} justifyContent={"space-between"}>
+                    <Typography variant="h6" fontWeight={600} color="#111" mb={4}>
+                        Thông tin tài khoản thanh toán
+                    </Typography>
+                    <Typography onClick={() => setAction(3)} sx={{ textDecoration: "underline", cursor: "pointer" }} color='#4E6AFF'>Chỉnh sửa</Typography>
+                </Box>
+
+                <Stack spacing={3.5}> <Divider sx={{ mt: 5, borderColor: '#EEEEEE' }} />
                     {/* Số tài khoản */}
                     <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"}>
                         <Typography variant="body2" color="#424242" fontWeight={500} mb={1}>
                             Số tài khoản
                         </Typography>
-                        <TextField
-                            fullWidth
-                            value="0123456789"
-                            disabled
-                            variant="outlined"
-                            sx={{
-                                width: "60%",
-                                '& .MuiOutlinedInput-root': {
-                                    height: 50,
-                                    bgcolor: '#FAFAFA',
-                                    borderRadius: 2,
-                                    fontWeight: 600,
-                                    fontSize: '1rem',
-                                    '& fieldset': { borderColor: '#E0E0E0' },
-                                    '&.Mui-disabled fieldset': { borderColor: '#E0E0E0' },
-                                    '&.Mui-disabled': { bgcolor: '#FAFAFA' },
-                                },
-                            }}
-                        />
+                        <Typography fontWeight={"700"}>{bankPrimary?.account_number}</Typography>
                     </Box>
-
+                    <Divider sx={{ mt: 5, borderColor: '#EEEEEE' }} />
                     {/* Người thụ hưởng */}
                     <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"}>
                         <Typography variant="body2" color="#424242" fontWeight={500} mb={1}>
                             Người thụ hưởng
                         </Typography>
-                        <TextField
-                            fullWidth
-                            value="Nguyễn Văn A"
-                            disabled
-                            variant="outlined"
-                            sx={{
-                                width: "60%",
-                                '& .MuiOutlinedInput-root': {
-                                    height: 50,
-                                    bgcolor: '#FAFAFA',
-                                    borderRadius: 2,
-                                    fontWeight: 600,
-                                    '& fieldset': { borderColor: '#E0E0E0' },
-                                },
-                            }}
-                        />
+                        <Typography fontWeight={"700"}>{bankPrimary?.account_name}</Typography>
                     </Box>
-
+                    <Divider sx={{ mt: 5, borderColor: '#EEEEEE' }} />
                     {/* Tên ngân hàng - SELECT thật 100% giống ảnh */}
                     <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"}>
                         <Typography variant="body2" color="#424242" fontWeight={500} mb={1}>
                             Tên ngân hàng
                         </Typography>
-                        <FormControl sx={{ width: "60%" }}>
+                        <FormControl >
+                            <Typography fontWeight={"700"}>{bankPrimary?.bank_name}</Typography>
+                        </FormControl>
+                    </Box>
+                </Stack>
+
+                <Divider sx={{ mt: 5, borderColor: '#EEEEEE' }} />
+
+            </DialogContent>}
+            {action == 3 && <DialogContent sx={{ px: 4, pb: 3 }}>
+                {/* Step 1 - 2 */}
+
+
+                {/* Tiêu đề + nút Chỉnh sửa */}
+                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+                    <Typography variant="body1" color="#424242" fontWeight={500}>
+                        Thông tin tài khoản thanh toán
+                    </Typography>
+                   
+                </Stack>
+
+                {/* Card thông tin tài khoản – giống hệt ảnh */}
+                <Box
+                    sx={{
+
+
+                        borderRadius: 3,
+
+                        textAlign: 'left',
+                    }}
+                >
+                    <Stack spacing={2.5}>
+                        {/* Số tài khoản */}
+                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+                            <Typography color="#616161" fontWeight={500}>
+                                Số tài khoản
+                            </Typography>
+                            <TextField
+                                fullWidth
+                                value="0123456789"
+
+                                variant="outlined"
+                                sx={{
+                                    width: "60%",
+                                    '& .MuiOutlinedInput-root': {
+                                        height: 50,
+                                        bgcolor: '#FAFAFA',
+                                        borderRadius: 2,
+                                        fontWeight: 600,
+                                        fontSize: '1rem',
+                                        '& fieldset': { borderColor: '#E0E0E0' },
+                                        '&.Mui-disabled fieldset': { borderColor: '#E0E0E0' },
+                                        '&.Mui-disabled': { bgcolor: '#FAFAFA' },
+                                    },
+                                }}
+                            />
+                        </Stack>
+                        <Divider sx={{ my: 2 }} />
+                        {/* Người thụ hưởng */}
+                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+                            <Typography color="#616161" fontWeight={500}>
+                                Người thụ hưởng
+                            </Typography>
+                            <TextField
+                                fullWidth
+                                value="0123456789"
+
+                                variant="outlined"
+                                sx={{
+                                    width: "60%",
+                                    '& .MuiOutlinedInput-root': {
+                                        height: 50,
+                                        bgcolor: '#FAFAFA',
+                                        borderRadius: 2,
+                                        fontWeight: 600,
+                                        fontSize: '1rem',
+                                        '& fieldset': { borderColor: '#E0E0E0' },
+                                        '&.Mui-disabled fieldset': { borderColor: '#E0E0E0' },
+                                        '&.Mui-disabled': { bgcolor: '#FAFAFA' },
+                                    },
+                                }}
+                            />
+                        </Stack>
+                        <Divider sx={{ my: 2 }} />
+                        {/* Tên ngân hàng */}
+                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+                            <Typography color="#616161" fontWeight={500}>
+                                Tên ngân hàng
+                            </Typography>
                             <Select
 
 
@@ -669,66 +992,6 @@ function ConfirmCompleteModal({ open = false, onClose = () => { } }) {
                                 <MenuItem value="bidv">BIDV</MenuItem>
                                 <MenuItem value="mb">MB Bank</MenuItem>
                             </Select>
-                        </FormControl>
-                    </Box>
-                </Stack>
-
-                <Divider sx={{ mt: 5, borderColor: '#EEEEEE' }} />
-
-            </DialogContent>}
-            {false && <DialogContent sx={{ px: 4, pb: 3 }}>
-                {/* Step 1 - 2 */}
-
-
-                {/* Tiêu đề + nút Chỉnh sửa */}
-                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-                    <Typography variant="body1" color="#424242" fontWeight={500}>
-                        Thông tin tài khoản thanh toán
-                    </Typography>
-                    <Button variant="text" sx={{ color: '#1976D2', textTransform: 'none', fontWeight: 500 }}>
-                        Chỉnh sửa
-                    </Button>
-                </Stack>
-
-                {/* Card thông tin tài khoản – giống hệt ảnh */}
-                <Box
-                    sx={{
-
-
-                        borderRadius: 3,
-
-                        textAlign: 'left',
-                    }}
-                >
-                    <Stack spacing={2.5}>
-                        {/* Số tài khoản */}
-                        <Stack direction="row" justifyContent="space-between">
-                            <Typography color="#616161" fontWeight={500}>
-                                Số tài khoản
-                            </Typography>
-                            <Typography fontWeight={700} color="#111">
-                                0123456789
-                            </Typography>
-                        </Stack>
-                        <Divider sx={{ my: 2 }} />
-                        {/* Người thụ hưởng */}
-                        <Stack direction="row" justifyContent="space-between">
-                            <Typography color="#616161" fontWeight={500}>
-                                Người thụ hưởng
-                            </Typography>
-                            <Typography fontWeight={600}>
-                                Nguyễn Văn A
-                            </Typography>
-                        </Stack>
-                        <Divider sx={{ my: 2 }} />
-                        {/* Tên ngân hàng */}
-                        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                            <Typography color="#616161" fontWeight={500}>
-                                Tên ngân hàng
-                            </Typography>
-                            <Typography fontWeight={600} sx={{ maxWidth: 220, textAlign: 'right' }}>
-                                Techcombank – Ngân hàng Thương mại Cổ phần Kỹ thương Việt Nam
-                            </Typography>
                         </Stack>
                         <Divider sx={{ my: 2 }} />
                     </Stack>
@@ -755,6 +1018,7 @@ function ConfirmCompleteModal({ open = false, onClose = () => { } }) {
 
                 <Button
                     variant="contained"
+                    onClick={() => setAction(++action)}
                     sx={{
                         minWidth: 140,
                         bgcolor: '#98B720',
@@ -777,6 +1041,7 @@ function ConfirmCompleteModal({ open = false, onClose = () => { } }) {
 
 import { QRCodeCanvas } from 'qrcode.react';// npm install qrcode.react
 import HotelSelect from '../../components/HotelSelect';
+import { getbankPartner, listBookingSettlement } from '../../service/booking';
 
 function PaymentQRInfo() {
     const qrData = "0123456789|Nguyễn Văn A|Techcombank";
@@ -784,22 +1049,22 @@ function PaymentQRInfo() {
     return (
         <Box
             sx={{
-               
+
                 mx: 'auto',
-                
-             
+
+
                 textAlign: 'center',
                 fontFamily: 'Roboto, sans-serif',
             }}
         >
             {/* QR Code */}
             <Box >
-            <QRCodeCanvas
-          value={qrData}
-          size={220}
-          level="M"
-          includeMargin={true}
-        />
+                <QRCodeCanvas
+                    value={qrData}
+                    size={220}
+                    level="M"
+                    includeMargin={true}
+                />
             </Box>
 
             {/* Tiêu đề */}
