@@ -24,6 +24,7 @@ export default function ManagerRoomView({
   hotels,
   idHotel,
   setIdHotel,
+  setData
 }) {
   const isMobile = useMediaQuery("(max-width:600px)");
 
@@ -42,14 +43,14 @@ export default function ManagerRoomView({
       {action == "create" && <CreateRoom idHotel={idHotel} setAction={setAction} />}
       {action == "lock" && <LockRoomSetup setAction={setAction} />}
       {action == "manager" && (
-        <Box py={2} px={isMobile ? 1 : 3}>
+        <Box sx={{ p: { xs: 2, sm: 3, md: 4 }}}>
           <Box
             display='flex'
             alignItems='center'
             justifyContent='space-between'>
             {/* Left section */}
             <Box display='flex' flexDirection='column' gap={0.5}>
-              <Typography fontSize={isMobile ? 18 : 22} fontWeight={600}>
+              <Typography variant='h5' fontWeight='bold'>
                 Danh sách loại phòng
               </Typography>
 
@@ -115,7 +116,9 @@ export default function ManagerRoomView({
                   <Box
                     key={t.key}
                     sx={{ cursor: "pointer" }}
-                    onClick={() => setActive(t.key)}>
+                    onClick={() => {
+                      setData([])
+                      setActive(t.key)}}>
                     <Typography
                       fontSize={17}
                       fontWeight={500}
@@ -137,27 +140,42 @@ export default function ManagerRoomView({
               <SimpleDateSearchBar value={dateRange} onChange={setDateRange} />
             </Box>
             <Box py={3}>
-              {active == "hourly" && data?.slots?.length > 0 && (
-                <RoomScheduleTableHourly
-                  handleOpenQuickBlock={() => setOpenQuickBlock(true)}
-                  handleOpenEdit={() => setOpenEdit(true)}
-                  data={data}
-                />
-              )}
-              {active == "daily" && data?.daily_slots?.length > 0 && (
-                <RoomScheduleTableDaily
-                  handleOpenQuickBlock={() => setOpenQuickBlock(true)}
-                  handleOpenEdit={() => setOpenEdit(true)}
-                  data={data}
-                />
-              )}
-              {active == "overnight" && data?.slots?.length > 0 && data?.price_overnight && (
-                <RoomScheduleTableOvernight
-                  handleOpenQuickBlock={() => setOpenQuickBlock(true)}
-                  handleOpenEdit={() => setOpenEdit(true)}
-                  data={data}
-                />
-              )}
+              {active == "hourly" && data?.room_types?.length > 0 && <>
+
+                {data?.room_types?.map((item) => {
+                  return <RoomScheduleTableHourly
+                    handleOpenQuickBlock={() => setOpenQuickBlock(true)}
+                    handleOpenEdit={() => setOpenEdit(true)}
+                    data={{ ...item, end_time: data.end_time, start_time: data.start_time }}
+                  />
+                })}
+
+
+              </>}
+              {active == "daily" && data?.room_types?.length > 0 && <>
+
+                {data?.room_types?.map((item) => {
+                  return <RoomScheduleTableDaily
+                    handleOpenQuickBlock={() => setOpenQuickBlock(true)}
+                    handleOpenEdit={() => setOpenEdit(true)}
+                    data={{ ...item, end_time: data.end_time, start_time: data.start_time }}
+                  />
+                })}
+
+
+              </>}
+              {active == "overnight" && data?.room_types?.length > 0 && <>
+
+                {data?.room_types?.map((item) => {
+                  return <RoomScheduleTableOvernight
+                    handleOpenQuickBlock={() => setOpenQuickBlock(true)}
+                    handleOpenEdit={() => setOpenEdit(true)}
+                    data={{ ...item, end_time: data.end_time, start_time: data.start_time }}
+                  />
+                })}
+
+
+              </>}
             </Box>
           </Card>
           <QuickBlockDialog
@@ -660,7 +678,7 @@ function RoomScheduleTableHourly({
           </Box>
           {/* CÁC DÒNG DỮ LIỆU */}
           {[
-            { label: "Vip123", isName: true },
+            { label: data?.name, isName: true },
             {
               label: "Tình trạng phòng",
               action: "Khóa nhanh",
@@ -700,7 +718,7 @@ function RoomScheduleTableHourly({
                         display='flex'
                         alignItems='center'
                         gap={1}>
-                        Vip123 <KeyboardArrowUpIcon />
+                        {row.label} <KeyboardArrowUpIcon />
                       </Typography>
                       <Typography
                         color='#98b720'
@@ -856,8 +874,8 @@ function RoomScheduleTableDaily({
   data,
 }: RoomScheduleTableDailyProps) {
   const isMobile = useMediaQuery("(max-width:768px)");
-  const dailySlots = data?.daily_slots; // 3 ngày
-  const totalDays = dailySlots.length; // 3
+  const dailySlots = data?.slots; // 3 ngày
+  const totalDays = dailySlots?.length; // 3
   const columnWidth = `${100 / totalDays}%`;
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -949,7 +967,7 @@ function RoomScheduleTableDaily({
 
           {/* CÁC DÒNG DỮ LIỆU */}
           {[
-            { label: "Vip123", isName: true },
+            { label: data?.name, isName: true },
             {
               label: "Tình trạng phòng",
               action: "Khóa nhanh",
@@ -989,7 +1007,7 @@ function RoomScheduleTableDaily({
                         display='flex'
                         alignItems='center'
                         gap={1}>
-                        Vip123 <KeyboardArrowUpIcon />
+                        {row.label} <KeyboardArrowUpIcon />
                       </Typography>
                       <Typography
                         color='#98b720'
@@ -1210,7 +1228,7 @@ function RoomScheduleTableOvernight({
 
           {/* CÁC DÒNG DỮ LIỆU */}
           {[
-            { label: "Vip123", isName: true },
+            { label: data.name, isName: true },
             {
               label: "Tình trạng phòng",
               action: "Khóa nhanh",
@@ -1250,7 +1268,7 @@ function RoomScheduleTableOvernight({
                         display='flex'
                         alignItems='center'
                         gap={1}>
-                        Vip123 <KeyboardArrowUpIcon />
+                         {row.label}  <KeyboardArrowUpIcon />
                       </Typography>
                       <Typography
                         color='#98b720'

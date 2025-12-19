@@ -13,7 +13,7 @@ import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { useLocation, useNavigate } from "react-router-dom";
-
+import InsightsIcon from '@mui/icons-material/Insights';
 export default function SidebarMenu() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -43,6 +43,12 @@ export default function SidebarMenu() {
       label: "Thông tin khách sạn",
       icon: <InfoOutlinedIcon />,
       path: "/info-hotel",
+    },
+    {
+      id: "reconciliation",
+      label: "Quản lý đối soát",
+      icon: <InsightsIcon />,
+      path: "/reconciliation",
     },
   ];
 

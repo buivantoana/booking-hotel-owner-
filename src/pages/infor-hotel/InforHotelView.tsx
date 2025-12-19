@@ -144,7 +144,7 @@ export default function InforHotelView({ hotels, getDataHotels }) {
     }
   }
   return (
-    <Box sx={{ p: 3, bgcolor: "#f5f7fa", minHeight: "100vh" }}>
+    <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, minHeight: "100vh" }}>
       {action == "detail" && <RoomDetail getHotelDetail={getHotelDetail} detailHotel={detailHotel} room={room} onNext={setAction} />}
       {action == "edit_form" && (
         <HotelEditForm setAction={setAction} setRoom={setRoom} />
@@ -162,7 +162,7 @@ export default function InforHotelView({ hotels, getDataHotels }) {
               alignItems: "center",
               mb: 4,
             }}>
-            <Typography variant='h5' fontWeight={600} color='#333'>
+            <Typography variant='h5' fontWeight='bold'>
               Thông tin khách sạn
             </Typography>
 

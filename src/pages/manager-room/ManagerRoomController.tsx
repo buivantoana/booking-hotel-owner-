@@ -35,17 +35,16 @@ const ManagerRoomController = (props: Props) => {
       let params = new URLSearchParams({
         start_time: dateRange.checkIn.format("YYYY-MM-DDTHH:mm:ssZ"),
         end_time: dateRange.checkOut.format("YYYY-MM-DDTHH:mm:ssZ"),
-        room_type_id: "lD49C0cWJAUw",
       });
 
       if (active == "hourly") {
-        result = await getInventoryHotelHourly("4kJ8wQz9aB2L", params);
+        result = await getInventoryHotelHourly(idHotel, params);
       }
       if (active == "daily") {
-        result = await getInventoryHotelDaily("4kJ8wQz9aB2L", params);
+        result = await getInventoryHotelDaily(idHotel, params);
       }
       if (active == "overnight") {
-        result = await getInventoryHotelOvernight("4kJ8wQz9aB2L", params);
+        result = await getInventoryHotelOvernight(idHotel, params);
       }
       setData(result);
     } catch (error) {
@@ -79,6 +78,7 @@ const ManagerRoomController = (props: Props) => {
       hotels={hotels}
       idHotel={idHotel}
       setIdHotel={setIdHotel}
+      setData={setData}
     />
   );
 };

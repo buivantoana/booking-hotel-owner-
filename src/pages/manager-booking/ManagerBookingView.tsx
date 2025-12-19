@@ -88,7 +88,7 @@ export default function ManagerBookingView({
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box sx={{ p: { xs: 2, md: 3 } }}>
+      <Box sx={{  p: { xs: 2, sm: 3, md: 4 } }}>
         {/* Header */}
         <Typography variant='h5' fontWeight='bold' mb={1}>
           Quản lý đặt phòng

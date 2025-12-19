@@ -48,7 +48,7 @@ const data: HotelRow[] = [
 const getStatusColor = (status: string) => {
     switch (status) {
         case 'Chưa đối soát': return { bg: '#FFF0F0', color: '#E53935' };
-        case 'Hoàn thành': return { bg: '#E8F5E9', color: '#2E7D32' };
+        case 'Hoàn thành': return { bg: '#E8F5E9', color: '#98B720' };
         case 'Chờ thanh toán': return { bg: '#FFF3E0', color: '#EF6C00' };
         default: return { bg: '#F5F5F5', color: '#424242' };
     }
@@ -59,13 +59,18 @@ const formatCurrency = (amount: number) => {
     return amount < 0 ? `- ${abs}đ` : `${abs}đ`;
 };
 
-export default function ReconciliationView() {
+export default function ReconciliationView({ hotels,
+    idHotel,
+    setIdHotel,}) {
     const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
     const isTablet = useMediaQuery((theme: Theme) => theme.breakpoints.between('sm', 'md'));
 
     return (
         <>
-            <HotelDetailFinal />
+            <HotelDetailFinal hotels={hotels}
+            isMobile={isMobile}
+    idHotel={idHotel}
+    setIdHotel={setIdHotel} />
             {false && <Box sx={{ p: { xs: 2, md: 4 }, backgroundColor: '#f9fafb', minHeight: '100vh' }}>
                 {/* Header */}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
@@ -225,40 +230,42 @@ import {
 
 
 
-function HotelDetailFinal() {
+function HotelDetailFinal({ hotels,isMobile,
+    idHotel,
+    setIdHotel}) {
     return (
         <Box sx={{ bgcolor: '#f9fafb', minHeight: '100vh' }}>
             {/* Header – giống 100% */}
 
 
-            <Box sx={{ p: { xs: 2, md: 4 } }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                    <ArrowBackIcon sx={{ mr: 1, cursor: 'pointer' }} />
-                    <Typography variant="h5" fontWeight="600" color="#1a1a1a">
-                        Khách sạn 123
-                    </Typography>
-                    <Chip
-                        label="Chưa đối soát"
-                        size="small"
-                        sx={{
-                            ml: 2,
-                            bgcolor: '#FFF0F0',
-                            color: '#E53935',
-                            fontWeight: 500,
-                            height: 26,
-                        }}
-                    />
-                    <Typography variant="body2" color="#757575" ml={2}>
-                        Tháng 11
-                    </Typography>
-                    <Button
-                        variant="outlined"
-                        startIcon={<DownloadIcon />}
-                        sx={{ ml: 'auto', borderRadius: 2, textTransform: 'none' }}
-                    >
-                        Tải Excel
-                    </Button>
-                </Box>
+            <Box sx={{  p: { xs: 2, sm: 3, md: 4 } }}>
+            <Box
+            display='flex'
+            alignItems='center'
+            justifyContent='space-between'>
+            {/* Left section */}
+            <Box display='flex' flexDirection='column' gap={0.5}>
+              <Typography variant='h5' fontWeight='bold'>
+              Quản lý đối soát
+              </Typography>
+
+              <Box display='flex' alignItems='center' gap={1}>
+                <HotelSelect
+                  value={idHotel}
+                  hotelsData={hotels}
+                  onChange={(id) => {
+                    setIdHotel(id);
+                    console.log("ID khách sạn được chọn:", id);
+                  }}
+                />
+
+               
+              </Box>
+            </Box>
+
+            
+           
+          </Box>
 
 
 
@@ -290,7 +297,7 @@ function HotelDetailFinal() {
                                     <Typography variant="body1" color="#424242">
                                         Công nợ phát sinh trong tháng
                                     </Typography>
-                                    <Typography variant="h6" fontWeight={600} color="#2E7D32">
+                                    <Typography variant="h6" fontWeight={600} color="#98B720">
                                         5.000.000đ
                                     </Typography>
                                 </Stack>
@@ -309,10 +316,10 @@ function HotelDetailFinal() {
 
                                 {/* Tổng công nợ */}
                                 <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1.5}>
-                                    <Typography variant="h6" fontWeight={700} color="#2E7D32">
+                                    <Typography variant="h6" fontWeight={700} color="#98B720">
                                         Tổng công nợ
                                     </Typography>
-                                    <Typography variant="h5" fontWeight={700} color="#2E7D32">
+                                    <Typography variant="h5" fontWeight={700} color="#98B720">
                                         4.984.000đ
                                     </Typography>
                                 </Stack>
@@ -347,7 +354,7 @@ function HotelDetailFinal() {
                                 <Button
                                     variant="contained"
                                     sx={{
-                                        bgcolor: '#43A047',
+                                        bgcolor: '#98B720',
                                         color: 'white',
                                         borderRadius: 10,
                                         px: 5,
@@ -424,7 +431,7 @@ function HotelDetailFinal() {
                                             <TableCell>160.000đ</TableCell>
                                             <TableCell>160.000đ</TableCell>
                                             <TableCell sx={{ color: '#616161' }}>16.000đ</TableCell>
-                                            <TableCell align="right" sx={{ fontWeight: 600, color: isNegative ? '#E53935' : '#2E7D32' }}>
+                                            <TableCell align="right" sx={{ fontWeight: 600, color: isNegative ? '#E53935' : '#98B720' }}>
                                                 {isNegative ? '-16.000đ' : '144.000đ'}
                                             </TableCell>
                                         </TableRow>
@@ -453,7 +460,7 @@ import {
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 
-function ConfirmCompleteModal({ open = true, onClose = () => { } }) {
+function ConfirmCompleteModal({ open = false, onClose = () => { } }) {
     return (
         <Dialog
             open={open}
@@ -485,7 +492,7 @@ function ConfirmCompleteModal({ open = true, onClose = () => { } }) {
                         sx={{
                             width: 30,
                             height: 30,
-                            bgcolor: '#43A047',
+                            bgcolor: '#98B720',
                             color: 'white',
                             borderRadius: '50%',
                             display: 'flex',
@@ -497,7 +504,7 @@ function ConfirmCompleteModal({ open = true, onClose = () => { } }) {
                     >
                         1
                     </Box>
-                    <Typography fontWeight={600} fontSize={"12px"} color="#2E7D32">
+                    <Typography fontWeight={600} fontSize={"12px"} color="#98B720">
                         Xác nhận thông tin tài khoản thanh toán
                     </Typography>
                 </Stack>
@@ -542,14 +549,14 @@ function ConfirmCompleteModal({ open = true, onClose = () => { } }) {
       {/* 2 mục tick xanh */}
       <Stack spacing={2.5} mb={5}>
         <Stack direction="row" alignItems="flex-start" spacing={2}>
-          <CheckCircle sx={{ color: '#43A047', fontSize: 28, flexShrink: 0, mt: 0.3 }} />
+          <CheckCircle sx={{ color: '#98B720', fontSize: 28, flexShrink: 0, mt: 0.3 }} />
           <Typography variant="body1" color="#424242" lineHeight={1.7}>
             Bảng đối soát hiện tại <strong>đúng và đủ</strong> các đặt phòng trong kỳ đối soát.
           </Typography>
         </Stack>
 
         <Stack direction="row" alignItems="flex-start" spacing={2}>
-          <CheckCircle sx={{ color: '#43A047', fontSize: 28, flexShrink: 0, mt: 0.3 }} />
+          <CheckCircle sx={{ color: '#98B720', fontSize: 28, flexShrink: 0, mt: 0.3 }} />
           <Typography variant="body1" color="#424242" lineHeight={1.7}>
             Số tiền công nợ <strong>là đúng</strong> theo số tiền trong kỳ đối soát
           </Typography>
@@ -750,7 +757,7 @@ function ConfirmCompleteModal({ open = true, onClose = () => { } }) {
                     variant="contained"
                     sx={{
                         minWidth: 140,
-                        bgcolor: '#43A047',
+                        bgcolor: '#98B720',
                         borderRadius: 10,
                         py: 1.4,
                         textTransform: 'none',
@@ -769,6 +776,7 @@ function ConfirmCompleteModal({ open = true, onClose = () => { } }) {
 
 
 import { QRCodeCanvas } from 'qrcode.react';// npm install qrcode.react
+import HotelSelect from '../../components/HotelSelect';
 
 function PaymentQRInfo() {
     const qrData = "0123456789|Nguyễn Văn A|Techcombank";

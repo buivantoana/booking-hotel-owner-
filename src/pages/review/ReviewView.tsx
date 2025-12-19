@@ -35,7 +35,7 @@ const ReviewView = ({ hotels, idHotel, setIdHotel, reviews = [],getReview }) => 
   const [detailReview, setDetailReview] = useState(null);
 
   return (
-    <Box sx={{ bgcolor: "#f9f9f9", p: { xs: 2, sm: 3, md: 4 } }}>
+    <Box sx={{ bgcolor: "#f9f9f9",  p: { xs: 2, sm: 3, md: 4 } }}>
       <Review
         detailReview={detailReview}
         hotels={hotels}
@@ -81,7 +81,7 @@ const Review = ({ reviews, hotels, idHotel, setIdHotel }) => {
   return (
     <Stack spacing={4}>
       <Box display={"flex"} flexDirection={"column"} justifyContent={"space-between"}>
-        <Typography variant="h6" fontWeight="bold">
+        <Typography variant='h5' fontWeight='bold'>
           Tổng quan Đánh giá
         </Typography>
 
