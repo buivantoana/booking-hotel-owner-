@@ -40,7 +40,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -81,8 +81,7 @@ function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
         }}>
         <MenuItem
           onClick={() => {
-
-            setAction("edit_form")
+            setAction("edit_form");
             navigate(`/info-hotel?id=${hotel.id}`);
           }}
           sx={{ gap: 1.5, fontSize: 14 }}>
@@ -127,7 +126,7 @@ export default function InforHotelView({ hotels, getDataHotels }) {
 
   useEffect(() => {
     if (searchParams.get("id")) {
-      getHotelDetail()
+      getHotelDetail();
     }
   }, [searchParams]);
   const getHotelDetail = async () => {
@@ -136,21 +135,33 @@ export default function InforHotelView({ hotels, getDataHotels }) {
       if (result?.id) {
         setDetailHotel(result);
         if (room.id) {
-          setRoom(result?.room_types.find((item) => item.id == room.id))
+          setRoom(result?.room_types.find((item) => item.id == room.id));
         }
       }
     } catch (error) {
       console.log(error);
     }
-  }
+  };
   return (
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, minHeight: "100vh" }}>
-      {action == "detail" && <RoomDetail getHotelDetail={getHotelDetail} detailHotel={detailHotel} room={room} onNext={setAction} />}
+      {action == "detail" && (
+        <RoomDetail
+          getHotelDetail={getHotelDetail}
+          detailHotel={detailHotel}
+          room={room}
+          onNext={setAction}
+        />
+      )}
       {action == "edit_form" && (
         <HotelEditForm setAction={setAction} setRoom={setRoom} />
       )}
       {action == "edit_detail" && (
-        <HotelDetail detailHotel={detailHotel} getHotelDetail={getHotelDetail} setRoom={setRoom} setAction={setAction} />
+        <HotelDetail
+          detailHotel={detailHotel}
+          getHotelDetail={getHotelDetail}
+          setRoom={setRoom}
+          setAction={setAction}
+        />
       )}
       {action == "manager" && (
         <>
@@ -168,8 +179,8 @@ export default function InforHotelView({ hotels, getDataHotels }) {
 
             <Button
               variant='contained'
-              onClick={()=>{
-                navigate("/create-hotel")
+              onClick={() => {
+                navigate("/create-hotel");
               }}
               startIcon={<AddIcon />}
               sx={{
@@ -382,16 +393,34 @@ const parseLang = (str) => {
   }
 };
 const renderStatusChip = (status) => {
-  if (status === "active") {
-    return (
-      <Chip
-        label='Đang hoạt động'
-        size='small'
-        sx={{ bgcolor: "#98B720", color: "white" }}
-      />
-    );
-  }
-  return <Chip label='Ngừng hoạt động' size='small' color='default' />;
+  const map = {
+    active: {
+      label: "Đang hoạt động",
+      sx: { bgcolor: "#98B720", color: "white" },
+    },
+    paused: {
+      label: "Tạm dừng",
+      sx: { bgcolor: "#FFB020", color: "white" },
+    },
+    pending: {
+      label: "Chờ duyệt",
+      sx: { bgcolor: "#1976D2", color: "white" },
+    },
+    terminated: {
+      label: "Đã kết thúc",
+      sx: { bgcolor: "#D32F2F", color: "white" },
+    },
+  };
+
+  const config = map[status];
+
+  return (
+    <Chip
+      label={config?.label || "Không xác định"}
+      size='small'
+      sx={config?.sx || { bgcolor: "#9E9E9E", color: "white" }}
+    />
+  );
 };
 
 const renderCooperationChip = (type) => {

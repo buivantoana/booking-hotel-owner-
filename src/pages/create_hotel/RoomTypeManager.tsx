@@ -300,6 +300,8 @@ export default function RoomTypeManager({
                   value={current?.name || ""}
                   onChange={(e) => {
                     updateRoomField("name", e.target.value);
+                  }}
+                  onBlur={() => {
                     handleTouch("name");
                   }}
                   error={
@@ -335,6 +337,8 @@ export default function RoomTypeManager({
                   value={current?.quantity || ""}
                   onChange={(e) => {
                     updateRoomField("quantity", e.target.value);
+                  }}
+                  onBlur={() => {
                     handleTouch("quantity");
                   }}
                   error={
@@ -369,6 +373,8 @@ export default function RoomTypeManager({
                   value={current?.area || ""}
                   onChange={(e) => {
                     updateRoomField("area", e.target.value);
+                  }}
+                  onBlur={() => {
                     handleTouch("area");
                   }}
                   error={
@@ -407,6 +413,8 @@ export default function RoomTypeManager({
                   value={current?.bedType || ""}
                   onChange={(_, v) => {
                     updateRoomField("bedType", v || "");
+                  }}
+                  onBlur={() => {
                     handleTouch("bedType");
                   }}
                   renderInput={(params) => (
@@ -463,6 +471,8 @@ export default function RoomTypeManager({
                   value={current?.direction || ""}
                   onChange={(_, v) => {
                     updateRoomField("direction", v || "");
+                  }}
+                  onBlur={() => {
                     handleTouch("direction");
                   }}
                   renderInput={(params) => (
@@ -531,6 +541,8 @@ export default function RoomTypeManager({
                   value={current?.description || ""}
                   onChange={(e) => {
                     updateRoomField("description", e.target.value);
+                  }}
+                  onBlur={() => {
                     handleTouch("description");
                   }}
                   error={
@@ -791,6 +803,7 @@ function RoomPricingSection({
                     </Typography>
                     <TextField
                       fullWidth
+                      type='number'
                       placeholder='Nhập số tiền'
                       value={pricing.hourly.firstHours}
                       onChange={(e) =>
@@ -821,6 +834,7 @@ function RoomPricingSection({
                     </Typography>
                     <TextField
                       fullWidth
+                      type='number'
                       placeholder='Nhập số tiền'
                       value={pricing.hourly.extraHour}
                       onChange={(e) =>
@@ -895,6 +909,7 @@ function RoomPricingSection({
             {pricing.overnight.enabled && (
               <TextField
                 fullWidth
+                type='number'
                 placeholder='Nhập số tiền'
                 value={pricing.overnight.price}
                 onChange={(e) => update("overnight", "price", e.target.value)}
@@ -936,6 +951,7 @@ function RoomPricingSection({
             {pricing.daily.enabled && (
               <TextField
                 fullWidth
+                type='number'
                 placeholder='Nhập số tiền'
                 value={pricing.daily.price}
                 onChange={(e) => update("daily", "price", e.target.value)}
