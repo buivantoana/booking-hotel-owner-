@@ -1,14 +1,20 @@
-import { Button, CircularProgress, Container, Typography, useTheme } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  Container,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import React, { useEffect, useState } from "react";
 import LoginIcon from "@mui/icons-material/Login";
 type Props = {};
 
-const CreateHotelView = ({submitCreateHotel}) => {
+const CreateHotelView = ({ submitCreateHotel }) => {
   const [step, setStep] = useState(1);
   const [typeHotel, setTypeHotel] = useState("Khách sạn Listing");
-  const context = useBookingContext()
-  const [loading,setLoading] = useState(false)
-  const navigate = useNavigate()
+  const context = useBookingContext();
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   const handleStepClick = (id) => {
     console.log("Bạn vừa chọn step:", id);
     setStep(id);
@@ -32,27 +38,27 @@ const CreateHotelView = ({submitCreateHotel}) => {
 
   // Hàm helper để đánh dấu field đã được touch
   const markAsTouched = (field: string) => {
-    setTouched(prev => ({ ...prev, [field]: true }));
+    setTouched((prev) => ({ ...prev, [field]: true }));
   };
   const [canNext, setCanNext] = useState(true);
   const [stepErrors, setStepErrors] = useState({});
 
   useEffect(() => {
     let isValid = true;
-  let errors: any = {};
+    let errors: any = {};
     if (step === 2) {
       const result = validateBasicInfo(tempData);
       errors = result.errors;
       isValid = result.isValid;
-    }else if (step === 3) {
+    } else if (step === 3) {
       const result = validateImageUpload(tempData);
       errors = result.errors;
       isValid = result.isValid;
-    }else if (step === 4) {
+    } else if (step === 4) {
       const result = validateLocation(tempData);
       errors = result.errors;
       isValid = result.isValid;
-    }else if (step === 5) {
+    } else if (step === 5) {
       const result = validateRoomTypes(tempData);
       errors = result.errors;
       isValid = result.isValid;
@@ -63,7 +69,7 @@ const CreateHotelView = ({submitCreateHotel}) => {
     setCanNext(isValid);
   }, [tempData, step]);
 
-  const handleNext = async() => {
+  const handleNext = async () => {
     if (step === 2) {
       setTouched({
         hotelName: true,
@@ -72,16 +78,21 @@ const CreateHotelView = ({submitCreateHotel}) => {
       });
     }
     if (step === 3) {
-      setTouched(prev => ({ ...prev, outsideImages: true, hotelImages: true, submitAttempt: true }));
+      setTouched((prev) => ({
+        ...prev,
+        outsideImages: true,
+        hotelImages: true,
+        submitAttempt: true,
+      }));
     }
     if (step === 4) {
-      setTouched(prev => ({
+      setTouched((prev) => ({
         ...prev,
         selectedProvince: true,
         selectedDistrict: true,
         address: true,
         map: true,
-        submitAttempt: true
+        submitAttempt: true,
       }));
     }
     if (step === 5) {
@@ -96,20 +107,21 @@ const CreateHotelView = ({submitCreateHotel}) => {
         allTouched[`room_${index}_images`] = true;
         allTouched[`room_${index}_pricing`] = true;
       });
-      setTouched(prev => ({ ...prev, ...allTouched }));
+      setTouched((prev) => ({ ...prev, ...allTouched }));
+      setStep(step + 1);
       try {
         setLoading(true);
-        let result =  await submitCreateHotel(context?.state?.create_hotel);
-        if(result.success){
+        let result = await submitCreateHotel(context?.state?.create_hotel);
+        if (result.success) {
           toast.success("Tạo khách sạn thành công!");
-          setStep(step + 1);
+        } else {
+          setStep(step - 1);
         }
-       
+
         // Xóa context nếu muốn
-       
       } catch (err) {
         console.error(err);
-        toast.error(err?.message)
+        toast.error(err?.message);
       } finally {
         setLoading(false);
       }
@@ -120,100 +132,124 @@ const CreateHotelView = ({submitCreateHotel}) => {
         type: "UPDATE_CREATE_HOTEL",
         payload: tempData,
       });
-      if(step !== 5){
-
+      if (step !== 5) {
         setStep(step + 1);
       }
     }
   };
-  console.log("AAAA context" ,context?.state?.create_hotel)
+  console.log("AAAA context", context?.state?.create_hotel);
   return (
-    <Box sx={{background:"#f7f7f7"}}>
-    <Container maxWidth='lg' sx={{ py: 4,minHeight:"100vh" }}>
-      {step < 6 && (
-        <>
-          <Typography fontSize={"32px"} fontWeight={"600"}>
-            Tạo khách sạn
-          </Typography>
-          <Typography fontSize={"16px"} mt={1} color='#989FAD'>
-            Để bắt đầu, vui lòng nhập các thông tin bên dưới về khách sạn của
-            bạn.
-          </Typography>
-        </>
-      )}
-
-      {step < 6 && (
-        <StepIndicator activeStep={step} onStepChange={handleStepClick} />
-      )}
-      <Box sx={{ my: 2 }}>
-        {step == 1 && (
-          <HotelTypeSelect typeHotel={typeHotel} onSelect={handleSelectType} />
+    <Box sx={{ background: "#f7f7f7" }}>
+      <Container maxWidth='lg' sx={{ py: 4, minHeight: "100vh" }}>
+        {step < 6 && (
+          <>
+            <Typography fontSize={"32px"} fontWeight={"600"}>
+              Tạo khách sạn
+            </Typography>
+            <Typography fontSize={"16px"} mt={1} color='#989FAD'>
+              Để bắt đầu, vui lòng nhập các thông tin bên dưới về khách sạn của
+              bạn.
+            </Typography>
+          </>
         )}
-        {step == 2 && <HotelBasicInfo dataCreateHotel={persistedData}
-          setDataCreateHotel={() => {}}
-          onTempChange={setTempData}          // 
-          errors={stepErrors} 
-          touched={touched}
-          onFieldBlur={markAsTouched}
-          
-          />
-          
-          }
-        {step == 3 && <HotelImageUpload  onTempChange={setTempData}
-    errors={stepErrors}
-    touched={touched}
-    onFieldTouch={(field) => setTouched(prev => ({ ...prev, [field]: true }))} />}
-        {step == 4 && <HotelLocationInput 
 
-onTempChange={setTempData}
-errors={stepErrors}
-touched={touched}
-onFieldTouch={(field) => setTouched(prev => ({ ...prev, [field]: true }))}
-    />}
-        {step == 5 && <RoomTypeTabsModern onTempChange={setTempData}
-    errors={stepErrors}
-    touched={touched}
-    onFieldTouch={(field) => setTouched(prev => ({ ...prev, [field]: true }))} />}
-        {step == 6 && <CreateSuccess />}
-      </Box>
-      {step < 6 && (
-        <Box my={5} display={"flex"} justifyContent={"space-between"}>
-          <Typography
-            sx={{ display: "flex", alignItems: "center", gap: 1,cursor:"pointer" }}
-            color='#FF3030' onClick={()=>{
-              navigate("/")
-            }}>
-            <LoginIcon color='#FF3030' /> Trở về
-          </Typography>
-          <Button
-            fullWidth
-            variant='contained'
-            disabled={!canNext||loading}
-            onClick={handleNext}
-            sx={{
-              background: "#8BC34A",
-              color: "white",
-              py: 1.4,
-              fontSize: 16,
-              fontWeight: 600,
-              borderRadius: 3,
-              width: "150px",
-              textTransform: "none",
-              "&:hover": {
-                background: "#7CB342",
-              },
-            }}>
-              {loading?
-              <>
-              <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-              Đang tạo...
-              </>
-              :"Kế tiếp"}
-            
-          </Button>
+        {step < 6 && (
+          <StepIndicator activeStep={step} onStepChange={handleStepClick} />
+        )}
+        <Box sx={{ my: 2 }}>
+          {step == 1 && (
+            <HotelTypeSelect
+              typeHotel={typeHotel}
+              onSelect={handleSelectType}
+            />
+          )}
+          {step == 2 && (
+            <HotelBasicInfo
+              dataCreateHotel={persistedData}
+              setDataCreateHotel={() => {}}
+              onTempChange={setTempData} //
+              errors={stepErrors}
+              touched={touched}
+              onFieldBlur={markAsTouched}
+            />
+          )}
+          {step == 3 && (
+            <HotelImageUpload
+              onTempChange={setTempData}
+              errors={stepErrors}
+              touched={touched}
+              onFieldTouch={(field) =>
+                setTouched((prev) => ({ ...prev, [field]: true }))
+              }
+            />
+          )}
+          {step == 4 && (
+            <HotelLocationInput
+              onTempChange={setTempData}
+              errors={stepErrors}
+              touched={touched}
+              onFieldTouch={(field) =>
+                setTouched((prev) => ({ ...prev, [field]: true }))
+              }
+            />
+          )}
+          {step == 5 && (
+            <RoomTypeTabsModern
+              onTempChange={setTempData}
+              errors={stepErrors}
+              touched={touched}
+              onFieldTouch={(field) =>
+                setTouched((prev) => ({ ...prev, [field]: true }))
+              }
+            />
+          )}
+          {step == 6 && <CreateSuccess />}
         </Box>
-      )}
-    </Container>
+        {step < 6 && (
+          <Box my={5} display={"flex"} justifyContent={"space-between"}>
+            <Typography
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                cursor: "pointer",
+              }}
+              color='#FF3030'
+              onClick={() => {
+                navigate("/");
+              }}>
+              <LoginIcon color='#FF3030' /> Trở về
+            </Typography>
+            <Button
+              fullWidth
+              variant='contained'
+              disabled={!canNext || loading}
+              onClick={handleNext}
+              sx={{
+                background: "#8BC34A",
+                color: "white",
+                py: 1.4,
+                fontSize: 16,
+                fontWeight: 600,
+                borderRadius: 3,
+                width: "150px",
+                textTransform: "none",
+                "&:hover": {
+                  background: "#7CB342",
+                },
+              }}>
+              {loading ? (
+                <>
+                  <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+                  Đang tạo...
+                </>
+              ) : (
+                "Kế tiếp"
+              )}
+            </Button>
+          </Box>
+        )}
+      </Container>
     </Box>
   );
 };
@@ -324,14 +360,19 @@ import { Stack, Paper } from "@mui/material";
 
 import success from "../../images/Frame 1321317962.png";
 import { useBookingContext } from "../../App";
-import { validateBasicInfo, validateImageUpload, validateLocation, validateRoomTypes } from "../../utils/utils";
+import {
+  validateBasicInfo,
+  validateImageUpload,
+  validateLocation,
+  validateRoomTypes,
+} from "../../utils/utils";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
 const CreateSuccess = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
+  const navigate = useNavigate();
   return (
     <Box
       sx={{
@@ -399,7 +440,9 @@ const CreateSuccess = () => {
               width='100%'
               mt={2}>
               <Button
-                onClick={() => {}}
+                onClick={() => {
+                  navigate("/");
+                }}
                 fullWidth
                 variant='contained'
                 sx={{

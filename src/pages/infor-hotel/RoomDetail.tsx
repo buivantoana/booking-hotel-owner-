@@ -24,7 +24,12 @@ import remove from "../../images/delete.png";
 import confirm from "../../images/Frame.png";
 import { useSearchParams } from "react-router-dom";
 
-export default function RoomDetail({ onNext, room ,getHotelDetail,detailHotel}) {
+export default function RoomDetail({
+  onNext,
+  room,
+  getHotelDetail,
+  detailHotel,
+}) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [action, setAction] = useState("detail");
@@ -33,7 +38,7 @@ export default function RoomDetail({ onNext, room ,getHotelDetail,detailHotel}) 
   const parsedName = room
     ? JSON.parse(room.name || '{"vi":""}').vi || "Không có tên"
     : "";
-    const parsedNameHotel = detailHotel
+  const parsedNameHotel = detailHotel
     ? JSON.parse(detailHotel.name || '{"vi":""}').vi || "Không có tên"
     : "";
   const parsedBedType = room?.bed_type
@@ -69,9 +74,9 @@ export default function RoomDetail({ onNext, room ,getHotelDetail,detailHotel}) 
       }).format(price) + "đ"
     );
   };
-  
+
   return (
-    <Box sx={{ p: 2, minHeight: "100vh" }}>
+    <Box sx={{ minHeight: "100vh" }}>
       {/* Dialog ngừng kinh doanh */}
       <Dialog
         open={deleteDialogOpen}
@@ -229,7 +234,8 @@ export default function RoomDetail({ onNext, room ,getHotelDetail,detailHotel}) 
                 const params = new URLSearchParams(searchParams);
                 params.set("manager_room", "true"); // thêm params mới
                 setSearchParams(params);
-                onNext("edit_detail")}}
+                onNext("edit_detail");
+              }}
               sx={{ fontSize: 30, mr: 1, cursor: "pointer" }}
             />
             <Box>
@@ -241,11 +247,11 @@ export default function RoomDetail({ onNext, room ,getHotelDetail,detailHotel}) 
 
             <Chip
               label='Đang hoạt động'
-              icon={<CheckCircleIcon />}
+              icon={<CheckCircleIcon sx={{ color: "white !important" }} />}
               sx={{
                 ml: 2,
-                background: "#E8F5E9",
-                color: "#2E7D32",
+                background: "#82B440",
+                color: "white",
                 height: 32,
                 fontWeight: 600,
               }}
@@ -456,8 +462,11 @@ export default function RoomDetail({ onNext, room ,getHotelDetail,detailHotel}) 
       {/* View chỉnh sửa */}
       {action === "edit" && (
         <Box>
-          
-          <RoomTypeManager getHotelDetail={getHotelDetail} setAction={setAction} room={room} />
+          <RoomTypeManager
+            getHotelDetail={getHotelDetail}
+            setAction={setAction}
+            room={room}
+          />
         </Box>
       )}
     </Box>

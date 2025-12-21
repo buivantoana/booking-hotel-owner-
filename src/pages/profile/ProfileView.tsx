@@ -1,5 +1,5 @@
 // ProfileForm.jsx
-import React from 'react';
+import React, { useEffect } from "react";
 import {
   Box,
   Container,
@@ -11,126 +11,210 @@ import {
   Grid,
   Snackbar,
   Alert,
-} from '@mui/material';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
+} from "@mui/material";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { useBookingContext } from "../../App";
+import { userUpdate } from "../../service/admin";
 
 const ProfileView = () => {
   // State cho các field
+  const context = useBookingContext();
   const [formData, setFormData] = React.useState({
-    fullName: 'Thangdv',
-    phone: '0123456789',
-    email: 'ABC@gmail.com',
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+    fullName: "",
+    phone: "",
+    email: "",
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
-  // State hiển thị/ẩn mật khẩu
   const [showPassword, setShowPassword] = React.useState({
     current: false,
     new: false,
     confirm: false,
   });
 
-  // State thông báo
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
-  const [snackbarMessage, setSnackbarMessage] = React.useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = React.useState('success'); // success | error
+  const [snackbarMessage, setSnackbarMessage] = React.useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = React.useState<
+    "success" | "error"
+  >("success");
 
-  // Handle thay đổi input
-  const handleChange = (e) => {
+  // Load dữ liệu từ context
+  useEffect(() => {
+    if (context?.state?.user) {
+      const rawPhone = context.state.user.phone || "";
+      // Giả sử phone trong DB là +84931966966 → cắt bỏ +84 → hiển thị 931966966
+      const displayPhone = rawPhone.startsWith("+84")
+        ? rawPhone.slice(3)
+        : rawPhone;
+
+      setFormData({
+        fullName: context.state.user.name || "",
+        phone: "0" + displayPhone,
+        email: context.state.user.email || "",
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    }
+  }, [context]);
+
+  // Hàm validate số điện thoại Việt Nam
+  const validatePhone = (phone: string): boolean => {
+    const cleaned = phone.replace(/\D/g, ""); // Loại bỏ ký tự không phải số
+    const regex = /^(0[3|5|7|8|9][0-9]{8}|0[1-9][0-9]{8})$/; // 09x hoặc 0(3|5|7|8|9)x
+    return regex.test(cleaned);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+
+    // Chỉ cho phép nhập số ở field phone
+    if (name === "phone") {
+      const onlyDigits = value.replace(/\D/g, "");
+      setFormData((prev) => ({ ...prev, [name]: onlyDigits }));
+      return;
+    }
+
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Toggle hiển thị mật khẩu
-  const handleClickShowPassword = (field) => {
-    setShowPassword((prev) => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
+  const handleClickShowPassword = (field: "current" | "new" | "confirm") => {
+    setShowPassword((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
-  // Handle submit form
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation cơ bản
+    // Validation số điện thoại
+    const phoneInput = formData.phone.trim();
+    if (!phoneInput) {
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Vui lòng nhập số điện thoại!");
+      setOpenSnackbar(true);
+      return;
+    }
+
+    const cleanedPhone = phoneInput.replace(/\D/g, "");
+    if (!validatePhone(cleanedPhone)) {
+      setSnackbarSeverity("error");
+      setSnackbarMessage(
+        "Số điện thoại không hợp lệ! (Phải là 10 số, bắt đầu bằng 09x hoặc 03x,05x,07x,08x)"
+      );
+      setOpenSnackbar(true);
+      return;
+    }
+
+    // Validation mật khẩu
     if (formData.newPassword || formData.confirmPassword) {
       if (formData.newPassword !== formData.confirmPassword) {
-        setSnackbarSeverity('error');
-        setSnackbarMessage('Mật khẩu mới và xác nhận không khớp!');
+        setSnackbarSeverity("error");
+        setSnackbarMessage("Mật khẩu mới và xác nhận không khớp!");
         setOpenSnackbar(true);
         return;
       }
       if (formData.newPassword.length < 6) {
-        setSnackbarSeverity('error');
-        setSnackbarMessage('Mật khẩu mới phải ít nhất 6 ký tự!');
+        setSnackbarSeverity("error");
+        setSnackbarMessage("Mật khẩu mới phải ít nhất 6 ký tự!");
         setOpenSnackbar(true);
         return;
       }
       if (!formData.currentPassword) {
-        setSnackbarSeverity('error');
-        setSnackbarMessage('Vui lòng nhập mật khẩu hiện tại để thay đổi mật khẩu!');
+        setSnackbarSeverity("error");
+        setSnackbarMessage("Vui lòng nhập mật khẩu hiện tại!");
         setOpenSnackbar(true);
         return;
       }
     }
 
-    // Giả lập gọi API thành công (thay bằng fetch/axios thực tế)
-    console.log('Đang cập nhật hồ sơ:', formData);
+    // Chuẩn hóa số điện thoại gửi API: luôn thêm +84
+    let apiPhone = cleanedPhone;
+    if (apiPhone.startsWith("0")) {
+      apiPhone = "+84" + apiPhone.slice(1); // 0931966966 → +84931966966
+    } else {
+      apiPhone = "+84" + apiPhone; // 931966966 → +84931966966
+    }
 
-    // Thành công
-    setSnackbarSeverity('success');
-    setSnackbarMessage('Cập nhật hồ sơ thành công!');
-    setOpenSnackbar(true);
+    const payload = {
+      name: formData.fullName,
+      phone: apiPhone,
+      old_password: formData.currentPassword || undefined,
+      new_password: formData.newPassword || undefined,
+    };
 
-    // Nếu bạn muốn reset mật khẩu sau khi cập nhật thành công
-    setFormData((prev) => ({
-      ...prev,
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
-    }));
+    try {
+      const result = await userUpdate(payload);
+      if (result?.code === "OK") {
+        setSnackbarSeverity("success");
+        setSnackbarMessage("Cập nhật hồ sơ thành công!");
+        setOpenSnackbar(true);
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            ...JSON.parse(localStorage.getItem("user")),
+            name: formData.fullName,
+            phone: apiPhone,
+          })
+        );
+        context.dispatch({
+          type: "LOGIN",
+          payload: {
+            ...context.state,
+            user: {
+              ...context.state.user,
+              name: formData.fullName,
+              phone: apiPhone,
+            },
+          },
+        });
+        // Reset password fields
+        setFormData((prev) => ({
+          ...prev,
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        }));
+      } else {
+        throw new Error("API trả về lỗi");
+      }
+    } catch (error) {
+      console.error("Lỗi cập nhật:", error);
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Cập nhật thất bại! Vui lòng thử lại.");
+      setOpenSnackbar(true);
+    }
   };
 
-  // Đóng snackbar
-  const handleCloseSnackbar = () => {
-    setOpenSnackbar(false);
-  };
-
+  const handleCloseSnackbar = () => setOpenSnackbar(false);
   return (
-    <Container maxWidth="lg" sx={{ py: 6 }}>
+    <Container maxWidth='lg' sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+      <Typography variant='h5' mb={3} fontWeight='bold'>
+        Hồ sơ cá nhân
+      </Typography>
       <Box
-        component="form"
+        component='form'
         onSubmit={handleSubmit}
         sx={{
-          bgcolor: 'white',
+          bgcolor: "white",
           borderRadius: 2,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
           p: { xs: 3, sm: 5 },
-          mx: 'auto',
-        }}
-      >
-        
-
+          mx: "auto",
+        }}>
         <Grid container spacing={3}>
           {/* User ID - disabled */}
           <Grid item xs={12} sm={6}>
-            <Typography variant="subtitle2" color="text.secondary" mb={0.5}>
+            <Typography variant='subtitle2' color='text.secondary' mb={0.5}>
               User ID
             </Typography>
             <TextField
               fullWidth
-              value="ABC@gmail.com"
+              value={context?.state?.user?.id}
               disabled
-              variant="outlined"
+              variant='outlined'
               sx={{
-               
                 "& .MuiOutlinedInput-root": {
                   borderRadius: "16px",
                   height: "45px",
@@ -146,17 +230,16 @@ const ProfileView = () => {
 
           {/* Tên của bạn */}
           <Grid item xs={12} sm={6}>
-            <Typography variant="subtitle2" color="text.secondary" mb={0.5}>
+            <Typography variant='subtitle2' color='text.secondary' mb={0.5}>
               Tên của bạn
             </Typography>
             <TextField
               fullWidth
-              name="fullName"
+              name='fullName'
               value={formData.fullName}
               onChange={handleChange}
-              variant="outlined"
+              variant='outlined'
               sx={{
-               
                 "& .MuiOutlinedInput-root": {
                   borderRadius: "16px",
                   height: "45px",
@@ -173,17 +256,23 @@ const ProfileView = () => {
 
           {/* Số điện thoại */}
           <Grid item xs={12} sm={6}>
-            <Typography variant="subtitle2" color="text.secondary" mb={0.5}>
+            <Typography variant='subtitle2' color='text.secondary' mb={0.5}>
               Số điện thoại
             </Typography>
             <TextField
               fullWidth
-              name="phone"
+              name='phone'
               value={formData.phone}
               onChange={handleChange}
-              variant="outlined"
+              variant='outlined'
+              placeholder='931966966 hoặc 0931966966'
+              error={formData.phone && !validatePhone(formData.phone)}
+              helperText={
+                formData.phone && !validatePhone(formData.phone)
+                  ? "Số không hợp lệ (09x hoặc 03x,05x,07x,08x)"
+                  : ""
+              }
               sx={{
-                
                 "& .MuiOutlinedInput-root": {
                   borderRadius: "16px",
                   height: "45px",
@@ -196,9 +285,14 @@ const ProfileView = () => {
               }}
               InputProps={{
                 startAdornment: (
-                  <InputAdornment position="start">
-                    <Box display="flex" alignItems="center" gap={0.5}>
-                      <Box component="img" src="https://flagcdn.com/w20/vn.png" alt="VN" sx={{ width: 20 }} />
+                  <InputAdornment position='start'>
+                    <Box display='flex' alignItems='center' gap={0.5}>
+                      <Box
+                        component='img'
+                        src='https://flagcdn.com/w20/vn.png'
+                        alt='VN'
+                        sx={{ width: 20 }}
+                      />
                       +84
                     </Box>
                   </InputAdornment>
@@ -209,17 +303,17 @@ const ProfileView = () => {
 
           {/* Email */}
           <Grid item xs={12} sm={6}>
-            <Typography variant="subtitle2" color="text.secondary" mb={0.5}>
+            <Typography variant='subtitle2' color='text.secondary' mb={0.5}>
               Email
             </Typography>
             <TextField
               fullWidth
-              name="email"
+              name='email'
               value={formData.email}
+              disabled
               onChange={handleChange}
-              variant="outlined"
+              variant='outlined'
               sx={{
-              
                 "& .MuiOutlinedInput-root": {
                   borderRadius: "16px",
                   height: "45px",
@@ -230,25 +324,24 @@ const ProfileView = () => {
                   },
                 },
               }}
-              type="email"
+              type='email'
             />
           </Grid>
 
           {/* Mật khẩu hiện hành */}
           <Grid item xs={12}>
-            <Typography variant="subtitle2" color="text.secondary" mb={0.5}>
+            <Typography variant='subtitle2' color='text.secondary' mb={0.5}>
               Mật khẩu hiện hành
             </Typography>
             <TextField
               fullWidth
-              name="currentPassword"
-              type={showPassword.current ? 'text' : 'password'}
-              placeholder="Mật khẩu hiện hành"
+              name='currentPassword'
+              type={showPassword.current ? "text" : "password"}
+              placeholder='Mật khẩu hiện hành'
               value={formData.currentPassword}
               onChange={handleChange}
-              variant="outlined"
+              variant='outlined'
               sx={{
-            
                 "& .MuiOutlinedInput-root": {
                   borderRadius: "16px",
                   height: "45px",
@@ -261,12 +354,15 @@ const ProfileView = () => {
               }}
               InputProps={{
                 endAdornment: (
-                  <InputAdornment position="end">
+                  <InputAdornment position='end'>
                     <IconButton
-                      onClick={() => handleClickShowPassword('current')}
-                      edge="end"
-                    >
-                      {showPassword.current ? <VisibilityOff /> : <Visibility />}
+                      onClick={() => handleClickShowPassword("current")}
+                      edge='end'>
+                      {showPassword.current ? (
+                        <VisibilityOff />
+                      ) : (
+                        <Visibility />
+                      )}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -276,19 +372,18 @@ const ProfileView = () => {
 
           {/* Mật khẩu mới */}
           <Grid item xs={12}>
-            <Typography variant="subtitle2" color="text.secondary" mb={0.5}>
+            <Typography variant='subtitle2' color='text.secondary' mb={0.5}>
               Mật khẩu mới
             </Typography>
             <TextField
               fullWidth
-              name="newPassword"
-              type={showPassword.new ? 'text' : 'password'}
-              placeholder="Mật khẩu mới"
+              name='newPassword'
+              type={showPassword.new ? "text" : "password"}
+              placeholder='Mật khẩu mới'
               value={formData.newPassword}
               onChange={handleChange}
-              variant="outlined"
+              variant='outlined'
               sx={{
-              
                 "& .MuiOutlinedInput-root": {
                   borderRadius: "16px",
                   height: "45px",
@@ -301,11 +396,10 @@ const ProfileView = () => {
               }}
               InputProps={{
                 endAdornment: (
-                  <InputAdornment position="end">
+                  <InputAdornment position='end'>
                     <IconButton
-                      onClick={() => handleClickShowPassword('new')}
-                      edge="end"
-                    >
+                      onClick={() => handleClickShowPassword("new")}
+                      edge='end'>
                       {showPassword.new ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
@@ -316,19 +410,18 @@ const ProfileView = () => {
 
           {/* Xác nhận mật khẩu mới */}
           <Grid item xs={12}>
-            <Typography variant="subtitle2" color="text.secondary" mb={0.5}>
+            <Typography variant='subtitle2' color='text.secondary' mb={0.5}>
               Xác nhận mật khẩu mới
             </Typography>
             <TextField
               fullWidth
-              name="confirmPassword"
-              type={showPassword.confirm ? 'text' : 'password'}
-              placeholder="Xác nhận mật khẩu mới"
+              name='confirmPassword'
+              type={showPassword.confirm ? "text" : "password"}
+              placeholder='Xác nhận mật khẩu mới'
               value={formData.confirmPassword}
               onChange={handleChange}
-              variant="outlined"
+              variant='outlined'
               sx={{
-                
                 "& .MuiOutlinedInput-root": {
                   borderRadius: "16px",
                   height: "45px",
@@ -341,12 +434,15 @@ const ProfileView = () => {
               }}
               InputProps={{
                 endAdornment: (
-                  <InputAdornment position="end">
+                  <InputAdornment position='end'>
                     <IconButton
-                      onClick={() => handleClickShowPassword('confirm')}
-                      edge="end"
-                    >
-                      {showPassword.confirm ? <VisibilityOff /> : <Visibility />}
+                      onClick={() => handleClickShowPassword("confirm")}
+                      edge='end'>
+                      {showPassword.confirm ? (
+                        <VisibilityOff />
+                      ) : (
+                        <Visibility />
+                      )}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -355,23 +451,20 @@ const ProfileView = () => {
           </Grid>
 
           {/* Nút Cập nhật */}
-          <Grid item xs={12}>
+          <Grid item xs={12} display={"flex"} justifyContent={"end"}>
             <Button
-             
-              
-              variant="contained"
-              size="large"
+              variant='contained'
+              onClick={handleSubmit}
               sx={{
-                bgcolor: '#98b720',
+                bgcolor: "#98b720",
                 mt: 2,
-                py: 1.5,
-                fontSize: '1.1rem',
-                borderRadius: '60px',
-                textTransform: 'none',
-                textAlign:"right",
-                '&:hover': { bgcolor: '#43A047' },
-              }}
-            >
+                py: 1,
+                width: "15%",
+                borderRadius: "40px",
+                textTransform: "none",
+
+                "&:hover": { bgcolor: "#43A047" },
+              }}>
               Cập nhật
             </Button>
           </Grid>
@@ -383,9 +476,11 @@ const ProfileView = () => {
         open={openSnackbar}
         autoHideDuration={4000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      >
-        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}>
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}>
           {snackbarMessage}
         </Alert>
       </Snackbar>

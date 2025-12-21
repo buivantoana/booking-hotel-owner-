@@ -59,7 +59,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
         let result = await register({
           name: name,
           email: Email,
-          phone: "0" + phoneNumber,
+          phone: "+84" + phoneNumber,
         });
         if (result?.message && !result?.code) {
           toast.success(result?.message);
@@ -92,9 +92,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
   const isDisabled =
     !phoneNumber || !name || !Email || !isValidPhone(phoneNumber) || loading;
   return (
-    <Container
-      maxWidth='lg'
-      sx={{ display: "flex", alignItems: "center" }}>
+    <Container maxWidth='lg' sx={{ display: "flex", alignItems: "center" }}>
       <Grid container sx={{ alignItems: "center", minHeight: "100vh" }}>
         {/* LEFT */}
         <Grid
@@ -312,7 +310,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 color='text.secondary'>
                 Bạn đã có tài khoản?{" "}
                 <Link
-                  href='#'
+                  href='/login'
                   sx={{
                     color: "#EA6A00",
                     fontWeight: 500,

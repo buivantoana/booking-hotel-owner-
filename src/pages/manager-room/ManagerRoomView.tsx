@@ -24,7 +24,7 @@ export default function ManagerRoomView({
   hotels,
   idHotel,
   setIdHotel,
-  setData
+  setData,
 }) {
   const isMobile = useMediaQuery("(max-width:600px)");
 
@@ -40,10 +40,12 @@ export default function ManagerRoomView({
 
   return (
     <>
-      {action == "create" && <CreateRoom idHotel={idHotel} setAction={setAction} />}
+      {action == "create" && (
+        <CreateRoom idHotel={idHotel} setAction={setAction} />
+      )}
       {action == "lock" && <LockRoomSetup setAction={setAction} />}
       {action == "manager" && (
-        <Box sx={{ p: { xs: 2, sm: 3, md: 4 }}}>
+        <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
           <Box
             display='flex'
             alignItems='center'
@@ -117,8 +119,9 @@ export default function ManagerRoomView({
                     key={t.key}
                     sx={{ cursor: "pointer" }}
                     onClick={() => {
-                      setData([])
-                      setActive(t.key)}}>
+                      setData([]);
+                      setActive(t.key);
+                    }}>
                     <Typography
                       fontSize={17}
                       fontWeight={500}
@@ -140,42 +143,57 @@ export default function ManagerRoomView({
               <SimpleDateSearchBar value={dateRange} onChange={setDateRange} />
             </Box>
             <Box py={3}>
-              {active == "hourly" && data?.room_types?.length > 0 && <>
-
-                {data?.room_types?.map((item) => {
-                  return <RoomScheduleTableHourly
-                    handleOpenQuickBlock={() => setOpenQuickBlock(true)}
-                    handleOpenEdit={() => setOpenEdit(true)}
-                    data={{ ...item, end_time: data.end_time, start_time: data.start_time }}
-                  />
-                })}
-
-
-              </>}
-              {active == "daily" && data?.room_types?.length > 0 && <>
-
-                {data?.room_types?.map((item) => {
-                  return <RoomScheduleTableDaily
-                    handleOpenQuickBlock={() => setOpenQuickBlock(true)}
-                    handleOpenEdit={() => setOpenEdit(true)}
-                    data={{ ...item, end_time: data.end_time, start_time: data.start_time }}
-                  />
-                })}
-
-
-              </>}
-              {active == "overnight" && data?.room_types?.length > 0 && <>
-
-                {data?.room_types?.map((item) => {
-                  return <RoomScheduleTableOvernight
-                    handleOpenQuickBlock={() => setOpenQuickBlock(true)}
-                    handleOpenEdit={() => setOpenEdit(true)}
-                    data={{ ...item, end_time: data.end_time, start_time: data.start_time }}
-                  />
-                })}
-
-
-              </>}
+              {active == "hourly" && data?.room_types?.length > 0 && (
+                <>
+                  {data?.room_types?.map((item) => {
+                    return (
+                      <RoomScheduleTableHourly
+                        handleOpenQuickBlock={() => setOpenQuickBlock(true)}
+                        handleOpenEdit={() => setOpenEdit(true)}
+                        data={{
+                          ...item,
+                          end_time: data.end_time,
+                          start_time: data.start_time,
+                        }}
+                      />
+                    );
+                  })}
+                </>
+              )}
+              {active == "daily" && data?.room_types?.length > 0 && (
+                <>
+                  {data?.room_types?.map((item) => {
+                    return (
+                      <RoomScheduleTableDaily
+                        handleOpenQuickBlock={() => setOpenQuickBlock(true)}
+                        handleOpenEdit={() => setOpenEdit(true)}
+                        data={{
+                          ...item,
+                          end_time: data.end_time,
+                          start_time: data.start_time,
+                        }}
+                      />
+                    );
+                  })}
+                </>
+              )}
+              {active == "overnight" && data?.room_types?.length > 0 && (
+                <>
+                  {data?.room_types?.map((item) => {
+                    return (
+                      <RoomScheduleTableOvernight
+                        handleOpenQuickBlock={() => setOpenQuickBlock(true)}
+                        handleOpenEdit={() => setOpenEdit(true)}
+                        data={{
+                          ...item,
+                          end_time: data.end_time,
+                          start_time: data.start_time,
+                        }}
+                      />
+                    );
+                  })}
+                </>
+              )}
             </Box>
           </Card>
           <QuickBlockDialog
@@ -571,7 +589,7 @@ function RoomScheduleTableHourly({
   const columnWidth = `${100 / totalSlots}%`;
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  console.log("AAAA", dayGroups)
+  console.log("AAAA", dayGroups);
   return (
     <Box p={2} bgcolor='#fff'>
       {/* CHỈ 1 CONTAINER CUỘN DUY NHẤT */}
@@ -678,7 +696,7 @@ function RoomScheduleTableHourly({
           </Box>
           {/* CÁC DÒNG DỮ LIỆU */}
           {[
-            { label: data?.name, isName: true },
+            { label: JSON.parse(data?.name)?.vi, isName: true },
             {
               label: "Tình trạng phòng",
               action: "Khóa nhanh",
@@ -807,7 +825,9 @@ function RoomScheduleTableHourly({
             },
             {
               label: "Giá 1 giờ thêm",
-              value: `${data?.price_hourly_increment?.toLocaleString("vi-VN")}đ`,
+              value: `${data?.price_hourly_increment?.toLocaleString(
+                "vi-VN"
+              )}đ`,
               bg: "#eef1ff",
               color: "#4e6aff",
             },
@@ -928,10 +948,12 @@ function RoomScheduleTableDaily({
                 {dailySlots?.map((slot) => {
                   const dateObj = new Date(slot.date);
                   const dayNum = dateObj && format(dateObj, "dd");
-                  const dayName = dateObj && format(dateObj, "EEEE", { locale: vi })
-                    .replace("Chủ nhật", "CN")
-                    .replace("Thứ ", "thứ ")
-                    .toLowerCase();
+                  const dayName =
+                    dateObj &&
+                    format(dateObj, "EEEE", { locale: vi })
+                      .replace("Chủ nhật", "CN")
+                      .replace("Thứ ", "thứ ")
+                      .toLowerCase();
 
                   return (
                     <Box
@@ -967,7 +989,7 @@ function RoomScheduleTableDaily({
 
           {/* CÁC DÒNG DỮ LIỆU */}
           {[
-            { label: data?.name, isName: true },
+            { label: JSON.parse(data?.name)?.vi, isName: true },
             {
               label: "Tình trạng phòng",
               action: "Khóa nhanh",
@@ -1189,10 +1211,12 @@ function RoomScheduleTableOvernight({
                 {dailySlots?.map((slot) => {
                   const dateObj = new Date(slot?.date);
                   const dayNum = dateObj && format(dateObj, "dd");
-                  const dayName = dateObj && format(dateObj, "EEEE", { locale: vi })
-                    .replace("Chủ nhật", "CN")
-                    .replace("Thứ ", "thứ ")
-                    .toLowerCase();
+                  const dayName =
+                    dateObj &&
+                    format(dateObj, "EEEE", { locale: vi })
+                      .replace("Chủ nhật", "CN")
+                      .replace("Thứ ", "thứ ")
+                      .toLowerCase();
 
                   return (
                     <Box
@@ -1228,7 +1252,7 @@ function RoomScheduleTableOvernight({
 
           {/* CÁC DÒNG DỮ LIỆU */}
           {[
-            { label: data.name, isName: true },
+            { label: JSON.parse(data?.name)?.vi, isName: true },
             {
               label: "Tình trạng phòng",
               action: "Khóa nhanh",
@@ -1268,7 +1292,7 @@ function RoomScheduleTableOvernight({
                         display='flex'
                         alignItems='center'
                         gap={1}>
-                         {row.label}  <KeyboardArrowUpIcon />
+                        {row.label} <KeyboardArrowUpIcon />
                       </Typography>
                       <Typography
                         color='#98b720'

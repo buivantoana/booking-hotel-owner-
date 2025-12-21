@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
-import ReconciliationView from './ReconciliationView'
-import { getHotels, getMySettlements } from '../../service/hotel';
+import React, { useEffect, useState } from "react";
+import ReconciliationView from "./ReconciliationView";
+import { getHotels, getMySettlements } from "../../service/hotel";
 
-type Props = {}
+type Props = {};
 
 const ReconciliationController = (props: Props) => {
   const [hotels, setHotels] = useState([]);
@@ -15,18 +15,14 @@ const ReconciliationController = (props: Props) => {
     total_pages: 0,
   });
   const [idHotel, setIdHotel] = useState(null);
- 
+
   useEffect(() => {
-    
-      fetchSettlements( 1); // Reset về trang 1 khi đổi khách sạn
-   
+    fetchSettlements(1); // Reset về trang 1 khi đổi khách sạn
   }, []);
 
-  const fetchSettlements = async ( page: number = 1) => {
-   
-    
+  const fetchSettlements = async (page: number = 1) => {
     try {
-      const query = new URLSearchParams({...pagination,page}).toString()
+      const query = new URLSearchParams({ ...pagination, page }).toString();
       const result = await getMySettlements(query);
       // Giả sử API trả về cấu trúc như mẫu bạn cung cấp
       setDataSettlement(result.settlements || []);
@@ -40,23 +36,28 @@ const ReconciliationController = (props: Props) => {
       console.error("Lỗi lấy danh sách booking:", error);
       setDataSettlement([]);
     } finally {
-      
     }
   };
-  const handlePageChange = (event: React.ChangeEvent<unknown>, newPage: number) => {
-      fetchSettlements(newPage);
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    newPage: number
+  ) => {
+    fetchSettlements(newPage);
   };
 
   return (
-    <ReconciliationView  hotels={hotels}
-    idHotel={idHotel}
-    dataSettlement={dataSettlement}
-    pagination={pagination}
-    setSettlement={setSettlement}
-    settlement={settlement}
+    <ReconciliationView
+      hotels={hotels}
+      idHotel={idHotel}
+      dataSettlement={dataSettlement}
+      pagination={pagination}
+      setSettlement={setSettlement}
+      settlement={settlement}
       onPageChange={handlePageChange}
-    setIdHotel={setIdHotel}/>
-  )
-}
+      fetchSettlements={fetchSettlements}
+      setIdHotel={setIdHotel}
+    />
+  );
+};
 
-export default ReconciliationController
+export default ReconciliationController;

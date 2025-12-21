@@ -78,7 +78,7 @@ const RegistrationForm = () => {
   return (
     <Container
       maxWidth='lg'
-      sx={{ display: "flex", alignItems: "center", py: 5,minHeight:"100vh" }}>
+      sx={{ display: "flex", alignItems: "center", py: 5, minHeight: "100vh" }}>
       <Grid
         container
         sx={{
@@ -213,7 +213,7 @@ const RegistrationForm = () => {
 
               <Typography sx={{ fontSize: "14px" }} color='text.secondary'>
                 <Link
-                  href='#'
+                  href='/register'
                   sx={{
                     color: "#ff7a00",
                     fontWeight: 500,

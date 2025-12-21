@@ -299,15 +299,19 @@ export async function updateHotel(id, body) {
   }
 }
 
-export async function updateRoom(id,idRoom, body) {
+export async function updateRoom(id, idRoom, body) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.post(`/partner/hotel/${id}/room-type/${idRoom}/update`, body, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await api.post(
+      `/partner/hotel/${id}/room-type/${idRoom}/update`,
+      body,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   } catch (error: any) {
     if (error.response) {
@@ -343,7 +347,69 @@ export async function toggleHotels(id) {
   }
 }
 
-
+export async function addBankHotels(body) {
+  try {
+    let token = localStorage.getItem("access_token");
+    const response = await api.post(`/partner/settlement/banks`, body, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
+export async function updateBankHotels(id, body) {
+  try {
+    let token = localStorage.getItem("access_token");
+    const response = await api.put(`/partner/settlement/banks/${id}`, body, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
+export async function confirmHotelsSettlement(id) {
+  try {
+    let token = localStorage.getItem("access_token");
+    const response = await api.post(`/partner/settlement/${id}/confirm`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
 export async function getHotelReview(id) {
   try {
     let token = localStorage.getItem("access_token");
@@ -366,10 +432,10 @@ export async function getHotelReview(id) {
   }
 }
 
-export async function replyReviewHotels(id,body) {
+export async function replyReviewHotels(id, body) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.post(`/partner/review/reply/${id}`,body, {
+    const response = await api.post(`/partner/review/reply/${id}`, body, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -391,11 +457,14 @@ export async function replyReviewHotels(id,body) {
 export async function getMySettlements(query) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.get(`/partner/settlement/my-settlements?${query}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await api.get(
+      `/partner/settlement/my-settlements?${query}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   } catch (error: any) {
     if (error.response) {
