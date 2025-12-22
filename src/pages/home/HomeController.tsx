@@ -38,6 +38,7 @@ const HomeController = (props: Props) => {
   const [dataReview, setDataReview] = useState([]);
   const [hotels, setHotels] = useState([]);
   const [idHotel, setIdHotel] = useState(null);
+  
   useEffect(() => {
     if (idHotel)
       getGeneral();

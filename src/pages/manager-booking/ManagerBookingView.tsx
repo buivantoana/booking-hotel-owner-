@@ -121,7 +121,7 @@ export default function ManagerBookingView({
         </Typography>
 
         {/* Hotel Selector */}
-        <FormControl fullWidth sx={{ mb: 3, ml: 1, maxWidth: 300 }}>
+        <FormControl fullWidth sx={{ mb: 3, ml: .2, maxWidth: 300 }}>
 
           <HotelSelect
             value={idHotel}

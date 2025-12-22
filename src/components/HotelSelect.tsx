@@ -1,20 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
   Popover,
   List,
   ListItemButton,
+  CircularProgress,
 } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { CircleNotifications } from "@mui/icons-material";
 
 // Helper: parse tên khách sạn từ JSON đa ngôn ngữ
 const parseHotelName = (nameStr: string): string => {
   try {
     const parsed = JSON.parse(nameStr);
-    return parsed.vi || parsed.en || nameStr || "Không có tên";
+    return parsed.vi || parsed.en || nameStr || "";
   } catch {
-    return nameStr || "Không có tên";
+    return nameStr || "";
   }
 };
 
@@ -35,8 +37,22 @@ export default function HotelSelect({
   hotelsData,
 }: HotelSelectProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [loading,setLoading] = useState(false)
+  const [selectedHotel,setSelectedHotel] = useState({})
+  useEffect(() => {
+    setLoading(true);
+  
+    const timer = setTimeout(() => {
+      const foundHotel = hotelsData.find((h) => h.id === value);
+      setSelectedHotel(foundHotel || {});
+      setLoading(false); // Chỉ tắt loading sau khi "xử lý xong"
+    }, 500);
+  
+    return () => clearTimeout(timer); // Cleanup nếu component unmount
+  }, [hotelsData, value]);
+  
 
-  const selectedHotel = hotelsData.find((h) => h.id === value);
+
 
   const open = Boolean(anchorEl);
 
@@ -53,11 +69,12 @@ export default function HotelSelect({
           userSelect: "none",
         }}
       >
+        {loading?<CircularProgress size={16} sx={{color:"#98b720"}} />:
         <Typography >
-          {selectedHotel
-            ? parseHotelName(selectedHotel.name)
-            : "Chọn khách sạn"}
-        </Typography>
+          
+           {  parseHotelName(selectedHotel?.name)}
+           
+        </Typography>}
 
         <KeyboardArrowDownIcon fontSize="small" />
       </Box>
