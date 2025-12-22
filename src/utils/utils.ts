@@ -367,3 +367,15 @@ export const list_banks = [
   { name: "Umee", code: "umee" },
   { name: "Liobank", code: "liobank" },
 ];
+
+export  const parseRoomName = (name?: string) => {
+  if (!name) return "Không có tên";
+
+  try {
+    const parsed = JSON.parse(name);
+    return parsed?.vi || parsed?.en || "Không có tên";
+  } catch {
+    // name là plain text (ví dụ: "Suite")
+    return name;
+  }
+};

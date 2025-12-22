@@ -16,6 +16,7 @@ import {
   Typography,
 } from "@mui/material";
 import React from "react";
+import { parseRoomName } from "../../utils/utils";
 
 type Props = {
   onNext: (action: string, roomId?: string) => void;
@@ -30,6 +31,7 @@ const formatPrice = (price: number | null | undefined): string => {
   }).format(price);
 };
 const ManagerRooms = ({ onNext, detailHotel, setRoom }: Props) => {
+ 
   // Parse room_types từ props
   const roomTypes = React.useMemo(() => {
     if (!detailHotel || !Array.isArray(detailHotel.room_types)) {
@@ -38,7 +40,7 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom }: Props) => {
 
     return detailHotel.room_types.map((room: any) => ({
       ...room,
-      parsedName: JSON.parse(room.name || '{"vi":""}')?.vi || "Không có tên",
+      parsedName: parseRoomName(room.name) || "Không có tên",
       price_hourly_formatted: formatPrice(room.price_hourly),
       price_overnight_formatted: formatPrice(room.price_overnight),
       price_daily_formatted: formatPrice(room.price_daily),
@@ -219,7 +221,7 @@ function ActionMenu() {
         </MenuItem>
         <MenuItem onClick={handleClose} sx={{ gap: 1.5, fontSize: 14 }}>
           <ContentCopy fontSize='small' sx={{ color: "#666" }} />
-          Nhận bản
+          Nhân bản
         </MenuItem>
         <MenuItem
           onClick={handleClose}

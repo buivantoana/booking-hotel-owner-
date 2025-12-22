@@ -90,7 +90,7 @@ function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
         </MenuItem>
         <MenuItem onClick={handleClose} sx={{ gap: 1.5, fontSize: 14 }}>
           <ContentCopyIcon fontSize='small' sx={{ color: "#666" }} />
-          Nhận bản
+          Nhân bản
         </MenuItem>
         <MenuItem
           onClick={() => {

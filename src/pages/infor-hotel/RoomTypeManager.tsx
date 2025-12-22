@@ -378,7 +378,7 @@ export default function RoomTypeManager({
       }
     } catch (error) {
       console.error(error);
-      toast.error("Có lỗi xảy ra");
+      // toast.error("Có lỗi xảy ra");
     }
   };
 
@@ -435,9 +435,9 @@ export default function RoomTypeManager({
                   bgcolor: activeTab === index ? "#fff" : "#f0f0f0",
                   border:
                     activeTab === index
-                      ? "2px solid #4caf50"
+                      ? "2px solid #82B440"
                       : "1px solid #ddd",
-                  color: activeTab === index ? "#4caf50" : "#666",
+                  color: activeTab === index ? "#82B440" : "#666",
                   fontWeight: 600,
                   height: 36,
                   fontSize: "0.95rem",

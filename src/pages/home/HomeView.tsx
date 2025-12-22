@@ -855,7 +855,7 @@ export default function HomeView({
   const navigate = useNavigate();
 
   return (
-    <Box sx={{ bgcolor: "#f9f9f9", p: { xs: 2, sm: 3, md: 4 } }}>
+    <Box sx={{  p: { xs: 2, sm: 3, md: 4 } }}>
       {/* Header */}
       <NotificationPopover anchorEl={anchorEl} setAnchorEl={setAnchorEl} />
       <Stack

@@ -77,8 +77,8 @@ export default function ManagerRoomView({
                 />
 
                 <Box display='flex' alignItems='center' gap={0.5} ml={2}>
-                  <RefreshIcon sx={{ fontSize: 18, color: "#8BC34A" }} />
-                  <Typography fontSize={13} color='#8BC34A' fontWeight={500}>
+                  <RefreshIcon sx={{ fontSize: 18, color: "#7CB518" }} />
+                  <Typography fontSize={13} color='#7CB518' fontWeight={500}>
                     Nhấn cập nhật dữ liệu
                   </Typography>
                 </Box>
@@ -93,8 +93,8 @@ export default function ManagerRoomView({
                 onClick={() => setAction("lock")}
                 gap={0.5}
                 sx={{ cursor: "pointer" }}>
-                <LockIcon sx={{ fontSize: 18, color: "#8BC34A" }} />
-                <Typography fontSize={14} color='#8BC34A' fontWeight={500}>
+                <LockIcon sx={{ fontSize: 18, color: "#7CB518" }} />
+                <Typography fontSize={14} color='#7CB518' fontWeight={500}>
                   Khóa phòng
                 </Typography>
               </Box>
@@ -107,8 +107,8 @@ export default function ManagerRoomView({
                 gap={0.5}
                 onClick={() => setAction("create")}
                 sx={{ cursor: "pointer" }}>
-                <AddCircleOutlineIcon sx={{ fontSize: 20, color: "#8BC34A" }} />
-                <Typography fontSize={14} color='#8BC34A' fontWeight={500}>
+                <AddCircleOutlineIcon sx={{ fontSize: 20, color: "#7CB518" }} />
+                <Typography fontSize={14} color='#7CB518' fontWeight={500}>
                   Tạo thêm loại phòng
                 </Typography>
               </Box>

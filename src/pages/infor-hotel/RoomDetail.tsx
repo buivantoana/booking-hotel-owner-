@@ -23,6 +23,7 @@ import { Close, ContentCopy, Edit, PauseCircle } from "@mui/icons-material";
 import remove from "../../images/delete.png";
 import confirm from "../../images/Frame.png";
 import { useSearchParams } from "react-router-dom";
+import { parseRoomName } from "../../utils/utils";
 
 export default function RoomDetail({
   onNext,
@@ -36,10 +37,10 @@ export default function RoomDetail({
   const [searchParams, setSearchParams] = useSearchParams();
   // Parse dữ liệu từ room props
   const parsedName = room
-    ? JSON.parse(room.name || '{"vi":""}').vi || "Không có tên"
+    ? parseRoomName(room.name) || "Không có tên"
     : "";
   const parsedNameHotel = detailHotel
-    ? JSON.parse(detailHotel.name || '{"vi":""}').vi || "Không có tên"
+    ? parseRoomName(detailHotel.name)|| "Không có tên"
     : "";
   const parsedBedType = room?.bed_type
     ? typeof room.bed_type === "string"
@@ -524,7 +525,7 @@ function ActionMenu({ setDeleteDialogOpen, setConfirmDialogOpen }) {
         </MenuItem>
         <MenuItem onClick={handleClose} sx={{ gap: 1.5, fontSize: 14 }}>
           <ContentCopy fontSize='small' sx={{ color: "#666" }} />
-          Nhận bản
+          Nhân bản
         </MenuItem>
         <MenuItem
           onClick={() => {
