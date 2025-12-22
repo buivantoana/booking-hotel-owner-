@@ -14,6 +14,16 @@ import LockIcon from "@mui/icons-material/Lock";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
+const parseVi = (value?: string) => {
+  if (!value) return "";
+
+  try {
+    const parsed = JSON.parse(value);
+    return parsed?.vi || value;
+  } catch (e) {
+    return value; // không phải JSON
+  }
+};
 export default function ManagerRoomView({
   setActive,
   active,
@@ -696,7 +706,7 @@ function RoomScheduleTableHourly({
           </Box>
           {/* CÁC DÒNG DỮ LIỆU */}
           {[
-            { label: JSON.parse(data?.name)?.vi|| data?.name, isName: true },
+            { label: parseVi(data?.name), isName: true },
             {
               label: "Tình trạng phòng",
               action: "Khóa nhanh",
@@ -989,7 +999,7 @@ function RoomScheduleTableDaily({
 
           {/* CÁC DÒNG DỮ LIỆU */}
           {[
-            { label: JSON.parse(data?.name)?.vi|| data?.name, isName: true },
+            { label:  parseVi(data?.name), isName: true },
             {
               label: "Tình trạng phòng",
               action: "Khóa nhanh",
@@ -1252,7 +1262,7 @@ function RoomScheduleTableOvernight({
 
           {/* CÁC DÒNG DỮ LIỆU */}
           {[
-            { label: JSON.parse(data?.name)?.vi|| data?.name, isName: true },
+            { label:  parseVi(data?.name), isName: true },
             {
               label: "Tình trạng phòng",
               action: "Khóa nhanh",
