@@ -39,18 +39,37 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
+import edit from "../../images/brush-square.png"
 
-const statusColors: Record<
-  string,
-  "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning"
-> = {
-  "Chờ nhận phòng": "primary",
-  "Đã nhận phòng": "secondary",
-  "Hủy phòng": "error",
-  "Không nhận phòng": "error",
-  "Chờ khách xác nhận": "warning",
-  "Chờ xử lý": "warning",
-  "Hoàn thành": "success",
+const statusStyles: Record<string, any> = {
+  "Chờ nhận phòng": {
+    color: "#2979FF",          // xanh dương
+    backgroundColor: "#EAF2FF",
+  },
+  "Đã nhận phòng": {
+    color: "#8B5CF6",          // tím
+    backgroundColor: "#F3E8FF",
+  },
+  "Hủy phòng": {
+    color: "#EF4444",          // đỏ
+    backgroundColor: "#FEE2E2",
+  },
+  "Không nhận phòng": {
+    color: "#EF4444",          // đỏ
+    backgroundColor: "#FEE2E2",
+  },
+  "Chờ khách xác nhận": {
+    color: "#F97316",          // cam
+    backgroundColor: "#FFEDD5",
+  },
+  "Chờ xử lý": {
+    color: "#F97316",          // cam
+    backgroundColor: "#FFEDD5",
+  },
+  "Hoàn thành": {
+    color: "#22C55E",          // xanh lá
+    backgroundColor: "#DCFCE7",
+  },
 };
 
 
@@ -85,7 +104,14 @@ export default function ManagerBookingView({
   const [openAccepp, setOpenAccepp] = useState(false);
 
   const [openCheckin, setOpenCheckin] = useState(false);
+  const [openDetail, setOpenDetail] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
+  // Handler click row
+  const handleRowClick = (booking) => {
+    setSelectedBooking(booking);
+    setOpenDetail(true);
+  };
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{  p: { xs: 2, sm: 3, md: 4 } }}>
@@ -121,7 +147,7 @@ export default function ManagerBookingView({
               <Box>
                 <Typography sx={{ mb: 1.5 }}>Tìm kiếm</Typography>
                 <TextField
-                  defaultValue='123456'
+                  placeholder="Tìm mã đặt phòng"
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position='start'>
@@ -277,9 +303,6 @@ export default function ManagerBookingView({
                     <strong>Thời gian</strong>
                   </TableCell>
                   <TableCell>
-                    <strong>Thời gian nhận phòng</strong>
-                  </TableCell>
-                  <TableCell>
                     <strong>Tình trạng đặt phòng</strong>
                   </TableCell>
                   <TableCell>
@@ -331,41 +354,43 @@ export default function ManagerBookingView({
                     const roomName = row.room_types?.[0]?.name || "N/A";
 
                     return (
-                      <TableRow key={row.id} hover>
+                      <TableRow 
+                      onClick={() => handleRowClick(row)} key={row.id} hover>
                         <TableCell
                           sx={{
                             fontWeight: row.code.includes("(G)") ? "bold" : "normal",
-                            color: row.code.includes("(G)") ? "#1976d2" : "inherit",
+                            color: row.code.includes("(G)") ? "#1976d2" : "#98B720",
                           }}>
                           {row.code}
                         </TableCell>
                         <TableCell>
                           <div>{row.total_price.toLocaleString()}đ</div>
-                          <div style={{ fontSize: "0.875rem", color: "#666" }}>
+                          <div style={{ fontSize: "0.875rem", color:row.status !== "cancelled"? "#20B720":"#666" }}>
                             {row.status === "cancelled" ? "Đã hoàn tiền" : "Đã thanh toán"}
                           </div>
                         </TableCell>
                         <TableCell>
                           {rentTypeLabel}
                           <br />
-                          <span style={{ color: "#666", fontSize: "0.875rem" }}>
+                          <span style={{ color: "#98B720", fontSize: "0.875rem" }}>
                             {roomName}
                           </span>
                         </TableCell>
-                        <TableCell>{formatDateTime(row.created_at)}</TableCell>
-                        <TableCell>{formatDateTime(row.check_in)}</TableCell>
+                        <TableCell>{formatDateTime(row.created_at)}<br/>{formatDateTime(row.check_in)}</TableCell>
+                       
                         <TableCell>
                           <Chip
                             label={statusLabel}
-                            color={statusColors[statusLabel] || "default"}
+                           
                             size="small"
-                            sx={{ minWidth: 110 }}
+                            sx={{ minWidth: 110,...statusStyles[statusLabel] }}
                           />
                         </TableCell>
                         <TableCell>
                           <Tooltip title={row.note || "Không có ghi chú"}>
                             <IconButton size="small">
-                              <EditIcon onClick={() => {
+                              <img src={edit} onClick={(e) => {
+                                e.stopPropagation();
                                 setIdBooking(row)
                                 setOpenNote(true)
                               }} fontSize="small" />
@@ -452,10 +477,117 @@ export default function ManagerBookingView({
         booking={idBooking}
         fetchBookings={fetchBookings} idHotel={idHotel}
       />
+      <BookingDetailModal
+        open={openDetail}
+        onClose={() => setOpenDetail(false)}
+        booking={selectedBooking}
+      />
     </LocalizationProvider>
   );
 }
 
+function BookingDetailModal({ open, onClose, booking }) {
+  if (!booking) return null;
+
+  const formatDateTime = (dateString) => {
+    return dayjs(dateString).format("HH:mm, DD/MM/YYYY");
+  };
+
+  const rentTypeLabel = getRentTypeLabel(booking.rent_type); // dùng hàm đã có
+  const statusLabel = {
+    pending: "Chờ nhận phòng",
+    confirmed: "Chờ khách xác nhận",
+    checked_in: "Đã nhận phòng",
+    checked_out: "Hoàn thành",
+    cancelled: "Hủy phòng",
+    no_show: "Không nhận phòng",
+  }[booking.status] || "Chờ xử lý";
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 4,
+          boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+        },
+      }}
+    >
+      <DialogTitle sx={{ pb: 2 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Typography variant="h6" fontWeight="bold">
+            Chi tiết mã đặt phòng
+          </Typography>
+          <IconButton onClick={onClose} size="small">
+            <CloseIcon />
+          </IconButton>
+        </Stack>
+      </DialogTitle>
+
+      <DialogContent >
+        <Stack spacing={3}>
+          {/* Thông tin đặt phòng */}
+          <Stack spacing={2}>
+            <Box display={"flex"} justifyContent={"space-between"}>
+            <Typography variant="subtitle1" fontWeight="bold">
+              Thông tin đặt phòng
+            </Typography>
+            <Chip
+                            label={statusLabel}
+                           
+                            size="small"
+                            sx={{ minWidth: 110,...statusStyles[statusLabel] }}
+                          />
+            </Box>
+
+            
+
+            <Stack direction="row" justifyContent="space-between">
+              <Typography color="text.secondary">Thời gian đặt phòng:</Typography>
+              <Typography fontWeight="medium">
+                {formatDateTime(booking.created_at)}
+              </Typography>
+            </Stack>
+
+            <Stack direction="row" justifyContent="space-between">
+              <Typography color="text.secondary">Tên người đặt:</Typography>
+              <Typography fontWeight="medium">{booking.customer_name || "Nguyễn Văn A"}</Typography>
+            </Stack>
+
+            <Stack direction="row" justifyContent="space-between">
+              <Typography color="text.secondary">Số điện thoại:</Typography>
+              <Typography fontWeight="medium">{booking.customer_phone || "0123456789"}</Typography>
+            </Stack>
+
+            <Stack direction="row" justifyContent="space-between">
+              <Typography color="text.secondary">Loại đặt phòng:</Typography>
+              <Typography fontWeight="medium">{rentTypeLabel}</Typography>
+            </Stack>
+
+            <Stack direction="row" justifyContent="space-between">
+              <Typography color="text.secondary">Loại phòng:</Typography>
+              <Typography fontWeight="medium">
+                {booking.room_types?.[0]?.name || "Vip123"}
+              </Typography>
+            </Stack>
+
+            <Stack direction="row" justifyContent="space-between">
+              <Typography color="text.secondary">Thời gian lưu trú:</Typography>
+              <Typography fontWeight="medium">
+                {formatDateTime(booking.check_in)} - {formatDateTime(booking.check_out)}
+              </Typography>
+            </Stack>
+          </Stack>
+
+        
+          
+        </Stack>
+      </DialogContent>
+    </Dialog>
+  );
+}
 import { Dialog, DialogContent, DialogTitle, Divider } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
@@ -693,10 +825,12 @@ function ActionMenu({
   const open = Boolean(anchorEl);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
+  const handleClose = (e) => {
+    e.stopPropagation();
     setAnchorEl(null);
   };
 

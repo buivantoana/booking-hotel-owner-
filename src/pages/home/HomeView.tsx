@@ -890,9 +890,9 @@ export default function HomeView({
               borderRadius: 20,
             }}
           />
-          <Avatar onClick={handleClick} sx={{}}>
+          {/* <Avatar onClick={handleClick} sx={{}}>
             <NotificationsNoneIcon />
-          </Avatar>
+          </Avatar> */}
         </Stack>
       </Stack>
 
@@ -1062,7 +1062,7 @@ const Review = ({ dataReview }) => {
     rating_stats = {},
     recent_reviews = [],
   } = dataReview || {};
-
+  const navigate = useNavigate()
   const renderStars = (rating) => {
     return [...Array(5)].map((_, i) => (
       <Star
@@ -1087,6 +1087,7 @@ const Review = ({ dataReview }) => {
 
         <Button
           variant='outlined'
+          onClick={()=>navigate("/review")}
           sx={{
             borderColor: "#98b720",
             color: "#98b720",
@@ -1097,7 +1098,7 @@ const Review = ({ dataReview }) => {
             py: 1,
             "&:hover": { borderColor: "#7a9a1a", bgcolor: "#f0f8f0" },
           }}>
-          Show All Reviews
+          Xem tất cả đánh giá
         </Button>
       </Box>
 

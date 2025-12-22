@@ -99,9 +99,9 @@ export default function ManagerRoomView({
                 </Typography>
               </Box>
 
-              <Divider orientation='vertical' flexItem />
+              
 
-              <Box
+              {/* <Box
                 display='flex'
                 alignItems='center'
                 gap={0.5}
@@ -111,7 +111,7 @@ export default function ManagerRoomView({
                 <Typography fontSize={14} color='#7CB518' fontWeight={500}>
                   Tạo thêm loại phòng
                 </Typography>
-              </Box>
+              </Box> */}
             </Box>
           </Box>
           <Card sx={{ mt: 4 }}>

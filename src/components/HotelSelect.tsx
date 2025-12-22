@@ -78,6 +78,7 @@ export default function HotelSelect({
               key={hotel.id}
               selected={hotel.id === value}
               onClick={() => {
+                localStorage.setItem("hotel_id",hotel.id)
                 onChange?.(hotel.id);
                 setAnchorEl(null);
               }}

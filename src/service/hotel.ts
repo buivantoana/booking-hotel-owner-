@@ -410,10 +410,10 @@ export async function confirmHotelsSettlement(id) {
     }
   }
 }
-export async function getHotelReview(id) {
+export async function getHotelReview(id,query) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.get(`/partner/review/hotel/${id}`, {
+    const response = await api.get(`/partner/review/hotel/${id}?${query}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

@@ -138,10 +138,10 @@ export async function reviewDelete(id: any) {
 }
 
 
-export async function listBooking(id: any) {
+export async function listBooking(id: any,query) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.get(`/partner/booking/hotel/${id}`, {
+    const response = await api.get(`/partner/booking/hotel/${id}?${query}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

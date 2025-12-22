@@ -59,7 +59,7 @@ const ManagerRoomController = (props: Props) => {
     try {
       let result = await getHotels();
       if (result?.hotels) {
-        setIdHotel(result?.hotels[0]?.id)
+        setIdHotel(localStorage.getItem("hotel_id") ? result?.hotels.some((item)=>item.id == localStorage.getItem("hotel_id"))?localStorage.getItem("hotel_id"): result?.hotels[0]?.id:  result?.hotels[0]?.id)
         setHotels(result?.hotels)
       }
     } catch (error) {

@@ -354,11 +354,7 @@ export default function ReconciliationView({
                     <TableCell sx={{ fontWeight: 600, color: "#424242" }}>
                       Trạng thái
                     </TableCell>
-                    <TableCell
-                      align='center'
-                      sx={{ fontWeight: 600, color: "#424242" }}>
-                      Số loại phòng
-                    </TableCell>
+                  
                     <TableCell
                       align='right'
                       sx={{ fontWeight: 600, color: "#424242" }}>
@@ -421,7 +417,7 @@ export default function ReconciliationView({
                           />
                         </TableCell>
 
-                        <TableCell align='center'>{row.rooms}</TableCell>
+                       
 
                         <TableCell
                           align='right'

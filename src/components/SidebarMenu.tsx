@@ -14,6 +14,7 @@ import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { useLocation, useNavigate } from "react-router-dom";
 import InsightsIcon from "@mui/icons-material/Insights";
+import logo from "../../src/images/Frame 1321318032.png"
 export default function SidebarMenu() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -63,9 +64,10 @@ export default function SidebarMenu() {
           bgcolor: "#fff",
           flex: 0.7,
         }}>
-        <Typography variant='h6' sx={{ fontWeight: 700, mb: 4 }}>
-          Logo
-        </Typography>
+          <Box my={3} display={"flex"} justifyContent={"center"}>
+
+        <img src={logo} width={200} alt="" />
+          </Box>
 
         <List>
           {menuItems.map((item) => {

@@ -29,7 +29,7 @@ const ManagerBookingController = () => {
         const result = await getHotels();
         if (result?.hotels && result.hotels.length > 0) {
           setHotels(result.hotels);
-          setIdHotel(result.hotels[0].id); // Chọn khách sạn đầu tiên mặc định
+          setIdHotel(localStorage.getItem("hotel_id") ? result?.hotels.some((item)=>item.id == localStorage.getItem("hotel_id"))?localStorage.getItem("hotel_id"): result?.hotels[0]?.id:  result?.hotels[0]?.id)
         }
       } catch (error) {
         console.error("Lỗi lấy danh sách khách sạn:", error);
@@ -43,7 +43,13 @@ const ManagerBookingController = () => {
     if (!hotelId) return;
     setLoading(true);
     try {
-      const result = await listBooking(hotelId);
+      let query ={
+        page,
+        limit:pagination.limit
+      }
+
+      const queryString = new URLSearchParams(query).toString();
+      const result = await listBooking(hotelId,queryString);
       // Giả sử API trả về cấu trúc như mẫu bạn cung cấp
       setBookings(result.bookings || []);
       setPagination({
