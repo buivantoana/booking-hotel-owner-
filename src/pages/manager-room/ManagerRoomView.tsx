@@ -696,7 +696,7 @@ function RoomScheduleTableHourly({
           </Box>
           {/* CÁC DÒNG DỮ LIỆU */}
           {[
-            { label: JSON.parse(data?.name)?.vi, isName: true },
+            { label: JSON.parse(data?.name)?.vi|| data?.name, isName: true },
             {
               label: "Tình trạng phòng",
               action: "Khóa nhanh",
@@ -989,7 +989,7 @@ function RoomScheduleTableDaily({
 
           {/* CÁC DÒNG DỮ LIỆU */}
           {[
-            { label: JSON.parse(data?.name)?.vi, isName: true },
+            { label: JSON.parse(data?.name)?.vi|| data?.name, isName: true },
             {
               label: "Tình trạng phòng",
               action: "Khóa nhanh",
@@ -1252,7 +1252,7 @@ function RoomScheduleTableOvernight({
 
           {/* CÁC DÒNG DỮ LIỆU */}
           {[
-            { label: JSON.parse(data?.name)?.vi, isName: true },
+            { label: JSON.parse(data?.name)?.vi|| data?.name, isName: true },
             {
               label: "Tình trạng phòng",
               action: "Khóa nhanh",
