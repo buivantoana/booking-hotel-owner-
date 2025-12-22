@@ -35,7 +35,7 @@ function HotelHeader({ setAction,detailHotel }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        borderBottom: "1px solid #eee",
+       
         pt: 0,
       }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
