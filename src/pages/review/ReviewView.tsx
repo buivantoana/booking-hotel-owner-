@@ -594,7 +594,7 @@ function HotelReview({ reviews, getReview, value, setValue, pagination, onPageCh
       </Card>
 
       {/* Modal chi tiết - giữ nguyên 100% UI gốc */}
-      <ReviewDetailModal isEdit={isEdit} open={open} setOpen={setOpen} setIsEdit={setIsEdit} getReview={getReview} review={selectedReview} />
+      <ReviewDetailModal isEdit={isEdit}  pagination={pagination} value={value} open={open} setOpen={setOpen} setIsEdit={setIsEdit} getReview={getReview} review={selectedReview} />
     </Box>
   );
 }
@@ -660,7 +660,7 @@ const ReplyButtonModal = styled(Button)({
   },
 });
 
-function ReviewDetailModal({ open, setOpen, review, getReview, isEdit, setIsEdit }) {
+function ReviewDetailModal({ open, setOpen, review, getReview, isEdit, setIsEdit,pagination,value }) {
   const [replyText, setReplyText] = useState("");
   const [isEditing, setIsEditing] = useState(false); // trạng thái chỉnh sửa
 
@@ -713,7 +713,7 @@ function ReviewDetailModal({ open, setOpen, review, getReview, isEdit, setIsEdit
         toast.success(
           review.owner_reply ? "Cập nhật phản hồi thành công" : "Gửi phản hồi thành công"
         );
-        await getReview();
+        await getReview(pagination.page,value);
         setOpen(false);
       } else {
         toast.error(result?.message || "Thao tác thất bại");
@@ -731,7 +731,7 @@ function ReviewDetailModal({ open, setOpen, review, getReview, isEdit, setIsEdit
       const result = await replyReviewHotels(review.id, { reply: null });
       if (result?.success || result?.owner_reply === null) {
         toast.success("Đã xóa phản hồi");
-        await getReview();
+        await getReview(pagination.page,value);
         setOpen(false);
       } else {
         toast.error("Xóa thất bại");

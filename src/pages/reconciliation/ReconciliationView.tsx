@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Box,
   Paper,
@@ -105,6 +105,12 @@ const data: HotelRow[] = [
     dueDate: "31/12/2025",
   },
 ];
+const STATUS_MAP: Record<string, string> = {
+  "Tất cả": "",
+  "Chưa đối soát": "draft",
+  "Chờ thanh toán": "confirmed",
+  "Hoàn thành": "paid",
+};
 const parseLang = (value: string, lang = "vi") => {
   try {
     const obj = JSON.parse(value);
@@ -141,6 +147,9 @@ export default function ReconciliationView({
   setIdHotel,
   dataSettlement,
   fetchSettlements,
+  filters, // Thêm prop filters
+  onFilterChange, // Thêm prop onFilterChange
+  onResetFilter, // Thêm prop onResetFilter
 }) {
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("sm")
@@ -149,6 +158,12 @@ export default function ReconciliationView({
     theme.breakpoints.between("sm", "md")
   );
 
+  const [searchCode, setSearchCode] = useState(""); 
+  const [localFilters, setLocalFilters] = useState({
+    hotel_name: "",
+    period_month: "",
+    status: "all", // Thêm trạng thái
+  });
   const STATUS_LABEL: Record<string, string> = {
     confirmed: "Chờ thanh toán",
     paid: "Đã thanh toán",
@@ -165,7 +180,36 @@ export default function ReconciliationView({
     hotel_id: item.hotel_id, // Tổng công nợ
     _id: item.id,
     dueDate: new Date(item.confirm_deadline).toLocaleDateString("vi-VN"),
+
   }));
+  const handleSearch = () => {
+    const apiStatus = STATUS_MAP[localFilters.status] || "";
+    onFilterChange({
+      hotel_name: localFilters.hotel_name,
+      period_month: localFilters.period_month,
+      status: apiStatus,
+    });
+  };
+  const handleReset = () => {
+    setLocalFilters({
+      hotel_name: "",
+      period_month: "",
+      status: "all",
+    });
+    onResetFilter();
+  };
+    // Hàm xử lý thay đổi tab (status)
+    const handleTabChange = (tab: string) => {
+      setLocalFilters(prev => ({
+        ...prev,
+        status: tab
+      }));
+      const apiStatus = STATUS_MAP[tab] || "";
+      onFilterChange({
+        ...localFilters,
+        status: apiStatus,
+      });
+    };
   return (
     <>
       {settlement && (
@@ -177,6 +221,8 @@ export default function ReconciliationView({
           idHotel={idHotel}
           setIdHotel={setIdHotel}
           fetchSettlements={fetchSettlements}
+          setSearchCode={setSearchCode}
+          searchCode={searchCode}
         />
       )}
       {!settlement && (
@@ -230,6 +276,11 @@ export default function ReconciliationView({
               mb={3}>
               <TextField
                 placeholder='Tên khách sạn'
+                value={localFilters.hotel_name}
+                onChange={(e) => setLocalFilters(prev => ({
+                  ...prev,
+                  hotel_name: e.target.value
+                }))}
                 size='small'
                 sx={{
                   "& .MuiOutlinedInput-root": {
@@ -276,11 +327,17 @@ export default function ReconciliationView({
                   },
                   "& .MuiSelect-icon": { color: "#666", fontSize: "28px" },
                 }}>
-                <Select defaultValue='' displayEmpty>
+                <Select defaultValue='' value={localFilters.period_month}
+                  onChange={(e) => setLocalFilters(prev => ({
+                    ...prev,
+                    period_month: e.target.value
+                  }))} displayEmpty>
                   <MenuItem value='' disabled>
                     Chọn kỳ đối soát
                   </MenuItem>
-                  <MenuItem value='11-2025'>Tháng 11.2025</MenuItem>
+                  <MenuItem value='2025-11'>Tháng 11.2025</MenuItem>
+                  <MenuItem value='2025-12'>Tháng 12.2025</MenuItem>
+                  <MenuItem value='2026-01'>Tháng 01.2026</MenuItem>
                 </Select>
               </FormControl>
 
@@ -288,6 +345,7 @@ export default function ReconciliationView({
                 <Button
                   variant='contained'
                   color='success'
+                  onClick={handleSearch}
                   sx={{
                     borderRadius: 2,
                     textTransform: "none",
@@ -298,6 +356,7 @@ export default function ReconciliationView({
                 </Button>
                 <Button
                   variant='outlined'
+                  onClick={handleReset}
                   sx={{
                     borderRadius: 2,
                     textTransform: "none",
@@ -316,7 +375,8 @@ export default function ReconciliationView({
                 (tab) => (
                   <Button
                     key={tab}
-                    variant={tab === "Tất cả" ? "contained" : "outlined"}
+                    onClick={() => handleTabChange(tab)}
+                    variant={localFilters.status === tab ? "contained" : "outlined"}
                     size='small'
                     sx={{
                       borderRadius: 3,
@@ -502,6 +562,8 @@ function HotelDetailFinal({
   idHotel,
   setIdHotel,
   fetchSettlements,
+  searchCode,
+  setSearchCode
 }) {
   const [dataSettlementBooking, setDataSettlementBooking] = useState([]);
   const [openModal, setOpenModal] = useState(false);
@@ -511,7 +573,27 @@ function HotelDetailFinal({
     total: 0,
     total_pages: 0,
   });
-  let [bankPrimary, setBankPrimary] = useState(null);
+  // Giá trị input
+const [debouncedSearchCode, setDebouncedSearchCode] = useState(""); // Giá trị sau debounce
+let [bankPrimary, setBankPrimary] = useState(null);
+// Ref để lưu timer debounce
+const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+useEffect(() => {
+  if (debounceTimer.current) {
+    clearTimeout(debounceTimer.current);
+  }
+
+  debounceTimer.current = setTimeout(() => {
+    setDebouncedSearchCode(searchCode.trim());
+  }, 500);
+
+  return () => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+  };
+}, [searchCode]);
+
   useEffect(() => {
     getListBankPartner();
   }, []);
@@ -529,15 +611,26 @@ function HotelDetailFinal({
   };
   useEffect(() => {
     if (settlement) {
-      fetchBooking(1);
+      fetchBooking(1); // Reset về trang 1 khi search thay đổi
     }
-  }, [settlement]);
+  }, [debouncedSearchCode, settlement]);
 
-  const fetchBooking = async (page: number = 1) => {
+  const fetchBooking = async (page: number = 1, search: string = debouncedSearchCode) => {
     try {
-      const query = new URLSearchParams({ ...pagination, page }).toString();
+      // Tạo query params
+      const params = new URLSearchParams({
+        page:search ? 1 : page.toString(),
+        limit: pagination.limit.toString(),
+      });
+  
+      if (search) {
+        params.append("booking_code", search);
+       
+      }
+  
+      const query = params.toString();
       const result = await listBookingSettlement(settlement?.id, query);
-      // Giả sử API trả về cấu trúc như mẫu bạn cung cấp
+  
       setDataSettlementBooking(result.bookings || []);
       setPagination({
         page: result.page || 1,
@@ -548,7 +641,6 @@ function HotelDetailFinal({
     } catch (error) {
       console.error("Lỗi lấy danh sách booking:", error);
       setDataSettlementBooking([]);
-    } finally {
     }
   };
   const handlePageChange = (
@@ -610,6 +702,7 @@ function HotelDetailFinal({
             <KeyboardArrowLeft
               onClick={() => {
                 setSettlement(null);
+                setSearchCode("")
               }}
               sx={{ fontSize: 32, mr: 1, cursor: "pointer" }}
             />
@@ -816,6 +909,8 @@ function HotelDetailFinal({
             <TextField
               placeholder='Tìm theo mã đặt phòng'
               size='small'
+              value={searchCode}                    // Thêm value
+  onChange={(e) => setSearchCode(e.target.value)}
               sx={{
                 width: { xs: "100%", sm: 340 },
                 "& .MuiOutlinedInput-root": {

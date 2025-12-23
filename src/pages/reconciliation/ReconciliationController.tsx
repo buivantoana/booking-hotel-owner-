@@ -15,16 +15,33 @@ const ReconciliationController = (props: Props) => {
     total_pages: 0,
   });
   const [idHotel, setIdHotel] = useState(null);
-
+  const [filters, setFilters] = useState({
+    period_month: "",
+    hotel_name: "",
+    status: "", // Thêm trạng thái nếu cần
+  });
   useEffect(() => {
     fetchSettlements(1); // Reset về trang 1 khi đổi khách sạn
   }, []);
 
-  const fetchSettlements = async (page: number = 1) => {
+  const fetchSettlements = async (page: number = 1, filterParams = filters) => {
     try {
-      const query = new URLSearchParams({ ...pagination, page }).toString();
+      const queryParams = {
+        ...pagination,
+        page,
+        ...filterParams,
+      };
+
+      // Loại bỏ các tham số rỗng
+      Object.keys(queryParams).forEach(key => {
+        if (queryParams[key] === "" || queryParams[key] === null) {
+          delete queryParams[key];
+        }
+      });
+
+      const query = new URLSearchParams(queryParams).toString();
       const result = await getMySettlements(query);
-      // Giả sử API trả về cấu trúc như mẫu bạn cung cấp
+
       setDataSettlement(result.settlements || []);
       setPagination({
         page: result.page || 1,
@@ -33,16 +50,33 @@ const ReconciliationController = (props: Props) => {
         total_pages: result.total_pages || 1,
       });
     } catch (error) {
-      console.error("Lỗi lấy danh sách booking:", error);
+      console.error("Lỗi lấy danh sách đối soát:", error);
       setDataSettlement([]);
-    } finally {
     }
   };
+
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
     newPage: number
   ) => {
     fetchSettlements(newPage);
+  };
+
+  // Hàm xử lý filter
+  const handleFilterChange = (newFilters: any) => {
+    setFilters(newFilters);
+    fetchSettlements(1, newFilters); // Reset về trang 1 khi filter
+  };
+
+  // Hàm reset filter
+  const handleResetFilter = () => {
+    const resetFilters = {
+      period_month: "",
+      hotel_name: "",
+      status: "",
+    };
+    setFilters(resetFilters);
+    fetchSettlements(1, resetFilters);
   };
 
   return (
@@ -56,6 +90,9 @@ const ReconciliationController = (props: Props) => {
       onPageChange={handlePageChange}
       fetchSettlements={fetchSettlements}
       setIdHotel={setIdHotel}
+      filters={filters}
+      onFilterChange={handleFilterChange}
+      onResetFilter={handleResetFilter}
     />
   );
 };

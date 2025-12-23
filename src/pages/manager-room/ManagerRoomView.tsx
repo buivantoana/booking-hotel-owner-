@@ -35,13 +35,13 @@ export default function ManagerRoomView({
   idHotel,
   setIdHotel,
   setData,
+  rentType
 }) {
   const isMobile = useMediaQuery("(max-width:600px)");
 
   const [openQuickBlock, setOpenQuickBlock] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [action, setAction] = useState("manager");
-
   const tabs = [
     { key: "hourly", label: "Theo giờ" },
     { key: "overnight", label: "Qua đêm" },
@@ -124,7 +124,7 @@ export default function ManagerRoomView({
               sx={{ background: "#fff" }}>
               {/* Tabs */}
               <Box display='flex' alignItems='center' gap={3}>
-                {tabs.map((t) => (
+                {tabs.filter((item)=>rentType.includes(item.key)).map((t) => (
                   <Box
                     key={t.key}
                     sx={{ cursor: "pointer" }}
@@ -1219,7 +1219,7 @@ function RoomScheduleTableOvernight({
               {/* Các ngày - mỗi ngày 1 cột */}
               <Box display='flex' borderBottom='2px solid #ddd' bgcolor='white'>
                 {dailySlots?.map((slot) => {
-                  const dateObj = new Date(slot?.date);
+                  const dateObj = slot?.date && new Date(slot?.date);
                   const dayNum = dateObj && format(dateObj, "dd");
                   const dayName =
                     dateObj &&

@@ -9,9 +9,10 @@ const ManagerBookingController = () => {
   const [hotels, setHotels] = useState([]);
   const [idHotel, setIdHotel] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState({
-    checkIn: dayjs(),
-    checkOut: dayjs().add(1, "day"),
+    checkIn: null,
+    checkOut: null,
   });
+  
   // State cho booking và phân trang
   const [bookings, setBookings] = useState<any[]>([]);
   const [pagination, setPagination] = useState({
@@ -21,6 +22,15 @@ const ManagerBookingController = () => {
     total_pages: 0,
   });
   const [loading, setLoading] = useState(false);
+  
+  // State cho filter
+  const [filters, setFilters] = useState({
+    booking_code: "",
+    rent_type: "all",
+    status: "all",
+    check_in_from: "",
+    check_in_to: "",
+  });
 
   // Lấy danh sách khách sạn
   useEffect(() => {
@@ -29,7 +39,12 @@ const ManagerBookingController = () => {
         const result = await getHotels();
         if (result?.hotels && result.hotels.length > 0) {
           setHotels(result.hotels);
-          setIdHotel(localStorage.getItem("hotel_id") ? result?.hotels.some((item)=>item.id == localStorage.getItem("hotel_id"))?localStorage.getItem("hotel_id"): result?.hotels[0]?.id:  result?.hotels[0]?.id)
+          setIdHotel(
+            localStorage.getItem("hotel_id") && 
+            result?.hotels.some((item) => item.id == localStorage.getItem("hotel_id")) 
+              ? localStorage.getItem("hotel_id")
+              : result?.hotels[0]?.id
+          );
         }
       } catch (error) {
         console.error("Lỗi lấy danh sách khách sạn:", error);
@@ -38,19 +53,88 @@ const ManagerBookingController = () => {
     getListHotel();
   }, []);
 
-  // Gọi API lấy booking khi idHotel thay đổi hoặc page thay đổi
-  const fetchBookings = async (hotelId: string, page: number = 1) => {
+  // Format date đúng chuẩn ISO 8601 cho parser.isoparse()
+  // KHÔNG encode + tại đây, để URLSearchParams tự xử lý
+  const formatDateForAPI = (date: dayjs.Dayjs) => {
+    if(!date){
+      return
+    }
+    // Format: 2025-12-09T00:00:00+07:00 (ISO 8601 với timezone)
+    return date.format("YYYY-MM-DDTHH:mm:ss+07:00");
+  };
+
+  // Hàm build query string thủ công để kiểm soát encoding
+  const buildQueryString = (params: any) => {
+    const parts: string[] = [];
+    
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== "" && value !== null && value !== undefined) {
+        // QUAN TRỌNG: Giữ nguyên giá trị date, chỉ encode key
+        const encodedKey = encodeURIComponent(key);
+        // KHÔNG encode value ở đây vì chúng ta muốn giữ + và :
+        parts.push(`${encodedKey}=${value}`);
+      }
+    });
+    
+    return parts.join('&');
+  };
+
+  // Gọi API lấy booking với filter
+  const fetchBookings = async (hotelId: string, page: number, filterParams = filters) => {
     if (!hotelId) return;
     setLoading(true);
     try {
-      let query ={
-        page,
-        limit:pagination.limit
+      let query: any = {
+        page: page || pagination.page,
+        limit: pagination.limit,
+      };
+
+      // Thêm các filter nếu có giá trị
+      if (filterParams.booking_code) {
+        query.booking_code = filterParams.booking_code;
+      }
+      
+      if (filterParams.rent_type && filterParams.rent_type !== "all") {
+        query.rent_type = filterParams.rent_type;
+      }
+      
+      if (filterParams.status && filterParams.status !== "all") {
+        query.status = filterParams.status;
+      }
+      
+      if (filterParams.check_in_from) {
+        query.check_in_from = filterParams.check_in_from;
+      }
+      
+      if (filterParams.check_in_to) {
+        query.check_in_to = filterParams.check_in_to;
       }
 
-      const queryString = new URLSearchParams(query).toString();
-      const result = await listBooking(hotelId,queryString);
-      // Giả sử API trả về cấu trúc như mẫu bạn cung cấp
+      // Debug chi tiết
+      console.log("=== DEBUG FILTER PARAMS ===");
+      console.log("Raw query params:", query);
+      console.log("check_in_from value:", query.check_in_from);
+      console.log("check_in_to value:", query.check_in_to);
+
+      // THỬ CẢ 2 CÁCH để tìm ra cách đúng
+      
+      // Cách 1: Dùng URLSearchParams (sẽ auto encode)
+      const params1 = new URLSearchParams();
+      Object.entries(query).forEach(([key, value]) => {
+        if (value !== "" && value !== null && value !== undefined) {
+          params1.append(key, String(value));
+        }
+      });
+      const queryString1 = params1.toString();
+      console.log("Cách 1 (URLSearchParams):", queryString1);
+      
+      // Cách 2: Build thủ công
+      const queryString2 = buildQueryString(query);
+      console.log("Cách 2 (Manual build):", queryString1);
+
+      // Chọn cách 2 (manual build) để kiểm soát tốt hơn
+      const result = await listBooking(hotelId, queryString1);
+      
       setBookings(result.bookings || []);
       setPagination({
         page: result.page || 1,
@@ -69,15 +153,75 @@ const ManagerBookingController = () => {
   // Khi chọn khách sạn mới
   useEffect(() => {
     if (idHotel) {
-      fetchBookings(idHotel, 1); // Reset về trang 1 khi đổi khách sạn
+      // Set default date range filter khi load lần đầu
+      const defaultFilters = {
+        booking_code: "",
+        rent_type: "all",
+        status: "all",
+        check_in_from: formatDateForAPI(dateRange?.checkIn),
+        check_in_to: formatDateForAPI(dateRange?.checkOut),
+      };
+      console.log("Initial filters:", defaultFilters);
+      setFilters(defaultFilters);
+      fetchBookings(idHotel, 1, defaultFilters);
     }
   }, [idHotel]);
 
   // Xử lý đổi trang
   const handlePageChange = (event: React.ChangeEvent<unknown>, newPage: number) => {
     if (idHotel) {
-      
       fetchBookings(idHotel, newPage);
+    }
+  };
+
+  // Xử lý filter thay đổi
+  const handleFilterChange = (newFilters: any) => {
+    console.log("Filter changed to:", newFilters);
+    setFilters(newFilters);
+    if (idHotel) {
+      fetchBookings(idHotel, 1, newFilters);
+    }
+  };
+
+  // Reset filter
+  const handleResetFilter = () => {
+    const resetDateRange = {
+      checkIn: null,
+      checkOut: null,
+    };
+    
+    const resetFilters = {
+      booking_code: "",
+      rent_type: "all",
+      status: "all",
+      check_in_from: formatDateForAPI(resetDateRange.checkIn),
+      check_in_to: formatDateForAPI(resetDateRange.checkOut),
+    };
+    
+    console.log("Reset filters:", resetFilters);
+    setFilters(resetFilters);
+    setDateRange(resetDateRange);
+    
+    if (idHotel) {
+      fetchBookings(idHotel, 1, resetFilters);
+    }
+  };
+
+  // Xử lý khi dateRange thay đổi
+  const handleDateRangeChange = (newDateRange: any) => {
+    console.log("DateRange changed:", newDateRange);
+    setDateRange(newDateRange);
+    
+    const updatedFilters = {
+      ...filters,
+      check_in_from: formatDateForAPI(newDateRange.checkIn),
+      check_in_to: formatDateForAPI(newDateRange.checkOut),
+    };
+    
+    console.log("Updated filters:", updatedFilters);
+    setFilters(updatedFilters);
+    if (idHotel) {
+      fetchBookings(idHotel, 1, updatedFilters);
     }
   };
 
@@ -91,8 +235,12 @@ const ManagerBookingController = () => {
       loading={loading}
       onPageChange={handlePageChange}
       fetchBookings={fetchBookings}
-      setDateRange={setDateRange}
       dateRange={dateRange}
+      setDateRange={handleDateRangeChange}
+      filters={filters}
+      onFilterChange={handleFilterChange}
+      onResetFilter={handleResetFilter}
+      formatDateForAPI={formatDateForAPI}
     />
   );
 };

@@ -72,19 +72,41 @@ const statusStyles: Record<string, any> = {
   },
 };
 
+const STATUS_API_TO_LABEL: Record<string, string> = {
+  pending: "Chờ nhận phòng",
+  confirmed: "Chờ khách xác nhận",
+  checked_in: "Đã nhận phòng",
+  checked_out: "Hoàn thành",
+  cancelled: "Hủy phòng",
+  no_show: "Không nhận phòng",
+};
 
+// Map label hiển thị sang status API
+const STATUS_LABEL_TO_API: Record<string, string> = {
+  "Tất cả": "all",
+  "Chờ nhận phòng": "pending",
+  "Đã nhận phòng": "checked_in",
+  "Hủy phòng": "cancelled",
+  "Không nhận phòng": "no_show",
+  "Chờ khách xác nhận": "confirmed",
+  "Hoàn thành": "checked_out",
+  "Chờ xử lý": "pending", // Giả sử "Chờ xử lý" là pending
+};
 
 export default function ManagerBookingView({
   hotels,
   idHotel,
   setIdHotel,
-  bookings,           // ← Thêm
-  pagination,         // ← Thêm
-  loading,            // ← Thêm
-  onPageChange,       // ← Thêm
+  bookings,
+  pagination,
+  loading,
+  onPageChange,
   fetchBookings,
   dateRange,
-  setDateRange
+  setDateRange,
+  filters,
+  onFilterChange,
+  onResetFilter,
 }: {
   hotels: any[];
   idHotel: string | null;
@@ -93,6 +115,12 @@ export default function ManagerBookingView({
   pagination: { page: number; total_pages: number; total: number };
   loading: boolean;
   onPageChange: (event: React.ChangeEvent<unknown>, page: number) => void;
+  fetchBookings: (hotelId: string, page: number, filters?: any) => void;
+  dateRange: any;
+  setDateRange: (dateRange: any) => void;
+  filters: any;
+  onFilterChange: (filters: any) => void;
+  onResetFilter: () => void;
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -106,12 +134,143 @@ export default function ManagerBookingView({
   const [openCheckin, setOpenCheckin] = useState(false);
   const [openDetail, setOpenDetail] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
-
+  const [localFilters, setLocalFilters] = useState({
+    booking_code: "",
+    rent_type: "all",
+    status: "all",
+  });
+  useEffect(() => {
+    if (filters) {
+      setLocalFilters({
+        booking_code: filters.booking_code || "",
+        rent_type: filters.rent_type || "all",
+        status: filters.status || "all",
+      });
+    }
+  }, [filters]);
   // Handler click row
   const handleRowClick = (booking) => {
     setSelectedBooking(booking);
     setOpenDetail(true);
   };
+  const handleSearch = () => {
+    // Format dateRange thành chuỗi cho API
+    
+    const formatDateForAPI = (date: dayjs.Dayjs) => {
+      if(!date){
+        return
+      }
+      return date.format("YYYY-MM-DDTHH:mm:ssZ");
+    };
+
+    const updatedFilters = {
+      ...localFilters,
+      check_in_from: formatDateForAPI(dateRange?.checkIn),
+      check_in_to: formatDateForAPI(dateRange?.checkOut),
+    };
+    
+    onFilterChange(updatedFilters);
+  };
+
+  // Xử lý thay đổi tab (status)
+  const handleTabChange = (tabLabel: string) => {
+    const status = STATUS_LABEL_TO_API[tabLabel] || "all";
+    
+    const updatedLocalFilters = {
+      ...localFilters,
+      status: status,
+    };
+    
+    setLocalFilters(updatedLocalFilters);
+    
+    // Format dateRange thành chuỗi cho API
+    const formatDateForAPI = (date: dayjs.Dayjs) => {
+      if(!date){
+        return
+      }
+      return date.format("YYYY-MM-DDTHH:mm:ssZ");
+    };
+
+    const updatedFilters = {
+      ...updatedLocalFilters,
+      check_in_from: formatDateForAPI(dateRange.checkIn),
+      check_in_to: formatDateForAPI(dateRange.checkOut),
+    };
+    
+    onFilterChange(updatedFilters);
+  };
+
+  // Reset filter
+  const handleReset = () => {
+    setLocalFilters({
+      booking_code: "",
+      rent_type: "all",
+      status: "all",
+    });
+    
+    const resetDateRange = {
+      checkIn: dayjs(),
+      checkOut: dayjs().add(1, "day"),
+    };
+    
+    setDateRange(resetDateRange);
+    onResetFilter();
+  };
+
+  // Đếm số lượng booking theo status
+  const countByStatus = () => {
+    const counts: Record<string, number> = {
+      "Tất cả": bookings.length,
+      "Chờ nhận phòng": 0,
+      "Đã nhận phòng": 0,
+      "Chờ khách xác nhận": 0,
+      "Đã hủy": 0,
+      "Không nhận phòng": 0,
+      "Hoàn thành": 0,
+      "Chờ Hotel Booking xử lý": 0,
+    };
+
+    bookings.forEach((booking) => {
+      const statusLabel = STATUS_API_TO_LABEL[booking.status] || "Chờ xử lý";
+      
+      switch (statusLabel) {
+        case "Chờ nhận phòng":
+          counts["Chờ nhận phòng"]++;
+          break;
+        case "Đã nhận phòng":
+          counts["Đã nhận phòng"]++;
+          break;
+        case "Chờ khách xác nhận":
+          counts["Chờ khách xác nhận"]++;
+          break;
+        case "Hủy phòng":
+          counts["Đã hủy"]++;
+          break;
+        case "Không nhận phòng":
+          counts["Không nhận phòng"]++;
+          break;
+        case "Hoàn thành":
+          counts["Hoàn thành"]++;
+          break;
+      }
+    });
+
+    return counts;
+  };
+
+  const statusCounts = countByStatus();
+
+  // Danh sách tab với số lượng
+  const tabs = [
+    { label: "Tất cả", count: statusCounts["Tất cả"], value: "all" },
+    { label: "Chờ nhận phòng", count: statusCounts["Chờ nhận phòng"], value: "pending" },
+    { label: "Đã nhận phòng", count: statusCounts["Đã nhận phòng"], value: "checked_in" },
+    { label: "Chờ khách xác nhận", count: statusCounts["Chờ khách xác nhận"], value: "confirmed" },
+    { label: "Đã hủy", count: statusCounts["Đã hủy"], value: "cancelled" },
+    { label: "Không nhận phòng", count: statusCounts["Không nhận phòng"], value: "no_show" },
+    { label: "Hoàn thành", count: statusCounts["Hoàn thành"], value: "checked_out" },
+    { label: "Chờ Hotel Booking xử lý", count: statusCounts["Chờ Hotel Booking xử lý"], value: "pending" },
+  ];
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{  p: { xs: 2, sm: 3, md: 4 } }}>
@@ -148,6 +307,11 @@ export default function ManagerBookingView({
                 <Typography sx={{ mb: 1.5 }}>Tìm kiếm</Typography>
                 <TextField
                   placeholder="Tìm mã đặt phòng"
+                  value={localFilters.booking_code}
+                  onChange={(e) => setLocalFilters({
+                    ...localFilters,
+                    booking_code: e.target.value
+                  })}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position='start'>
@@ -187,7 +351,11 @@ export default function ManagerBookingView({
                 <Typography sx={{ mb: 1.5 }}>Loại đặt phòng</Typography>
                 <Select
                   displayEmpty
-                  defaultValue=""
+                  value={localFilters.rent_type}
+                  onChange={(e) => setLocalFilters({
+                    ...localFilters,
+                    rent_type: e.target.value
+                  })}
                  
                   sx={{
                     width: 200,
@@ -217,12 +385,10 @@ export default function ManagerBookingView({
                     },
                   }}
                 >
-                  <MenuItem value="" disabled>
-                    Chọn loại đặt phòng
-                  </MenuItem>
-                  <MenuItem value="theogio">Theo giờ</MenuItem>
-                  <MenuItem value="quadem">Qua đêm</MenuItem>
-                  <MenuItem value="quangay">Qua ngày</MenuItem> {/* Nếu cần thêm */}
+                   <MenuItem value="all">Tất cả</MenuItem>
+                  <MenuItem value="hourly">Theo giờ</MenuItem>
+                  <MenuItem value="daily">Qua ngày</MenuItem>
+                  <MenuItem value="overnight">Qua đêm</MenuItem>
                 </Select>
               </Box>
 
@@ -236,6 +402,7 @@ export default function ManagerBookingView({
               <Stack direction='row' alignItems={"end"} spacing={1}>
                 <Button
                   variant='contained'
+                  onClick={handleSearch}
                   sx={{
                     borderRadius: "24px",
                     bgcolor: "#98b720",
@@ -246,13 +413,14 @@ export default function ManagerBookingView({
                 </Button>
                 <Button
                   variant='outlined'
+                  onClick={handleReset}
                   sx={{
                     borderRadius: "24px",
                     height: 40,
                     minWidth: 120,
                     border: "1px solid rgba(208, 211, 217, 1)",
                     background: "rgba(240, 241, 243, 1)",
-                    color: "rgba(208, 211, 217, 1)",
+                    color: "black",
                   }}>
                   Xóa tìm kiếm
                 </Button>
@@ -261,29 +429,28 @@ export default function ManagerBookingView({
 
             {/* Chip */}
             <Stack direction='row' flexWrap='wrap' gap={1.5} mt={3}>
-              {[
-                { label: "Tất cả", count: 5, active: true },
-                { label: "Chờ nhận phòng", count: 2 },
-                { label: "Đã nhận phòng", count: 2 },
-                { label: "Chờ Hotel Booking xử lý", count: 1 },
-                { label: "Đã hủy", count: 1 },
-                { label: "Không nhận phòng", count: 1 },
-                { label: "Hoàn thành", count: 1 },
-                { label: "Chờ khách xác nhận", count: 1 },
-              ].map((item) => (
-                <Chip
-                  key={item.label}
-                  label={`${item.label} ${item.count}`}
-                  sx={{
-                    borderRadius: "18px",
-                    height: 36,
-                    bgcolor: item.active ? "#98b720" : "transparent",
-                    color: item.active ? "white" : "#666",
-                    border: item.active ? "none" : "1px solid #e0e0e0",
-                    fontWeight: item.active ? "bold" : "normal",
-                  }}
-                />
-              ))}
+            {tabs.map((tab) => {
+                const isActive = localFilters.status === tab.value;
+                return (
+                  <Chip
+                    key={tab.label}
+                    label={`${tab.label} ${tab.count}`}
+                    onClick={() => handleTabChange(tab.label)}
+                    sx={{
+                      cursor: "pointer",
+                      borderRadius: "18px",
+                      height: 36,
+                      bgcolor: isActive ? "#98b720" : "transparent",
+                      color: isActive ? "white" : "#666",
+                      border: isActive ? "none" : "1px solid #e0e0e0",
+                      fontWeight: isActive ? "bold" : "normal",
+                      "&:hover": {
+                        bgcolor: isActive ? "#7cb342" : "#f5f5f5",
+                      },
+                    }}
+                  />
+                );
+              })}
             </Stack>
           </Stack>
           <TableContainer sx={{ mt: 5, width: "100%" }}>
@@ -355,7 +522,7 @@ export default function ManagerBookingView({
 
                     return (
                       <TableRow 
-                      onClick={() => handleRowClick(row)} key={row.id} hover>
+                      onClick={() => handleRowClick(row)} sx={{cursor:"pointer"}} key={row.id} hover>
                         <TableCell
                           sx={{
                             fontWeight: row.code.includes("(G)") ? "bold" : "normal",
@@ -717,9 +884,27 @@ function NoteModal({ openNote, onClose, booking, fetchBookings, idHotel }) {
             }}
             sx={{
               "& .MuiOutlinedInput-root": {
+               
                 borderRadius: 1,
-                bgcolor: "#f9f9f9",
-                "& textarea": { resize: "none" },
+
+                backgroundColor: "#fff",
+                "& fieldset": {
+                  borderColor: "#cddc39", // Border mặc định
+                  borderWidth: "1px",     // Tăng độ dày nếu muốn nổi bật hơn
+                },
+                "&:hover fieldset": {
+                  borderColor: "#c0ca33", // Hover: đậm hơn một chút (tùy chọn)
+                  borderWidth: "1px",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#cddc39 !important", // QUAN TRỌNG: Khi focus vẫn giữ màu này
+                  borderWidth: "1px",
+                  boxShadow: "0 0 0 3px rgba(205, 220, 57, 0.2)", // Hiệu ứng glow nhẹ (tùy chọn)
+                },
+                // Tắt màu legend primary khi focus (nếu có label)
+                "&.Mui-focused .MuiInputLabel-root": {
+                  color: "#666",
+                },
               },
             }}
           />
@@ -884,7 +1069,8 @@ function ActionMenu({
         {/* Khách nhận phòng - chỉ hiện khi pending */}
         {showCheckIn && (
           <MenuItem
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               setIdBooking(booking)
               setOpenCheckIn(true);
               handleClose();
@@ -899,7 +1085,8 @@ function ActionMenu({
         {/* Khách trả phòng - chỉ hiện khi checked_in */}
         {showCheckOut && (
           <MenuItem
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               setIdBooking(booking)
               setOpenCheckOut(true);
               handleClose();
@@ -914,7 +1101,8 @@ function ActionMenu({
         {/* Hủy đặt phòng - chỉ hiện khi pending hoặc confirmed */}
         {showCancel && (
           <MenuItem
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               setIdBooking(booking)
               setOpenCancel(true);
               handleClose();
