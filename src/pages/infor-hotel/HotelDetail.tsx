@@ -95,6 +95,9 @@ function HotelInfoDetail({ onNext, setRoom ,detailHotel,getHotelDetail}) {
       setAction("rooms")
       setSearchParams(searchParams, { replace: true });
     }
+    if(searchParams.get("room_id")){
+      setAction("rooms")
+    }
   },[searchParams])
   const hotelName = parseVi(detailHotel.name);
   const hotelAddress = parseVi(detailHotel.address);
@@ -385,14 +388,14 @@ function HotelInfoDetail({ onNext, setRoom ,detailHotel,getHotelDetail}) {
             </Grid>
           </Grid>
 
-          <Divider sx={{ my: 4 }} />
+          {/* <Divider sx={{ my: 4 }} /> */}
 
           {/* Các loại phòng - render động nhưng giữ đúng layout cũ */}
-          <Box>
+          {/* <Box>
             {(detailHotel.room_types || []).map((room) => (
               <RoomTypeCard key={room.id} room={room} />
             ))}
-          </Box>
+          </Box> */}
         </>
       )}
     </Paper>

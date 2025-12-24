@@ -9,6 +9,7 @@ import {
   getInventoryHotelOvernight,
 } from "../../service/hotel";
 import { formatDateWithTimezone } from "../../utils/utils";
+import Loading from "../../components/Loading";
 
 type Props = {};
 
@@ -97,6 +98,8 @@ const ManagerRoomController = (props: Props) => {
   console.log("AAAA data",data)
   console.log("AAAA rentType",rentType)
   return (
+    <>
+    {loading&& <Loading/>}
     <ManagerRoomView
       setActive={setActive}
       active={active}
@@ -109,7 +112,9 @@ const ManagerRoomController = (props: Props) => {
       setIdHotel={setIdHotel}
       setData={setData}
       rentType={rentType}
+      getData={getData}
     />
+    </>
   );
 };
 

@@ -16,7 +16,7 @@ const Loading = (props: any) => {
         zIndex: 10000,
       }}>
       <Box>
-        <img src={logo} width={"80px"} alt='' />
+        <CircularProgress sx={{color:"#98b720"}}/>
       </Box>
     </Box>
   );

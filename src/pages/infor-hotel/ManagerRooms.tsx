@@ -15,8 +15,9 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import { parseRoomName } from "../../utils/utils";
+import { useSearchParams } from "react-router-dom";
 
 type Props = {
   onNext: (action: string, roomId?: string) => void;
@@ -47,6 +48,14 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom }: Props) => {
     }));
   }, [detailHotel]);
 
+  const [searchParams,setSearchParams] = useSearchParams();
+  useEffect(()=>{
+    
+    if(searchParams.get("room_id")){
+      setRoom(roomTypes.find((item)=>item.id == searchParams.get("room_id")));
+    onNext("detail");
+    }
+  },[searchParams])
   const handleRoomClick = (room) => {
     setRoom(room);
     onNext("detail");
@@ -219,10 +228,10 @@ function ActionMenu() {
           <Edit fontSize='small' sx={{ color: "#666" }} />
           Chỉnh sửa
         </MenuItem>
-        <MenuItem onClick={handleClose} sx={{ gap: 1.5, fontSize: 14 }}>
+        {/* <MenuItem onClick={handleClose} sx={{ gap: 1.5, fontSize: 14 }}>
           <ContentCopy fontSize='small' sx={{ color: "#666" }} />
           Nhân bản
-        </MenuItem>
+        </MenuItem> */}
         <MenuItem
           onClick={handleClose}
           sx={{ gap: 1.5, fontSize: 14, color: "#d32f2f" }}>

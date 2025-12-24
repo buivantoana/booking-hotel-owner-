@@ -88,10 +88,10 @@ function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
           <EditIcon fontSize='small' sx={{ color: "#666" }} />
           Chỉnh sửa
         </MenuItem>
-        <MenuItem onClick={handleClose} sx={{ gap: 1.5, fontSize: 14 }}>
+        {/* <MenuItem onClick={handleClose} sx={{ gap: 1.5, fontSize: 14 }}>
           <ContentCopyIcon fontSize='small' sx={{ color: "#666" }} />
           Nhân bản
-        </MenuItem>
+        </MenuItem> */}
         <MenuItem
           onClick={() => {
             setIdHotel(hotel);
@@ -125,17 +125,20 @@ export default function InforHotelView({ hotels, getDataHotels }) {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    if (searchParams.get("id")) {
+    if (searchParams.get("id")|| searchParams.get("hotel_id")) {
       getHotelDetail();
+    }
+    if(searchParams.get("hotel_id")){
+      setAction("edit_detail");
     }
   }, [searchParams]);
   const getHotelDetail = async () => {
     try {
-      let result = await getHotel(searchParams.get("id"));
+      let result = await getHotel(searchParams.get("id")|| searchParams.get("hotel_id"));
       if (result?.id) {
         setDetailHotel(result);
-        if (room.id) {
-          setRoom(result?.room_types.find((item) => item.id == room.id));
+        if (room?.id||searchParams.get("room_id")) {
+          setRoom(result?.room_types.find((item) => item.id == (room?.id||searchParams.get("room_id"))));
         }
       }
     } catch (error) {

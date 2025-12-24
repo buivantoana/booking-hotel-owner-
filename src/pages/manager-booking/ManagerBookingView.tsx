@@ -42,55 +42,97 @@ import dayjs from "dayjs";
 import edit from "../../images/brush-square.png"
 
 const statusStyles: Record<string, any> = {
+  "Chờ khách xác nhận": {
+    color: "#F97316",          // cam (giữ nguyên như cũ cho "Chờ khách xác nhận" / "Chờ xử lý")
+    backgroundColor: "#FFEDD5",
+  },
   "Chờ nhận phòng": {
-    color: "#2979FF",          // xanh dương
+    color: "#2979FF",          // xanh dương (giữ nguyên như cũ cho "Chờ nhận phòng")
     backgroundColor: "#EAF2FF",
   },
   "Đã nhận phòng": {
-    color: "#8B5CF6",          // tím
+    color: "#8B5CF6",          // tím (giữ nguyên như cũ)
     backgroundColor: "#F3E8FF",
   },
-  "Hủy phòng": {
-    color: "#EF4444",          // đỏ
+  "Đã trả phòng": {
+    color: "#22C55E",          // xanh lá (giữ nguyên như cũ cho "Hoàn thành")
+    backgroundColor: "#DCFCE7",
+  },
+  "Đã huỷ": {
+    color: "#EF4444",          // đỏ (giữ nguyên như cũ cho "Hủy phòng")
     backgroundColor: "#FEE2E2",
   },
   "Không nhận phòng": {
-    color: "#EF4444",          // đỏ
+    color: "#EF4444",          // đỏ (giữ nguyên như cũ cho "Không nhận phòng")
     backgroundColor: "#FEE2E2",
   },
-  "Chờ khách xác nhận": {
+};
+const paymentStatusStyles: Record<string, any> = {
+  "Thanh toán tại khách sạn": {
     color: "#F97316",          // cam
-    backgroundColor: "#FFEDD5",
+    
   },
-  "Chờ xử lý": {
-    color: "#F97316",          // cam
-    backgroundColor: "#FFEDD5",
-  },
-  "Hoàn thành": {
+  "Đã thanh toán": {
     color: "#22C55E",          // xanh lá
-    backgroundColor: "#DCFCE7",
+    
+  },
+  "Đã hoàn tiền": {
+    color: "#EF4444",          // đỏ
+    
+  },
+  "Thanh toán không thành công": {
+    color: "#EF4444",          // đỏ
+   
+  },
+  "Đã huỷ": {
+    color: "#666666",          // xám
+   
   },
 };
 
+const getPaymentLabel = (booking: any): string => {
+  const payment = booking?.payment;
+  if (!payment) return "Chưa có thông tin";
+
+  const method = (payment.method || "").toString().trim().toLowerCase();
+
+  if (method === "cash") {
+    return "Thanh toán tại khách sạn";
+  }
+
+  // method !== cash → dựa vào status
+  const status = (payment.status || "").toString().trim().toLowerCase();
+  switch (status) {
+    case "paid":
+      return "Đã thanh toán";
+    case "refunded":
+      return "Đã hoàn tiền";
+    case "failed":
+      return "Thanh toán không thành công";
+    case "cancelled":
+      return "Đã huỷ";
+    default:
+      return "Chưa xác định";
+  }
+};
 const STATUS_API_TO_LABEL: Record<string, string> = {
-  pending: "Chờ nhận phòng",
-  confirmed: "Chờ khách xác nhận",
+  pending: "Chờ khách xác nhận",
+  confirmed: "Chờ nhận phòng",
   checked_in: "Đã nhận phòng",
-  checked_out: "Hoàn thành",
-  cancelled: "Hủy phòng",
+  checked_out: "Đã trả phòng",
+  cancelled: "Đã huỷ",
   no_show: "Không nhận phòng",
 };
 
-// Map label hiển thị sang status API
+// Mapping nhãn hiển thị → giá trị API (dùng cho filter/tab)
 const STATUS_LABEL_TO_API: Record<string, string> = {
   "Tất cả": "all",
-  "Chờ nhận phòng": "pending",
+  "Chờ khách xác nhận": "pending",
+  "Chờ nhận phòng": "confirmed",
   "Đã nhận phòng": "checked_in",
-  "Hủy phòng": "cancelled",
+  "Đã trả phòng": "checked_out",
+  "Đã huỷ": "cancelled",
   "Không nhận phòng": "no_show",
-  "Chờ khách xác nhận": "confirmed",
-  "Hoàn thành": "checked_out",
-  "Chờ xử lý": "pending", // Giả sử "Chờ xử lý" là pending
 };
 
 export default function ManagerBookingView({
@@ -509,14 +551,7 @@ export default function ManagerBookingView({
                             ? "Qua đêm"
                             : "Không xác định";
 
-                    const statusLabel = {
-                      pending: "Chờ nhận phòng",
-                      confirmed: "Chờ khách xác nhận",
-                      checked_in: "Đã nhận phòng",
-                      checked_out: "Hoàn thành",
-                      cancelled: "Hủy phòng",
-                      no_show: "Không nhận phòng",
-                    }[row.status] || "Chờ xử lý";
+                    const statusLabel = STATUS_API_TO_LABEL[row.status] || "Chờ xử lý";
 
                     const roomName = row.room_types?.[0]?.name || "N/A";
 
@@ -532,9 +567,18 @@ export default function ManagerBookingView({
                         </TableCell>
                         <TableCell>
                           <div>{row.total_price.toLocaleString()}đ</div>
-                          <div style={{ fontSize: "0.875rem", color:row.status !== "cancelled"? "#20B720":"#666" }}>
-                            {row.status === "cancelled" ? "Đã hoàn tiền" : "Đã thanh toán"}
-                          </div>
+                          <div style={{ marginTop: 8 }}>
+    <Box
+      
+      sx={{
+        minWidth: 140,
+        height: 28,
+        fontSize: "0.825rem",
+        fontWeight: "medium",
+        ...paymentStatusStyles[getPaymentLabel(row)],
+      }}
+    >{getPaymentLabel(row)}</Box>
+  </div>
                         </TableCell>
                         <TableCell>
                           {rentTypeLabel}
@@ -661,14 +705,7 @@ function BookingDetailModal({ open, onClose, booking }) {
   };
 
   const rentTypeLabel = getRentTypeLabel(booking.rent_type); // dùng hàm đã có
-  const statusLabel = {
-    pending: "Chờ nhận phòng",
-    confirmed: "Chờ khách xác nhận",
-    checked_in: "Đã nhận phòng",
-    checked_out: "Hoàn thành",
-    cancelled: "Hủy phòng",
-    no_show: "Không nhận phòng",
-  }[booking.status] || "Chờ xử lý";
+  const statusLabel = STATUS_API_TO_LABEL[booking.status] || "Chờ xử lý";
   return (
     <Dialog
       open={open}
@@ -791,14 +828,7 @@ function NoteModal({ openNote, onClose, booking, fetchBookings, idHotel }) {
           : "Không xác định";
 
   // Map trạng thái để hiển thị chip
-  const statusLabel = {
-    pending: "Chờ nhận phòng",
-    confirmed: "Chờ khách xác nhận",
-    checked_in: "Đã nhận phòng",
-    checked_out: "Hoàn thành",
-    cancelled: "Hủy phòng",
-    no_show: "Không nhận phòng",
-  }[booking.status] || "Chờ xử lý";
+  const statusLabel = STATUS_API_TO_LABEL[booking.status] || "Chờ xử lý";
 
   const statusColor = {
     pending: { bg: "#e3f2fd", color: "#1976d2" },

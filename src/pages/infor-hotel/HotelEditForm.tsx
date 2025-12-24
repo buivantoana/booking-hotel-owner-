@@ -196,6 +196,7 @@ export default function HotelEditFormExact({ setAction, setRoom }) {
                   </Typography>
                   <TextField
                     fullWidth
+                    disabled
                     value={formValues.name}
                     onChange={(e) =>
                       setFormValues({ ...formValues, name: e.target.value })
@@ -250,6 +251,7 @@ export default function HotelEditFormExact({ setAction, setRoom }) {
                   </Typography>
                   <FormControl fullWidth>
                     <Select
+                    disabled
                       value={formValues.cooperation_type}
                       onChange={(e) =>
                         setFormValues({
@@ -322,6 +324,7 @@ export default function HotelEditFormExact({ setAction, setRoom }) {
                   </Typography>
                   <TextField
                     fullWidth
+                    disabled
                     value={formValues.address}
                     onChange={(e) =>
                       setFormValues({ ...formValues, address: e.target.value })
@@ -350,6 +353,7 @@ export default function HotelEditFormExact({ setAction, setRoom }) {
                     </Typography>
                     <TextField
                       fullWidth
+                      disabled
                       value={
                         formValues.city === "hanoi" ? "Hà Nội" : formValues.city
                       }

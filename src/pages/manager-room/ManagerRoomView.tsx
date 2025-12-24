@@ -35,7 +35,8 @@ export default function ManagerRoomView({
   idHotel,
   setIdHotel,
   setData,
-  rentType
+  rentType,
+  getData
 }) {
   const isMobile = useMediaQuery("(max-width:600px)");
 
@@ -76,7 +77,9 @@ export default function ManagerRoomView({
                   }}
                 />
 
-                <Box display='flex' alignItems='center' gap={0.5} ml={2}>
+                <Box display='flex' sx={{cursor:"pointer"}} onClick={()=>{
+                  getData()
+                }} alignItems='center' gap={0.5} ml={2}>
                   <RefreshIcon sx={{ fontSize: 18, color: "#7CB518" }} />
                   <Typography fontSize={13} color='#7CB518' fontWeight={500}>
                     Nhấn cập nhật dữ liệu
@@ -87,7 +90,7 @@ export default function ManagerRoomView({
 
             {/* Right section */}
             <Box display='flex' alignItems='center' gap={2}>
-              <Box
+              {/* <Box
                 display='flex'
                 alignItems='center'
                 onClick={() => setAction("lock")}
@@ -97,7 +100,7 @@ export default function ManagerRoomView({
                 <Typography fontSize={14} color='#7CB518' fontWeight={500}>
                   Khóa phòng
                 </Typography>
-              </Box>
+              </Box> */}
 
               
 
@@ -164,6 +167,7 @@ export default function ManagerRoomView({
                           ...item,
                           end_time: data.end_time,
                           start_time: data.start_time,
+                          hotel_id:data?.hotel_id
                         }}
                       />
                     );
@@ -181,6 +185,7 @@ export default function ManagerRoomView({
                           ...item,
                           end_time: data.end_time,
                           start_time: data.start_time,
+                          hotel_id:data?.hotel_id
                         }}
                       />
                     );
@@ -198,6 +203,7 @@ export default function ManagerRoomView({
                           ...item,
                           end_time: data.end_time,
                           start_time: data.start_time,
+                          hotel_id:data?.hotel_id
                         }}
                       />
                     );
@@ -597,7 +603,7 @@ function RoomScheduleTableHourly({
   const dayGroups = groupSlotsByDate(data?.slots);
   const totalSlots = data?.slots?.length;
   const columnWidth = `${100 / totalSlots}%`;
-
+  const navigate = useNavigate()
   const scrollRef = useRef<HTMLDivElement>(null);
   console.log("AAAA", dayGroups);
   return (
@@ -709,14 +715,14 @@ function RoomScheduleTableHourly({
             { label: parseVi(data?.name), isName: true },
             {
               label: "Tình trạng phòng",
-              action: "Khóa nhanh",
+              // action: "Khóa nhanh",
               onClick: handleOpenQuickBlock,
               isStatus: true,
             },
             { label: "Số phòng đặt", isBooked: true },
             {
               label: "Số phòng còn lại",
-              action: "Chỉnh sửa",
+              // action: "Chỉnh sửa",
               onClick: handleOpenEdit,
               isRemaining: true,
             },
@@ -749,6 +755,9 @@ function RoomScheduleTableHourly({
                         {row.label} <KeyboardArrowUpIcon />
                       </Typography>
                       <Typography
+                      onClick={()=>{
+                        navigate(`/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`)
+                      }}
                         color='#98b720'
                         display='flex'
                         alignItems='center'
@@ -1002,14 +1011,14 @@ function RoomScheduleTableDaily({
             { label:  parseVi(data?.name), isName: true },
             {
               label: "Tình trạng phòng",
-              action: "Khóa nhanh",
+              // action: "Khóa nhanh",
               onClick: handleOpenQuickBlock,
               isStatus: true,
             },
             { label: "Số phòng đặt", isBooked: true },
             {
               label: "Số phòng còn lại",
-              action: "Chỉnh sửa",
+              // action: "Chỉnh sửa",
               onClick: handleOpenEdit,
               isRemaining: true,
             },
@@ -1265,14 +1274,14 @@ function RoomScheduleTableOvernight({
             { label:  parseVi(data?.name), isName: true },
             {
               label: "Tình trạng phòng",
-              action: "Khóa nhanh",
+              // action: "Khóa nhanh",
               onClick: handleOpenQuickBlock,
               isStatus: true,
             },
             { label: "Số phòng đặt", isBooked: true },
             {
               label: "Số phòng còn lại",
-              action: "Chỉnh sửa",
+              // action: "Chỉnh sửa",
               onClick: handleOpenEdit,
               isRemaining: true,
             },
@@ -1438,6 +1447,7 @@ import CreateRoom from "./CreateRoom";
 import SimpleDateSearchBar from "../../components/SimpleDateSearchBar";
 import Loading from "../../components/Loading";
 import HotelSelect from "../../components/HotelSelect";
+import { useNavigate } from "react-router-dom";
 
 dayjs.locale("vi");
 
