@@ -10,6 +10,7 @@ import {
 } from "../../service/hotel";
 import { formatDateWithTimezone } from "../../utils/utils";
 import Loading from "../../components/Loading";
+import { Box } from "@mui/material";
 
 type Props = {};
 
@@ -25,36 +26,33 @@ const ManagerRoomController = (props: Props) => {
     checkIn: dayjs(),
     checkOut: dayjs().add(1, "day"),
   });
-  
+
   useEffect(() => {
-    if(idHotel){
-   
-      if(!detaulHotel || (detaulHotel.id !=idHotel)){
-        getDetailHotel()
+    if (idHotel) {
+      if (!detaulHotel || detaulHotel.id != idHotel) {
+        getDetailHotel();
         getData();
-      }else{
+      } else {
         getData();
       }
-     
-
     }
-  }, [dateRange,active,idHotel]);
-  const getDetailHotel = async ()=>{
+  }, [dateRange, active, idHotel]);
+  const getDetailHotel = async () => {
     try {
       let result = await getHotel(idHotel);
       if (result?.id) {
         setDetailHotel(result);
-        if(result?.rent_types){
-          setRentType(Object.keys(JSON.parse(result?.rent_types)))
-          if(!Object.keys(JSON.parse(result?.rent_types)).includes(active)){
-            setActive(Object.keys(JSON.parse(result?.rent_types))[1])
+        if (result?.rent_types) {
+          setRentType(Object.keys(JSON.parse(result?.rent_types)));
+          if (!Object.keys(JSON.parse(result?.rent_types)).includes(active)) {
+            setActive(Object.keys(JSON.parse(result?.rent_types))[1]);
           }
         }
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
   const getData = async () => {
     setLoading(true);
     try {
@@ -73,48 +71,54 @@ const ManagerRoomController = (props: Props) => {
       if (active == "overnight") {
         result = await getInventoryHotelOvernight(idHotel, params);
       }
-      console.log("AAAA result ",result)
-      setData(result?.hotel_id ? result: {});
+      console.log("AAAA result ", result);
+      setData(result?.hotel_id ? result : {});
     } catch (error) {
-      setData({})
+      setData({});
       console.log(error);
     }
     setLoading(false);
   };
   useEffect(() => {
-    getListHotel()
-  }, [])
+    getListHotel();
+  }, []);
   const getListHotel = async () => {
     try {
       let result = await getHotels();
       if (result?.hotels) {
-        setIdHotel(localStorage.getItem("hotel_id") ? result?.hotels.some((item)=>item.id == localStorage.getItem("hotel_id"))?localStorage.getItem("hotel_id"): result?.hotels[0]?.id:  result?.hotels[0]?.id)
-        setHotels(result?.hotels)
+        setIdHotel(
+          localStorage.getItem("hotel_id")
+            ? result?.hotels.some(
+                (item) => item.id == localStorage.getItem("hotel_id")
+              )
+              ? localStorage.getItem("hotel_id")
+              : result?.hotels[0]?.id
+            : result?.hotels[0]?.id
+        );
+        setHotels(result?.hotels);
       }
-    } catch (error) {
-
-    }
-  }
-  console.log("AAAA data",data)
-  console.log("AAAA rentType",rentType)
+    } catch (error) {}
+  };
+  console.log("AAAA data", data);
+  console.log("AAAA rentType", rentType);
   return (
-    <>
-    {loading&& <Loading/>}
-    <ManagerRoomView
-      setActive={setActive}
-      active={active}
-      dateRange={dateRange}
-      setDateRange={setDateRange}
-      loading={loading}
-      data={data}
-      hotels={hotels}
-      idHotel={idHotel}
-      setIdHotel={setIdHotel}
-      setData={setData}
-      rentType={rentType}
-      getData={getData}
-    />
-    </>
+    <Box position={"relative"}>
+      {loading && <Loading />}
+      <ManagerRoomView
+        setActive={setActive}
+        active={active}
+        dateRange={dateRange}
+        setDateRange={setDateRange}
+        loading={loading}
+        data={data}
+        hotels={hotels}
+        idHotel={idHotel}
+        setIdHotel={setIdHotel}
+        setData={setData}
+        rentType={rentType}
+        getData={getData}
+      />
+    </Box>
   );
 };
 

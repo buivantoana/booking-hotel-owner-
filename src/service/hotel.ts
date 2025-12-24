@@ -410,10 +410,31 @@ export async function confirmHotelsSettlement(id) {
     }
   }
 }
-export async function getHotelReview(id,query) {
+export async function getHotelReview(id, query) {
   try {
     let token = localStorage.getItem("access_token");
     const response = await api.get(`/partner/review/hotel/${id}?${query}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
+export async function getDetailReview(id) {
+  try {
+    let token = localStorage.getItem("access_token");
+    const response = await api.get(`/partner/review/detail/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

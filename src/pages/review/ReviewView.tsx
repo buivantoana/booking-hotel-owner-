@@ -1,4 +1,10 @@
-import { ArrowBackIos, CheckCircle, Edit, Star, StarBorder } from "@mui/icons-material";
+import {
+  ArrowBackIos,
+  CheckCircle,
+  Edit,
+  Star,
+  StarBorder,
+} from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -37,10 +43,20 @@ import Bed from "@mui/icons-material/Bed";
 import Close from "@mui/icons-material/Close";
 import HotelSelect from "../../components/HotelSelect";
 import start from "../../images/star.svg"; // giữ nguyên icon sao
-import { replyReviewHotels } from "../../service/hotel";
+import { getDetailReview, replyReviewHotels } from "../../service/hotel";
 import { toast } from "react-toastify";
-import edit from "../../images/brush-square.png"
-const ReviewView = ({ hotels, idHotel, setIdHotel, reviews = [], getReview, value, setValue, pagination, onPageChange }) => {
+import edit from "../../images/brush-square.png";
+const ReviewView = ({
+  hotels,
+  idHotel,
+  setIdHotel,
+  reviews = [],
+  getReview,
+  value,
+  setValue,
+  pagination,
+  onPageChange,
+}) => {
   const [detailReview, setDetailReview] = useState(null);
 
   return (
@@ -54,10 +70,15 @@ const ReviewView = ({ hotels, idHotel, setIdHotel, reviews = [], getReview, valu
         setDetailReview={setDetailReview}
       />
 
-      <HotelReview reviews={reviews} getReview={getReview} pagination={pagination}
+      <HotelReview
+        reviews={reviews}
+        getReview={getReview}
+        pagination={pagination}
         setValue={setValue}
         onPageChange={onPageChange}
-        value={value} setDetailReview={setDetailReview} />
+        value={value}
+        setDetailReview={setDetailReview}
+      />
     </Box>
   );
 };
@@ -82,8 +103,8 @@ const Review = ({ reviews, hotels, idHotel, setIdHotel }) => {
     ? (reviews.reduce((acc, r) => acc + r.rate, 0) / reviews.length).toFixed(1)
     : 0;
 
-  const starCounts = [5, 4, 3, 2, 1].map((star) =>
-    reviews.filter((r) => r.rate === star).length
+  const starCounts = [5, 4, 3, 2, 1].map(
+    (star) => reviews.filter((r) => r.rate === star).length
   );
 
   // Tính phần trăm cho progress bar (tối đa 100%)
@@ -92,7 +113,10 @@ const Review = ({ reviews, hotels, idHotel, setIdHotel }) => {
 
   return (
     <Stack spacing={4}>
-      <Box display={"flex"} flexDirection={"column"} justifyContent={"space-between"}>
+      <Box
+        display={"flex"}
+        flexDirection={"column"}
+        justifyContent={"space-between"}>
         <Typography variant='h5' fontWeight='bold'>
           Tổng quan Đánh giá
         </Typography>
@@ -110,7 +134,7 @@ const Review = ({ reviews, hotels, idHotel, setIdHotel }) => {
 
       <Card sx={{ borderRadius: 3, p: 4 }}>
         <Paper elevation={0} sx={{ borderRadius: "16px", py: 3, px: 0 }}>
-          <Grid container alignItems="start">
+          <Grid container alignItems='start'>
             <Grid item xs={12} md={6}>
               <Box display={"flex"} gap={4}>
                 <Box
@@ -125,18 +149,20 @@ const Review = ({ reviews, hotels, idHotel, setIdHotel }) => {
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                  }}
-                >
-                  <Typography variant="h2">{avgRate}</Typography>
+                  }}>
+                  <Typography variant='h2'>{avgRate}</Typography>
                 </Box>
                 <Box display={"flex"} flexDirection={"column"} gap={2}>
-                  <Typography fontWeight={600} fontSize="1.7rem" color="#98b720">
+                  <Typography
+                    fontWeight={600}
+                    fontSize='1.7rem'
+                    color='#98b720'>
                     Xuất sắc
                   </Typography>
-                  <Typography fontSize="1.1rem" color="#2b2f38">
+                  <Typography fontSize='1.1rem' color='#2b2f38'>
                     Từ {reviews.length} đánh giá
                   </Typography>
-                  <Typography fontSize="0.9rem" color="#999">
+                  <Typography fontSize='0.9rem' color='#999'>
                     Bởi người dùng trong Booking Hotel
                   </Typography>
                 </Box>
@@ -146,20 +172,23 @@ const Review = ({ reviews, hotels, idHotel, setIdHotel }) => {
             <Grid item xs={12} md={6}>
               <Stack spacing={2}>
                 {[5, 4, 3, 2, 1].map((star, idx) => (
-                  <Stack key={star} direction="row" alignItems="center" spacing={2}>
+                  <Stack
+                    key={star}
+                    direction='row'
+                    alignItems='center'
+                    spacing={2}>
                     <Typography
                       width={40}
-                      fontSize="0.9rem"
+                      fontSize='0.9rem'
                       display={"flex"}
                       alignItems={"center"}
                       gap={1}
-                      color="#666"
-                    >
-                      {star} <img src={start} alt="" />
+                      color='#666'>
+                      {star} <img src={start} alt='' />
                     </Typography>
                     <Box sx={{ flex: 1 }}>
                       <LinearProgress
-                        variant="determinate"
+                        variant='determinate'
                         value={percentages[idx]}
                         sx={{
                           height: 8,
@@ -172,7 +201,10 @@ const Review = ({ reviews, hotels, idHotel, setIdHotel }) => {
                         }}
                       />
                     </Box>
-                    <Typography fontWeight={600} fontSize="0.9rem" color="#98b720">
+                    <Typography
+                      fontWeight={600}
+                      fontSize='0.9rem'
+                      color='#98b720'>
                       {starCounts[idx]}
                     </Typography>
                   </Stack>
@@ -187,18 +219,26 @@ const Review = ({ reviews, hotels, idHotel, setIdHotel }) => {
 };
 
 // ==================== Danh sách đánh giá ====================
-function HotelReview({ reviews, getReview, value, setValue, pagination, onPageChange }: any) {
+function HotelReview({
+  reviews,
+  getReview,
+  value,
+  setValue,
+  pagination,
+  onPageChange,
+}: any) {
   const [tab, setTab] = useState(0);
   const [open, setOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState(null);
   const theme = useTheme();
-  const [isEdit, setIsEdit] = useState(false)
+  const [isEdit, setIsEdit] = useState(false);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   // Lọc theo tab
-  const currentReviews = tab === 1
-    ? reviews.filter(r => !r.owner_reply)
-    : tab === 2
-      ? reviews.filter(r => !!r.owner_reply)
+  const currentReviews =
+    tab === 1
+      ? reviews.filter((r) => !r.owner_reply)
+      : tab === 2
+      ? reviews.filter((r) => !!r.owner_reply)
       : reviews;
 
   // Format ngày giờ giống hệt gốc
@@ -241,7 +281,6 @@ function HotelReview({ reviews, getReview, value, setValue, pagination, onPageCh
   ];
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-
 
   const openFilter = Boolean(anchorEl);
 
@@ -301,8 +340,8 @@ function HotelReview({ reviews, getReview, value, setValue, pagination, onPageCh
           </Tabs>
           <>
             <Button
-              variant="outlined"
-              size="small"
+              variant='outlined'
+              size='small'
               endIcon={<KeyboardArrowDown />}
               onClick={handleToggle}
               sx={{
@@ -311,12 +350,14 @@ function HotelReview({ reviews, getReview, value, setValue, pagination, onPageCh
                 borderColor: "#ddd",
                 color: "#666",
                 fontSize: "14px",
-              }}
-            >
+              }}>
               {OPTIONS.find((item) => item.value == value)?.label}
             </Button>
 
-            <Popper open={openFilter} anchorEl={anchorEl} placement="bottom-start">
+            <Popper
+              open={openFilter}
+              anchorEl={anchorEl}
+              placement='bottom-start'>
               <ClickAwayListener onClickAway={() => setAnchorEl(null)}>
                 <Paper
                   sx={{
@@ -324,26 +365,22 @@ function HotelReview({ reviews, getReview, value, setValue, pagination, onPageCh
                     width: 220,
                     borderRadius: 2,
                     boxShadow: 3,
-                  }}
-                >
+                  }}>
                   <List dense>
                     {OPTIONS.map((item) => (
                       <ListItemButton
                         key={item.value}
                         onClick={() => handleSelect(item.value)}
-                        sx={{ px: 2 }}
-                      >
+                        sx={{ px: 2 }}>
                         <ListItemText
                           primary={
-                            <Box display="flex" alignItems="center" gap={1}>
+                            <Box display='flex' alignItems='center' gap={1}>
                               <Typography
                                 sx={{
                                   color:
                                     item.value === "all" ? "#8bc34a" : "#333",
-                                  fontWeight:
-                                    item.value === "all" ? 600 : 400,
-                                }}
-                              >
+                                  fontWeight: item.value === "all" ? 600 : 400,
+                                }}>
                                 {item.label}
                               </Typography>
 
@@ -483,13 +520,17 @@ function HotelReview({ reviews, getReview, value, setValue, pagination, onPageCh
 
                   {/* Ảnh + video đính kèm */}
                   {review.attachments && review.attachments.length > 0 && (
-                    <Stack direction='row' spacing={1.5} mt={1} flexWrap="wrap">
-                      {review.attachments.map((att, i) => (
+                    <Stack direction='row' spacing={1.5} mt={1} flexWrap='wrap'>
+                      {review.attachments.map((att, i) =>
                         att.type === "image" ? (
                           <Box
                             key={i}
                             component='img'
-                            src={att.url.startsWith("http") ? att.url : `https://res.dev.zeezoo.mobi${att.url}`}
+                            src={
+                              att.url.startsWith("http")
+                                ? att.url
+                                : `https://res.dev.zeezoo.mobi${att.url}`
+                            }
                             alt='review'
                             sx={{
                               width: { xs: "48%", sm: 100 },
@@ -504,7 +545,11 @@ function HotelReview({ reviews, getReview, value, setValue, pagination, onPageCh
                             key={i}
                             component='video'
                             controls
-                            src={att.url.startsWith("http") ? att.url : `https://res.dev.zeezoo.mobi${att.url}`}
+                            src={
+                              att.url.startsWith("http")
+                                ? att.url
+                                : `https://res.dev.zeezoo.mobi${att.url}`
+                            }
                             sx={{
                               width: { xs: "48%", sm: 100 },
                               height: 100,
@@ -514,17 +559,27 @@ function HotelReview({ reviews, getReview, value, setValue, pagination, onPageCh
                             }}
                           />
                         ) : null
-                      ))}
+                      )}
                     </Stack>
                   )}
 
                   {/* Phản hồi của chủ (nếu có) */}
                   {review.owner_reply && (
-                    <Box mt={2} p={2} bgcolor="#f8fcf8" borderRadius={1} border="1px solid #98b720">
-                      <Typography fontWeight={600} fontSize="14px" color="#98b720">
+                    <Box
+                      mt={2}
+                      p={2}
+                      bgcolor='#f8fcf8'
+                      borderRadius={1}
+                      border='1px solid #98b720'>
+                      <Typography
+                        fontWeight={600}
+                        fontSize='14px'
+                        color='#98b720'>
                         Phản hồi từ chủ:
                       </Typography>
-                      <Typography fontSize="14px">{review.owner_reply}</Typography>
+                      <Typography fontSize='14px'>
+                        {review.owner_reply}
+                      </Typography>
                     </Box>
                   )}
 
@@ -535,66 +590,80 @@ function HotelReview({ reviews, getReview, value, setValue, pagination, onPageCh
                         Trả lời
                       </ReplyButton>
                     </Box>
-                  ) :
+                  ) : (
                     <Box display={"flex"} justifyContent={"space-between"}>
                       <Typography fontSize={"15px"} mt={2}>
                         Đã trả lời lúc {formatDate(review.owner_reply_at)}
                       </Typography>
-                      <Typography onClick={() => {
-                        setIsEdit(true)
-                        openReplyModal(review)
-                      }} sx={{ cursor: "pointer" }} fontWeight={"500"} color="#98B720" mt={2}>
+                      <Typography
+                        onClick={() => {
+                          setIsEdit(true);
+                          openReplyModal(review);
+                        }}
+                        sx={{ cursor: "pointer" }}
+                        fontWeight={"500"}
+                        color='#98B720'
+                        mt={2}>
                         Xem chi tiết
                       </Typography>
                     </Box>
-                  }
+                  )}
                 </Box>
               </ReviewContent>
             </ReviewCardDetail>
           ))
         )}
-        {currentReviews.length !== 0 && <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
-          <Pagination
-            key={pagination?.page} // ← THÊM DÒNG NÀY ĐỂ FORCE RE-RENDER KHI PAGE THAY ĐỔI
-            count={pagination?.total_pages}
-            page={pagination?.page}
-            onChange={onPageChange}
-            siblingCount={1}
-            boundaryCount={1}
-            color="primary"
-            size={isMobile ? "medium" : "large"}
-            sx={{
-              // Tùy chỉnh trang active
-              "& .MuiPaginationItem-root.Mui-selected": {
-                backgroundColor: "#98b720 !important", // Màu xanh lá bạn đang dùng trong app
-                color: "white",
-                fontWeight: "bold",
-                boxShadow: "0 4px 8px rgba(139,195,74,0.4)",
-                "&:hover": {
-                  backgroundColor: "#7cb342 !important",
+        {currentReviews.length !== 0 && (
+          <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
+            <Pagination
+              key={pagination?.page} // ← THÊM DÒNG NÀY ĐỂ FORCE RE-RENDER KHI PAGE THAY ĐỔI
+              count={pagination?.total_pages}
+              page={pagination?.page}
+              onChange={onPageChange}
+              siblingCount={1}
+              boundaryCount={1}
+              color='primary'
+              size={isMobile ? "medium" : "large"}
+              sx={{
+                // Tùy chỉnh trang active
+                "& .MuiPaginationItem-root.Mui-selected": {
+                  backgroundColor: "#98b720 !important", // Màu xanh lá bạn đang dùng trong app
+                  color: "white",
+                  fontWeight: "bold",
+                  boxShadow: "0 4px 8px rgba(139,195,74,0.4)",
+                  "&:hover": {
+                    backgroundColor: "#7cb342 !important",
+                  },
                 },
-              },
-              // Tùy chỉnh các trang thường (nếu muốn)
-              "& .MuiPaginationItem-root": {
-                borderRadius: "8px",
-                margin: "0 4px",
-                "&:hover": {
-                  backgroundColor: "#e8f5e9",
+                // Tùy chỉnh các trang thường (nếu muốn)
+                "& .MuiPaginationItem-root": {
+                  borderRadius: "8px",
+                  margin: "0 4px",
+                  "&:hover": {
+                    backgroundColor: "#e8f5e9",
+                  },
                 },
-              },
-              // Tùy chỉnh nút ellipsis (...) nếu cần
-              "& .MuiPaginationItem-ellipsis": {
-                color: "#666",
-              },
-            }}
-
-          />
-
-        </Stack>}
+                // Tùy chỉnh nút ellipsis (...) nếu cần
+                "& .MuiPaginationItem-ellipsis": {
+                  color: "#666",
+                },
+              }}
+            />
+          </Stack>
+        )}
       </Card>
 
       {/* Modal chi tiết - giữ nguyên 100% UI gốc */}
-      <ReviewDetailModal isEdit={isEdit}  pagination={pagination} value={value} open={open} setOpen={setOpen} setIsEdit={setIsEdit} getReview={getReview} review={selectedReview} />
+      <ReviewDetailModal
+        isEdit={isEdit}
+        pagination={pagination}
+        value={value}
+        open={open}
+        setOpen={setOpen}
+        setIsEdit={setIsEdit}
+        getReview={getReview}
+        review={selectedReview}
+      />
     </Box>
   );
 }
@@ -660,23 +729,56 @@ const ReplyButtonModal = styled(Button)({
   },
 });
 
-function ReviewDetailModal({ open, setOpen, review, getReview, isEdit, setIsEdit,pagination,value }) {
+function ReviewDetailModal({
+  open,
+  setOpen,
+  review, // vẫn giữ để lấy id gọi API và reply (nếu cần)
+  getReview,
+  isEdit,
+  setIsEdit,
+  pagination,
+  value,
+}) {
   const [replyText, setReplyText] = useState("");
-  const [isEditing, setIsEditing] = useState(false); // trạng thái chỉnh sửa
+  const [isEditing, setIsEditing] = useState(false);
+  const [detail, setDetail] = useState({}); // ← Đây là nguồn dữ liệu chính để hiển thị
 
-  // Load reply hiện tại khi mở modal hoặc review thay đổi
+  const getReviewDetail = async () => {
+    try {
+      if (!review?.id) return;
+      let result = await getDetailReview(review.id);
+      console.log("AAA result ", result);
+      setDetail(result || {}); // bảo vệ trường hợp null/undefined
+    } catch (error) {
+      console.log(error);
+      setDetail({});
+    }
+  };
+
   useEffect(() => {
+    if (review?.id && open) {
+      getReviewDetail();
+    }
+
+    // replyText lấy từ detail nếu có, fallback về review (trường hợp cũ)
     if (review?.owner_reply) {
+      setReplyText(review.owner_reply);
+    } else if (review?.owner_reply) {
       setReplyText(review.owner_reply);
     } else {
       setReplyText("");
     }
-    setIsEditing(false); // luôn reset về không edit khi mở lại
-  }, [review, open]);
+
+    setIsEditing(false);
+  }, [review, open]); // thêm detail để update khi API trả về
 
   if (!review) return null;
+  if (Object.keys(detail).length === 0 && open) {
+    // Có thể thêm loading nếu muốn, tạm thời return null để tránh lỗi
+    return null;
+  }
 
-  // Format thời gian
+  // Format thời gian (giữ nguyên)
   const formatTime = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
@@ -707,13 +809,15 @@ function ReviewDetailModal({ open, setOpen, review, getReview, isEdit, setIsEdit
   const handleSubmit = async () => {
     try {
       const payload = { reply: replyText.trim() || null };
-      const result = await replyReviewHotels(review.id, payload);
+      const result = await replyReviewHotels(review.id, payload); // vẫn dùng review.id
 
       if (result?.success || result?.owner_reply !== undefined) {
         toast.success(
-          review.owner_reply ? "Cập nhật phản hồi thành công" : "Gửi phản hồi thành công"
+          detail.owner_reply
+            ? "Cập nhật phản hồi thành công"
+            : "Gửi phản hồi thành công"
         );
-        await getReview(pagination.page,value);
+        await getReview(pagination.page, value);
         setOpen(false);
       } else {
         toast.error(result?.message || "Thao tác thất bại");
@@ -731,7 +835,7 @@ function ReviewDetailModal({ open, setOpen, review, getReview, isEdit, setIsEdit
       const result = await replyReviewHotels(review.id, { reply: null });
       if (result?.success || result?.owner_reply === null) {
         toast.success("Đã xóa phản hồi");
-        await getReview(pagination.page,value);
+        await getReview(pagination.page, value);
         setOpen(false);
       } else {
         toast.error("Xóa thất bại");
@@ -741,23 +845,55 @@ function ReviewDetailModal({ open, setOpen, review, getReview, isEdit, setIsEdit
     }
   };
 
-  const hasReply = !!review.owner_reply;
+  const hasReply = !!detail.owner_reply;
+  // Thêm hàm tính số giờ (đặt bên trong component, trước return)
+  const calculateRentDuration = () => {
+    const checkIn = detail.booking?.check_in;
+    const checkOut = detail.booking?.check_out;
+    const rentType = detail.booking?.rent_type;
+
+    if (!checkIn || !checkOut) return null;
+
+    const inDate = new Date(checkIn);
+    const outDate = new Date(checkOut);
+
+    // Tính chênh lệch theo giờ (làm tròn lên nếu cần)
+    const diffMs = outDate - inDate;
+    const diffHours = Math.ceil(diffMs / (1000 * 60 * 60)); // làm tròn lên
+
+    // Nếu là daily → thường không hiển thị số giờ, hoặc cố định 1 đêm
+    if (rentType === "daily") {
+      return null; // hoặc return 24 nếu muốn hiển thị 24 giờ
+    }
+
+    // Nếu là hourly hoặc overnight → hiển thị số giờ thực tế
+    if (rentType === "hourly" || rentType === "overnight") {
+      return diffHours > 0 ? diffHours : null;
+    }
+
+    // Fallback: nếu không có rent_type → tự đoán dựa trên thời gian
+    if (diffHours <= 12 && diffHours > 0) {
+      return diffHours; // có vẻ là hourly/overnight
+    }
+
+    return null;
+  };
+
+  // Sau đó dùng trong phần hiển thị "Số giờ"
+  const rentDuration = calculateRentDuration();
   return (
-    <StyledModal open={open} onClose={() => {
-      setIsEdit(false)
-      setOpen(false)
-    }}>
+    <StyledModal
+      open={open}
+      onClose={() => {
+        setIsEdit(false);
+        setOpen(false);
+      }}>
       <DialogContent sx={{ p: 0, overflow: "hidden" }}>
-        {/* Header xanh + điểm + nút đóng */}
-        <Box
-          sx={{
-            p: 2,
-            position: "relative",
-          }}>
+        <Box sx={{ p: 2, position: "relative" }}>
           <IconButton
             onClick={() => {
-              setIsEdit(false)
-              setOpen(false)
+              setIsEdit(false);
+              setOpen(false);
             }}
             sx={{ position: "absolute", right: 8, top: 8 }}>
             <Close />
@@ -773,16 +909,17 @@ function ReviewDetailModal({ open, setOpen, review, getReview, isEdit, setIsEdit
           </Stack>
         </Box>
 
-        {/* Thông tin đặt phòng */}
         <Box px={3} pt={3}>
-
-          <Stack direction='row' alignItems='center' spacing={2} mb={2} flexWrap="wrap">
-
+          <Stack
+            direction='row'
+            alignItems='center'
+            spacing={2}
+            mb={2}
+            flexWrap='wrap'>
             <Typography variant='body2' color='text.secondary'>
-              Mã đặt phòng: {review.booking_code}
+              Mã đặt phòng: {detail.booking?.code || "-"}
             </Typography>
 
-            {/* Bạn có thể thêm chip loại phòng nếu có dữ liệu room_type */}
             <Chip
               icon={<Bed sx={{ fontSize: 16 }} />}
               label='Phòng luxury'
@@ -790,9 +927,6 @@ function ReviewDetailModal({ open, setOpen, review, getReview, isEdit, setIsEdit
               sx={{ bgcolor: "#fff3e0", color: "#ef6c00", fontSize: 13 }}
             />
           </Stack>
-
-
-          {/* Chip Theo giờ + thời gian - chỉ hiển thị nếu là thuê theo giờ */}
 
           <Paper
             elevation={0}
@@ -812,74 +946,88 @@ function ReviewDetailModal({ open, setOpen, review, getReview, isEdit, setIsEdit
               mb={1}>
               <CheckCircle sx={{ fontSize: 16, color: "#98b720" }} />
               <Typography fontSize='0.75rem' color='#98b720' fontWeight={600}>
-                Theo giờ
+                {detail.booking?.rent_type === "hourly"
+                  ? "Theo giờ"
+                  : detail.booking?.rent_type === "overnight"
+                  ? "Qua đêm"
+                  : detail.booking?.rent_type === "daily"
+                  ? "Theo ngày"
+                  : "Thuê phòng"}{" "}
+                {/* fallback nếu rent_type không có */}
               </Typography>
             </Stack>
             <Divider />
             <Grid container spacing={0.5} mt={1} fontSize='0.7rem'>
-              <Grid item xs={4}>
+              <Grid item xs={detail.booking?.rent_type !== "hourly" ? 6 : 4}>
                 <Typography color='#888' fontSize='0.75rem'>
                   Nhận phòng
                 </Typography>
                 <Typography fontWeight={600} color='#333' fontSize='0.8rem'>
-                  {review.check_in
-                    ? `${formatTime(review.check_in)}, ${formatDayMonth(review.check_in)}`
+                  {detail.booking?.check_in
+                    ? `${formatTime(detail.booking.check_in)}, ${formatDayMonth(
+                        detail.booking.check_in
+                      )}`
                     : "-"}
                 </Typography>
               </Grid>
               <Grid
                 item
-                xs={4}
+                xs={detail.booking?.rent_type !== "hourly" ? 6 : 4}
                 sx={{ borderLeft: "1px solid #ddd", textAlign: "center" }}>
                 <Typography color='#888' fontSize='0.75rem'>
                   Trả phòng
                 </Typography>
                 <Typography fontWeight={600} color='#333' fontSize='0.8rem'>
-                  {review.check_out
-                    ? `${formatTime(review.check_out)}, ${formatDayMonth(review.check_out)}`
+                  {detail.booking?.check_out
+                    ? `${formatTime(
+                        detail.booking.check_out
+                      )}, ${formatDayMonth(detail.booking.check_out)}`
                     : "-"}
                 </Typography>
               </Grid>
-              <Grid
-                item
-                xs={4}
-                sx={{ borderLeft: "1px solid #ddd", textAlign: "center" }}>
-                <Typography color='#888' fontSize='0.75rem'>
-                  Số giờ
-                </Typography>
-                <Typography fontWeight={600} color='#333' fontSize='0.8rem'>
-                  {review.rent_duration > 0 ? `${review.rent_duration} giờ` : "-"}
-                </Typography>
-              </Grid>
+              {detail.booking?.rent_type === "hourly" && (
+                <Grid
+                  item
+                  xs={4}
+                  sx={{ borderLeft: "1px solid #ddd", textAlign: "center" }}>
+                  <Typography color='#888' fontSize='0.75rem'>
+                    Số giờ
+                  </Typography>
+                  <Typography fontWeight={600} color='#333' fontSize='0.8rem'>
+                    {rentDuration}
+                  </Typography>
+                </Grid>
+              )}
             </Grid>
           </Paper>
 
-
-          {/* Người đánh giá */}
           <Stack direction='row' spacing={2} alignItems='flex-start'>
             <Avatar sx={{ bgcolor: "#ffb74d", width: 48, height: 48 }}>
-              {review.user_name?.[0]?.toUpperCase() || "U"}
+              {detail.user?.name?.[0]?.toUpperCase() || "U"}
             </Avatar>
             <Box flex={1}>
               <Stack>
                 <Typography fontWeight={600}>
-                  {review.user_name || "Người dùng"}
+                  {detail.user?.name || "Người dùng"}
                 </Typography>
-                <Rating value={review.rate || 0} readOnly size='small' />
+                <Rating value={detail.rate || 0} readOnly size='small' />
               </Stack>
             </Box>
           </Stack>
+
           <Box display={"flex"} justifyContent={"space-between"}>
             <Typography mt={2} variant='body2' color='text.secondary'>
-              Đánh giá lúc {formatFullDate(review.created_at)}
+              Đánh giá lúc {formatFullDate(detail.created_at)}
             </Typography>
             {hasReply && !isEditing && (
-              <IconButton size="small" onClick={() => setIsEditing(true)} sx={{ ml: 1 }}>
-                <img src={edit} />
+              <IconButton
+                size='small'
+                onClick={() => setIsEditing(true)}
+                sx={{ ml: 1 }}>
+                <img src={edit} alt='edit' />
               </IconButton>
             )}
           </Box>
-
 
           <Typography
             variant='body1'
@@ -893,54 +1041,53 @@ function ReviewDetailModal({ open, setOpen, review, getReview, isEdit, setIsEdit
               borderRadius: 1,
             }}
             fontWeight={500}>
-            {review.comment || ""}
+            {detail.comment || ""}
           </Typography>
 
           {hasReply && !isEditing && (
             <Box mb={3}>
-              <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+              <Stack
+                direction='row'
+                justifyContent='space-between'
+                alignItems='flex-start'>
                 <Box flex={1}>
-
                   <TextField
                     multiline
                     disabled
                     rows={4}
                     placeholder='Trả lời cho đánh giá này...'
                     value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
                     variant='outlined'
                     fullWidth
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        
                         borderRadius: 1,
-  
                         backgroundColor: "#fff",
                         "& fieldset": {
-                          borderColor: "#cddc39", // Border mặc định
-                          borderWidth: "1px",     // Tăng độ dày nếu muốn nổi bật hơn
+                          borderColor: "#cddc39",
+                          borderWidth: "1px",
                         },
                         "&:hover fieldset": {
-                          borderColor: "#c0ca33", // Hover: đậm hơn một chút (tùy chọn)
+                          borderColor: "#c0ca33",
                           borderWidth: "1px",
                         },
                         "&.Mui-focused fieldset": {
-                          borderColor: "#cddc39 !important", // QUAN TRỌNG: Khi focus vẫn giữ màu này
+                          borderColor: "#cddc39 !important",
                           borderWidth: "1px",
-                          boxShadow: "0 0 0 3px rgba(205, 220, 57, 0.2)", // Hiệu ứng glow nhẹ (tùy chọn)
+                          boxShadow: "0 0 0 3px rgba(205, 220, 57, 0.2)",
                         },
-                        // Tắt màu legend primary khi focus (nếu có label)
-                        "&.Mui-focused .MuiInputLabel-root": {
-                          color: "#666",
-                        },
+                        "&.Mui-focused .MuiInputLabel-root": { color: "#666" },
                       },
                     }}
                   />
-                  <Typography mt={2} variant="body2" color="text.secondary" gutterBottom>
-                    Đã trả lời lúc: {formatFullDate(review.owner_reply_at)}
+                  <Typography
+                    mt={2}
+                    variant='body2'
+                    color='text.secondary'
+                    gutterBottom>
+                    Đã trả lời lúc: {formatFullDate(detail.owner_reply_at)}
                   </Typography>
                 </Box>
-
               </Stack>
             </Box>
           )}
@@ -957,56 +1104,55 @@ function ReviewDetailModal({ open, setOpen, review, getReview, isEdit, setIsEdit
                 fullWidth
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                        
                     borderRadius: 1,
-
                     backgroundColor: "#fff",
                     "& fieldset": {
-                      borderColor: "#cddc39", // Border mặc định
-                      borderWidth: "1px",     // Tăng độ dày nếu muốn nổi bật hơn
+                      borderColor: "#cddc39",
+                      borderWidth: "1px",
                     },
                     "&:hover fieldset": {
-                      borderColor: "#c0ca33", // Hover: đậm hơn một chút (tùy chọn)
+                      borderColor: "#c0ca33",
                       borderWidth: "1px",
                     },
                     "&.Mui-focused fieldset": {
-                      borderColor: "#cddc39 !important", // QUAN TRỌNG: Khi focus vẫn giữ màu này
+                      borderColor: "#cddc39 !important",
                       borderWidth: "1px",
-                      boxShadow: "0 0 0 3px rgba(205, 220, 57, 0.2)", // Hiệu ứng glow nhẹ (tùy chọn)
+                      boxShadow: "0 0 0 3px rgba(205, 220, 57, 0.2)",
                     },
-                    // Tắt màu legend primary khi focus (nếu có label)
-                    "&.Mui-focused .MuiInputLabel-root": {
-                      color: "#666",
-                    },
+                    "&.Mui-focused .MuiInputLabel-root": { color: "#666" },
                   },
                 }}
               />
 
-              {/* Nút hành động */}
               {isEditing ? (
-                <Stack direction="row" mt={3} spacing={2}>
-                  <Button sx={{
-
-                    color: "black",
-                    borderRadius: 30,
-                    textTransform: "none",
-                    width: "100%",
-                    fontWeight: 600,
-                    fontSize: "16px",
-                    padding: "12px 40px",
-                    boxShadow: "none",
-                    marginTop: "20px",
-                    background: "#F0F1F3"
-
-                  }} onClick={handleDelete}>Xóa phản hồi </Button>
-                  <ReplyButtonModal onClick={handleSubmit}>Gửi lại trả lời</ReplyButtonModal>
+                <Stack direction='row' mt={3} spacing={2}>
+                  <Button
+                    sx={{
+                      color: "black",
+                      borderRadius: 30,
+                      textTransform: "none",
+                      width: "100%",
+                      fontWeight: 600,
+                      fontSize: "16px",
+                      padding: "12px 40px",
+                      boxShadow: "none",
+                      marginTop: "20px",
+                      background: "#F0F1F3",
+                    }}
+                    onClick={handleDelete}>
+                    Xóa phản hồi
+                  </Button>
+                  <ReplyButtonModal onClick={handleSubmit}>
+                    Gửi lại trả lời
+                  </ReplyButtonModal>
                 </Stack>
               ) : (
-                <ReplyButtonModal onClick={handleSubmit}>Gửi trả lời</ReplyButtonModal>
+                <ReplyButtonModal onClick={handleSubmit}>
+                  Gửi trả lời
+                </ReplyButtonModal>
               )}
             </>
           )}
-
         </Box>
       </DialogContent>
     </StyledModal>

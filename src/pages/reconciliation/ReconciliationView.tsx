@@ -158,7 +158,7 @@ export default function ReconciliationView({
     theme.breakpoints.between("sm", "md")
   );
 
-  const [searchCode, setSearchCode] = useState(""); 
+  const [searchCode, setSearchCode] = useState("");
   const [localFilters, setLocalFilters] = useState({
     hotel_name: "",
     period_month: "",
@@ -180,7 +180,6 @@ export default function ReconciliationView({
     hotel_id: item.hotel_id, // Tổng công nợ
     _id: item.id,
     dueDate: new Date(item.confirm_deadline).toLocaleDateString("vi-VN"),
-
   }));
   const handleSearch = () => {
     const apiStatus = STATUS_MAP[localFilters.status] || "";
@@ -198,18 +197,18 @@ export default function ReconciliationView({
     });
     onResetFilter();
   };
-    // Hàm xử lý thay đổi tab (status)
-    const handleTabChange = (tab: string) => {
-      setLocalFilters(prev => ({
-        ...prev,
-        status: tab
-      }));
-      const apiStatus = STATUS_MAP[tab] || "";
-      onFilterChange({
-        ...localFilters,
-        status: apiStatus,
-      });
-    };
+  // Hàm xử lý thay đổi tab (status)
+  const handleTabChange = (tab: string) => {
+    setLocalFilters((prev) => ({
+      ...prev,
+      status: tab,
+    }));
+    const apiStatus = STATUS_MAP[tab] || "";
+    onFilterChange({
+      ...localFilters,
+      status: apiStatus,
+    });
+  };
   return (
     <>
       {settlement && (
@@ -277,10 +276,12 @@ export default function ReconciliationView({
               <TextField
                 placeholder='Tên khách sạn'
                 value={localFilters.hotel_name}
-                onChange={(e) => setLocalFilters(prev => ({
-                  ...prev,
-                  hotel_name: e.target.value
-                }))}
+                onChange={(e) =>
+                  setLocalFilters((prev) => ({
+                    ...prev,
+                    hotel_name: e.target.value,
+                  }))
+                }
                 size='small'
                 sx={{
                   "& .MuiOutlinedInput-root": {
@@ -327,11 +328,16 @@ export default function ReconciliationView({
                   },
                   "& .MuiSelect-icon": { color: "#666", fontSize: "28px" },
                 }}>
-                <Select defaultValue='' value={localFilters.period_month}
-                  onChange={(e) => setLocalFilters(prev => ({
-                    ...prev,
-                    period_month: e.target.value
-                  }))} displayEmpty>
+                <Select
+                  defaultValue=''
+                  value={localFilters.period_month}
+                  onChange={(e) =>
+                    setLocalFilters((prev) => ({
+                      ...prev,
+                      period_month: e.target.value,
+                    }))
+                  }
+                  displayEmpty>
                   <MenuItem value='' disabled>
                     Chọn kỳ đối soát
                   </MenuItem>
@@ -376,7 +382,9 @@ export default function ReconciliationView({
                   <Button
                     key={tab}
                     onClick={() => handleTabChange(tab)}
-                    variant={localFilters.status === tab ? "contained" : "outlined"}
+                    variant={
+                      localFilters.status === tab ? "contained" : "outlined"
+                    }
                     size='small'
                     sx={{
                       borderRadius: 3,
@@ -414,7 +422,7 @@ export default function ReconciliationView({
                     <TableCell sx={{ fontWeight: 600, color: "#424242" }}>
                       Trạng thái
                     </TableCell>
-                  
+
                     <TableCell
                       align='right'
                       sx={{ fontWeight: 600, color: "#424242" }}>
@@ -476,8 +484,6 @@ export default function ReconciliationView({
                             }}
                           />
                         </TableCell>
-
-                       
 
                         <TableCell
                           align='right'
@@ -563,7 +569,7 @@ function HotelDetailFinal({
   setIdHotel,
   fetchSettlements,
   searchCode,
-  setSearchCode
+  setSearchCode,
 }) {
   const [dataSettlementBooking, setDataSettlementBooking] = useState([]);
   const [openModal, setOpenModal] = useState(false);
@@ -574,25 +580,25 @@ function HotelDetailFinal({
     total_pages: 0,
   });
   // Giá trị input
-const [debouncedSearchCode, setDebouncedSearchCode] = useState(""); // Giá trị sau debounce
-let [bankPrimary, setBankPrimary] = useState(null);
-// Ref để lưu timer debounce
-const debounceTimer = useRef<NodeJS.Timeout | null>(null);
-useEffect(() => {
-  if (debounceTimer.current) {
-    clearTimeout(debounceTimer.current);
-  }
+  const [debouncedSearchCode, setDebouncedSearchCode] = useState(""); // Giá trị sau debounce
+  let [bankPrimary, setBankPrimary] = useState(null);
+  // Ref để lưu timer debounce
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  // useEffect(() => {
+  //   if (debounceTimer.current) {
+  //     clearTimeout(debounceTimer.current);
+  //   }
 
-  debounceTimer.current = setTimeout(() => {
-    setDebouncedSearchCode(searchCode.trim());
-  }, 500);
+  //   debounceTimer.current = setTimeout(() => {
+  //     setDebouncedSearchCode(searchCode.trim());
+  //   }, 500);
 
-  return () => {
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
-    }
-  };
-}, [searchCode]);
+  //   return () => {
+  //     if (debounceTimer.current) {
+  //       clearTimeout(debounceTimer.current);
+  //     }
+  //   };
+  // }, [searchCode]);
 
   useEffect(() => {
     getListBankPartner();
@@ -615,22 +621,24 @@ useEffect(() => {
     }
   }, [debouncedSearchCode, settlement]);
 
-  const fetchBooking = async (page: number = 1, search: string = debouncedSearchCode) => {
+  const fetchBooking = async (
+    page: number = 1,
+    search: string = searchCode
+  ) => {
     try {
       // Tạo query params
       const params = new URLSearchParams({
-        page:search ? 1 : page.toString(),
+        page: search ? 1 : page.toString(),
         limit: pagination.limit.toString(),
       });
-  
-      if (search) {
-        params.append("booking_code", search);
-       
+
+      if (search && search.trim() !== "") {
+        params.append("booking_code", search.trim());
       }
-  
+
       const query = params.toString();
       const result = await listBookingSettlement(settlement?.id, query);
-  
+
       setDataSettlementBooking(result.bookings || []);
       setPagination({
         page: result.page || 1,
@@ -687,6 +695,19 @@ useEffect(() => {
   const deadlineText = `${formatTime(
     settlement?.confirm_deadline
   )}, ${formatDate(settlement?.confirm_deadline)}`;
+
+  const handleKeyPress = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter") {
+      // Reset về trang 1 khi search
+      fetchBooking(1);
+    }
+  };
+
+  // Hàm xử lý khi click icon kính lúp
+  const handleSearchClick = () => {
+    // Reset về trang 1 khi search
+    fetchBooking(1);
+  };
   return (
     <Box sx={{ bgcolor: "#f9fafb", minHeight: "100vh" }}>
       {/* Header – giống 100% */}
@@ -702,7 +723,7 @@ useEffect(() => {
             <KeyboardArrowLeft
               onClick={() => {
                 setSettlement(null);
-                setSearchCode("")
+                setSearchCode("");
               }}
               sx={{ fontSize: 32, mr: 1, cursor: "pointer" }}
             />
@@ -909,8 +930,9 @@ useEffect(() => {
             <TextField
               placeholder='Tìm theo mã đặt phòng'
               size='small'
-              value={searchCode}                    // Thêm value
-  onChange={(e) => setSearchCode(e.target.value)}
+              value={searchCode} // Thêm value
+              onKeyDown={handleKeyPress}
+              onChange={(e) => setSearchCode(e.target.value)}
               sx={{
                 width: { xs: "100%", sm: 340 },
                 "& .MuiOutlinedInput-root": {
@@ -939,7 +961,10 @@ useEffect(() => {
               }}
               InputProps={{
                 startAdornment: (
-                  <InputAdornment position='start'>
+                  <InputAdornment
+                    sx={{ cursor: "pointer" }}
+                    onClick={handleSearchClick}
+                    position='start'>
                     <SearchIcon sx={{ color: "#9e9e9e" }} />
                   </InputAdornment>
                 ),
