@@ -70,23 +70,23 @@ const statusStyles: Record<string, any> = {
 const paymentStatusStyles: Record<string, any> = {
   "Thanh toán tại khách sạn": {
     color: "#F97316",          // cam
-    
+
   },
   "Đã thanh toán": {
     color: "#22C55E",          // xanh lá
-    
+
   },
   "Đã hoàn tiền": {
     color: "#EF4444",          // đỏ
-    
+
   },
   "Thanh toán không thành công": {
     color: "#EF4444",          // đỏ
-   
+
   },
   "Đã huỷ": {
     color: "#666666",          // xám
-   
+
   },
 };
 
@@ -197,9 +197,9 @@ export default function ManagerBookingView({
   };
   const handleSearch = () => {
     // Format dateRange thành chuỗi cho API
-    
+
     const formatDateForAPI = (date: dayjs.Dayjs) => {
-      if(!date){
+      if (!date) {
         return
       }
       return date.format("YYYY-MM-DDTHH:mm:ssZ");
@@ -210,36 +210,38 @@ export default function ManagerBookingView({
       check_in_from: formatDateForAPI(dateRange?.checkIn),
       check_in_to: formatDateForAPI(dateRange?.checkOut),
     };
-    
+
     onFilterChange(updatedFilters);
   };
 
   // Xử lý thay đổi tab (status)
   const handleTabChange = (tabLabel: string) => {
-    const status = STATUS_LABEL_TO_API[tabLabel] || "all";
-    
+    const selectedTab = tabs.find(tab => tab.label === tabLabel);
+    if (!selectedTab) return;
+
+    const status = selectedTab.value;
+
     const updatedLocalFilters = {
       ...localFilters,
       status: status,
     };
-    
-    setLocalFilters(updatedLocalFilters);
-    
-    // Format dateRange thành chuỗi cho API
-    const formatDateForAPI = (date: dayjs.Dayjs) => {
-      if(!date){
-        return
-      }
-      return date.format("YYYY-MM-DDTHH:mm:ssZ");
-    };
 
+    setLocalFilters(updatedLocalFilters);
+
+    // Cập nhật filter cho controller (giữ nguyên date range hiện tại)
     const updatedFilters = {
       ...updatedLocalFilters,
-      check_in_from: formatDateForAPI(dateRange.checkIn),
-      check_in_to: formatDateForAPI(dateRange.checkOut),
+      check_in_from: dateRange?.checkIn ? formatDateForAPI(dateRange.checkIn) : "",
+      check_in_to: dateRange?.checkOut ? formatDateForAPI(dateRange.checkOut) : "",
     };
-    
+
     onFilterChange(updatedFilters);
+  };
+
+  // Hàm format date cho API (đảm bảo đồng bộ)
+  const formatDateForAPI = (date: dayjs.Dayjs | null) => {
+    if (!date) return "";
+    return date.format("YYYY-MM-DDTHH:mm:ss+07:00"); // giữ nguyên định dạng như Controller
   };
 
   // Reset filter
@@ -249,12 +251,12 @@ export default function ManagerBookingView({
       rent_type: "all",
       status: "all",
     });
-    
+
     const resetDateRange = {
       checkIn: dayjs(),
       checkOut: dayjs().add(1, "day"),
     };
-    
+
     setDateRange(resetDateRange);
     onResetFilter();
   };
@@ -274,7 +276,7 @@ export default function ManagerBookingView({
 
     bookings.forEach((booking) => {
       const statusLabel = STATUS_API_TO_LABEL[booking.status] || "Chờ xử lý";
-      
+
       switch (statusLabel) {
         case "Chờ nhận phòng":
           counts["Chờ nhận phòng"]++;
@@ -304,18 +306,17 @@ export default function ManagerBookingView({
 
   // Danh sách tab với số lượng
   const tabs = [
-    { label: "Tất cả", count: statusCounts["Tất cả"], value: "all" },
-    { label: "Chờ nhận phòng", count: statusCounts["Chờ nhận phòng"], value: "pending" },
-    { label: "Đã nhận phòng", count: statusCounts["Đã nhận phòng"], value: "checked_in" },
-    { label: "Chờ khách xác nhận", count: statusCounts["Chờ khách xác nhận"], value: "confirmed" },
-    { label: "Đã hủy", count: statusCounts["Đã hủy"], value: "cancelled" },
-    { label: "Không nhận phòng", count: statusCounts["Không nhận phòng"], value: "no_show" },
-    { label: "Hoàn thành", count: statusCounts["Hoàn thành"], value: "checked_out" },
-    { label: "Chờ Hotel Booking xử lý", count: statusCounts["Chờ Hotel Booking xử lý"], value: "pending" },
+    { label: "Tất cả", value: "all" },
+    { label: "Chờ khách xác nhận", value: "pending" },
+    { label: "Chờ nhận phòng", value: "confirmed" },
+    { label: "Đã nhận phòng", value: "checked_in" },
+    { label: "Đã trả phòng", value: "checked_out" },
+    { label: "Đã huỷ", value: "cancelled" },
+    { label: "Không nhận phòng", value: "no_show" },
   ];
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box sx={{  p: { xs: 2, sm: 3, md: 4 } }}>
+      <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
         {/* Header */}
         <Typography variant='h5' fontWeight='bold' mb={1}>
           Quản lý đặt phòng
@@ -398,7 +399,7 @@ export default function ManagerBookingView({
                     ...localFilters,
                     rent_type: e.target.value
                   })}
-                 
+
                   sx={{
                     width: 200,
                     height: 40,
@@ -415,7 +416,7 @@ export default function ManagerBookingView({
                     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                       borderColor: "#cddc39 !important", // QUAN TRỌNG: Focus vẫn màu đỏ rực
                       borderWidth: "1px !important",
-                     
+
                     },
                     // Tùy chọn: đổi màu mũi tên dropdown cho đồng bộ
                     "& .MuiSelect-icon": {
@@ -427,7 +428,7 @@ export default function ManagerBookingView({
                     },
                   }}
                 >
-                   <MenuItem value="all">Tất cả</MenuItem>
+                  <MenuItem value="all">Tất cả</MenuItem>
                   <MenuItem value="hourly">Theo giờ</MenuItem>
                   <MenuItem value="daily">Qua ngày</MenuItem>
                   <MenuItem value="overnight">Qua đêm</MenuItem>
@@ -437,7 +438,7 @@ export default function ManagerBookingView({
               {/* 2 ô DatePicker – ĐÃ FIX LỖI 100% */}
               <Box>
                 <Typography sx={{ mb: 1.5 }}>Thời gian nhận phòng</Typography>
-               <SimpleDateSearchBar value={dateRange} onChange={setDateRange} />
+                <SimpleDateSearchBar value={dateRange} onChange={setDateRange} />
               </Box>
 
               {/* Nút */}
@@ -471,12 +472,12 @@ export default function ManagerBookingView({
 
             {/* Chip */}
             <Stack direction='row' flexWrap='wrap' gap={1.5} mt={3}>
-            {tabs.map((tab) => {
+              {tabs.map((tab) => {
                 const isActive = localFilters.status === tab.value;
                 return (
                   <Chip
                     key={tab.label}
-                    label={`${tab.label} ${tab.count}`}
+                    label={tab.label}  // Chỉ hiển thị label, không có count
                     onClick={() => handleTabChange(tab.label)}
                     sx={{
                       cursor: "pointer",
@@ -556,8 +557,8 @@ export default function ManagerBookingView({
                     const roomName = row.room_types?.[0]?.name || "N/A";
 
                     return (
-                      <TableRow 
-                      onClick={() => handleRowClick(row)} sx={{cursor:"pointer"}} key={row.id} hover>
+                      <TableRow
+                        onClick={() => handleRowClick(row)} sx={{ cursor: "pointer" }} key={row.id} hover>
                         <TableCell
                           sx={{
                             fontWeight: row.code.includes("(G)") ? "bold" : "normal",
@@ -568,17 +569,17 @@ export default function ManagerBookingView({
                         <TableCell>
                           <div>{row.total_price.toLocaleString()}đ</div>
                           <div style={{ marginTop: 8 }}>
-    <Box
-      
-      sx={{
-        minWidth: 140,
-        height: 28,
-        fontSize: "0.825rem",
-        fontWeight: "medium",
-        ...paymentStatusStyles[getPaymentLabel(row)],
-      }}
-    >{getPaymentLabel(row)}</Box>
-  </div>
+                            <Box
+
+                              sx={{
+                                minWidth: 140,
+                                height: 28,
+                                fontSize: "0.825rem",
+                                fontWeight: "medium",
+                                ...paymentStatusStyles[getPaymentLabel(row)],
+                              }}
+                            >{getPaymentLabel(row)}</Box>
+                          </div>
                         </TableCell>
                         <TableCell>
                           {rentTypeLabel}
@@ -587,14 +588,14 @@ export default function ManagerBookingView({
                             {roomName}
                           </span>
                         </TableCell>
-                        <TableCell>{formatDateTime(row.created_at)}<br/>{formatDateTime(row.check_in)}</TableCell>
-                       
+                        <TableCell>{formatDateTime(row.check_in)}<br />{formatDateTime(row.check_out)}</TableCell>
+
                         <TableCell>
                           <Chip
                             label={statusLabel}
-                           
+
                             size="small"
-                            sx={{ minWidth: 110,...statusStyles[statusLabel] }}
+                            sx={{ minWidth: 110, ...statusStyles[statusLabel] }}
                           />
                         </TableCell>
                         <TableCell>
@@ -735,18 +736,18 @@ function BookingDetailModal({ open, onClose, booking }) {
           {/* Thông tin đặt phòng */}
           <Stack spacing={2}>
             <Box display={"flex"} justifyContent={"space-between"}>
-            <Typography variant="subtitle1" fontWeight="bold">
-              Thông tin đặt phòng
-            </Typography>
-            <Chip
-                            label={statusLabel}
-                           
-                            size="small"
-                            sx={{ minWidth: 110,...statusStyles[statusLabel] }}
-                          />
+              <Typography variant="subtitle1" fontWeight="bold">
+                Thông tin đặt phòng
+              </Typography>
+              <Chip
+                label={statusLabel}
+
+                size="small"
+                sx={{ minWidth: 110, ...statusStyles[statusLabel] }}
+              />
             </Box>
 
-            
+
 
             <Stack direction="row" justifyContent="space-between">
               <Typography color="text.secondary">Thời gian đặt phòng:</Typography>
@@ -785,8 +786,8 @@ function BookingDetailModal({ open, onClose, booking }) {
             </Stack>
           </Stack>
 
-        
-          
+
+
         </Stack>
       </DialogContent>
     </Dialog>
@@ -914,7 +915,7 @@ function NoteModal({ openNote, onClose, booking, fetchBookings, idHotel }) {
             }}
             sx={{
               "& .MuiOutlinedInput-root": {
-               
+
                 borderRadius: 1,
 
                 backgroundColor: "#fff",
@@ -1054,9 +1055,10 @@ function ActionMenu({
   const status = booking.status;
 
   // Quyết định hiển thị những action nào
-  const showCheckIn = status === "pending";                    // Chờ nhận phòng → cho nhận phòng
-  const showCheckOut = status === "checked_in";                // Đã nhận phòng → cho trả phòng
-  const showCancel = ["pending", "confirmed"].includes(status); // Chờ xử lý hoặc chờ xác nhận → cho hủy
+  const showCheckIn = status === "pending" || status =="confirmed";                     // Chờ nhận phòng → cho nhận phòng
+  const showCheckOut = status === "checked_in" ;    
+             // Đã nhận phòng → cho trả phòng
+  const showCancel = ["pending"].includes(status); // Chờ xử lý hoặc chờ xác nhận → cho hủy
 
   // Nếu không có action nào thì không hiển thị nút
   if (!showCheckIn && !showCheckOut && !showCancel) {

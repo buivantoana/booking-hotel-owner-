@@ -41,7 +41,9 @@ const ReconciliationController = (props: Props) => {
 
       const query = new URLSearchParams(queryParams).toString();
       const result = await getMySettlements(query);
-
+      if(settlement){
+        setSettlement(result.settlements?.find((item)=>item.id == settlement.id))
+      }
       setDataSettlement(result.settlements || []);
       setPagination({
         page: result.page || 1,

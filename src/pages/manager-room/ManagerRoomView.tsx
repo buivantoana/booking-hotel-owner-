@@ -826,6 +826,7 @@ function RoomScheduleTableHourly({
                         sx={{ width: 50 }}
                         inputProps={{
                           style: { textAlign: "center", fontWeight: 600 },
+                          readOnly: true
                         }}
                       />
                     )}
@@ -916,7 +917,7 @@ function RoomScheduleTableDaily({
   const dailySlots = data?.slots; // 3 ngày
   const totalDays = dailySlots?.length; // 3
   const columnWidth = `${100 / totalDays}%`;
-
+  const navigate = useNavigate()
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -1051,6 +1052,9 @@ function RoomScheduleTableDaily({
                         {row.label} <KeyboardArrowUpIcon />
                       </Typography>
                       <Typography
+                       onClick={()=>{
+                        navigate(`/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`)
+                      }}
                         color='#98b720'
                         display='flex'
                         alignItems='center'
@@ -1119,6 +1123,7 @@ function RoomScheduleTableDaily({
                         sx={{ width: 50 }}
                         inputProps={{
                           style: { textAlign: "center", fontWeight: 600 },
+                          readOnly: true
                         }}
                       />
                     )}
@@ -1179,7 +1184,7 @@ function RoomScheduleTableOvernight({
   const dailySlots = data?.slots; // 3 ngày
   const totalDays = dailySlots?.length; // 3
   const columnWidth = `${100 / totalDays}%`;
-
+  const navigate = useNavigate()
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -1314,6 +1319,9 @@ function RoomScheduleTableOvernight({
                         {row.label} <KeyboardArrowUpIcon />
                       </Typography>
                       <Typography
+                       onClick={()=>{
+                        navigate(`/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`)
+                      }}
                         color='#98b720'
                         display='flex'
                         alignItems='center'
@@ -1382,6 +1390,7 @@ function RoomScheduleTableOvernight({
                         sx={{ width: 50 }}
                         inputProps={{
                           style: { textAlign: "center", fontWeight: 600 },
+                          readOnly: true
                         }}
                       />
                     )}

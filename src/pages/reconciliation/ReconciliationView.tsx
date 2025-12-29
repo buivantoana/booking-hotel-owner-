@@ -172,7 +172,7 @@ export default function ReconciliationView({
   const tableData = dataSettlement.map((item, index) => ({
     id: index + 1, // hoặc item.id nếu muốn
     name: parseLang(item.hotel_name, "vi"),
-    address: parseLang(item.hotel_address, "en"),
+    address: parseLang(item.hotel_address, "vi"),
     month: item.period_month, // 2025-11
     status: STATUS_LABEL[item.status] ?? item.status, // confirmed
     rooms: "-", // API chưa có → placeholder
@@ -692,9 +692,9 @@ function HotelDetailFinal({
     settlement?.end_time
   )}`;
 
-  const deadlineText = `${formatTime(
-    settlement?.confirm_deadline
-  )}, ${formatDate(settlement?.confirm_deadline)}`;
+  const deadlineText = `${formatDate(settlement?.confirm_deadline)}`;
+  const deadlineTextPending = `${formatDate(settlement?.end_time)}`;
+  const deadlineTextPaid = `${formatTime(settlement?.paid_at)} - ${formatDate(settlement?.paid_at)}`;
 
   const handleKeyPress = (event: React.KeyboardEvent) => {
     if (event.key === "Enter") {
@@ -839,7 +839,8 @@ function HotelDetailFinal({
               {/* Cột phải */}
               <Box
                 sx={{ textAlign: { xs: "left", md: "right" }, flexShrink: 0 }}>
-                {settlement?.status == "draft" ? (
+                {settlement?.status == "pending" ? (
+                  <>
                   <Button
                     variant='contained'
                     onClick={() => {
@@ -857,14 +858,22 @@ function HotelDetailFinal({
                     }}>
                     Hoàn tất đối soát
                   </Button>
+                  <Typography
+                      variant='body2'
+                      color='#616161'
+                      sx={{ maxWidth: 340 }}>
+                  Vui lòng hoàn tất đối soát trước <strong>{deadlineTextPending}</strong> để nhận thanh toán dự kiến vào ngay làm việc kế tiếp
+                      
+                    </Typography>
+                  </>
                 ) : (
                   <>
                     <Typography
                       variant='body2'
                       color='#616161'
                       sx={{ maxWidth: 340 }}>
-                      Hotel Booking sẽ thanh toán công nợ cho khách vào{" "}
-                      <strong>{deadlineText}</strong> qua tài khoản:
+                   {settlement.status == 'paid' ? "Đã thanh toán vào lúc" : "Sẽ thanh toán công nợ chậm nhất vào ngày"}   <strong>{settlement.status == 'paid' ?deadlineTextPaid: deadlineText}</strong>  qua tài khoản:
+                      
                     </Typography>
 
                     <Stack spacing={1.5} mt={2}>
@@ -878,7 +887,7 @@ function HotelDetailFinal({
                           Số tài khoản
                         </Typography>
                         <Typography fontWeight={"700"}>
-                          {bankPrimary?.account_number}
+                          {settlement?.bank_account_number || bankPrimary?.account_number}
                         </Typography>
                       </Box>
                       <Divider sx={{ mt: 1, borderColor: "#EEEEEE" }} />
@@ -891,7 +900,7 @@ function HotelDetailFinal({
                           Người thụ hưởng
                         </Typography>
                         <Typography fontWeight={"700"}>
-                          {bankPrimary?.account_name}
+                          {settlement?.bank_account_name ||  bankPrimary?.account_name}
                         </Typography>
                       </Box>
                       <Divider sx={{ mt: 1, borderColor: "#EEEEEE" }} />
@@ -905,7 +914,7 @@ function HotelDetailFinal({
                         </Typography>
                         <FormControl>
                           <Typography fontWeight={"700"}>
-                            {bankPrimary?.bank_name}
+                            {settlement?.bank_name || bankPrimary?.bank_name}
                           </Typography>
                         </FormControl>
                       </Box>
