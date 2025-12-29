@@ -225,47 +225,40 @@ export const validateRoomTypes = (data: any) => {
   // Validate từng loại phòng
   roomTypes.forEach((room: any, index: number) => {
     if (!room?.name?.trim()) {
-      errors[`room_${index}_name`] = `Loại phòng ${
-        index + 1
-      }: Vui lòng nhập tên loại phòng`;
+      errors[`room_${index}_name`] = `Loại phòng ${index + 1
+        }: Vui lòng nhập tên loại phòng`;
     }
     if (
       !room?.quantity?.trim() ||
       isNaN(parseInt(room.quantity)) ||
       parseInt(room.quantity) <= 0
     ) {
-      errors[`room_${index}_quantity`] = `Loại phòng ${
-        index + 1
-      }: Vui lòng nhập số lượng phòng hợp lệ (số nguyên > 0)`;
+      errors[`room_${index}_quantity`] = `Loại phòng ${index + 1
+        }: Vui lòng nhập số lượng phòng hợp lệ (số nguyên > 0)`;
     }
     if (
       !room?.area?.trim() ||
       isNaN(parseFloat(room.area)) ||
       parseFloat(room.area) <= 0
     ) {
-      errors[`room_${index}_area`] = `Loại phòng ${
-        index + 1
-      }: Vui lòng nhập diện tích phòng hợp lệ (số > 0)`;
+      errors[`room_${index}_area`] = `Loại phòng ${index + 1
+        }: Vui lòng nhập diện tích phòng hợp lệ (số > 0)`;
     }
     if (!room?.bedType) {
-      errors[`room_${index}_bedType`] = `Loại phòng ${
-        index + 1
-      }: Vui lòng chọn loại giường`;
+      errors[`room_${index}_bedType`] = `Loại phòng ${index + 1
+        }: Vui lòng chọn loại giường`;
     }
     if (!room?.direction) {
-      errors[`room_${index}_direction`] = `Loại phòng ${
-        index + 1
-      }: Vui lòng chọn hướng phòng`;
+      errors[`room_${index}_direction`] = `Loại phòng ${index + 1
+        }: Vui lòng chọn hướng phòng`;
     }
     if (!room?.description?.trim()) {
-      errors[`room_${index}_description`] = `Loại phòng ${
-        index + 1
-      }: Vui lòng nhập mô tả phòng`;
+      errors[`room_${index}_description`] = `Loại phòng ${index + 1
+        }: Vui lòng nhập mô tả phòng`;
     }
     if ((room?.images || []).length < 3) {
-      errors[`room_${index}_images`] = `Loại phòng ${
-        index + 1
-      }: Vui lòng tải lên ít nhất 3 ảnh phòng`;
+      errors[`room_${index}_images`] = `Loại phòng ${index + 1
+        }: Vui lòng tải lên ít nhất 3 ảnh phòng`;
     }
 
     // Pricing: phải có ít nhất 1 loại kinh doanh enabled và có giá hợp lệ
@@ -279,9 +272,8 @@ export const validateRoomTypes = (data: any) => {
       (pricing.daily?.enabled && pricing.daily.price?.trim());
 
     if (!hasValidPricing) {
-      errors[`room_${index}_pricing`] = `Loại phòng ${
-        index + 1
-      }: Vui lòng thiết lập ít nhất một loại giá phòng hợp lệ (theo giờ, qua đêm hoặc theo ngày)`;
+      errors[`room_${index}_pricing`] = `Loại phòng ${index + 1
+        }: Vui lòng thiết lập ít nhất một loại giá phòng hợp lệ (theo giờ, qua đêm hoặc theo ngày)`;
     }
   });
 
@@ -368,7 +360,7 @@ export const list_banks = [
   { name: "Liobank", code: "liobank" },
 ];
 
-export  const parseRoomName = (name?: string) => {
+export const parseRoomName = (name?: string) => {
   if (!name) return "Không có tên";
 
   try {
@@ -379,3 +371,116 @@ export  const parseRoomName = (name?: string) => {
     return name;
   }
 };
+
+export const type_bed = [
+  {
+    "id": "single_bed_1",
+    "name": "1 giường đơn"
+  },
+  {
+    "id": "double_bed_1",
+    "label": "1 giường đôi"
+  },
+  {
+    "id": "single_bed_2",
+    "label": "2 giường đơn"
+  },
+  {
+    "id": "double_bed_2",
+    "label": "2 giường đôi"
+  },
+  {
+    "id": "round_bed_1",
+    "label": "1 giường tròn"
+  },
+  {
+    "id": "double_small_1m5x2",
+    "label": "Giường đôi cỡ nhỏ (1m5 x 2m)"
+  },
+  {
+    "id": "queen_1m6x2",
+    "label": "Giường Queen-size (1m6 x 2m)"
+  },
+  {
+    "id": "king_1m8x2",
+    "label": "Giường King-size (1m8 x 2m)"
+  },
+  {
+    "id": "extra_bed",
+    "label": "Giường phụ"
+  },
+  {
+    "id": "sofa_bed",
+    "label": "Giường sofa"
+  },
+  {
+    "id": "bunk_bed_double",
+    "label": "Giường tầng đôi"
+  },
+  {
+    "id": "bunk_bed_single",
+    "label": "Giường tầng đơn"
+  },
+  {
+    "id": "mattress",
+    "label": "Nệm ngủ"
+  },
+  {
+    "id": "baby_cot",
+    "label": "Giường con nhộng / cũi em bé"
+  }]
+
+export const direction = [
+  {
+    "id": "window_no_view",
+    "label": "Cửa sổ (không hướng)"
+  },
+  {
+    "id": "city_view",
+    "label": "Hướng thành phố"
+  },
+  {
+    "id": "garden_view",
+    "label": "Hướng vườn"
+  },
+  {
+    "id": "pool_view",
+    "label": "Hướng hồ bơi"
+  },
+  {
+    "id": "no_window",
+    "label": "Không cửa sổ"
+  },
+  {
+    "id": "landmark_view",
+    "label": "Hướng ra địa danh nổi tiếng"
+  },
+  {
+    "id": "sea_view",
+    "label": "Hướng biển"
+  },
+  {
+    "id": "airport_view",
+    "label": "Hướng sân bay"
+  },
+  {
+    "id": "park_view",
+    "label": "Hướng công viên"
+  },
+  {
+    "id": "mountain_view",
+    "label": "Hướng núi"
+  },
+  {
+    "id": "river_view",
+    "label": "Hướng sông"
+  },
+  {
+    "id": "valley_view",
+    "label": "Hướng thung lũng"
+  },
+  {
+    "id": "balcony",
+    "label": "Ban công"
+  }
+]

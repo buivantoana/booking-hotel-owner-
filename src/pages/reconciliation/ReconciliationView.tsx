@@ -107,7 +107,7 @@ const data: HotelRow[] = [
 ];
 const STATUS_MAP: Record<string, string> = {
   "Tất cả": "",
-  "Chưa đối soát": "draft",
+  "Chưa đối soát": "pending",
   "Chờ thanh toán": "confirmed",
   "Hoàn thành": "paid",
 };
@@ -389,11 +389,11 @@ export default function ReconciliationView({
                     sx={{
                       borderRadius: 3,
                       textTransform: "none",
-                      color: tab === "Tất cả" ? "white" : "#98b720",
+                      color:  localFilters.status === tab ? "white" : "#98b720",
                       borderColor: "#98b720",
-                      bgcolor: tab === "Tất cả" ? "#98b720" : "transparent",
+                      bgcolor:  localFilters.status === tab ? "#98b720" : "transparent",
                       "&:hover": {
-                        bgcolor: tab === "Tất cả" ? "#1565c0" : "#f5f5f5",
+                        bgcolor:  localFilters.status === tab ? "#1565c0" : "#f5f5f5",
                       },
                     }}>
                     {tab}
@@ -676,8 +676,7 @@ function HotelDetailFinal({
     return type;
   };
 
-  const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString("vi-VN");
+  const formatDate = (date, addDays = 0) => { const d = new Date(date); d.setDate(d.getDate() + addDays); return d.toLocaleDateString("vi-VN"); };
 
   const formatTime = (date: string) =>
     new Date(date).toLocaleTimeString("vi-VN", {
@@ -692,8 +691,8 @@ function HotelDetailFinal({
     settlement?.end_time
   )}`;
 
-  const deadlineText = `${formatDate(settlement?.confirm_deadline)}`;
-  const deadlineTextPending = `${formatDate(settlement?.end_time)}`;
+  const deadlineText = `${formatDate(settlement?.confirmed_at,15)}`;
+  const deadlineTextPending = `${formatDate(settlement?.confirm_deadline)}`;
   const deadlineTextPaid = `${formatTime(settlement?.paid_at)} - ${formatDate(settlement?.paid_at)}`;
 
   const handleKeyPress = (event: React.KeyboardEvent) => {
@@ -862,7 +861,7 @@ function HotelDetailFinal({
                       variant='body2'
                       color='#616161'
                       sx={{ maxWidth: 340 }}>
-                  Vui lòng hoàn tất đối soát trước <strong>{deadlineTextPending}</strong> để nhận thanh toán dự kiến vào ngay làm việc kế tiếp
+                  Vui lòng hoàn tất đối soát trước <strong>{deadlineTextPending}</strong> để nhận thanh toán dự kiến vào ngày làm việc kế tiếp
                       
                     </Typography>
                   </>

@@ -23,8 +23,14 @@ import { Close, ContentCopy, Edit, PauseCircle } from "@mui/icons-material";
 import remove from "../../images/delete.png";
 import confirm from "../../images/Frame.png";
 import { useSearchParams } from "react-router-dom";
-import { parseRoomName } from "../../utils/utils";
+import { direction, parseRoomName, type_bed } from "../../utils/utils";
 
+const getLabelsByIds = (ids: string[] | null | undefined, list: typeof type_bed) => {
+  if (!ids || !Array.isArray(ids) || ids.length === 0) return [];
+  return ids
+    .map((id) => list.find((item) => item.id === id)?.label)
+    .filter(Boolean) as string[];
+};
 export default function RoomDetail({
   onNext,
   room,
@@ -42,16 +48,35 @@ export default function RoomDetail({
   const parsedNameHotel = detailHotel
     ? parseRoomName(detailHotel.name)|| "Không có tên"
     : "";
-  const parsedBedType = room?.bed_type
-    ? typeof room.bed_type === "string"
-      ? JSON.parse(room.bed_type).vi
-      : room.bed_type
-    : "-";
-  const parsedDirection = room?.direction
-    ? typeof room.direction === "string"
-      ? JSON.parse(room.direction).vi
-      : room.direction
-    : "-";
+    const bedTypeIds = React.useMemo(() => {
+      if (!room?.bed_type) return [];
+      try {
+        return typeof room.bed_type === "string"
+          ? JSON.parse(room.bed_type)
+          : Array.isArray(room.bed_type)
+          ? room.bed_type
+          : [];
+      } catch {
+        return [];
+      }
+    }, [room?.bed_type]);
+    
+    const directionIds = React.useMemo(() => {
+      if (!room?.direction) return [];
+      try {
+        return typeof room.direction === "string"
+          ? JSON.parse(room.direction)
+          : Array.isArray(room.direction)
+          ? room.direction
+          : [];
+      } catch {
+        return [];
+      }
+    }, [room?.direction]);
+    
+    // Chuyển sang label để hiển thị
+    const bedTypeLabels = getLabelsByIds(bedTypeIds, type_bed);
+    const directionLabels = getLabelsByIds(directionIds, direction);
   const area = room?.area_m2 ? `${room.area_m2}m²` : "-";
 
   // Parse hình ảnh phòng
@@ -296,8 +321,48 @@ export default function RoomDetail({
               {[
                 { label: "Số lượng phòng bán", value: "Không giới hạn" },
                 { label: "Diện tích", value: area },
-                { label: "Loại giường", value: parsedBedType },
-                { label: "Hướng phòng", value: parsedDirection },
+                {
+                  label: "Loại giường",
+                  value: bedTypeLabels.length > 0 ? (
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                      {bedTypeLabels.map((label, i) => (
+                        <Chip
+                          key={i}
+                          label={label}
+                          size="small"
+                          sx={{
+                            bgcolor: "#e8f5e9",
+                            color: "#2e7d32",
+                            fontWeight: 500,
+                          }}
+                        />
+                      ))}
+                    </Box>
+                  ) : (
+                    "-"
+                  ),
+                },
+                {
+                  label: "Hướng phòng",
+                  value: directionLabels.length > 0 ? (
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                      {directionLabels.map((label, i) => (
+                        <Chip
+                          key={i}
+                          label={label}
+                          size="small"
+                          sx={{
+                            bgcolor: "#e3f2fd",
+                            color: "#1976d2",
+                            fontWeight: 500,
+                          }}
+                        />
+                      ))}
+                    </Box>
+                  ) : (
+                    "-"
+                  ),
+                },
               ].map((item, idx) => (
                 <Grid item xs={12} sm={6} md={3} key={idx}>
                   <Box

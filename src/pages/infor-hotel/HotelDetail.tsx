@@ -156,7 +156,7 @@ function HotelInfoDetail({ onNext, setRoom ,detailHotel,getHotelDetail}) {
             Loại phòng
           </Typography>
         </Box>
-
+        {action =="manager" &&
         <Button
           variant='contained'
           startIcon={<EditIcon />}
@@ -172,7 +172,7 @@ function HotelInfoDetail({ onNext, setRoom ,detailHotel,getHotelDetail}) {
             textTransform: "none",
           }}>
           Chỉnh sửa
-        </Button>
+        </Button>}
       </Box>
 
       {action === "rooms" && (

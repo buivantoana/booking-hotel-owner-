@@ -25,17 +25,8 @@ import CheckIcon from "@mui/icons-material/Check";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import SearchIcon from "@mui/icons-material/Search";
 import { useBookingContext } from "../../App"; // Điều chỉnh đường dẫn nếu cần
+import { direction, type_bed } from "../../utils/utils";
 
-const bedTypes = [
-  "1 giường đơn",
-  "2 giường đơn",
-  "1 giường đôi",
-  "1 giường đôi lớn (Queen)",
-  "1 giường king",
-  "2 giường king",
-];
-
-const directions = ["Hướng Đông", "Hướng Tây", "Hướng Nam", "Hướng Bắc"];
 
 interface Pricing {
   hourly: {
@@ -59,8 +50,8 @@ interface RoomType {
   name: string;
   quantity: string;
   area: string;
-  bedType: string;
-  direction: string;
+  bedType: string[]; // Đổi thành mảng id
+  direction: string[]; // Đổi thành mảng id
   description: string;
   images: File[];
   imagePreviews: string[];
@@ -100,8 +91,8 @@ export default function RoomTypeManager({
           name: "",
           quantity: "",
           area: "",
-          bedType: "",
-          direction: "",
+          bedType: [],
+          direction: [],
           description: "",
           images: [],
           imagePreviews: [],
@@ -178,8 +169,8 @@ export default function RoomTypeManager({
       name: "",
       quantity: "",
       area: "",
-      bedType: "",
-      direction: "",
+      bedType: [],
+      direction: [],
       description: "",
       images: [],
       imagePreviews: [],
@@ -409,18 +400,32 @@ export default function RoomTypeManager({
                   Loại giường
                 </Typography>
                 <Autocomplete
-                  options={bedTypes}
-                  value={current?.bedType || ""}
-                  onChange={(_, v) => {
-                    updateRoomField("bedType", v || "");
+                  multiple
+                  options={type_bed}
+                  getOptionLabel={(option) => option.label}
+                  value={type_bed.filter((opt) => current?.bedType.includes(opt.id))}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  onChange={(_, newValue) => {
+                    updateRoomField("bedType", newValue.map((v) => v.id));
                   }}
                   onBlur={() => {
                     handleTouch("bedType");
                   }}
+                  disableClearable
+                  renderTags={(tagValue, getTagProps) =>
+                    tagValue.map((option, index) => (
+                      <Chip
+                        label={option.label}
+                        size="small"
+                        {...getTagProps({ index })}
+                        key={index}
+                      />
+                    ))
+                  }
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      placeholder='Chọn loại giường'
+                      placeholder={current?.bedType.length === 0 ? 'Chọn loại giường' : ''}
                       error={
                         touched[`room_${activeTab}_bedType`] &&
                         !!errors[`room_${activeTab}_bedType`]
@@ -433,14 +438,18 @@ export default function RoomTypeManager({
                       InputProps={{
                         ...params.InputProps,
                         startAdornment: (
-                          <InputAdornment position='start'>
-                            <BedIcon sx={{ color: "#999" }} />
-                          </InputAdornment>
+                          <>
+                            <InputAdornment position='start'>
+                              <BedIcon sx={{ color: "#999" }} />
+                            </InputAdornment>
+                            {params.InputProps.startAdornment}
+                          </>
                         ),
                       }}
                       sx={{
                         "& .MuiOutlinedInput-root": {
-                          height: 50,
+                          height: "auto",
+                          minHeight: 50,
                           borderRadius: 1.5,
                           "&.Mui-focused fieldset": { borderColor: "#a0d468" },
                         },
@@ -448,9 +457,9 @@ export default function RoomTypeManager({
                     />
                   )}
                   renderOption={(props, option, { selected }) => (
-                    <li {...props}>
+                    <li {...props} key={option.id}>
                       <BedIcon sx={{ mr: 2, color: "#999", fontSize: 20 }} />
-                      {option}
+                      {option.label}
                       {selected && (
                         <CheckIcon sx={{ ml: "auto", color: "#4caf50" }} />
                       )}
@@ -467,18 +476,32 @@ export default function RoomTypeManager({
                   Hướng phòng
                 </Typography>
                 <Autocomplete
-                  options={directions}
-                  value={current?.direction || ""}
-                  onChange={(_, v) => {
-                    updateRoomField("direction", v || "");
+                  multiple
+                  options={direction}
+                  getOptionLabel={(option) => option.label}
+                  value={direction.filter((opt) => current?.direction.includes(opt.id))}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  onChange={(_, newValue) => {
+                    updateRoomField("direction", newValue.map((v) => v.id));
                   }}
                   onBlur={() => {
                     handleTouch("direction");
                   }}
+                  disableClearable
+                  renderTags={(tagValue, getTagProps) =>
+                    tagValue.map((option, index) => (
+                      <Chip
+                        label={option.label}
+                        size="small"
+                        {...getTagProps({ index })}
+                        key={index}
+                      />
+                    ))
+                  }
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      placeholder='Chọn hướng phòng'
+                      placeholder={current?.direction.length === 0 ? 'Chọn hướng phòng' : ''}
                       error={
                         touched[`room_${activeTab}_direction`] &&
                         !!errors[`room_${activeTab}_direction`]
@@ -491,14 +514,18 @@ export default function RoomTypeManager({
                       InputProps={{
                         ...params.InputProps,
                         startAdornment: (
-                          <InputAdornment position='start'>
-                            <CompassCalibrationIcon sx={{ color: "#999" }} />
-                          </InputAdornment>
+                          <>
+                            <InputAdornment position='start'>
+                              <CompassCalibrationIcon sx={{ color: "#999" }} />
+                            </InputAdornment>
+                            {params.InputProps.startAdornment}
+                          </>
                         ),
                       }}
                       sx={{
                         "& .MuiOutlinedInput-root": {
-                          height: 50,
+                          height: "auto",
+                          minHeight: 50,
                           borderRadius: 1.5,
                           "&.Mui-focused fieldset": { borderColor: "#a0d468" },
                         },
@@ -506,11 +533,11 @@ export default function RoomTypeManager({
                     />
                   )}
                   renderOption={(props, option, { selected }) => (
-                    <li {...props}>
+                    <li {...props} key={option.id}>
                       <CompassCalibrationIcon
                         sx={{ mr: 2, color: "#999", fontSize: 20 }}
                       />
-                      {option}
+                      {option.label}
                       {selected && (
                         <CheckIcon sx={{ ml: "auto", color: "#4caf50" }} />
                       )}

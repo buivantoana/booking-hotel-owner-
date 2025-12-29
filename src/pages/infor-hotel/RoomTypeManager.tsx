@@ -28,23 +28,9 @@ import { KeyboardArrowLeft } from "@mui/icons-material";
 import { createRoomHotel, updateRoom } from "../../service/hotel";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { direction, type_bed } from "../../utils/utils";
 
-const bedTypes = [
-  "1 giường đơn",
-  "2 giường đơn",
-  "1 giường đôi",
-  "1 giường đôi lớn (Queen)",
-  "1 giường king",
-  "2 giường king",
-];
 
-const directions = [
-  "Hướng Đông",
-  "Hướng Tây",
-  "Hướng Nam",
-  "Hướng Bắc",
-  "Hướng biển",
-];
 
 interface Pricing {
   hourly: {
@@ -143,12 +129,12 @@ export default function RoomTypeManager({
     if (room) {
       const imagesArr = room.images
         ? (() => {
-            try {
-              return JSON.parse(room.images);
-            } catch {
-              return [];
-            }
-          })()
+          try {
+            return JSON.parse(room.images);
+          } catch {
+            return [];
+          }
+        })()
         : [];
 
       return {
@@ -158,8 +144,22 @@ export default function RoomTypeManager({
             name: parseVi(room.name),
             quantity: room.number || "1",
             area: room.area_m2?.toString() || "",
-            bedType: mapBedType(parseVi(room.bed_type)),
-            direction: mapDirection(parseVi(room.direction)),
+            bedType: (() => {
+              if (!room.bed_type) return [];
+              try {
+                return JSON.parse(room.bed_type as string);
+              } catch {
+                return [];
+              }
+            })(),
+            direction: (() => {
+              if (!room.direction) return [];
+              try {
+                return JSON.parse(room.direction as string);
+              } catch {
+                return [];
+              }
+            })(),
             description: parseVi(room.description),
             images: [],
             imagePreviews: imagesArr,
@@ -302,8 +302,8 @@ export default function RoomTypeManager({
       formData.append("area_m2", room.area || "");
       formData.append("max_guests", "2");
 
-      formData.append("bed_type", toViJson(room.bedType));
-      formData.append("direction", toViJson(room.direction));
+      formData.append("bed_type", JSON.stringify(room.bedType));        // mảng id
+      formData.append("direction", JSON.stringify(room.direction));
 
       if (room.pricing.hourly.enabled) {
         if (room.pricing.hourly.firstHours) {
@@ -568,42 +568,55 @@ export default function RoomTypeManager({
                     Loại giường
                   </Typography>
                   <Autocomplete
-                    options={bedTypes}
-                    value={current?.bedType || ""}
-                    onChange={(_, v) => {
-                      updateRoomField("bedType", v || "");
+                    multiple
+                    options={type_bed}
+                    getOptionLabel={(option) => option.label}
+                    value={type_bed.filter((opt) => current?.bedType.includes(opt.id))}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    onChange={(_, newValue) => {
+                      updateRoomField("bedType", newValue.map((v) => v.id));
                       handleTouch("bedType");
                     }}
+                    disableClearable // ← quan trọng: ngăn xóa hết và tránh hiển thị dòng trống
+                    renderTags={(tagValue, getTagProps) =>
+                      tagValue.map((option, index) => (
+                        <Chip
+                          label={option.label}
+                          size="small"
+                          {...getTagProps({ index })}
+                          key={index}
+                        />
+                      ))
+                    }
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        placeholder='Chọn loại giường'
+                        placeholder={current?.bedType.length === 0 ? 'Chọn loại giường' : ''} // chỉ hiện placeholder khi chưa chọn
                         InputProps={{
                           ...params.InputProps,
                           startAdornment: (
-                            <InputAdornment position='start'>
-                              <BedIcon sx={{ color: "#999" }} />
-                            </InputAdornment>
+                            <>
+                              <InputAdornment position="start">
+                                <BedIcon sx={{ color: "#999" }} />
+                              </InputAdornment>
+                              {params.InputProps.startAdornment}
+                            </>
                           ),
                         }}
                         sx={{
                           "& .MuiOutlinedInput-root": {
-                            height: 50,
+                            height: "auto",
+                            minHeight: 50,
                             borderRadius: 1.5,
-                            "&.Mui-focused fieldset": {
-                              borderColor: "#a0d468",
-                            },
+                            "&.Mui-focused fieldset": { borderColor: "#a0d468" },
                           },
                         }}
                       />
                     )}
-                    renderOption={(props, option, { selected }) => (
-                      <li {...props}>
+                    renderOption={(props, option) => (
+                      <li {...props} key={option.id}>
                         <BedIcon sx={{ mr: 2, color: "#999", fontSize: 20 }} />
-                        {option}
-                        {selected && (
-                          <CheckIcon sx={{ ml: "auto", color: "#4caf50" }} />
-                        )}
+                        {option.label}
                       </li>
                     )}
                   />
@@ -617,12 +630,25 @@ export default function RoomTypeManager({
                     Hướng phòng
                   </Typography>
                   <Autocomplete
-                    options={directions}
-                    value={current?.direction || ""}
-                    onChange={(_, v) => {
-                      updateRoomField("direction", v || "");
+                    multiple
+                    options={direction}
+                    getOptionLabel={(option) => option.label}
+                    value={direction.filter((opt) => current?.direction.includes(opt.id)) || []}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    onChange={(_, newValue) => {
+                      updateRoomField("direction", newValue.map((v) => v.id));
                       handleTouch("direction");
                     }}
+                    renderTags={(tagValue, getTagProps) =>
+                      tagValue.map((option, index) => (
+                        <Chip
+                          label={option.label}
+                          size="small"
+                          {...getTagProps({ index })}
+                          key={index}
+                        />
+                      ))
+                    }
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -630,31 +656,28 @@ export default function RoomTypeManager({
                         InputProps={{
                           ...params.InputProps,
                           startAdornment: (
-                            <InputAdornment position='start'>
-                              <CompassCalibrationIcon sx={{ color: "#999" }} />
-                            </InputAdornment>
+                            <>
+                              <InputAdornment position='start'>
+                                <CompassCalibrationIcon sx={{ color: "#999" }} />
+                              </InputAdornment>
+                              {params.InputProps.startAdornment}
+                            </>
                           ),
                         }}
                         sx={{
                           "& .MuiOutlinedInput-root": {
-                            height: 50,
+                            height: "auto",
+                            minHeight: 50,
                             borderRadius: 1.5,
-                            "&.Mui-focused fieldset": {
-                              borderColor: "#a0d468",
-                            },
+                            "&.Mui-focused fieldset": { borderColor: "#a0d468" },
                           },
                         }}
                       />
                     )}
-                    renderOption={(props, option, { selected }) => (
+                    renderOption={(props, option) => (
                       <li {...props}>
-                        <CompassCalibrationIcon
-                          sx={{ mr: 2, color: "#999", fontSize: 20 }}
-                        />
-                        {option}
-                        {selected && (
-                          <CheckIcon sx={{ ml: "auto", color: "#4caf50" }} />
-                        )}
+                        <CompassCalibrationIcon sx={{ mr: 2, color: "#999", fontSize: 20 }} />
+                        {option.label}
                       </li>
                     )}
                   />
