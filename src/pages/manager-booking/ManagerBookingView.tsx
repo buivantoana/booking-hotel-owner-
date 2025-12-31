@@ -262,47 +262,7 @@ export default function ManagerBookingView({
   };
 
   // Đếm số lượng booking theo status
-  const countByStatus = () => {
-    const counts: Record<string, number> = {
-      "Tất cả": bookings.length,
-      "Chờ nhận phòng": 0,
-      "Đã nhận phòng": 0,
-      "Chờ khách xác nhận": 0,
-      "Đã hủy": 0,
-      "Không nhận phòng": 0,
-      "Hoàn thành": 0,
-      "Chờ Hotel Booking xử lý": 0,
-    };
 
-    bookings.forEach((booking) => {
-      const statusLabel = STATUS_API_TO_LABEL[booking.status] || "Chờ xử lý";
-
-      switch (statusLabel) {
-        case "Chờ nhận phòng":
-          counts["Chờ nhận phòng"]++;
-          break;
-        case "Đã nhận phòng":
-          counts["Đã nhận phòng"]++;
-          break;
-        case "Chờ khách xác nhận":
-          counts["Chờ khách xác nhận"]++;
-          break;
-        case "Hủy phòng":
-          counts["Đã hủy"]++;
-          break;
-        case "Không nhận phòng":
-          counts["Không nhận phòng"]++;
-          break;
-        case "Hoàn thành":
-          counts["Hoàn thành"]++;
-          break;
-      }
-    });
-
-    return counts;
-  };
-
-  const statusCounts = countByStatus();
 
   // Danh sách tab với số lượng
   const tabs = [

@@ -14,24 +14,29 @@ const ReconciliationController = (props: Props) => {
     total: 0,
     total_pages: 0,
   });
-  const [idHotel, setIdHotel] = useState(null);
+  const [idHotel, setIdHotel] = useState(null); 
+   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
     period_month: "",
     hotel_name: "",
-    status: "", // Thêm trạng thái nếu cần
+    status: "all", // Thêm trạng thái nếu cần
   });
   useEffect(() => {
     fetchSettlements(1); // Reset về trang 1 khi đổi khách sạn
   }, []);
 
   const fetchSettlements = async (page: number = 1, filterParams = filters) => {
+    setLoading(true)
     try {
       const queryParams = {
         ...pagination,
         page,
         ...filterParams,
       };
-
+      delete queryParams.status
+      if(filterParams?.status &&  filterParams?.status != "all"){
+        queryParams.status = filterParams.status
+      }
       // Loại bỏ các tham số rỗng
       Object.keys(queryParams).forEach(key => {
         if (queryParams[key] === "" || queryParams[key] === null) {
@@ -55,6 +60,7 @@ const ReconciliationController = (props: Props) => {
       console.error("Lỗi lấy danh sách đối soát:", error);
       setDataSettlement([]);
     }
+    setLoading(false)
   };
 
   const handlePageChange = (
@@ -75,7 +81,7 @@ const ReconciliationController = (props: Props) => {
     const resetFilters = {
       period_month: "",
       hotel_name: "",
-      status: "",
+      status: "all",
     };
     setFilters(resetFilters);
     fetchSettlements(1, resetFilters);
@@ -95,6 +101,7 @@ const ReconciliationController = (props: Props) => {
       filters={filters}
       onFilterChange={handleFilterChange}
       onResetFilter={handleResetFilter}
+      loading={loading}
     />
   );
 };

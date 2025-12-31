@@ -106,7 +106,7 @@ const data: HotelRow[] = [
   },
 ];
 const STATUS_MAP: Record<string, string> = {
-  "Tất cả": "",
+  "Tất cả": "all",
   "Chưa đối soát": "pending",
   "Chờ thanh toán": "confirmed",
   "Hoàn thành": "paid",
@@ -150,6 +150,7 @@ export default function ReconciliationView({
   filters, // Thêm prop filters
   onFilterChange, // Thêm prop onFilterChange
   onResetFilter, // Thêm prop onResetFilter
+  loading
 }) {
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("sm")
@@ -164,10 +165,12 @@ export default function ReconciliationView({
     period_month: "",
     status: "all", // Thêm trạng thái
   });
-  const STATUS_LABEL: Record<string, string> = {
+  const STATUS_LABEL = {
+    draft: "Chưa đối soát",
+    pending: "Chờ xác nhận",
     confirmed: "Chờ thanh toán",
     paid: "Đã thanh toán",
-    carried: "Chuyển kỳ sau",
+    completed: "Hoàn thành", // Giả sử
   };
   const tableData = dataSettlement.map((item, index) => ({
     id: index + 1, // hoặc item.id nếu muốn
@@ -198,17 +201,35 @@ export default function ReconciliationView({
     onResetFilter();
   };
   // Hàm xử lý thay đổi tab (status)
-  const handleTabChange = (tab: string) => {
-    setLocalFilters((prev) => ({
-      ...prev,
-      status: tab,
-    }));
-    const apiStatus = STATUS_MAP[tab] || "";
-    onFilterChange({
+  const handleTabChange = (tabLabel: string) => {
+    const selectedTab = tabs.find(tab => tab.label === tabLabel);
+    if (!selectedTab) return;
+
+    const status = selectedTab.value;
+
+    const updatedLocalFilters = {
       ...localFilters,
-      status: apiStatus,
-    });
+      status: status,
+    };
+
+    setLocalFilters(updatedLocalFilters);
+
+    // Cập nhật filter cho controller (giữ nguyên date range hiện tại)
+    const updatedFilters = {
+      ...updatedLocalFilters,
+    };
+
+    onFilterChange(updatedFilters);
   };
+ 
+  const tabs = [
+    { label: "Tất cả", value: "all" },
+    { label: "Chờ xác nhận", value: "pending" },
+    { label: "Chờ thanh toán", value: "confirmed" },
+    { label: "Đã thanh toán", value: "paid" },
+    { label: "Hoàn thành", value: "completed" },
+   
+  ];
   return (
     <>
       {settlement && (
@@ -377,29 +398,28 @@ export default function ReconciliationView({
 
             {/* Tabs */}
             <Stack direction='row' spacing={1} flexWrap='wrap' gap={1}>
-              {["Tất cả", "Chưa đối soát", "Chờ thanh toán", "Hoàn thành"].map(
-                (tab) => (
-                  <Button
-                    key={tab}
-                    onClick={() => handleTabChange(tab)}
-                    variant={
-                      localFilters.status === tab ? "contained" : "outlined"
-                    }
-                    size='small'
+            {tabs.map((tab) => {
+                const isActive = localFilters.status === tab.value;
+                return (
+                  <Chip
+                    key={tab.label}
+                    label={tab.label}  // Chỉ hiển thị label, không có count
+                    onClick={() => handleTabChange(tab.label)}
                     sx={{
-                      borderRadius: 3,
-                      textTransform: "none",
-                      color:  localFilters.status === tab ? "white" : "#98b720",
-                      borderColor: "#98b720",
-                      bgcolor:  localFilters.status === tab ? "#98b720" : "transparent",
+                      cursor: "pointer",
+                      borderRadius: "18px",
+                      height: 36,
+                      bgcolor: isActive ? "#98b720" : "transparent",
+                      color: isActive ? "white" : "#666",
+                      border: isActive ? "none" : "1px solid #e0e0e0",
+                      fontWeight: isActive ? "bold" : "normal",
                       "&:hover": {
-                        bgcolor:  localFilters.status === tab ? "#1565c0" : "#f5f5f5",
+                        bgcolor: isActive ? "#7cb342" : "#f5f5f5",
                       },
-                    }}>
-                    {tab}
-                  </Button>
-                )
-              )}
+                    }}
+                  />
+                );
+              })}
             </Stack>
             <TableContainer sx={{ maxHeight: "calc(100vh - 380px)", mt: 4 }}>
               <Table stickyHeader>
@@ -436,6 +456,13 @@ export default function ReconciliationView({
                   </TableRow>
                 </TableHead>
                 <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={8} align="center">
+                      <Typography>Đang tải...</Typography>
+                    </TableCell>
+                  </TableRow>
+                ) :  <>
                   {tableData?.map((row, index) => {
                     const statusStyle = getStatusColor(row.status);
 
@@ -498,6 +525,7 @@ export default function ReconciliationView({
                       </TableRow>
                     );
                   })}
+                  </>}
                 </TableBody>
               </Table>
             </TableContainer>
