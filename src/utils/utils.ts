@@ -484,3 +484,47 @@ export const direction = [
     "label": "Ban công"
   }
 ]
+
+export const facilities = [
+  {
+    id: "luggage_storage",
+    name: { en: "Luggage Storage", vi: "Bảo quản hành lý" },
+    icon: "https://cdn-icons-png.flaticon.com/512/3176/3176366.png"
+  },
+  {
+    id: "elevator",
+    name: { en: "Elevator", vi: "Thang máy" },
+    icon: "https://cdn-icons-png.flaticon.com/512/854/854929.png"
+  },
+  {
+    id: "safe_box",
+    name: { en: "Safe Box", vi: "Két sắt" },
+    icon: "https://cdn-icons-png.flaticon.com/512/639/639365.png"
+  },
+  // Thêm các tiện ích khác ở đây...
+  {
+    id: "parking",
+    name: { en: "Parking", vi: "Bãi đỗ xe" },
+    icon: "https://cdn-icons-png.flaticon.com/512/3063/3063826.png"
+  },
+  {
+    id: "pool",
+    name: { en: "Swimming Pool", vi: "Bể bơi" },
+    icon: "https://cdn-icons-png.flaticon.com/512/2933/2933028.png"
+  },
+  {
+    id: "gym",
+    name: { en: "Gym", vi: "Phòng gym" },
+    icon: "https://cdn-icons-png.flaticon.com/512/2930/2930888.png"
+  },
+  {
+    id: "spa",
+    name: { en: "Spa", vi: "Điều hòa" },
+    icon: "https://cdn-icons-png.flaticon.com/512/2901/2901399.png"
+  },
+  {
+    id: "tv",
+    name: { en: "Smart TV", vi: "Smart TV" },
+    icon: "https://cdn-icons-png.flaticon.com/512/565/565674.png"
+  },
+]
