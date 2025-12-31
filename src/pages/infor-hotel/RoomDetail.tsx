@@ -23,9 +23,17 @@ import { Close, ContentCopy, Edit, PauseCircle } from "@mui/icons-material";
 import remove from "../../images/delete.png";
 import confirm from "../../images/Frame.png";
 import { useSearchParams } from "react-router-dom";
-import { direction, parseRoomName, type_bed } from "../../utils/utils";
+import {
+  direction,
+  facilities,
+  parseRoomName,
+  type_bed,
+} from "../../utils/utils";
 
-const getLabelsByIds = (ids: string[] | null | undefined, list: typeof type_bed) => {
+const getLabelsByIds = (
+  ids: string[] | null | undefined,
+  list: typeof type_bed
+) => {
   if (!ids || !Array.isArray(ids) || ids.length === 0) return [];
   return ids
     .map((id) => list.find((item) => item.id === id)?.label)
@@ -42,41 +50,39 @@ export default function RoomDetail({
   const [action, setAction] = useState("detail");
   const [searchParams, setSearchParams] = useSearchParams();
   // Parse dữ liệu từ room props
-  const parsedName = room
-    ? parseRoomName(room.name) || "Không có tên"
-    : "";
+  const parsedName = room ? parseRoomName(room.name) || "Không có tên" : "";
   const parsedNameHotel = detailHotel
-    ? parseRoomName(detailHotel.name)|| "Không có tên"
+    ? parseRoomName(detailHotel.name) || "Không có tên"
     : "";
-    const bedTypeIds = React.useMemo(() => {
-      if (!room?.bed_type) return [];
-      try {
-        return typeof room.bed_type === "string"
-          ? JSON.parse(room.bed_type)
-          : Array.isArray(room.bed_type)
-          ? room.bed_type
-          : [];
-      } catch {
-        return [];
-      }
-    }, [room?.bed_type]);
-    
-    const directionIds = React.useMemo(() => {
-      if (!room?.direction) return [];
-      try {
-        return typeof room.direction === "string"
-          ? JSON.parse(room.direction)
-          : Array.isArray(room.direction)
-          ? room.direction
-          : [];
-      } catch {
-        return [];
-      }
-    }, [room?.direction]);
-    
-    // Chuyển sang label để hiển thị
-    const bedTypeLabels = getLabelsByIds(bedTypeIds, type_bed);
-    const directionLabels = getLabelsByIds(directionIds, direction);
+  const bedTypeIds = React.useMemo(() => {
+    if (!room?.bed_type) return [];
+    try {
+      return typeof room.bed_type === "string"
+        ? JSON.parse(room.bed_type)
+        : Array.isArray(room.bed_type)
+        ? room.bed_type
+        : [];
+    } catch {
+      return [];
+    }
+  }, [room?.bed_type]);
+
+  const directionIds = React.useMemo(() => {
+    if (!room?.direction) return [];
+    try {
+      return typeof room.direction === "string"
+        ? JSON.parse(room.direction)
+        : Array.isArray(room.direction)
+        ? room.direction
+        : [];
+    } catch {
+      return [];
+    }
+  }, [room?.direction]);
+
+  // Chuyển sang label để hiển thị
+  const bedTypeLabels = getLabelsByIds(bedTypeIds, type_bed);
+  const directionLabels = getLabelsByIds(directionIds, direction);
   const area = room?.area_m2 ? `${room.area_m2}m²` : "-";
 
   // Parse hình ảnh phòng
@@ -323,45 +329,47 @@ export default function RoomDetail({
                 { label: "Diện tích", value: area },
                 {
                   label: "Loại giường",
-                  value: bedTypeLabels.length > 0 ? (
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                      {bedTypeLabels.map((label, i) => (
-                        <Chip
-                          key={i}
-                          label={label}
-                          size="small"
-                          sx={{
-                            bgcolor: "#e8f5e9",
-                            color: "#2e7d32",
-                            fontWeight: 500,
-                          }}
-                        />
-                      ))}
-                    </Box>
-                  ) : (
-                    "-"
-                  ),
+                  value:
+                    bedTypeLabels.length > 0 ? (
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                        {bedTypeLabels.map((label, i) => (
+                          <Chip
+                            key={i}
+                            label={label}
+                            size='small'
+                            sx={{
+                              bgcolor: "#e8f5e9",
+                              color: "#2e7d32",
+                              fontWeight: 500,
+                            }}
+                          />
+                        ))}
+                      </Box>
+                    ) : (
+                      "-"
+                    ),
                 },
                 {
                   label: "Hướng phòng",
-                  value: directionLabels.length > 0 ? (
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                      {directionLabels.map((label, i) => (
-                        <Chip
-                          key={i}
-                          label={label}
-                          size="small"
-                          sx={{
-                            bgcolor: "#e3f2fd",
-                            color: "#1976d2",
-                            fontWeight: 500,
-                          }}
-                        />
-                      ))}
-                    </Box>
-                  ) : (
-                    "-"
-                  ),
+                  value:
+                    directionLabels.length > 0 ? (
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                        {directionLabels.map((label, i) => (
+                          <Chip
+                            key={i}
+                            label={label}
+                            size='small'
+                            sx={{
+                              bgcolor: "#e3f2fd",
+                              color: "#1976d2",
+                              fontWeight: 500,
+                            }}
+                          />
+                        ))}
+                      </Box>
+                    ) : (
+                      "-"
+                    ),
                 },
               ].map((item, idx) => (
                 <Grid item xs={12} sm={6} md={3} key={idx}>
@@ -386,9 +394,68 @@ export default function RoomDetail({
               Tiện ích phòng
             </Typography>
             <Box sx={{ mb: 4 }}>
-              <Typography color='#999' fontStyle='italic'>
-                Chưa có tiện ích nào được thiết lập
-              </Typography>
+              {(() => {
+                // Parse facilities từ DB (là JSON string dạng array id)
+                const facilityIds = React.useMemo<string[]>(() => {
+                  if (!room?.facilities) return [];
+                  try {
+                    const parsed =
+                      typeof room.facilities === "string"
+                        ? JSON.parse(room.facilities)
+                        : Array.isArray(room.facilities)
+                        ? room.facilities
+                        : [];
+                    return Array.isArray(parsed) ? parsed : [];
+                  } catch (e) {
+                    console.warn("Parse facilities error:", e);
+                    return [];
+                  }
+                }, [room?.facilities]);
+
+                // Map id → object đầy đủ (label + icon)
+                const selectedFacilities = facilities.filter((fac) =>
+                  facilityIds.includes(fac.id)
+                );
+
+                if (selectedFacilities.length === 0) {
+                  return (
+                    <Typography color='#999' fontStyle='italic'>
+                      Chưa có tiện ích nào được thiết lập
+                    </Typography>
+                  );
+                }
+
+                return (
+                  <Box
+                    sx={{ display: "flex", flexWrap: "wrap", gap: 2, mb: 4 }}>
+                    {selectedFacilities.map((fac) => (
+                      <Box
+                        key={fac.id}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1.5,
+                          bgcolor: "#f8f9fa",
+                          border: "1px solid #e9ecef",
+                          borderRadius: 3,
+                          px: 2,
+                          py: 1.5,
+                          minWidth: 140,
+                        }}>
+                        <Box
+                          component='img'
+                          src={fac.icon}
+                          alt={fac.name.vi}
+                          sx={{ width: 32, height: 32, objectFit: "contain" }}
+                        />
+                        <Typography fontWeight={500} fontSize='0.95rem'>
+                          {fac.name.vi}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                );
+              })()}
             </Box>
 
             {/* Hình ảnh */}

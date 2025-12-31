@@ -103,13 +103,8 @@ const CreateHotelController = (props: Props) => {
       );
 
       // facilities: gom các thông tin lại thành object JSON
-      const facilities = {
-        bed: JSON.stringify(room.bedType) || "",
-        area: `${room.area || 0}m²`,
-        max_guests: "2", // bạn có thể thêm field maxGuests vào form nếu muốn
-        direction: JSON.stringify(room.direction) || "",
-      };
-      roomForm.append("facilities", JSON.stringify(facilities));
+
+      roomForm.append("facilities", JSON.stringify(room.facilities));
 
       // Giá tiền
       roomForm.append(
@@ -142,10 +137,7 @@ const CreateHotelController = (props: Props) => {
 
       // Các field còn lại cũng phải JSON string có "vi"
       roomForm.append("bed_type", JSON.stringify(room.bedType));
-      roomForm.append(
-        "direction",
-        JSON.stringify(room.direction)
-      );
+      roomForm.append("direction", JSON.stringify(room.direction));
       roomForm.append("area_m2", room.area || "0");
       roomForm.append("max_guests", "2");
 
