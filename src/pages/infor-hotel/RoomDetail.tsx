@@ -106,7 +106,26 @@ export default function RoomDetail({
       }).format(price) + "đ"
     );
   };
+  const facilityIds = React.useMemo<string[]>(() => {
+    if (!room?.facilities) return [];
+    try {
+      const parsed =
+        typeof room.facilities === "string"
+          ? JSON.parse(room.facilities)
+          : Array.isArray(room.facilities)
+          ? room.facilities
+          : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      console.warn("Parse facilities error:", e);
+      return [];
+    }
+  }, [room?.facilities]);
 
+  const selectedFacilities = React.useMemo(
+    () => facilities.filter((fac) => facilityIds.includes(fac.id)),
+    [facilities, facilityIds]
+  );
   return (
     <Box sx={{ minHeight: "100vh" }}>
       {/* Dialog ngừng kinh doanh */}
@@ -265,6 +284,7 @@ export default function RoomDetail({
               onClick={() => {
                 const params = new URLSearchParams(searchParams);
                 params.set("manager_room", "true"); // thêm params mới
+                params.delete("room_id");
                 setSearchParams(params);
                 onNext("edit_detail");
               }}
@@ -396,7 +416,7 @@ export default function RoomDetail({
             <Box sx={{ mb: 4 }}>
               {(() => {
                 // Parse facilities từ DB (là JSON string dạng array id)
-                const facilityIds = React.useMemo<string[]>(() => {
+                const facilityIds = () => {
                   if (!room?.facilities) return [];
                   try {
                     const parsed =
@@ -410,11 +430,11 @@ export default function RoomDetail({
                     console.warn("Parse facilities error:", e);
                     return [];
                   }
-                }, [room?.facilities]);
+                };
 
                 // Map id → object đầy đủ (label + icon)
                 const selectedFacilities = facilities.filter((fac) =>
-                  facilityIds.includes(fac.id)
+                  facilityIds().includes(fac.id)
                 );
 
                 if (selectedFacilities.length === 0) {

@@ -31,8 +31,7 @@ const formatPrice = (price: number | null | undefined): string => {
     minimumFractionDigits: 0,
   }).format(price);
 };
-const ManagerRooms = ({ onNext, detailHotel, setRoom }: Props) => {
- 
+const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom }: Props) => {
   // Parse room_types từ props
   const roomTypes = React.useMemo(() => {
     if (!detailHotel || !Array.isArray(detailHotel.room_types)) {
@@ -48,21 +47,22 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom }: Props) => {
     }));
   }, [detailHotel]);
 
-  const [searchParams,setSearchParams] = useSearchParams();
-  useEffect(()=>{
-    
-    if(searchParams.get("room_id")){
-      setRoom(roomTypes.find((item)=>item.id == searchParams.get("room_id")));
-    onNext("detail");
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get("room_id")) {
+      setRoom(roomTypes.find((item) => item.id == searchParams.get("room_id")));
+      // onNext("detail");
     }
-  },[searchParams])
+  }, [searchParams]);
   const handleRoomClick = (room) => {
     setRoom(room);
     onNext("detail");
   };
 
   const totalRooms = roomTypes.length;
-
+  const displayedRooms = roomTypes.filter((acc) =>
+    acc.name.toLowerCase().includes(searchRoom.toLowerCase())
+  );
   return (
     <>
       <Paper
@@ -116,14 +116,14 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom }: Props) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {roomTypes.length === 0 ? (
+              {displayedRooms.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} align='center' sx={{ py: 6 }}>
                     <Typography color='#999'>Chưa có loại phòng nào</Typography>
                   </TableCell>
                 </TableRow>
               ) : (
-                roomTypes.map((room: any) => (
+                displayedRooms.map((room: any) => (
                   <TableRow key={room.id} hover>
                     {/* Tên loại phòng */}
                     <TableCell

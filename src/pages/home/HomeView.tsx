@@ -334,7 +334,8 @@ const PerformanceChart = ({
 
   subtitle,
   data,
-  markedDate,
+  markedDateStart,
+  markedDateEnd,
   dateRangeRevenueEvent,
   setDateRangeRevenueEvent,
   setRoomType,
@@ -361,16 +362,13 @@ const PerformanceChart = ({
   const isWeek = data?.end?.length === 7;
 
   const chartData = data?.end?.map((item, index) => {
-    const dateStr = item.date;
-
     return {
-      day: isWeek
-        ? dayLabels[index] // Tuần → Thứ Hai, Thứ Ba...
-        : dayjs(dateStr).format("DD/MM"), // Tháng → 01/12, 02/12...
-      prev: prevMap?.get(dateStr) ?? 0,
-      current: currentMap?.get(dateStr) ?? 0,
+      day: isWeek ? dayLabels[index] : dayjs(item.date).format("DD/MM"),
+      prev: data?.start?.[index]?.value ?? 0, // ✅ FIX
+      current: item.value ?? 0,
     };
   });
+
   // ===== TÍNH VALUE & CHANGE TỪ DATA =====
   const prevTotal =
     data?.start?.reduce((sum, item) => sum + (item.value || 0), 0) || 0;
@@ -390,6 +388,15 @@ const PerformanceChart = ({
 
   // Format text hiển thị
   const change = `${changePercent >= 0 ? "+" : ""}${changePercent.toFixed(1)}%`;
+  const startData = data?.start ?? [];
+  const endData = data?.end ?? [];
+
+  const maxValue = Math.max(
+    ...startData.map((i) => i.value),
+    ...endData.map((i) => i.value),
+    0
+  );
+  const yMax = maxValue <= 1 ? 2 : Math.ceil(maxValue * 1.2);
   return (
     <Card sx={{ borderRadius: 3, height: "100%" }}>
       <CardContent sx={{ pb: 4 }}>
@@ -443,7 +450,7 @@ const PerformanceChart = ({
           </Stack>
         )}
         {roomType && (
-          <Box>
+          <Box mb={3}>
             <RoomTypeSelect
               value={roomType}
               onChange={(newValue) => setRoomType(newValue)}
@@ -469,12 +476,8 @@ const PerformanceChart = ({
                 tick={{ fontSize: 12, fill: "#888" }}
                 axisLine={false}
                 tickLine={false}
-                ticks={
-                  isVisit
-                    ? [0, 2, 4, 6, 8, 10]
-                    : [0, 50, 100, 150, 200, 250, 300, 350, 400]
-                }
-                domain={isVisit ? [0, 10] : [0, 400]}
+                domain={[0, yMax]}
+                allowDecimals={false}
               />
               <Line
                 type='monotone'
@@ -507,13 +510,13 @@ const PerformanceChart = ({
                     fontSize: 13,
                   }}>
                   <Typography variant='subtitle2' fontWeight='bold'>
-                    {markedDate}
+                    {markedDateStart}
                   </Typography>
                   <Typography
                     variant='caption'
                     color='#3B82F6'
                     fontWeight='medium'>
-                    {markedDate}
+                    {markedDateEnd}
                   </Typography>
                 </Box>
               </foreignObject>
@@ -855,7 +858,7 @@ export default function HomeView({
   const navigate = useNavigate();
 
   return (
-    <Box sx={{  p: { xs: 2, sm: 3, md: 4 } }}>
+    <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
       {/* Header */}
       <NotificationPopover anchorEl={anchorEl} setAnchorEl={setAnchorEl} />
       <Stack
@@ -982,7 +985,10 @@ export default function HomeView({
             change='26% so với tuần trước'
             subtitle='Khách ghé thăm tăng – bạn hãy thêm những ưu đãi để hút khách hơn nữa'
             data={dataEventVisit}
-            markedDate='04/11/2025'
+            markedDateStart={dataEventVisit?.start?.[0]?.date}
+            markedDateEnd={
+              dataEventVisit?.end?.[dataEventVisit?.end?.length - 1]?.date
+            }
             setDateRangeRevenueEvent={setDateRangeRevenueEvent}
             dateRangeRevenueEvent={dateRangeRevenueEvent}
           />
@@ -994,7 +1000,10 @@ export default function HomeView({
             change='26% so với tuần trước'
             subtitle='Khách ít quan tâm – bạn hãy thử chiến dịch truyền thông để kéo lại sự chú ý'
             data={dataEventView}
-            markedDate='28/10/2025'
+            markedDateStart={dataEventView?.start?.[0]?.date}
+            markedDateEnd={
+              dataEventView?.end?.[dataEventView?.end?.length - 1]?.date
+            }
             setDateRangeRevenueEvent={setDateRangeRevenueEventView}
             dateRangeRevenueEvent={dateRangeRevenueEventView}
           />
@@ -1008,7 +1017,10 @@ export default function HomeView({
             change='26% so với tuần trước'
             subtitle='Đặt phòng đang tăng -  bạn hãy thêm những ưu đãi để hút khách hơn nữa'
             data={dataEventBooked}
-            markedDate='04/11/2025'
+            markedDateStart={dataEventBooked?.start?.[0]?.date}
+            markedDateEnd={
+              dataEventBooked?.end?.[dataEventBooked?.end?.length - 1]?.date
+            }
             setDateRangeRevenueEvent={setDateRangeRevenueEvent}
             dateRangeRevenueEvent={dateRangeRevenueEvent}
             setRoomType={setRoomTypeBooking}
@@ -1022,7 +1034,10 @@ export default function HomeView({
             change='26% so với tuần trước'
             subtitle='Khách nhận phòng giảm -  cần xem lại trải nghiệm khách khi nhận phòng'
             data={dataEventCheckin}
-            markedDate='28/10/2025'
+            markedDateStart={dataEventCheckin?.start?.[0]?.date}
+            markedDateEnd={
+              dataEventCheckin?.end?.[dataEventCheckin?.end?.length - 1]?.date
+            }
             setDateRangeRevenueEvent={setDateRangeRevenueEventView}
             dateRangeRevenueEvent={dateRangeRevenueEventView}
             setRoomType={setRoomTypeCheckin}
@@ -1062,7 +1077,7 @@ const Review = ({ dataReview }) => {
     rating_stats = {},
     recent_reviews = [],
   } = dataReview || {};
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const renderStars = (rating) => {
     return [...Array(5)].map((_, i) => (
       <Star
@@ -1087,7 +1102,7 @@ const Review = ({ dataReview }) => {
 
         <Button
           variant='outlined'
-          onClick={()=>navigate("/review")}
+          onClick={() => navigate("/review")}
           sx={{
             borderColor: "#98b720",
             color: "#98b720",

@@ -1,21 +1,44 @@
-import { Box, Typography, Button, Chip } from "@mui/material";
-import { ArrowBackIos, Edit as EditIcon, Star } from "@mui/icons-material";
+import {
+  Box,
+  Typography,
+  Button,
+  Chip,
+  TextField,
+  InputAdornment,
+} from "@mui/material";
+import {
+  ArrowBackIos,
+  Edit as EditIcon,
+  Search,
+  Star,
+} from "@mui/icons-material";
 import { Grid, Paper, Stack, Divider } from "@mui/material";
 import ManagerRooms from "./ManagerRooms";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getHotel } from "../../service/hotel";
+import RoomTypeManager from "./RoomTypeManager";
 
-export default function HotelDetail({ setAction, setRoom,detailHotel ,getHotelDetail}) {
+export default function HotelDetail({
+  setAction,
+  setRoom,
+  detailHotel,
+  getHotelDetail,
+}) {
   return (
     <Box sx={{ minHeight: "100vh" }}>
       <HotelHeader detailHotel={detailHotel} setAction={setAction} />
-      <HotelInfoDetail detailHotel={detailHotel} onNext={setAction} getHotelDetail={getHotelDetail} setRoom={setRoom} />
+      <HotelInfoDetail
+        detailHotel={detailHotel}
+        onNext={setAction}
+        getHotelDetail={getHotelDetail}
+        setRoom={setRoom}
+      />
     </Box>
   );
 }
 
-function HotelHeader({ setAction,detailHotel }) {
+function HotelHeader({ setAction, detailHotel }) {
   const parseVi = (str) => {
     if (!str) return "";
     try {
@@ -35,7 +58,7 @@ function HotelHeader({ setAction,detailHotel }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-       
+
         pt: 0,
       }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -77,8 +100,9 @@ function HotelHeader({ setAction,detailHotel }) {
   );
 }
 
-function HotelInfoDetail({ onNext, setRoom ,detailHotel,getHotelDetail}) {
+function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail }) {
   const [action, setAction] = useState("manager");
+  const [searchRoom, setSearchRoom] = useState("");
   const parseVi = (str) => {
     if (!str) return "";
     try {
@@ -88,17 +112,17 @@ function HotelInfoDetail({ onNext, setRoom ,detailHotel,getHotelDetail}) {
       return str;
     }
   };
-  const [searchParams,setSearchParams] = useSearchParams();
-  useEffect(()=>{
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
     if (searchParams.get("manager_room") == "true") {
       searchParams.delete("manager_room");
-      setAction("rooms")
+      setAction("rooms");
       setSearchParams(searchParams, { replace: true });
     }
-    if(searchParams.get("room_id")){
-      setAction("rooms")
+    if (searchParams.get("room_id")) {
+      setAction("rooms");
     }
-  },[searchParams])
+  }, [searchParams]);
   const hotelName = parseVi(detailHotel.name);
   const hotelAddress = parseVi(detailHotel.address);
   const hotelDescription = parseVi(detailHotel.description);
@@ -156,23 +180,83 @@ function HotelInfoDetail({ onNext, setRoom ,detailHotel,getHotelDetail}) {
             Loại phòng
           </Typography>
         </Box>
-        {action =="manager" &&
-        <Button
-          variant='contained'
-          startIcon={<EditIcon />}
-          onClick={() => onNext("edit_form")}
-          sx={{
-            bgcolor: "#98B720",
-            color: "white",
-            fontWeight: 600,
-            fontSize: 15,
-            px: 4,
-            py: 1.4,
-            borderRadius: "50px",
-            textTransform: "none",
-          }}>
-          Chỉnh sửa
-        </Button>}
+        {action == "manager" && (
+          <Button
+            variant='contained'
+            startIcon={<EditIcon />}
+            onClick={() => onNext("edit_form")}
+            sx={{
+              bgcolor: "#98B720",
+              color: "white",
+              fontWeight: 600,
+              fontSize: 15,
+              px: 4,
+              py: 1.4,
+              borderRadius: "50px",
+              textTransform: "none",
+            }}>
+            Chỉnh sửa
+          </Button>
+        )}
+        {action == "rooms" && (
+          <Box display={"flex"} alignItems={"center"} gap={2}>
+            <TextField
+              placeholder='Tìm loại phòng'
+              value={searchRoom}
+              onChange={(e) => setSearchRoom(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position='start'>
+                    <Search sx={{ color: "#999" }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                width: 280,
+                "& .MuiOutlinedInput-root": {
+                  height: 40,
+                  borderRadius: "24px",
+
+                  backgroundColor: "#fff",
+                  "& fieldset": {
+                    borderColor: "#cddc39", // Border mặc định
+                    borderWidth: "1px", // Tăng độ dày nếu muốn nổi bật hơn
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#c0ca33", // Hover: đậm hơn một chút (tùy chọn)
+                    borderWidth: "1px",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#cddc39 !important", // QUAN TRỌNG: Khi focus vẫn giữ màu này
+                    borderWidth: "1px",
+                    boxShadow: "0 0 0 3px rgba(205, 220, 57, 0.2)", // Hiệu ứng glow nhẹ (tùy chọn)
+                  },
+                  // Tắt màu legend primary khi focus (nếu có label)
+                  "&.Mui-focused .MuiInputLabel-root": {
+                    color: "#666",
+                  },
+                },
+              }}
+            />
+            <Button
+              variant='contained'
+              startIcon={<EditIcon />}
+              onClick={() => onNext("create_room")}
+              sx={{
+                bgcolor: "#98B720",
+                color: "white",
+                fontWeight: 600,
+                fontSize: 15,
+                px: 4,
+                py: 1.4,
+                borderRadius: "50px",
+                textTransform: "none",
+                height: "40px",
+              }}>
+              Tạo loại phòng
+            </Button>
+          </Box>
+        )}
       </Box>
 
       {action === "rooms" && (
@@ -181,6 +265,7 @@ function HotelInfoDetail({ onNext, setRoom ,detailHotel,getHotelDetail}) {
           setRoom={setRoom}
           detailHotel={detailHotel}
           getHotelDetail={getHotelDetail}
+          searchRoom={searchRoom}
         />
       )}
 

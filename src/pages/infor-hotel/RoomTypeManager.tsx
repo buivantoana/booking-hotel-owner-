@@ -28,9 +28,7 @@ import { KeyboardArrowLeft } from "@mui/icons-material";
 import { createRoomHotel, updateRoom } from "../../service/hotel";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { direction, type_bed } from "../../utils/utils";
-
-
+import { direction, facilities, type_bed } from "../../utils/utils";
 
 interface Pricing {
   hourly: {
@@ -94,7 +92,7 @@ export default function RoomTypeManager({
     activeTab: 0,
   });
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   // Helper parse JSON đa ngôn ngữ
   const parseVi = (field?: string) => {
     if (!field) return "";
@@ -105,7 +103,6 @@ export default function RoomTypeManager({
       return field;
     }
   };
-
 
   useEffect(() => {
     if (room && room.facilities) {
@@ -124,12 +121,12 @@ export default function RoomTypeManager({
     if (room) {
       const imagesArr = room.images
         ? (() => {
-          try {
-            return JSON.parse(room.images);
-          } catch {
-            return [];
-          }
-        })()
+            try {
+              return JSON.parse(room.images);
+            } catch {
+              return [];
+            }
+          })()
         : [];
 
       return {
@@ -232,8 +229,6 @@ export default function RoomTypeManager({
     // onFieldTouch?.(`room_${activeTab}_${field}`);
   };
 
- 
-
   // Cập nhật field
   const updateRoomField = <K extends keyof RoomType>(
     field: K,
@@ -265,7 +260,7 @@ export default function RoomTypeManager({
       formData.append("area_m2", room.area || "");
       formData.append("max_guests", "2");
 
-      formData.append("bed_type", JSON.stringify(room.bedType));        // mảng id
+      formData.append("bed_type", JSON.stringify(room.bedType)); // mảng id
       formData.append("direction", JSON.stringify(room.direction));
 
       if (room.pricing.hourly.enabled) {
@@ -300,16 +295,16 @@ export default function RoomTypeManager({
     };
 
     try {
-   
       const room = roomTypes[0];
       const formData = buildFormData(room);
-      formData.append("id", room.id);
+      let result;
+      if (isCreate) {
+        result = await createRoomHotel(idHotel, formData);
+      } else {
+        formData.append("id", room.id);
 
-      const result = await updateRoom(
-        searchParams.get("id"),
-        room.id,
-        formData
-      );
+        result = await updateRoom(searchParams.get("id"), room.id, formData);
+      }
 
       if (result?.room_type_id) {
         toast.success(result?.message);
@@ -327,7 +322,17 @@ export default function RoomTypeManager({
     <>
       <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
         <KeyboardArrowLeft
-          onClick={() => setAction(isCreate ? "manager" : "detail")}
+          onClick={() => {
+            if (isCreate) {
+              const params = new URLSearchParams(searchParams);
+              params.set("manager_room", "true"); // thêm params mới
+              params.delete("room_id");
+              setSearchParams(params);
+              setAction("edit_detail");
+            } else {
+              setAction("detail");
+            }
+          }}
           sx={{ fontSize: 30, mr: 1, cursor: "pointer" }}
         />
         <Box>
@@ -460,10 +465,17 @@ export default function RoomTypeManager({
                     multiple
                     options={type_bed}
                     getOptionLabel={(option) => option.label}
-                    value={type_bed.filter((opt) => current?.bedType.includes(opt.id))}
-                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    value={type_bed.filter((opt) =>
+                      current?.bedType.includes(opt.id)
+                    )}
+                    isOptionEqualToValue={(option, value) =>
+                      option.id === value.id
+                    }
                     onChange={(_, newValue) => {
-                      updateRoomField("bedType", newValue.map((v) => v.id));
+                      updateRoomField(
+                        "bedType",
+                        newValue.map((v) => v.id)
+                      );
                       handleTouch("bedType");
                     }}
                     disableClearable // ← quan trọng: ngăn xóa hết và tránh hiển thị dòng trống
@@ -471,7 +483,7 @@ export default function RoomTypeManager({
                       tagValue.map((option, index) => (
                         <Chip
                           label={option.label}
-                          size="small"
+                          size='small'
                           {...getTagProps({ index })}
                           key={index}
                         />
@@ -480,12 +492,16 @@ export default function RoomTypeManager({
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        placeholder={current?.bedType.length === 0 ? 'Chọn loại giường' : ''} // chỉ hiện placeholder khi chưa chọn
+                        placeholder={
+                          current?.bedType.length === 0
+                            ? "Chọn loại giường"
+                            : ""
+                        } // chỉ hiện placeholder khi chưa chọn
                         InputProps={{
                           ...params.InputProps,
                           startAdornment: (
                             <>
-                              <InputAdornment position="start">
+                              <InputAdornment position='start'>
                                 <BedIcon sx={{ color: "#999" }} />
                               </InputAdornment>
                               {params.InputProps.startAdornment}
@@ -497,7 +513,9 @@ export default function RoomTypeManager({
                             height: "auto",
                             minHeight: 50,
                             borderRadius: 1.5,
-                            "&.Mui-focused fieldset": { borderColor: "#a0d468" },
+                            "&.Mui-focused fieldset": {
+                              borderColor: "#a0d468",
+                            },
                           },
                         }}
                       />
@@ -522,17 +540,26 @@ export default function RoomTypeManager({
                     multiple
                     options={direction}
                     getOptionLabel={(option) => option.label}
-                    value={direction.filter((opt) => current?.direction.includes(opt.id)) || []}
-                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    value={
+                      direction.filter((opt) =>
+                        current?.direction.includes(opt.id)
+                      ) || []
+                    }
+                    isOptionEqualToValue={(option, value) =>
+                      option.id === value.id
+                    }
                     onChange={(_, newValue) => {
-                      updateRoomField("direction", newValue.map((v) => v.id));
+                      updateRoomField(
+                        "direction",
+                        newValue.map((v) => v.id)
+                      );
                       handleTouch("direction");
                     }}
                     renderTags={(tagValue, getTagProps) =>
                       tagValue.map((option, index) => (
                         <Chip
                           label={option.label}
-                          size="small"
+                          size='small'
                           {...getTagProps({ index })}
                           key={index}
                         />
@@ -547,7 +574,9 @@ export default function RoomTypeManager({
                           startAdornment: (
                             <>
                               <InputAdornment position='start'>
-                                <CompassCalibrationIcon sx={{ color: "#999" }} />
+                                <CompassCalibrationIcon
+                                  sx={{ color: "#999" }}
+                                />
                               </InputAdornment>
                               {params.InputProps.startAdornment}
                             </>
@@ -558,14 +587,18 @@ export default function RoomTypeManager({
                             height: "auto",
                             minHeight: 50,
                             borderRadius: 1.5,
-                            "&.Mui-focused fieldset": { borderColor: "#a0d468" },
+                            "&.Mui-focused fieldset": {
+                              borderColor: "#a0d468",
+                            },
                           },
                         }}
                       />
                     )}
                     renderOption={(props, option) => (
                       <li {...props}>
-                        <CompassCalibrationIcon sx={{ mr: 2, color: "#999", fontSize: 20 }} />
+                        <CompassCalibrationIcon
+                          sx={{ mr: 2, color: "#999", fontSize: 20 }}
+                        />
                         {option.label}
                       </li>
                     )}
@@ -620,8 +653,8 @@ export default function RoomTypeManager({
 
         {/* Upload ảnh */}
         <RoomImagesUpload
-        setSelectedIds={setSelectedIds}
-        selectedIds={selectedIds}
+          setSelectedIds={setSelectedIds}
+          selectedIds={selectedIds}
           previews={current?.imagePreviews || []}
           files={current?.images || []}
           onChange={(previews, files) => {
@@ -650,7 +683,7 @@ function RoomImagesUpload({
   files,
   onChange,
   setSelectedIds,
-  selectedIds
+  selectedIds,
 }: {
   previews: string[];
   files: File[];
@@ -705,14 +738,13 @@ function RoomImagesUpload({
           </Typography>
         </Box>
         <Box width={{ xs: "100%", md: "65%" }}>
-
-
-          <FacilitySelector  setSelectedIds={setSelectedIds}
-        selectedIds={selectedIds} />
+          <FacilitySelector
+            setSelectedIds={setSelectedIds}
+            selectedIds={selectedIds}
+          />
 
           <Typography
             variant='body1'
-
             sx={{ fontSize: "0.875rem", fontWeight: "bold" }}>
             Thêm ảnh phòng
           </Typography>
@@ -1040,120 +1072,116 @@ function RoomPricingSection({
 }
 
 import {
-
   Modal,
-
   Stack,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-
-
-
+} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 
 const modalStyle = {
-  position: 'absolute' as 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: { xs: '90%', sm: 500 },
-  maxHeight: '80vh',
-  bgcolor: 'background.paper',
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: { xs: "90%", sm: 500 },
+  maxHeight: "80vh",
+  bgcolor: "background.paper",
   borderRadius: 3,
   boxShadow: 24,
   p: 3,
-  overflow: 'hidden',
-  display: 'flex',
-  flexDirection: 'column',
+  overflow: "hidden",
+  display: "flex",
+  flexDirection: "column",
 };
 
-function FacilitySelector({selectedIds,setSelectedIds}) {
+function FacilitySelector({ selectedIds, setSelectedIds }) {
   const [open, setOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredFacilities = facilities.filter(fac =>
-    fac.name.vi.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    fac.name.en.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredFacilities = facilities.filter(
+    (fac) =>
+      fac.name.vi.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      fac.name.en.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleToggle = (id: string) => {
-    setSelectedIds(prev =>
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
   };
 
   const handleDelete = (id: string) => {
-    setSelectedIds(prev => prev.filter(x => x !== id));
+    setSelectedIds((prev) => prev.filter((x) => x !== id));
   };
 
   const handleSubmit = () => {
-    console.log('Selected facility IDs:', selectedIds);
+    console.log("Selected facility IDs:", selectedIds);
     // Ở đây bạn có thể truyền selectedIds lên parent component hoặc API
     setOpen(false);
   };
 
-  const selectedFacilities = facilities.filter(f => selectedIds.includes(f.id));
+  const selectedFacilities = facilities.filter((f) =>
+    selectedIds.includes(f.id)
+  );
 
   return (
     <Box mb={2}>
-
-      <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"}>
+      <Box
+        display={"flex"}
+        alignItems={"center"}
+        justifyContent={"space-between"}>
         <Typography
           variant='body1'
-
           sx={{ fontSize: "0.875rem", fontWeight: "bold" }}>
           Thêm tiện ích
         </Typography>
         <TextField
-
-          placeholder="Chọn tiện ích"
-          value={selectedFacilities.map(f => f.name.vi).join(', ') || ''}
+          placeholder='Chọn tiện ích'
+          value={selectedFacilities.map((f) => f.name.vi).join(", ") || ""}
           onClick={() => setOpen(true)}
           InputProps={{
             readOnly: true,
-            startAdornment: selectedFacilities.length > 0 ? (
-              <InputAdornment position="start">
-                <SearchIcon sx={{ color: 'text.secondary' }} />
-              </InputAdornment>
-            ) : null,
-            endAdornment: selectedFacilities.length > 0 ? null : (
-              <InputAdornment position="end">
-                <SearchIcon sx={{ color: 'text.secondary' }} />
-              </InputAdornment>
-            ),
+            startAdornment:
+              selectedFacilities.length > 0 ? (
+                <InputAdornment position='start'>
+                  <SearchIcon sx={{ color: "text.secondary" }} />
+                </InputAdornment>
+              ) : null,
+            endAdornment:
+              selectedFacilities.length > 0 ? null : (
+                <InputAdornment position='end'>
+                  <SearchIcon sx={{ color: "text.secondary" }} />
+                </InputAdornment>
+              ),
           }}
           sx={{
-
             "& .MuiOutlinedInput-root": {
               borderRadius: 2,
               height: "40px",
               "&.Mui-focused fieldset": { borderColor: "#a0d468" },
             },
-            cursor: "pointer"
+            cursor: "pointer",
           }}
         />
 
-
-
         <Modal open={open} onClose={() => setOpen(false)}>
           <Box sx={modalStyle}>
-            <Typography variant="h6" mb={2}>
+            <Typography variant='h6' mb={2}>
               Chọn tiện ích
             </Typography>
 
             <TextField
               fullWidth
-              placeholder="Tìm kiếm tiện ích"
+              placeholder='Tìm kiếm tiện ích'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               InputProps={{
                 startAdornment: (
-                  <InputAdornment position="start">
+                  <InputAdornment position='start'>
                     <SearchIcon />
                   </InputAdornment>
                 ),
@@ -1161,18 +1189,23 @@ function FacilitySelector({selectedIds,setSelectedIds}) {
               sx={{ mb: 2 }}
             />
 
-            <Box sx={{ flex: 1, overflow: 'auto' }}>
+            <Box sx={{ flex: 1, overflow: "auto" }}>
               <List disablePadding>
                 {filteredFacilities.map((fac, index) => (
                   <React.Fragment key={fac.id}>
                     <ListItem disablePadding>
                       <ListItemButton onClick={() => handleToggle(fac.id)}>
                         <ListItemIcon sx={{ minWidth: 40 }}>
-                          <img src={fac.icon} alt={fac.name.vi} width={28} height={28} />
+                          <img
+                            src={fac.icon}
+                            alt={fac.name.vi}
+                            width={28}
+                            height={28}
+                          />
                         </ListItemIcon>
                         <ListItemText primary={fac.name.vi} />
                         <Checkbox
-                          edge="end"
+                          edge='end'
                           checked={selectedIds.includes(fac.id)}
                         />
                       </ListItemButton>
@@ -1184,17 +1217,16 @@ function FacilitySelector({selectedIds,setSelectedIds}) {
             </Box>
 
             <Button
-              variant="contained"
+              variant='contained'
               fullWidth
               onClick={handleSubmit}
               sx={{
                 mt: 3,
-                bgcolor: '#7CB518',
-                '&:hover': { bgcolor: '#7CB518' },
+                bgcolor: "#7CB518",
+                "&:hover": { bgcolor: "#7CB518" },
                 borderRadius: 8,
                 py: 1.5,
-              }}
-            >
+              }}>
               Chọn tiếp tục
             </Button>
           </Box>
@@ -1202,17 +1234,17 @@ function FacilitySelector({selectedIds,setSelectedIds}) {
       </Box>
       {/* Hiển thị các chip đã chọn bên dưới input */}
       {selectedFacilities.length > 0 && (
-        <Stack direction="row" flexWrap="wrap" gap={1} mt={2}>
-          {selectedFacilities.map(fac => (
+        <Stack direction='row' flexWrap='wrap' gap={1} mt={2}>
+          {selectedFacilities.map((fac) => (
             <Chip
               key={fac.id}
               label={fac.name.vi}
               onDelete={() => handleDelete(fac.id)}
               deleteIcon={<CloseIcon />}
               sx={{
-                bgcolor: '#7CB518',
-                color: 'white',
-                '& .MuiChip-deleteIcon': { color: 'red' },
+                bgcolor: "#7CB518",
+                color: "white",
+                "& .MuiChip-deleteIcon": { color: "red" },
               }}
             />
           ))}

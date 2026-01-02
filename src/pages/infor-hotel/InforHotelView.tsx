@@ -35,6 +35,7 @@ import HotelEditForm from "./HotelEditForm";
 import RoomDetail from "./RoomDetail";
 import { getHotel, toggleHotels } from "../../service/hotel";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import RoomTypeManager from "./RoomTypeManager";
 
 // Component menu thao tác
 function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
@@ -122,23 +123,32 @@ export default function InforHotelView({ hotels, getDataHotels }) {
   const active = hotels.filter((h) => h.status === "active").length;
   const inactive = total - active;
   const [detailHotel, setDetailHotel] = useState({});
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
-    if (searchParams.get("id")|| searchParams.get("hotel_id")) {
+    if (searchParams.get("id") || searchParams.get("hotel_id")) {
       getHotelDetail();
     }
-    if(searchParams.get("hotel_id")){
+    if (searchParams.get("hotel_id")) {
       setAction("edit_detail");
+    }
+    if (searchParams.get("room_id")) {
+      setAction("detail");
     }
   }, [searchParams]);
   const getHotelDetail = async () => {
     try {
-      let result = await getHotel(searchParams.get("id")|| searchParams.get("hotel_id"));
+      let result = await getHotel(
+        searchParams.get("id") || searchParams.get("hotel_id")
+      );
       if (result?.id) {
         setDetailHotel(result);
-        if (room?.id||searchParams.get("room_id")) {
-          setRoom(result?.room_types.find((item) => item.id == (room?.id||searchParams.get("room_id"))));
+        if (room?.id || searchParams.get("room_id")) {
+          setRoom(
+            result?.room_types.find(
+              (item) => item.id == (room?.id || searchParams.get("room_id"))
+            )
+          );
         }
       }
     } catch (error) {
@@ -147,6 +157,16 @@ export default function InforHotelView({ hotels, getDataHotels }) {
   };
   return (
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, minHeight: "100vh" }}>
+      {action === "create_room" && (
+        <Box>
+          <RoomTypeManager
+            getHotelDetail={getHotelDetail}
+            setAction={setAction}
+            isCreate={true}
+            idHotel={detailHotel?.id}
+          />
+        </Box>
+      )}
       {action == "detail" && (
         <RoomDetail
           getHotelDetail={getHotelDetail}
