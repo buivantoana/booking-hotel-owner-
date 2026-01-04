@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Box,
   Typography,
@@ -8,11 +8,45 @@ import {
   useMediaQuery,
   Card,
   Checkbox,
+  TextField,
+  Stack,
+  Chip,
+  Paper,
+  FormControl,
+  Select,
+  MenuItem,
+  InputAdornment,
+  FormControlLabel,
+  DialogContent,
+  Dialog,
 } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import LockIcon from "@mui/icons-material/Lock";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import LaunchIcon from "@mui/icons-material/Launch";
+import {
+  Close as CloseIcon,
+  AccessTime as AccessTimeIcon,
+  CheckCircle,
+  CalendarToday,
+  AccessTime,
+} from "@mui/icons-material";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { MobileDatePicker, MobileTimePicker } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
+import "dayjs/locale/vi";
+import { format, parseISO } from "date-fns";
+import { vi } from "date-fns/locale";
+import { useNavigate } from "react-router-dom";
+import SimpleDateSearchBar from "../../components/SimpleDateSearchBar";
+import HotelSelect from "../../components/HotelSelect";
+import { updateInventoryRooms } from "../../service/hotel";
+import { toast } from "react-toastify";
+
+dayjs.locale("vi");
 
 const parseVi = (value?: string) => {
   if (!value) return "";
@@ -24,6 +58,7 @@ const parseVi = (value?: string) => {
     return value; // không phải JSON
   }
 };
+
 export default function ManagerRoomView({
   setActive,
   active,
@@ -36,18 +71,24 @@ export default function ManagerRoomView({
   setIdHotel,
   setData,
   rentType,
-  getData
+  getData,
 }) {
   const isMobile = useMediaQuery("(max-width:600px)");
 
   const [openQuickBlock, setOpenQuickBlock] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [action, setAction] = useState("manager");
+  const [currentEditSlot, setCurrentEditSlot] = useState(null);
   const tabs = [
     { key: "hourly", label: "Theo giờ" },
     { key: "overnight", label: "Qua đêm" },
     { key: "daily", label: "Theo ngày" },
   ];
+
+  const handleOpenQuickBlock = (slotData) => {
+    setCurrentEditSlot(slotData);
+    setOpenQuickBlock(true);
+  };
 
   return (
     <>
@@ -77,9 +118,15 @@ export default function ManagerRoomView({
                   }}
                 />
 
-                <Box display='flex' sx={{cursor:"pointer"}} onClick={()=>{
-                  getData()
-                }} alignItems='center' gap={0.5} ml={2}>
+                <Box
+                  display='flex'
+                  sx={{ cursor: "pointer" }}
+                  onClick={() => {
+                    getData();
+                  }}
+                  alignItems='center'
+                  gap={0.5}
+                  ml={2}>
                   <RefreshIcon sx={{ fontSize: 18, color: "#7CB518" }} />
                   <Typography fontSize={13} color='#7CB518' fontWeight={500}>
                     Nhấn cập nhật dữ liệu
@@ -101,8 +148,6 @@ export default function ManagerRoomView({
                   Khóa phòng
                 </Typography>
               </Box> */}
-
-              
 
               {/* <Box
                 display='flex'
@@ -127,30 +172,32 @@ export default function ManagerRoomView({
               sx={{ background: "#fff" }}>
               {/* Tabs */}
               <Box display='flex' alignItems='center' gap={3}>
-                {tabs.filter((item)=>rentType.includes(item.key)).map((t) => (
-                  <Box
-                    key={t.key}
-                    sx={{ cursor: "pointer" }}
-                    onClick={() => {
-                      setData([]);
-                      setActive(t.key);
-                    }}>
-                    <Typography
-                      fontSize={17}
-                      fontWeight={500}
-                      sx={{
-                        color: active === t.key ? "#8BC34A" : "#555",
-                        borderBottom:
-                          active === t.key
-                            ? "2px solid #8BC34A"
-                            : "2px solid transparent",
-                        pb: 0.5,
-                        transition: "all 0.25s",
+                {tabs
+                  .filter((item) => rentType.includes(item.key))
+                  .map((t) => (
+                    <Box
+                      key={t.key}
+                      sx={{ cursor: "pointer" }}
+                      onClick={() => {
+                        setData([]);
+                        setActive(t.key);
                       }}>
-                      {t.label}
-                    </Typography>
-                  </Box>
-                ))}
+                      <Typography
+                        fontSize={17}
+                        fontWeight={500}
+                        sx={{
+                          color: active === t.key ? "#8BC34A" : "#555",
+                          borderBottom:
+                            active === t.key
+                              ? "2px solid #8BC34A"
+                              : "2px solid transparent",
+                          pb: 0.5,
+                          transition: "all 0.25s",
+                        }}>
+                        {t.label}
+                      </Typography>
+                    </Box>
+                  ))}
               </Box>
               {/* Date Range */}
               <SimpleDateSearchBar value={dateRange} onChange={setDateRange} />
@@ -161,13 +208,13 @@ export default function ManagerRoomView({
                   {data?.room_types?.map((item) => {
                     return (
                       <RoomScheduleTableHourly
-                        handleOpenQuickBlock={() => setOpenQuickBlock(true)}
+                        handleOpenQuickBlock={handleOpenQuickBlock}
                         handleOpenEdit={() => setOpenEdit(true)}
                         data={{
                           ...item,
                           end_time: data.end_time,
                           start_time: data.start_time,
-                          hotel_id:data?.hotel_id
+                          hotel_id: data?.hotel_id,
                         }}
                       />
                     );
@@ -179,13 +226,13 @@ export default function ManagerRoomView({
                   {data?.room_types?.map((item) => {
                     return (
                       <RoomScheduleTableDaily
-                        handleOpenQuickBlock={() => setOpenQuickBlock(true)}
+                        handleOpenQuickBlock={handleOpenQuickBlock}
                         handleOpenEdit={() => setOpenEdit(true)}
                         data={{
                           ...item,
                           end_time: data.end_time,
                           start_time: data.start_time,
-                          hotel_id:data?.hotel_id
+                          hotel_id: data?.hotel_id,
                         }}
                       />
                     );
@@ -197,13 +244,13 @@ export default function ManagerRoomView({
                   {data?.room_types?.map((item) => {
                     return (
                       <RoomScheduleTableOvernight
-                        handleOpenQuickBlock={() => setOpenQuickBlock(true)}
+                        handleOpenQuickBlock={handleOpenQuickBlock}
                         handleOpenEdit={() => setOpenEdit(true)}
                         data={{
                           ...item,
                           end_time: data.end_time,
                           start_time: data.start_time,
-                          hotel_id:data?.hotel_id
+                          hotel_id: data?.hotel_id,
                         }}
                       />
                     );
@@ -215,6 +262,9 @@ export default function ManagerRoomView({
           <QuickBlockDialog
             openQuickBlock={openQuickBlock}
             onClose={() => setOpenQuickBlock(false)}
+            currentSlot={currentEditSlot}
+            idHotel={idHotel}
+            onSuccess={getData}
           />
           <EditOperationDialog
             openEdit={openEdit}
@@ -225,37 +275,125 @@ export default function ManagerRoomView({
     </>
   );
 }
-("use client");
+function QuickBlockDialog({
+  openQuickBlock,
+  onClose,
+  currentSlot,
+  idHotel,
+  onSuccess,
+}) {
+  const [blockType, setBlockType] = useState("hourly");
+  const [dateRange, setDateRange] = useState({
+    checkIn: dayjs(),
+    checkOut: dayjs().add(1, "day"),
+  });
+  const [startTime, setStartTime] = useState(dayjs().hour(15).minute(0));
+  const [endTime, setEndTime] = useState(dayjs().hour(16).minute(0));
+  const [availableRooms, setAvailableRooms] = useState(0);
+  const [reason, setReason] = useState("");
+  const [note, setNote] = useState("");
+  console.log("AAAAA currentSlot", currentSlot);
+  // Đồng bộ dữ liệu khi currentSlot thay đổi (mỗi lần mở dialog với slot mới)
+  useEffect(() => {
+    if (!currentSlot || !openQuickBlock) {
+      // Reset về mặc định nếu không có slot hoặc dialog đóng
+      setBlockType("hourly");
+      setDateRange({
+        checkIn: dayjs(),
+        checkOut: dayjs().add(1, "day"),
+      });
+      setStartTime(dayjs().hour(15).minute(0));
+      setEndTime(dayjs().hour(16).minute(0));
+      setAvailableRooms(0);
+      setReason("");
+      setNote("");
+      return;
+    }
 
-import {
-  Dialog,
-  DialogContent,
-  Select,
-  MenuItem,
-  FormControl,
-  Stack,
-  Chip,
-  Paper,
-} from "@mui/material";
-import {
-  Close as CloseIcon,
-  AccessTime as AccessTimeIcon,
-  CheckCircle,
-} from "@mui/icons-material";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs from "dayjs";
-import "dayjs/locale/vi";
-import { format, parseISO } from "date-fns";
-import { vi } from "date-fns/locale";
-dayjs.locale("vi");
+    // Fill dữ liệu từ currentSlot
+    setBlockType(currentSlot.rent_type || "hourly");
+    setAvailableRooms(currentSlot.available_rooms ?? 0);
+    setReason(currentSlot.reason || "");
+    setNote(currentSlot.note || "");
 
-function QuickBlockDialog({ openQuickBlock, onClose }) {
-  const [blockType] = useState("Theo giờ");
-  const [startDate] = useState(dayjs("19/11/2025", "DD/MM/YYYY"));
-  const [endDate] = useState(dayjs("21/11/2025", "DD/MM/YYYY"));
-  const [startTime] = useState(dayjs().hour(15).minute(0));
-  const [endTime] = useState(dayjs().hour(16).minute(0));
+    const startDayjs = dayjs(currentSlot.start_time);
+    const endDayjs = dayjs(currentSlot.end_time);
+
+    // Set ngày
+    setDateRange({
+      checkIn: startDayjs,
+      checkOut: endDayjs,
+    });
+
+    // Nếu là hourly → set giờ chính xác
+    if (currentSlot.rent_type === "hourly") {
+      setStartTime(startDayjs);
+      setEndTime(endDayjs);
+    } else {
+      // Daily / Overnight → set giờ mặc định (không dùng đến nhưng giữ cho an toàn)
+      setStartTime(dayjs().hour(0).minute(0));
+      setEndTime(dayjs().hour(23).minute(59));
+    }
+  }, [currentSlot, openQuickBlock]);
+
+  const isHourly = blockType === "hourly"; // Dựa trên blockType hiện tại (người dùng có thể đổi)
+
+  const getRentLabel = (type: string) => {
+    switch (type) {
+      case "hourly":
+        return "Theo giờ";
+      case "overnight":
+        return "Qua đêm";
+      case "daily":
+        return "Theo ngày";
+      default:
+        return "";
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!currentSlot?.room_type_id) {
+      alert("Thiếu thông tin loại phòng!");
+      return;
+    }
+
+    let startISO = dateRange.checkIn.format("YYYY-MM-DD");
+    let endISO = dateRange.checkOut.format("YYYY-MM-DD");
+
+    if (isHourly) {
+      startISO += `T${startTime.format("HH:mm")}:00+07:00`;
+      endISO += `T${endTime.format("HH:mm")}:00+07:00`;
+    } else {
+      startISO += "T00:00:00+07:00";
+      endISO += "T23:59:59+07:00";
+    }
+
+    const body = {
+      room_type_id: currentSlot.room_type_id,
+      rent_type: blockType,
+      start_time: startISO,
+      end_time: endISO,
+      available_rooms: availableRooms >= 0 ? availableRooms : 0,
+      reason: reason || undefined,
+      note: note || undefined,
+    };
+
+    console.log("Gửi API:", body); // Debug
+
+    try {
+      const result = await updateInventoryRooms(idHotel, body);
+      if (result?.status == "created") {
+        toast.success("Khóa phòng thành công");
+        onSuccess();
+        onClose();
+      } else {
+        toast.error("Khóa phòng thất bại");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Lỗi kết nối mạng!");
+    }
+  };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='vi'>
@@ -263,16 +401,8 @@ function QuickBlockDialog({ openQuickBlock, onClose }) {
         open={openQuickBlock}
         maxWidth='sm'
         fullWidth
-        fullScreen={typeof window !== "undefined" && window.innerWidth < 600}
-        PaperProps={{
-          sx: {
-            m: 0,
-            borderRadius: { xs: 0, sm: "24px" },
-            overflow: "hidden",
-            boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
-          },
-        }}>
-        {/* Header */}
+        fullScreen={window.innerWidth < 600}
+        onClose={onClose}>
         <Box
           sx={{
             px: 3,
@@ -283,254 +413,230 @@ function QuickBlockDialog({ openQuickBlock, onClose }) {
           <Typography
             variant='h6'
             sx={{ fontWeight: 600, fontSize: "18px", color: "#333" }}>
-            Khóa nhanh
+            Khóa nhanh / Cập nhật số phòng
           </Typography>
-          <IconButton sx={{ position: "absolute", right: 12, top: 12 }}>
-            <CloseIcon onClick={onClose} sx={{ fontSize: 20 }} />
+          <IconButton
+            onClick={onClose}
+            sx={{ position: "absolute", right: 12, top: 12 }}>
+            <CloseIcon sx={{ fontSize: 20 }} />
           </IconButton>
         </Box>
 
         <DialogContent sx={{ bgcolor: "#fff", p: 3 }}>
           <Stack spacing={3.5}>
-            {/* Khách sạn */}
+            {/* Loại đặt phòng */}
             <Box
-              display={"flex"}
-              justifyContent={"space-between"}
-              alignItems={"center"}>
+              display='flex'
+              justifyContent='space-between'
+              alignItems='center'>
               <Typography fontSize={15} color='#888' fontWeight={500}>
-                Khách sạn muốn khóa:
+                Loại đặt phòng
               </Typography>
-              <Box
-                sx={{
-                  mt: 0.5,
-                  fontWeight: 600,
-                  fontSize: "15px",
-                  color: "#333",
-                }}>
-                Khách sạn 123
-              </Box>
-            </Box>
-
-            {/* Loại phòng */}
-            <Box
-              display={"flex"}
-              justifyContent={"space-between"}
-              alignItems={"center"}>
-              <Typography fontSize={15} color='#888' fontWeight={500}>
-                Loại phòng:
-              </Typography>
-              <Box
-                sx={{
-                  mt: 0.5,
-                  fontWeight: 600,
-                  fontSize: "15px",
-                  color: "#1b5e20",
-                }}>
-                Vip123
-              </Box>
-            </Box>
-
-            {/* Loại đặt phòng muốn khóa */}
-            <Box
-              display={"flex"}
-              justifyContent={"space-between"}
-              alignItems={"center"}>
-              <Typography fontSize={13} color='#888' fontWeight={500}>
-                Loại đặt phòng muốn khóa
-              </Typography>
-              <FormControl fullWidth sx={{ mt: 0.8, width: "60%" }}>
+              <FormControl sx={{ width: "60%" }}>
                 <Select
                   value={blockType}
+                  onChange={(e) => setBlockType(e.target.value as string)}
                   size='small'
-                  displayEmpty
-                  sx={{
-                    "& .MuiSelect-select": { py: 1.6, fontSize: "14px" },
-                    borderRadius: "8px",
-                    height: "40px",
-                  }}>
-                  <MenuItem value='Theo giờ'>Theo giờ</MenuItem>
-                  <MenuItem value='Qua đêm'>Qua đêm</MenuItem>
-                  <MenuItem value='Theo ngày'>Theo ngày</MenuItem>
+                  sx={{ borderRadius: "32px", height: 40 }}>
+                  <MenuItem value='hourly'>Theo giờ</MenuItem>
+                  <MenuItem value='overnight'>Qua đêm</MenuItem>
+                  <MenuItem value='daily'>Theo ngày</MenuItem>
                 </Select>
               </FormControl>
             </Box>
 
             {/* Khoảng thời gian */}
             <Box
-              display={"flex"}
-              justifyContent={"space-between"}
-              alignItems={"center"}>
-              <Typography fontSize={13} color='#888' fontWeight={500}>
+              display='flex'
+              justifyContent='space-between'
+              alignItems='center'>
+              <Typography fontSize={15} color='#888' fontWeight={500}>
                 Khoảng thời gian
               </Typography>
-              <Stack
-                direction='row'
-                alignItems='center'
-                width={"60%"}
-                spacing={1.5}
-                mt={1}>
-                <MobileDatePicker
-                  value={startDate}
-                  format='DD/MM/YYYY'
-                  slotProps={{
-                    textField: {
-                      size: "small",
-                      fullWidth: true,
-                      sx: { "& .MuiInputBase-root": { borderRadius: "8px" } },
-                    },
-                  }}
-                />
-                <Typography color='#aaa' fontSize={14}>
-                  —
-                </Typography>
-                <MobileDatePicker
-                  value={endDate}
-                  format='DD/MM/YYYY'
-                  slotProps={{
-                    textField: {
-                      size: "small",
-                      fullWidth: true,
-                      sx: { "& .MuiInputBase-root": { borderRadius: "8px" } },
-                    },
-                  }}
-                />
-              </Stack>
+              <SimpleDateSearchBar value={dateRange} onChange={setDateRange} />
             </Box>
 
-            {/* Khung giờ */}
+            {/* Khung giờ - CHỈ HIỆN khi blockType là hourly */}
+            {isHourly && (
+              <Box
+                display='flex'
+                justifyContent='space-between'
+                alignItems='center'>
+                <Typography fontSize={15} color='#888' fontWeight={500}>
+                  Khung giờ
+                </Typography>
+                <Stack
+                  direction='row'
+                  alignItems='center'
+                  width='60%'
+                  spacing={2}>
+                  <MobileTimePicker
+                    value={startTime}
+                    onChange={setStartTime}
+                    ampm={false}
+                    slotProps={{
+                      textField: {
+                        size: "small",
+                        sx: {
+                          "& .MuiInputBase-root": { borderRadius: "32px" },
+                        },
+                        InputProps: {
+                          endAdornment: (
+                            <AccessTimeIcon
+                              sx={{ fontSize: 18, color: "#999" }}
+                            />
+                          ),
+                        },
+                      },
+                    }}
+                  />
+                  <Typography color='#aaa' fontSize={18}>
+                    —
+                  </Typography>
+                  <MobileTimePicker
+                    value={endTime}
+                    onChange={setEndTime}
+                    ampm={false}
+                    slotProps={{
+                      textField: {
+                        size: "small",
+                        sx: {
+                          "& .MuiInputBase-root": { borderRadius: "32px" },
+                        },
+                        InputProps: {
+                          endAdornment: (
+                            <AccessTimeIcon
+                              sx={{ fontSize: 18, color: "#999" }}
+                            />
+                          ),
+                        },
+                      },
+                    }}
+                  />
+                </Stack>
+              </Box>
+            )}
+
+            {/* Số phòng còn lại */}
             <Box
-              display={"flex"}
-              justifyContent={"space-between"}
-              alignItems={"center"}>
-              <Typography fontSize={13} color='#888' fontWeight={500}>
-                Khung giờ
+              display='flex'
+              justifyContent='space-between'
+              alignItems='center'>
+              <Typography fontSize={15} color='#888' fontWeight={500}>
+                Số phòng còn lại
               </Typography>
-              <Stack
-                direction='row'
-                alignItems='center'
-                width={"60%"}
-                spacing={2}
-                mt={1}>
-                <MobileTimePicker
-                  value={startTime}
-                  ampm={false}
-                  slotProps={{
-                    textField: {
-                      size: "small",
-                      placeholder: "15:00",
-                      sx: { "& .MuiInputBase-root": { borderRadius: "8px" } },
-                      InputProps: {
-                        endAdornment: (
-                          <AccessTimeIcon
-                            sx={{ fontSize: 18, color: "#999" }}
-                          />
-                        ),
-                      },
-                    },
-                  }}
-                />
-                <Typography color='#aaa' fontSize={18}>
-                  —
-                </Typography>
-                <MobileTimePicker
-                  value={endTime}
-                  ampm={false}
-                  slotProps={{
-                    textField: {
-                      size: "small",
-                      placeholder: "16:00",
-                      sx: { "& .MuiInputBase-root": { borderRadius: "8px" } },
-                      InputProps: {
-                        endAdornment: (
-                          <AccessTimeIcon
-                            sx={{ fontSize: 18, color: "#999" }}
-                          />
-                        ),
-                      },
-                    },
-                  }}
-                />
-              </Stack>
+              <TextField
+                value={availableRooms}
+                onChange={(e) =>
+                  setAvailableRooms(parseInt(e.target.value) || 0)
+                }
+                type='number'
+                inputProps={{ min: 0 }}
+                size='small'
+                sx={{ width: 100 }}
+              />
             </Box>
 
-            {/* Hộp thông báo giống hệt */}
+            {/* Lý do */}
+            <Box
+              display='flex'
+              justifyContent='space-between'
+              alignItems='center'>
+              <Typography fontSize={15} color='#888' fontWeight={500}>
+                Lý do
+              </Typography>
+              <FormControl sx={{ width: "60%" }}>
+                <Select
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  displayEmpty
+                  size='small'
+                  sx={{ borderRadius: "32px", height: 40 }}>
+                  <MenuItem value=''>
+                    <em>Chọn lý do</em>
+                  </MenuItem>
+                  <MenuItem value='staff_shortage'>Thiếu nhân viên</MenuItem>
+                  <MenuItem value='maintenance'>Bảo trì</MenuItem>
+                  <MenuItem value='cleaning'>Dọn dẹp</MenuItem>
+                  <MenuItem value='other'>Khác</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+
+            {/* Ghi chú */}
+            <Box
+              display='flex'
+              justifyContent='space-between'
+              alignItems='center'>
+              <Typography fontSize={15} color='#888' fontWeight={500}>
+                Ghi chú
+              </Typography>
+              <TextField
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder='Ghi chú thêm...'
+                size='small'
+                sx={{ width: "60%" }}
+              />
+            </Box>
+
+            {/* Preview */}
             <Paper
               elevation={0}
               sx={{
                 p: 2,
-                backgroundColor: "#f5f8e9",
+                bgcolor: "#f5f8e9",
                 border: "1px solid #c8e6c9",
                 borderRadius: "12px",
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 1.5,
               }}>
-              <CheckCircle sx={{ fontSize: 18, color: "#66bb6a", mt: 0.3 }} />
-              <Box>
-                <Typography fontSize={13} color='#33691e' lineHeight={1.5}>
-                  Khách sẽ không thể đặt phòng tại{" "}
-                  <strong>Khách sạn 123</strong> đối với đặt phòng:
-                </Typography>
-                <Chip
-                  label='Theo giờ'
-                  size='small'
-                  sx={{
-                    mt: 1,
-                    bgcolor: "#98B720",
-                    color: "white",
-                    fontWeight: 600,
-                    height: 26,
-                    fontSize: "12px",
-                  }}
-                />
-                <Typography
-                  fontSize={13}
-                  color='#1b5e20'
-                  mt={1}
-                  fontWeight={500}>
-                  15:00 - 16:00 từ ngày 19/11/2025 - 21/11/2025
-                </Typography>
-              </Box>
+              <Stack direction='row' alignItems='flex-start' gap={1.5}>
+                <CheckCircle sx={{ fontSize: 18, color: "#66bb6a", mt: 0.3 }} />
+                <Box>
+                  <Typography fontSize={13} color='#33691e' lineHeight={1.5}>
+                    Cập nhật tồn kho: <strong>{availableRooms} phòng</strong>{" "}
+                    còn lại cho đặt phòng{" "}
+                    <strong>{getRentLabel(blockType)}</strong>
+                  </Typography>
+                  {isHourly && (
+                    <Typography
+                      fontSize={13}
+                      color='#1b5e20'
+                      mt={1}
+                      fontWeight={500}>
+                      {startTime.format("HH:mm")} - {endTime.format("HH:mm")} từ{" "}
+                      {dateRange.checkIn.format("DD/MM/YYYY")} đến{" "}
+                      {dateRange.checkOut.format("DD/MM/YYYY")}
+                    </Typography>
+                  )}
+                  {!isHourly && (
+                    <Typography
+                      fontSize={13}
+                      color='#1b5e20'
+                      mt={1}
+                      fontWeight={500}>
+                      Toàn ngày từ {dateRange.checkIn.format("DD/MM/YYYY")} đến{" "}
+                      {dateRange.checkOut.format("DD/MM/YYYY")}
+                    </Typography>
+                  )}
+                </Box>
+              </Stack>
             </Paper>
 
-            {/* Nút hành động - giống hệt ảnh */}
-            <Stack
-              direction='row'
-              justifyContent='space-between'
-              spacing={2}
-              mt={2}>
+            {/* Nút */}
+            <Stack direction='row' spacing={2} mt={2}>
               <Button
                 variant='outlined'
                 onClick={onClose}
-                sx={{
-                  flex: 1,
-                  borderRadius: "50px",
-                  borderColor: "#ddd",
-                  color: "#666",
-                  textTransform: "none",
-                  fontWeight: 500,
-                  py: 1.5,
-                  boxShadow: "none",
-                  "&:hover": { borderColor: "#ccc" },
-                }}>
+                fullWidth
+                sx={{ borderRadius: "50px", py: 1.5 }}>
                 Hủy
               </Button>
-
               <Button
                 variant='contained'
-                sx={{
-                  flex: 1,
-                  borderRadius: "50px",
-                  bgcolor: "#98B720",
-                  "&:hover": { bgcolor: "#4caf50" },
-                  color: "white",
-                  textTransform: "none",
-                  fontWeight: 600,
-                  py: 1.5,
-                  boxShadow: "none",
-                  fontSize: "15px",
-                }}>
-                Thêm lịch khóa phòng
+                onClick={handleSubmit}
+                fullWidth
+                sx={{ borderRadius: "50px", bgcolor: "#98B720", py: 1.5 }}>
+                Xác nhận cập nhật
               </Button>
             </Stack>
           </Stack>
@@ -539,36 +645,6 @@ function QuickBlockDialog({ openQuickBlock, onClose }) {
     </LocalizationProvider>
   );
 }
-import { TextField } from "@mui/material";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import LaunchIcon from "@mui/icons-material/Launch";
-import { MobileDatePicker, MobileTimePicker } from "@mui/x-date-pickers";
-
-// Định nghĩa type cho props
-
-interface Slot {
-  hour: string;
-  from: string;
-  to: string;
-  booked_rooms: number;
-  remaining_rooms: number;
-  status: string;
-}
-
-interface RoomScheduleTableHourlyProps {
-  handleOpenQuickBlock: () => void;
-  handleOpenEdit: () => void;
-  data: {
-    room_type_id: string;
-    start_time: string;
-    end_time: string;
-    slots: Slot[];
-    price_hourly: number;
-    price_hourly_increment: number;
-    currency: string;
-  };
-}
-
 // Nhóm slot theo ngày + giữ nguyên thứ tự giờ
 const groupSlotsByDate = (slots: Slot[]) => {
   const groups: { [key: string]: Slot[] } = {};
@@ -603,8 +679,11 @@ function RoomScheduleTableHourly({
   const dayGroups = groupSlotsByDate(data?.slots);
   const totalSlots = data?.slots?.length;
   const columnWidth = `${100 / totalSlots}%`;
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [editedValues, setEditedValues] = useState<{ [key: number]: number }>(
+    {}
+  );
   console.log("AAAA", dayGroups);
   return (
     <Box p={2} bgcolor='#fff'>
@@ -715,8 +794,10 @@ function RoomScheduleTableHourly({
             { label: parseVi(data?.name), isName: true },
             {
               label: "Tình trạng phòng",
-              // action: "Khóa nhanh",
-              onClick: handleOpenQuickBlock,
+              action: "Khóa nhanh",
+              onClick: () => {
+                handleOpenQuickBlock({ room_type_id: data?.room_type_id });
+              },
               isStatus: true,
             },
             { label: "Số phòng đặt", isBooked: true },
@@ -755,9 +836,11 @@ function RoomScheduleTableHourly({
                         {row.label} <KeyboardArrowUpIcon />
                       </Typography>
                       <Typography
-                      onClick={()=>{
-                        navigate(`/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`)
-                      }}
+                        onClick={() => {
+                          navigate(
+                            `/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`
+                          );
+                        }}
                         color='#98b720'
                         display='flex'
                         alignItems='center'
@@ -819,15 +902,42 @@ function RoomScheduleTableHourly({
                         {slot.booked_rooms}
                       </Typography>
                     )}
+
                     {row.isRemaining && (
                       <TextField
-                        defaultValue={slot.remaining_rooms}
-                        size='small'
-                        sx={{ width: 50 }}
-                        inputProps={{
-                          style: { textAlign: "center", fontWeight: 600 },
-                          readOnly: true
+                        value={editedValues[i] ?? slot.remaining_rooms}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setEditedValues((prev) => ({
+                            ...prev,
+                            [i]: val === "" ? undefined : parseInt(val, 10),
+                          }));
                         }}
+                        onBlur={(e) => {
+                          const newVal = parseInt(e.target.value, 10);
+                          console.log("AAAAA newVal", newVal);
+                          if (
+                            !isNaN(newVal) &&
+                            newVal !== slot.remaining_rooms
+                          ) {
+                            handleOpenQuickBlock({
+                              room_type_id: data.room_type_id,
+                              rent_type: "hourly", // hoặc "hourly" / "daily" / "overnight" tùy bảng
+                              start_time: slot.from,
+                              end_time: slot.to || slot.from, // overnight/daily có thể chỉ có date
+                              available_rooms: newVal,
+                              reason: "staff_shortage",
+                              note: "Thiếu nhân viên dọn phòng", // tùy chỉnh nếu cần
+                            });
+                          }
+                        }}
+                        type='number'
+                        size='small'
+                        inputProps={{
+                          min: 0,
+                          style: { textAlign: "center", fontWeight: 600 },
+                        }}
+                        sx={{ width: 60 }}
                       />
                     )}
                   </Box>
@@ -886,43 +996,23 @@ function RoomScheduleTableHourly({
   );
 }
 
-interface DailySlot {
-  date: string;
-  from: string;
-  to: string;
-  booked_rooms: number;
-  remaining_rooms: number;
-  status: string;
-}
-
-interface RoomScheduleTableDailyProps {
-  handleOpenQuickBlock: () => void;
-  handleOpenEdit: () => void;
-  data: {
-    room_type_id: string;
-    start_time: string;
-    end_time: string;
-    daily_slots: DailySlot[];
-    price_daily: number;
-    currency: string;
-  };
-}
-
 function RoomScheduleTableDaily({
   handleOpenQuickBlock,
   handleOpenEdit,
   data,
 }: RoomScheduleTableDailyProps) {
   const isMobile = useMediaQuery("(max-width:768px)");
-  const dailySlots = data?.slots; // 3 ngày
-  const totalDays = dailySlots?.length; // 3
+  const dailySlots = data?.slots; // Giả sử sửa thành data?.daily_slots nếu cần
+  const totalDays = dailySlots?.length;
   const columnWidth = `${100 / totalDays}%`;
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [editedValues, setEditedValues] = useState<{ [key: number]: number }>(
+    {}
+  );
 
   return (
     <Box p={isMobile ? 1 : 2} bgcolor='#fff'>
-      {/* CHỈ 1 THANH CUỘN DUY NHẤT */}
       <Box
         ref={scrollRef}
         sx={{
@@ -967,13 +1057,11 @@ function RoomScheduleTableDaily({
               <Box display='flex' borderBottom='2px solid #ddd' bgcolor='white'>
                 {dailySlots?.map((slot) => {
                   const dateObj = new Date(slot.date);
-                  const dayNum = dateObj && format(dateObj, "dd");
-                  const dayName =
-                    dateObj &&
-                    format(dateObj, "EEEE", { locale: vi })
-                      .replace("Chủ nhật", "CN")
-                      .replace("Thứ ", "thứ ")
-                      .toLowerCase();
+                  const dayNum = format(dateObj, "dd");
+                  const dayName = format(dateObj, "EEEE", { locale: vi })
+                    .replace("Chủ nhật", "CN")
+                    .replace("Thứ ", "thứ ")
+                    .toLowerCase();
 
                   return (
                     <Box
@@ -1009,11 +1097,17 @@ function RoomScheduleTableDaily({
 
           {/* CÁC DÒNG DỮ LIỆU */}
           {[
-            { label:  parseVi(data?.name), isName: true },
+            { label: parseVi(data?.name), isName: true },
             {
               label: "Tình trạng phòng",
-              // action: "Khóa nhanh",
+              action: "Khóa nhanh",
               onClick: handleOpenQuickBlock,
+              onClick: () => {
+                handleOpenQuickBlock({
+                  room_type_id: data?.room_type_id,
+                  rent_type: "daily",
+                });
+              },
               isStatus: true,
             },
             { label: "Số phòng đặt", isBooked: true },
@@ -1052,9 +1146,11 @@ function RoomScheduleTableDaily({
                         {row.label} <KeyboardArrowUpIcon />
                       </Typography>
                       <Typography
-                       onClick={()=>{
-                        navigate(`/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`)
-                      }}
+                        onClick={() => {
+                          navigate(
+                            `/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`
+                          );
+                        }}
                         color='#98b720'
                         display='flex'
                         alignItems='center'
@@ -1116,15 +1212,41 @@ function RoomScheduleTableDaily({
                         {slot.booked_rooms}
                       </Typography>
                     )}
+
                     {row.isRemaining && (
                       <TextField
-                        defaultValue={slot.remaining_rooms}
-                        size='small'
-                        sx={{ width: 50 }}
-                        inputProps={{
-                          style: { textAlign: "center", fontWeight: 600 },
-                          readOnly: true
+                        value={editedValues[i] ?? slot.remaining_rooms}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setEditedValues((prev) => ({
+                            ...prev,
+                            [i]: val === "" ? undefined : parseInt(val, 10),
+                          }));
                         }}
+                        onBlur={(e) => {
+                          const newVal = parseInt(e.target.value, 10);
+                          if (
+                            !isNaN(newVal) &&
+                            newVal !== slot.remaining_rooms
+                          ) {
+                            handleOpenQuickBlock({
+                              room_type_id: data.room_type_id,
+                              rent_type: "daily", // hoặc "hourly" / "daily" / "overnight" tùy bảng
+                              start_time: slot.from,
+                              end_time: slot.to || slot.from, // overnight/daily có thể chỉ có date
+                              available_rooms: newVal,
+                              reason: "staff_shortage",
+                              note: "Thiếu nhân viên dọn phòng", // tùy chỉnh nếu cần
+                            });
+                          }
+                        }}
+                        type='number'
+                        size='small'
+                        inputProps={{
+                          min: 0,
+                          style: { textAlign: "center", fontWeight: 600 },
+                        }}
+                        sx={{ width: 60 }}
                       />
                     )}
                   </Box>
@@ -1175,21 +1297,24 @@ function RoomScheduleTableDaily({
     </Box>
   );
 }
+
 function RoomScheduleTableOvernight({
   handleOpenQuickBlock,
   handleOpenEdit,
   data,
 }: RoomScheduleTableDailyProps) {
   const isMobile = useMediaQuery("(max-width:768px)");
-  const dailySlots = data?.slots; // 3 ngày
-  const totalDays = dailySlots?.length; // 3
+  const dailySlots = data?.slots; // Giả sử sửa thành data?.daily_slots nếu cần
+  const totalDays = dailySlots?.length;
   const columnWidth = `${100 / totalDays}%`;
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [editedValues, setEditedValues] = useState<{ [key: number]: number }>(
+    {}
+  );
 
   return (
     <Box p={isMobile ? 1 : 2} bgcolor='#fff'>
-      {/* CHỈ 1 THANH CUỘN DUY NHẤT */}
       <Box
         ref={scrollRef}
         sx={{
@@ -1276,11 +1401,16 @@ function RoomScheduleTableOvernight({
 
           {/* CÁC DÒNG DỮ LIỆU */}
           {[
-            { label:  parseVi(data?.name), isName: true },
+            { label: parseVi(data?.name), isName: true },
             {
               label: "Tình trạng phòng",
-              // action: "Khóa nhanh",
-              onClick: handleOpenQuickBlock,
+              action: "Khóa nhanh",
+              onClick: () => {
+                handleOpenQuickBlock({
+                  room_type_id: data?.room_type_id,
+                  rent_type: "overnight",
+                });
+              },
               isStatus: true,
             },
             { label: "Số phòng đặt", isBooked: true },
@@ -1319,9 +1449,11 @@ function RoomScheduleTableOvernight({
                         {row.label} <KeyboardArrowUpIcon />
                       </Typography>
                       <Typography
-                       onClick={()=>{
-                        navigate(`/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`)
-                      }}
+                        onClick={() => {
+                          navigate(
+                            `/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`
+                          );
+                        }}
                         color='#98b720'
                         display='flex'
                         alignItems='center'
@@ -1383,15 +1515,41 @@ function RoomScheduleTableOvernight({
                         {slot.booked_rooms}
                       </Typography>
                     )}
+
                     {row.isRemaining && (
                       <TextField
-                        defaultValue={slot.remaining_rooms}
-                        size='small'
-                        sx={{ width: 50 }}
-                        inputProps={{
-                          style: { textAlign: "center", fontWeight: 600 },
-                          readOnly: true
+                        value={editedValues[i] ?? slot.remaining_rooms}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setEditedValues((prev) => ({
+                            ...prev,
+                            [i]: val === "" ? undefined : parseInt(val, 10),
+                          }));
                         }}
+                        onBlur={(e) => {
+                          const newVal = parseInt(e.target.value, 10);
+                          if (
+                            !isNaN(newVal) &&
+                            newVal !== slot.remaining_rooms
+                          ) {
+                            handleOpenQuickBlock({
+                              room_type_id: data.room_type_id,
+                              rent_type: "overnight", // hoặc "hourly" / "daily" / "overnight" tùy bảng
+                              start_time: slot.from,
+                              end_time: slot.to || slot.from, // overnight/daily có thể chỉ có date
+                              available_rooms: newVal,
+                              reason: "staff_shortage",
+                              note: "Thiếu nhân viên dọn phòng", // tùy chỉnh nếu cần
+                            });
+                          }
+                        }}
+                        type='number'
+                        size='small'
+                        inputProps={{
+                          min: 0,
+                          style: { textAlign: "center", fontWeight: 600 },
+                        }}
+                        sx={{ width: 60 }}
                       />
                     )}
                   </Box>
@@ -1442,28 +1600,10 @@ function RoomScheduleTableOvernight({
     </Box>
   );
 }
-import {
-  Radio,
-  RadioGroup,
-  FormControlLabel,
-  InputAdornment,
-} from "@mui/material";
-import { CalendarToday, AccessTime } from "@mui/icons-material";
-
-import "dayjs/locale/vi";
-import LockRoomSetup from "./LockRoomSetup";
-import CreateRoom from "./CreateRoom";
-import SimpleDateSearchBar from "../../components/SimpleDateSearchBar";
-import Loading from "../../components/Loading";
-import HotelSelect from "../../components/HotelSelect";
-import { useNavigate } from "react-router-dom";
-
-dayjs.locale("vi");
 
 const daysOfWeek = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
 function EditOperationDialog({ openEdit, onClose }) {
-  const [open] = useState(false);
   const [selectedDays, setSelectedDays] = useState([
     "T2",
     "T3",
@@ -1584,7 +1724,7 @@ function EditOperationDialog({ openEdit, onClose }) {
                     }}
                   />
                   <Typography color='#aaa' fontSize={20}>
-                    —
+                    -
                   </Typography>
                   <MobileDatePicker
                     slots={{ openPickerIcon: CalendarToday }}
@@ -1642,7 +1782,7 @@ function EditOperationDialog({ openEdit, onClose }) {
                     }}
                   />
                   <Typography color='#aaa' fontSize={20}>
-                    —
+                    -
                   </Typography>
                   <MobileTimePicker
                     ampm={false}

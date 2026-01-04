@@ -118,7 +118,7 @@ const DateRangePicker = ({
       open={open}
       anchorEl={anchorEl}
       placement='bottom'
-      sx={{ zIndex: 50 }}>
+      sx={{ zIndex: 100000 }}>
       <Paper sx={{ mt: 1, borderRadius: 3, width: 680, overflow: "hidden" }}>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <Stack>
@@ -191,7 +191,7 @@ export default function SimpleDateSearchBar({
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <ClickAwayListener onClickAway={() => setOpen(false)}>
-        <Box zIndex={10}>
+        <Box>
           <Box maxWidth='lg'>
             <Box
               ref={dateRef}
