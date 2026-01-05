@@ -603,9 +603,9 @@ function QuickBlockDialog({
                       color='#1b5e20'
                       mt={1}
                       fontWeight={500}>
-                      {startTime.format("HH:mm")} - {endTime.format("HH:mm")} từ{" "}
-                      {dateRange.checkIn.format("DD/MM/YYYY")} đến{" "}
-                      {dateRange.checkOut.format("DD/MM/YYYY")}
+                      {startTime?.format("HH:mm")} - {endTime?.format("HH:mm")} từ{" "}
+                      {dateRange?.checkIn?.format("DD/MM/YYYY")} đến{" "}
+                      {dateRange?.checkOut?.format("DD/MM/YYYY")}
                     </Typography>
                   )}
                   {!isHourly && (
@@ -614,8 +614,8 @@ function QuickBlockDialog({
                       color='#1b5e20'
                       mt={1}
                       fontWeight={500}>
-                      Toàn ngày từ {dateRange.checkIn.format("DD/MM/YYYY")} đến{" "}
-                      {dateRange.checkOut.format("DD/MM/YYYY")}
+                      Toàn ngày từ {dateRange?.checkIn?.format("DD/MM/YYYY")} đến{" "}
+                      {dateRange?.checkOut?.format("DD/MM/YYYY")}
                     </Typography>
                   )}
                 </Box>

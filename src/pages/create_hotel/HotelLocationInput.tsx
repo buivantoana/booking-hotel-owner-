@@ -11,49 +11,30 @@ import {
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import SearchIcon from "@mui/icons-material/Search";
 import CheckIcon from "@mui/icons-material/Check";
-import MapIcon from "@mui/icons-material/Map";
 import {
   GoogleMap,
   LoadScript,
-  Marker,
-  InfoWindow,
-  MarkerClusterer,
 } from "@react-google-maps/api";
 import { useBookingContext } from "../../App";
-// Dữ liệu địa chỉ Việt Nam (cập nhật 2025 - mẫu đầy đủ, bạn có thể mở rộng)
-const vietnamData: Record<string, string[]> = {
-  "Hà Nội": [
-    "Ba Đình",
-    "Hoàn Kiếm",
-    "Đống Đa",
-    "Cầu Giấy",
-    "Hai Bà Trưng",
-    "Thanh Xuân",
-  ],
-  "TP. Hồ Chí Minh": [
-    "Quận 1",
-    "Quận 3",
-    "Quận 5",
-    "Quận 10",
-    "Bình Thạnh",
-    "Gò Vấp",
-    "Tân Bình",
-    "Phú Nhuận",
-  ],
-  "Đà Nẵng": ["Hải Châu", "Thanh Khê", "Sơn Trà", "Ngũ Hành Sơn", "Liên Chiểu"],
-  "Cần Thơ": ["Ninh Kiều", "Bình Thủy", "Cái Răng", "Ô Môn"],
-  "Hải Phòng": ["Hồng Bàng", "Lê Chân", "Ngô Quyền", "Hải An"],
-};
+import { getLocations } from "../../service/hotel";
+
+// Định nghĩa type cho location từ API
+interface Location {
+  id: string;
+  name: {
+    en: string;
+    vi: string;
+  };
+  total_hotels: number;
+}
+
 const wardsData: Record<string, string[]> = {
   "Đống Đa": ["Phường Phương Liên", "Phường Quốc Tử Giám", "Phường Trung Liệt"],
   "Ba Đình": ["Phường Ngọc Hà", "Phường Trúc Bạch"],
   "Hoàn Kiếm": ["Phường Hàng Buồm", "Phường Hàng Đào"],
-
   "Quận 1": ["Phường Bến Nghé", "Phường Nguyễn Thái Bình", "Phường Đa Kao"],
   "Quận 3": ["Phường 6", "Phường 7", "Phường 8"],
 };
-
-const provinces = Object.keys(vietnamData);
 
 export default function HotelLocationInput({
   onTempChange,
@@ -61,89 +42,91 @@ export default function HotelLocationInput({
   touched = {},
   onFieldTouch,
 }) {
-  const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [loadingLocations, setLoadingLocations] = useState(true);
+
+  // selectedProvince giờ là object đầy đủ { id, name: { vi } }
+  const [selectedProvince, setSelectedProvince] = useState<Location | null>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedWard, setSelectedWard] = useState<string | null>(null);
   const [address, setAddress] = useState("");
-  const [center, setCenter] = useState({
-    lat: 21.0285,
-    lng: 105.8542,
-  });
+  const [center, setCenter] = useState({ lat: 21.0285, lng: 105.8542 });
 
   const [districts, setDistricts] = useState<string[]>([]);
   const [wards, setWards] = useState<string[]>([]);
 
-  const containerStyle = {
-    width: "100%",
-    height: "100%",
-  };
   const context = useBookingContext();
-
   const dataRef = useRef({});
   const mapRef = useRef(null);
 
-  const [activeHotel, setActiveHotel] = useState(null);
   const onLoad = useCallback((map) => {
     mapRef.current = map;
   }, []);
 
+  // Gọi API lấy danh sách tỉnh/thành phố
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        setLoadingLocations(true);
+        const result = await getLocations();
+        // Giả sử API trả về { locations: [...] }
+        if (result?.locations && Array.isArray(result.locations)) {
+          setLocations(result.locations);
+        }
+      } catch (error) {
+        console.error("Error fetching locations:", error);
+      } finally {
+        setLoadingLocations(false);
+      }
+    };
+
+    fetchLocations();
+  }, []);
+
+  // Cập nhật dữ liệu tạm mỗi khi có thay đổi
   useEffect(() => {
     const newData = {
-      selectedProvince,
+      provinceId: selectedProvince?.id || null,
+      provinceName: selectedProvince?.name.vi || null,
       selectedDistrict,
       selectedWard,
       address,
       center,
     };
     dataRef.current = newData;
-
     onTempChange?.(newData);
   }, [selectedProvince, selectedDistrict, selectedWard, address, center]);
-  const handleTouch = (field: string) => {
-    onFieldTouch?.(field);
-  };
-  console.log("AAA dataCreateHotel", context?.state?.create_hotel);
+
+  // Khôi phục dữ liệu từ context khi mount
   useEffect(() => {
     const saved = context?.state?.create_hotel;
     if (!saved) return;
 
-    const {
-      selectedProvince,
-      selectedDistrict,
-      selectedWard,
-      address,
-      center,
-    } = saved;
+    // Khôi phục tỉnh/thành
+    if (saved.provinceId && locations.length > 0) {
+      const foundProvince = locations.find(loc => loc.id === saved.provinceId);
+      if (foundProvince) {
+        setSelectedProvince(foundProvince);
 
-    // 1. Load tỉnh trước
-    if (selectedProvince && provinces.includes(selectedProvince)) {
-      setSelectedProvince(selectedProvince);
-
-      // Lấy danh sách quận/huyện tương ứng
-      const newDistricts = vietnamData[selectedProvince] || [];
-      setDistricts(newDistricts);
-
-      // 2. Sau khi có districts → load district (dùng callback hoặc setTimeout nhỏ để đảm bảo state đã update)
-      if (selectedDistrict && newDistricts.includes(selectedDistrict)) {
-        // Dùng setTimeout 0 hoặc callback để chạy sau khi districts đã được set
-        setTimeout(() => {
-          setSelectedDistrict(selectedDistrict);
-
-          const newWards = wardsData[selectedDistrict] || [];
-          setWards(newWards);
-
-          if (selectedWard && newWards.includes(selectedWard)) {
-            setSelectedWard(selectedWard);
-          }
-        }, 0);
+        // Nếu có district (giả lập) → load tương ứng
+        if (saved.selectedDistrict) {
+          setTimeout(() => {
+            setSelectedDistrict(saved.selectedDistrict);
+            const newWards = wardsData[saved.selectedDistrict] || [];
+            setWards(newWards);
+            if (saved.selectedWard && newWards.includes(saved.selectedWard)) {
+              setSelectedWard(saved.selectedWard);
+            }
+          }, 0);
+        }
       }
     }
 
-    if (address) setAddress(address);
-    if (center?.lat && center?.lng) setCenter(center);
-  }, [context?.state?.create_hotel]);
+    if (saved.address) setAddress(saved.address);
+    if (saved.center?.lat && saved.center?.lng) setCenter(saved.center);
+  }, [locations, context?.state?.create_hotel]);
 
-  // ⭐ LƯU DỮ LIỆU KHI UNMOUNT
+  // Lưu vào context khi unmount
   useEffect(() => {
     return () => {
       context.dispatch({
@@ -155,90 +138,73 @@ export default function HotelLocationInput({
       });
     };
   }, []);
-  // Khi map dừng di chuyển (drag, zoom…)
+
   const onIdle = () => {
     if (!mapRef.current) return;
-
     const newCenter = mapRef.current.getCenter();
     const lat = newCenter.lat();
     const lng = newCenter.lng();
 
-    // kiểm tra nếu giống nhau thì không update
     if (
       Math.abs(center.lat - lat) < 0.000001 &&
       Math.abs(center.lng - lng) < 0.000001
     ) {
       return;
     }
-
     setCenter({ lat, lng });
   };
-  // Khi chọn tỉnh → load quận/huyện
+
+  // Khi chọn tỉnh → reset quận/phường (vì hiện tại chưa có API quận)
   useEffect(() => {
-    if (selectedProvince && vietnamData[selectedProvince]) {
-      setDistricts(vietnamData[selectedProvince]);
-      setSelectedDistrict(null);
-      setSelectedWard(null);
-      setWards([]);
-    } else {
-      setDistricts([]);
-      setSelectedDistrict(null);
-      setWards([]);
-      setSelectedWard(null);
-    }
+    setDistricts([]);
+    setSelectedDistrict(null);
+    setWards([]);
+    setSelectedWard(null);
   }, [selectedProvince]);
 
-  // Khi chọn quận → load phường/xã (giả lập)
+  // Khi chọn quận → load phường (giả lập)
   useEffect(() => {
     if (!selectedDistrict) {
       setWards([]);
       setSelectedWard(null);
       return;
     }
-
     const loadedWards = wardsData[selectedDistrict] || [];
-
     setWards(loadedWards);
-
-    // nếu ward cũ không thuộc district mới => reset
-    if (!loadedWards.includes(selectedWard)) {
+    if (selectedWard && !loadedWards.includes(selectedWard)) {
       setSelectedWard(null);
     }
   }, [selectedDistrict]);
-  console.log("AAA selectedDistrict", selectedDistrict);
-  console.log("AAA wards", wards);
+
+  const containerStyle = { width: "100%", height: "100%" };
+
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, background: "white", borderRadius: 3 }}>
-      {/* Tiêu đề */}
-      <Typography
-        variant='subtitle1'
-        fontWeight={600}
-        color='text.primary'
-        gutterBottom>
+      <Typography variant="subtitle1" fontWeight={600} color="text.primary" gutterBottom>
         Vị trí khách sạn trên bản đồ
       </Typography>
-      <Typography variant='body2' color='text.secondary' sx={{ mb: 4 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
         Giúp khách đặt phòng dễ dàng tìm đường tới khách sạn của bạn
       </Typography>
 
-      {/* Ô tìm tỉnh/thành phố lớn */}
+      {/* Chọn Tỉnh/Thành phố từ API */}
       <Autocomplete
-        options={provinces}
+        options={locations}
+        getOptionLabel={(option) => option.name.vi}
         value={selectedProvince}
-        onBlur={() => {
-          handleTouch("selectedProvince");
-        }}
+        loading={loadingLocations}
+        onBlur={() => handleTouch("provinceId")}
         onChange={(_, newValue) => {
           setSelectedProvince(newValue);
         }}
         renderInput={(params) => (
           <TextField
             {...params}
-            placeholder='Tìm kiếm tỉnh/thành phố...'
-            variant='outlined'
+            placeholder="Tìm kiếm tỉnh/thành phố..."
+            variant="outlined"
             fullWidth
-            error={touched.selectedProvince && !!errors.selectedProvince}
-            helperText={touched.selectedProvince && errors.selectedProvince}
+            error={touched.provinceId && !!errors.provinceId}
+            helperText={touched.provinceId && errors.provinceId}
             sx={{
               mb: 4,
               "& .MuiOutlinedInput-root": {
@@ -253,7 +219,7 @@ export default function HotelLocationInput({
             }}
           />
         )}
-        noOptionsText='Không tìm thấy tỉnh/thành phố'
+        noOptionsText={loadingLocations ? "Đang tải..." : "Không tìm thấy tỉnh/thành phố"}
       />
 
       {/* Form chi tiết khi đã chọn tỉnh */}
@@ -262,179 +228,106 @@ export default function HotelLocationInput({
           <Grid container spacing={3}>
             {/* Địa chỉ chi tiết */}
             <Grid item xs={12}>
-              <Typography variant='subtitle2' fontWeight={600} gutterBottom>
+              <Typography variant="subtitle2" fontWeight={600} gutterBottom>
                 Địa chỉ khách sạn
               </Typography>
               <TextField
                 fullWidth
-                placeholder='Nhập số nhà, tên đường...'
+                placeholder="Nhập số nhà, tên đường..."
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 onBlur={() => handleTouch("address")}
                 error={touched.address && !!errors.address}
                 helperText={touched.address ? errors.address : " "}
-                variant='outlined'
+                variant="outlined"
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 2,
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#a0d468",
-                    },
+                    "&.Mui-focused fieldset": { borderColor: "#a0d468" },
                   },
                 }}
               />
             </Grid>
 
-            {/* Thành phố/Tỉnh */}
+            {/* Thành phố/Tỉnh (hiển thị đã chọn) */}
             <Grid item xs={12} md={4}>
-              <Typography variant='subtitle2' fontWeight={600} gutterBottom>
+              <Typography variant="subtitle2" fontWeight={600} gutterBottom>
                 Thành Phố/Tỉnh
               </Typography>
-              <Autocomplete
-                value={selectedProvince}
-                options={provinces}
+              <TextField
+                value={selectedProvince.name.vi}
                 disabled
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    placeholder='Chọn Thành Phố/Tỉnh'
-                    variant='outlined'
-                    InputProps={{
-                      ...params.InputProps,
-                      startAdornment: (
-                        <InputAdornment position='start'>
-                          <LocationOnIcon color='success' />
-                        </InputAdornment>
-                      ),
-                    }}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: 2,
-                        bgcolor: "#f7faf5",
-                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#a0d468",
-                        },
-                      },
-                    }}
-                  />
-                )}
+                fullWidth
+                variant="outlined"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LocationOnIcon color="success" />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 2,
+                    bgcolor: "#f7faf5",
+                  },
+                }}
               />
             </Grid>
 
-            {/* Quận/Huyện */}
+            {/* Quận/Huyện - tạm thời để trống hoặc thêm API sau */}
             <Grid item xs={12} md={4}>
-              <Typography variant='subtitle2' fontWeight={600} gutterBottom>
+              <Typography variant="subtitle2" fontWeight={600} gutterBottom>
                 Quận/Huyện
               </Typography>
               <Autocomplete
                 options={districts}
                 value={selectedDistrict}
-                onBlur={() => {
-                  handleTouch("selectedDistrict");
-                }}
-                onChange={(_, v) => {
-                  setSelectedDistrict(v);
-                }}
-                disabled={!selectedProvince}
+                onChange={(_, v) => setSelectedDistrict(v)}
+                onBlur={() => handleTouch("selectedDistrict")}
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    placeholder='Chọn Quận/Huyện'
-                    variant='outlined'
-                    error={
-                      touched.selectedDistrict && !!errors.selectedDistrict
-                    }
-                    helperText={
-                      touched.selectedDistrict ? errors.selectedDistrict : " "
-                    }
+                    placeholder="Chọn Quận/Huyện (sắp có)"
+                    disabled
+                    variant="outlined"
                     InputProps={{
                       ...params.InputProps,
                       startAdornment: (
-                        <InputAdornment position='start'>
+                        <InputAdornment position="start">
                           <SearchIcon sx={{ color: "text.secondary" }} />
                         </InputAdornment>
                       ),
                     }}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: 2,
-                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#a0d468",
-                          borderWidth: 2,
-                        },
-                      },
-                    }}
                   />
-                )}
-                renderOption={(props, option, { selected }) => (
-                  <li {...props} key={option}>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        width: "100%",
-                      }}>
-                      {option}
-                      {selected && (
-                        <CheckIcon sx={{ ml: "auto", color: "#7cb342" }} />
-                      )}
-                    </Box>
-                  </li>
                 )}
               />
             </Grid>
 
             {/* Phường/Xã */}
             <Grid item xs={12} md={4}>
-              <Typography variant='subtitle2' fontWeight={600} gutterBottom>
+              <Typography variant="subtitle2" fontWeight={600} gutterBottom>
                 Phường/Xã/Thị trấn
               </Typography>
               <Autocomplete
                 options={wards}
                 value={selectedWard}
                 onChange={(_, v) => setSelectedWard(v)}
-                disabled={!selectedDistrict}
+                disabled
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    placeholder='Chọn Phường/Xã'
-                    variant='outlined'
+                    placeholder="Chọn Phường/Xã"
+                    variant="outlined"
                     InputProps={{
                       ...params.InputProps,
                       startAdornment: (
-                        <InputAdornment position='start'>
-                          <LocationOnIcon
-                            fontSize='small'
-                            sx={{ color: "text.secondary" }}
-                          />
+                        <InputAdornment position="start">
+                          <LocationOnIcon fontSize="small" sx={{ color: "text.secondary" }} />
                         </InputAdornment>
                       ),
                     }}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: 2,
-                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#a0d468",
-                          borderWidth: 2,
-                        },
-                      },
-                    }}
                   />
-                )}
-                renderOption={(props, option, { selected }) => (
-                  <li {...props} key={option}>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        width: "100%",
-                      }}>
-                      {option}
-                      {selected && (
-                        <CheckIcon sx={{ ml: "auto", color: "#7cb342" }} />
-                      )}
-                    </Box>
-                  </li>
                 )}
               />
             </Grid>
@@ -452,8 +345,9 @@ export default function HotelLocationInput({
           position: "relative",
           bgcolor: "#f8f9fa",
           boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-        }}>
-        <LoadScript googleMapsApiKey='AIzaSyASJk1hzLv6Xoj0fRsYnfuO6ptOXu0fZsc'>
+        }}
+      >
+        <LoadScript googleMapsApiKey="AIzaSyASJk1hzLv6Xoj0fRsYnfuO6ptOXu0fZsc">
           <GoogleMap
             mapContainerStyle={containerStyle}
             center={center}
@@ -465,16 +359,15 @@ export default function HotelLocationInput({
               streetViewControl: false,
               mapTypeControl: false,
               fullscreenControl: false,
-              styles: [
-                {
-                  featureType: "poi",
-                  elementType: "labels",
-                  stylers: [{ visibility: "off" }],
-                },
-              ],
-            }}></GoogleMap>
+              styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }],
+            }}
+          />
         </LoadScript>
       </Box>
     </Box>
   );
+
+  function handleTouch(field: string) {
+    onFieldTouch?.(field);
+  }
 }

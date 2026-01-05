@@ -28,6 +28,7 @@ const CreateHotelController = (props: Props) => {
       selectedWard,
       address,
       center,
+      provinceId,
       roomTypes = [],
     } = contextData;
 
@@ -37,7 +38,7 @@ const CreateHotelController = (props: Props) => {
     hotelFormData.append("name", JSON.stringify({ vi: hotelName }) || "");
     hotelFormData.append("phone", phone || "");
     hotelFormData.append("description", JSON.stringify({ vi: description }));
-    hotelFormData.append("city", selectedProvince || "");
+    hotelFormData.append("city", provinceId || "");
     hotelFormData.append("address", JSON.stringify({ vi: address }) || "");
     hotelFormData.append("lat", center?.lat?.toString() || "");
     hotelFormData.append("lng", center?.lng?.toString() || "");

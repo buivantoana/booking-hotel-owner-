@@ -189,13 +189,13 @@ export const validateImageUpload = (data: any) => {
 export const validateLocation = (data: any) => {
   const errors: Record<string, string> = {};
 
-  if (!data?.selectedProvince) {
-    errors.selectedProvince = "Vui lòng chọn Tỉnh/Thành phố";
-  }
+  // if (!data?.selectedProvince) {
+  //   errors.selectedProvince = "Vui lòng chọn Tỉnh/Thành phố";
+  // }
 
-  if (!data?.selectedDistrict) {
-    errors.selectedDistrict = "Vui lòng chọn Quận/Huyện";
-  }
+  // if (!data?.selectedDistrict) {
+  //   errors.selectedDistrict = "Vui lòng chọn Quận/Huyện";
+  // }
 
   if (!data?.address?.trim()) {
     errors.address = "Vui lòng nhập địa chỉ chi tiết (số nhà, tên đường...)";

@@ -163,7 +163,7 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom }: Props) => {
 
                     {/* Thao tác */}
                     <TableCell align='right'>
-                      <ActionMenu />
+                      <ActionMenu handleDetailRoom={() => handleRoomClick(room)} />
                     </TableCell>
                   </TableRow>
                 ))
@@ -179,7 +179,7 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom }: Props) => {
 export default ManagerRooms;
 
 // Menu thao tác
-function ActionMenu() {
+function ActionMenu({handleDetailRoom}) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -224,7 +224,7 @@ function ActionMenu() {
             mt: 1,
           },
         }}>
-        <MenuItem onClick={handleClose} sx={{ gap: 1.5, fontSize: 14 }}>
+        <MenuItem onClick={handleDetailRoom} sx={{ gap: 1.5, fontSize: 14 }}>
           <Edit fontSize='small' sx={{ color: "#666" }} />
           Chỉnh sửa
         </MenuItem>

@@ -18,12 +18,13 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getHotel } from "../../service/hotel";
 import RoomTypeManager from "./RoomTypeManager";
-
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 export default function HotelDetail({
   setAction,
   setRoom,
   detailHotel,
   getHotelDetail,
+  locations
 }) {
   return (
     <Box sx={{ minHeight: "100vh" }}>
@@ -33,6 +34,7 @@ export default function HotelDetail({
         onNext={setAction}
         getHotelDetail={getHotelDetail}
         setRoom={setRoom}
+        locations={locations}
       />
     </Box>
   );
@@ -100,7 +102,7 @@ function HotelHeader({ setAction, detailHotel }) {
   );
 }
 
-function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail }) {
+function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail,locations }) {
   const [action, setAction] = useState("manager");
   const [searchRoom, setSearchRoom] = useState("");
   const parseVi = (str) => {
@@ -240,7 +242,7 @@ function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail }) {
             />
             <Button
               variant='contained'
-              startIcon={<EditIcon />}
+              startIcon={<AddCircleOutlineIcon />}
               onClick={() => onNext("create_room")}
               sx={{
                 bgcolor: "#98B720",
@@ -320,22 +322,25 @@ function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail }) {
 
             {/* Cột 2: Thông tin chính */}
             <Grid item xs={12} md={4}>
-              <Typography fontSize={16} fontWeight={600} color='#333' mb={2}>
-                Tên khách sạn/ Mã
-              </Typography>
-              <Typography fontSize={18} fontWeight={700} color='#222' mb={3}>
-                {hotelName} ({detailHotel.id || "ABC_123456"})
-              </Typography>
+             
 
               <Stack spacing={2.5}>
-                <Box>
+              <Box>
+                  <Typography fontSize={14} color='black' fontWeight={600}>
+                  Tên khách sạn
+                  </Typography>
+                  <Typography fontSize={15} color='#333'>
+                  {hotelName} 
+                  </Typography>
+                </Box>
+                {/* <Box>
                   <Typography fontSize={14} color='black' fontWeight={600}>
                     Email
                   </Typography>
                   <Typography fontSize={15} color='#333'>
                     ABC@gmail.com
                   </Typography>
-                </Box>
+                </Box> */}
 
                 <Box>
                   <Typography fontSize={14} color='black' fontWeight={600}>
@@ -378,7 +383,7 @@ function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail }) {
                     Tỉnh thành/ Quận
                   </Typography>
                   <Typography fontSize={15} color='#333'>
-                    Bắc Từ Liêm/ TP.Hà Nội
+                    {locations?.find(item=> item?.id == detailHotel?.city)?.name?.vi }
                   </Typography>
                 </Box>
 
@@ -401,7 +406,7 @@ function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail }) {
                     Mô tả
                   </Typography>
                   <Typography fontSize={15} color='#333'>
-                    {hotelDescription ? "Có" : "Không"}
+                    {hotelDescription }
                   </Typography>
                 </Box>
 
@@ -419,7 +424,7 @@ function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail }) {
                     Tổng bình luận
                   </Typography>
                   <Typography fontSize={15} color='#333' fontWeight={600}>
-                    100 lượt bình luận
+                  {detailHotel?.review_count} lượt bình luận
                   </Typography>
                 </Box>
 
@@ -430,7 +435,7 @@ function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail }) {
                   <Stack direction='row' alignItems='center' spacing={1}>
                     <Star sx={{ color: "#ffb400" }} />
                     <Typography fontSize={18} fontWeight={700} color='#333'>
-                      5 sao
+                    {detailHotel?.rating} sao
                     </Typography>
                   </Stack>
                 </Box>
@@ -452,7 +457,7 @@ function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail }) {
                   />
                 </Box>
 
-                <Box>
+                {/* <Box>
                   <Typography fontSize={14} color='black' fontWeight={600}>
                     Loại khách sạn
                   </Typography>
@@ -468,7 +473,7 @@ function HotelInfoDetail({ onNext, setRoom, detailHotel, getHotelDetail }) {
                   <Typography fontSize={15} color='#333'>
                     Có
                   </Typography>
-                </Box>
+                </Box> */}
               </Stack>
             </Grid>
           </Grid>

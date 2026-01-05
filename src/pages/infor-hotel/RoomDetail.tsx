@@ -311,16 +311,16 @@ export default function RoomDetail({
 
             <Box sx={{ flexGrow: 1 }} />
 
-            <ActionMenu
+            {/* <ActionMenu
               setDeleteDialogOpen={setDeleteDialogOpen}
               setConfirmDialogOpen={setConfirmDialogOpen}
-            />
+            /> */}
 
             <Button
               variant='contained'
               onClick={() => setAction("edit")}
               sx={{
-                background: "#82B440",
+                background: "#98B720",
                 borderRadius: 3,
                 textTransform: "none",
                 px: 3,
@@ -345,7 +345,7 @@ export default function RoomDetail({
 
             <Grid container spacing={2} mb={4}>
               {[
-                { label: "Số lượng phòng bán", value: "Không giới hạn" },
+                { label: "Số lượng phòng bán", value: room?.number },
                 { label: "Diện tích", value: area },
                 {
                   label: "Loại giường",

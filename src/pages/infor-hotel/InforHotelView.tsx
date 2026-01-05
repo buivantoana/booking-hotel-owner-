@@ -113,7 +113,7 @@ function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
   );
 }
 
-export default function InforHotelView({ hotels, getDataHotels }) {
+export default function InforHotelView({ hotels, getDataHotels ,locations}) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [action, setAction] = useState("manager");
   const [idHotel, setIdHotel] = useState(null);
@@ -176,7 +176,7 @@ export default function InforHotelView({ hotels, getDataHotels }) {
         />
       )}
       {action == "edit_form" && (
-        <HotelEditForm setAction={setAction} setRoom={setRoom} />
+        <HotelEditForm setAction={setAction}  setRoom={setRoom} />
       )}
       {action == "edit_detail" && (
         <HotelDetail
@@ -184,6 +184,7 @@ export default function InforHotelView({ hotels, getDataHotels }) {
           getHotelDetail={getHotelDetail}
           setRoom={setRoom}
           setAction={setAction}
+          locations={locations}
         />
       )}
       {action == "manager" && (
