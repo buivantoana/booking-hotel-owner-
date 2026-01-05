@@ -10,9 +10,13 @@ import LoginIcon from "@mui/icons-material/Login";
 type Props = {};
 
 const CreateHotelView = ({ submitCreateHotel }) => {
-  const [step, setStep] = useState(1);
-  const [typeHotel, setTypeHotel] = useState("Khách sạn Listing");
   const context = useBookingContext();
+  const persistedData = context?.state?.create_hotel || {};
+  const [step, setStep] = useState(1);
+  const [typeHotel, setTypeHotel] = useState(
+    persistedData.typeHotel || "Khách sạn Listing"
+  );
+  
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const handleStepClick = (id) => {
@@ -20,15 +24,27 @@ const CreateHotelView = ({ submitCreateHotel }) => {
     setStep(id);
   };
   const handleSelectType = (name) => {
-    console.log("Bạn đã chọn loại khách sạn", name);
     setTypeHotel(name);
+    setTempData(prev => ({ ...prev, typeHotel: name }));
   };
-  const persistedData = context?.state?.create_hotel || {};
+ 
 
   // Dữ liệu tạm của step hiện tại (luôn mới nhất)
-  const [tempData, setTempData] = useState(persistedData);
+  const [tempData, setTempData] = useState({
+    ...persistedData,
+    typeHotel: persistedData.typeHotel || "Khách sạn Listing",
+  });
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
+  useEffect(() => {
+    if (context?.state?.create_hotel?.typeHotel) {
+      setTypeHotel(context.state.create_hotel.typeHotel);
+      setTempData(prev => ({
+        ...prev,
+        typeHotel: context.state.create_hotel.typeHotel
+      }));
+    }
+  }, [context?.state?.create_hotel?.typeHotel]);
   // Đồng bộ khi chuyển step
   useEffect(() => {
     setTempData(persistedData);

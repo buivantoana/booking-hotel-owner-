@@ -12,16 +12,26 @@ import {
   Divider,
   Button,
   CircularProgress,
+  Chip,
+  Modal,
+  InputAdornment,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Checkbox,
 } from "@mui/material";
 import HotelImageUpload from "./HotelImageUpload";
-import { ArrowBackIos } from "@mui/icons-material";
+import { Add, ArrowBackIos, Close, Search } from "@mui/icons-material";
 import { GoogleMap, LoadScript } from "@react-google-maps/api";
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getHotel, updateHotel } from "../../service/hotel";
 import { toast } from "react-toastify";
+import { facilities } from "../../utils/utils";
 
-export default function HotelEditFormExact({ setAction, setRoom }) {
+export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }) {
   const [center, setCenter] = useState({ lat: 21.0285, lng: 105.8542 });
   const mapRef = useRef(null);
   const [hotel, setHotel] = useState(null); // dữ liệu hotel đã parse
@@ -29,7 +39,7 @@ export default function HotelEditFormExact({ setAction, setRoom }) {
   const [searchParams] = useSearchParams();
 
   const containerStyle = { width: "100%", height: "50vh" };
-
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   // State cho các field (controlled)
   const [formValues, setFormValues] = useState({
     name: "",
@@ -44,6 +54,7 @@ export default function HotelEditFormExact({ setAction, setRoom }) {
     },
   });
 
+  
   // Ref để lưu ảnh mới upload (được HotelImageUpload cập nhật)
   const newImagesRef = useRef({ images: [], verify_images: [] });
 
@@ -65,6 +76,16 @@ export default function HotelEditFormExact({ setAction, setRoom }) {
               ? JSON.parse(result.rent_types)
               : {};
 
+              if (result && result.amenities) {
+                try {
+                  const parsed = JSON.parse(result.amenities as string);
+                  if (Array.isArray(parsed)) {
+                    setSelectedIds(parsed);
+                  }
+                } catch (e) {
+                  console.warn("Không parse được facilities:", e);
+                }
+              }
             setFormValues({
               name: parsedName,
               phone: result.phone || "",
@@ -125,7 +146,7 @@ export default function HotelEditFormExact({ setAction, setRoom }) {
     formData.append("lat", center.lat);
     formData.append("lng", center.lng);
     formData.append("rent_types", JSON.stringify(formValues.rent_types));
-
+    formData.append("amenities", JSON.stringify(selectedIds));
     // Chỉ append ảnh mới upload
     newImagesRef.current.images.forEach((file) => {
       formData.append("images", file);
@@ -140,7 +161,9 @@ export default function HotelEditFormExact({ setAction, setRoom }) {
       console.log("Update success", response);
       if (response?.hotel_id) {
         toast.success(response?.message);
+        getHotelDetail()
         setAction("edit_detail");
+       
       } else {
         toast.success(response?.message);
       }
@@ -149,7 +172,7 @@ export default function HotelEditFormExact({ setAction, setRoom }) {
     }
     setLoading(false);
   };
-
+  const memoizedHotelData = useMemo(() => hotel, [hotel?.id]);
   return (
     <Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
@@ -411,6 +434,19 @@ export default function HotelEditFormExact({ setAction, setRoom }) {
           </Grid>
 
           <Divider sx={{ my: 4 }} />
+          <Grid container spacing={{ xs: 4, lg: 6 }}>
+            <Grid item xs={12} lg={4}>
+              <Typography variant='h6'>Tiện ích khách sạn</Typography>
+             
+            </Grid>
+            <Grid item xs={12} lg={8}>
+            <FacilitySelector
+           setSelectedIds={setSelectedIds}
+            selectedIds={selectedIds}
+          />
+            </Grid>
+          </Grid>
+          <Divider sx={{ my: 4 }} />
 
           {/* Phần hình ảnh */}
           <Grid container spacing={{ xs: 4, lg: 6 }}>
@@ -422,7 +458,7 @@ export default function HotelEditFormExact({ setAction, setRoom }) {
             </Grid>
             <Grid item xs={12} lg={8}>
               <HotelImageUpload
-                hotelData={hotel}
+                hotelData={memoizedHotelData}
                 onNewImagesChange={(newImages) => {
                   newImagesRef.current = newImages; // lưu ảnh mới để submit
                 }}
@@ -463,6 +499,172 @@ export default function HotelEditFormExact({ setAction, setRoom }) {
           </Box>
         </Box>
       </Paper>
+    </Box>
+  );
+}
+
+const modalStyle = {
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: { xs: "90%", sm: 500 },
+  maxHeight: "80vh",
+  bgcolor: "background.paper",
+  borderRadius: 3,
+  boxShadow: 24,
+  p: 3,
+  overflow: "hidden",
+  display: "flex",
+  flexDirection: "column",
+};
+function FacilitySelector({ selectedIds = [], setSelectedIds }) {
+  const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredFacilities = facilities.filter(
+    (fac) =>
+      fac.name.vi.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      fac.name.en.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Quan trọng: Khi toggle → cập nhật NGAY LẬP TỨC ra ngoài
+  const handleToggle = (id: string) => {
+    const newIds = selectedIds.includes(id)
+      ? selectedIds.filter((x) => x !== id)
+      : [...selectedIds, id];
+
+    setSelectedIds(newIds);  // ← Cập nhật ngay vào formData → chip hiện ngay
+  };
+
+  const handleDelete = (id: string) => {
+    const newIds = selectedIds.filter((x) => x !== id);
+    setSelectedIds(newIds);
+  };
+
+  // Nút này giờ chỉ đóng modal thôi, không cần commit nữa
+  const handleClose = () => {
+    setOpen(false);
+    setSearchTerm(""); // optional: reset search khi đóng
+  };
+
+  const selectedFacilities = facilities.filter((f) =>
+    selectedIds.includes(f.id)
+  );
+
+  return (
+    <Box mb={2}>
+      <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"}>
+      <Button
+  variant="outlined"
+  onClick={() => setOpen(true)}
+  startIcon={<Add />}
+  sx={{
+    height: "40px",
+    borderRadius: 2,
+    borderColor: "#ddd",
+    color: "#555",
+    textTransform: "none",
+    fontSize: "0.875rem",
+    fontWeight: 500,
+    justifyContent: "flex-start",
+    px: 2,
+    "&:hover": {
+      borderColor: "#98b720",
+      bgcolor: "rgba(152, 183, 32, 0.04)",
+    },
+    "& .MuiButton-startIcon": {
+      color: "#98b720",
+    },
+  }}
+>
+  {selectedFacilities.length > 0
+    ? `${selectedFacilities.length} tiện ích đã chọn`
+    : "Thêm tiện ích"}
+</Button>
+      </Box>
+
+      {/* Chips hiển thị bên ngoài – sẽ cập nhật ngay khi chọn */}
+      {selectedFacilities.length > 0 && (
+        <Stack direction='row' flexWrap='wrap' gap={1} mt={2}>
+          {selectedFacilities.map((fac) => (
+            <Chip
+              key={fac.id}
+              label={fac.name.vi}
+              onDelete={() => handleDelete(fac.id)}
+              deleteIcon={<Close />}
+              sx={{
+                bgcolor: "#7CB518",
+                color: "white",
+                "& .MuiChip-deleteIcon": { color: "white", opacity: 0.7 },
+              }}
+            />
+          ))}
+        </Stack>
+      )}
+
+      {/* Modal */}
+      <Modal open={open} onClose={handleClose}>
+        <Box sx={modalStyle}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant='h6'>Chọn tiện ích</Typography>
+            <Button onClick={handleClose} sx={{ minWidth: "auto", p: 0 }}>
+              <Close />
+            </Button>
+          </Box>
+
+          <TextField
+            fullWidth
+            placeholder='Tìm kiếm tiện ích'
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <Search />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ mb: 2 }}
+          />
+
+          <Box sx={{ flex: 1, overflow: "auto" }}>
+            <List disablePadding>
+              {filteredFacilities.map((fac, index) => (
+                <React.Fragment key={fac.id}>
+                  <ListItem disablePadding>
+                    <ListItemButton onClick={() => handleToggle(fac.id)}>
+                      <ListItemIcon sx={{ minWidth: 40 }}>
+                        <img src={fac.icon} alt={fac.name.vi} width={28} height={28} />
+                      </ListItemIcon>
+                      <ListItemText primary={fac.name.vi} />
+                      <Checkbox
+                        edge='end'
+                        checked={selectedIds.includes(fac.id)}  // ← dùng selectedIds từ props → luôn đúng
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                  {index < filteredFacilities.length - 1 && <Divider />}
+                </React.Fragment>
+              ))}
+            </List>
+          </Box>
+
+          <Button
+            variant='contained'
+            fullWidth
+            onClick={handleClose}
+            sx={{
+              mt: 3,
+              bgcolor: "#7CB518",
+              "&:hover": { bgcolor: "#7CB518" },
+              borderRadius: 8,
+              py: 1.5,
+            }}>
+            Đóng
+          </Button>
+        </Box>
+      </Modal>
     </Box>
   );
 }

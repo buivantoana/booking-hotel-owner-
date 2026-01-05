@@ -176,7 +176,7 @@ export default function InforHotelView({ hotels, getDataHotels ,locations}) {
         />
       )}
       {action == "edit_form" && (
-        <HotelEditForm setAction={setAction}  setRoom={setRoom} />
+        <HotelEditForm setAction={setAction} getHotelDetail={getHotelDetail}  setRoom={setRoom} />
       )}
       {action == "edit_detail" && (
         <HotelDetail

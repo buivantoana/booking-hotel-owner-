@@ -39,6 +39,36 @@ const getLabelsByIds = (
     .map((id) => list.find((item) => item.id === id)?.label)
     .filter(Boolean) as string[];
 };
+const renderStatusChip = (status) => {
+  const map = {
+    active: {
+      label: "Đang hoạt động",
+      sx: { bgcolor: "#98B720", color: "white" },
+    },
+    paused: {
+      label: "Tạm dừng",
+      sx: { bgcolor: "#FFB020", color: "white" },
+    },
+    pending: {
+      label: "Chờ duyệt",
+      sx: { bgcolor: "#1976D2", color: "white" },
+    },
+    terminated: {
+      label: "Đã kết thúc",
+      sx: { bgcolor: "#D32F2F", color: "white" },
+    },
+  };
+
+  const config = map[status];
+
+  return (
+    <Chip
+      label={config?.label || "Không xác định"}
+      size='small'
+      sx={config?.sx || { bgcolor: "#9E9E9E", color: "white" }}
+    />
+  );
+};
 export default function RoomDetail({
   onNext,
   room,
@@ -107,13 +137,13 @@ export default function RoomDetail({
     );
   };
   const facilityIds = React.useMemo<string[]>(() => {
-    if (!room?.facilities) return [];
+    if (!room?.amenities) return [];
     try {
       const parsed =
-        typeof room.facilities === "string"
-          ? JSON.parse(room.facilities)
-          : Array.isArray(room.facilities)
-          ? room.facilities
+        typeof room.amenities === "string"
+          ? JSON.parse(room.amenities)
+          : Array.isArray(room.amenities)
+          ? room.amenities
           : [];
       return Array.isArray(parsed) ? parsed : [];
     } catch (e) {
@@ -297,17 +327,7 @@ export default function RoomDetail({
               <Typography color='gray'>{parsedNameHotel}</Typography>
             </Box>
 
-            <Chip
-              label='Đang hoạt động'
-              icon={<CheckCircleIcon sx={{ color: "white !important" }} />}
-              sx={{
-                ml: 2,
-                background: "#82B440",
-                color: "white",
-                height: 32,
-                fontWeight: 600,
-              }}
-            />
+           {renderStatusChip(room?.status)}
 
             <Box sx={{ flexGrow: 1 }} />
 
@@ -417,13 +437,13 @@ export default function RoomDetail({
               {(() => {
                 // Parse facilities từ DB (là JSON string dạng array id)
                 const facilityIds = () => {
-                  if (!room?.facilities) return [];
+                  if (!room?.amenities) return [];
                   try {
                     const parsed =
-                      typeof room.facilities === "string"
-                        ? JSON.parse(room.facilities)
-                        : Array.isArray(room.facilities)
-                        ? room.facilities
+                      typeof room.amenities === "string"
+                        ? JSON.parse(room.amenities)
+                        : Array.isArray(room.amenities)
+                        ? room.amenities
                         : [];
                     return Array.isArray(parsed) ? parsed : [];
                   } catch (e) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -9,43 +9,43 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import add from "../../images/gallery-add.png";
 
-export default function HotelImageUpload({
+function HotelImageUpload({
   hotelData,
   onNewImagesChange,
   isPadding = true,
 }) {
   const isMobile = useMediaQuery("(max-width:600px)");
 
-  // Ảnh mới upload (File objects)
   const [newHotelImages, setNewHotelImages] = useState([]);
   const [newVerifyImages, setNewVerifyImages] = useState([]);
 
-  // Ảnh cũ từ server (chỉ để hiển thị)
   const [existingHotelImages, setExistingHotelImages] = useState([]);
   const [existingVerifyImages, setExistingVerifyImages] = useState([]);
 
+  // Parse ảnh cũ từ server
   useEffect(() => {
     if (hotelData) {
-      if (hotelData.images) {
-        try {
-          const urls = JSON.parse(hotelData.images);
-          setExistingHotelImages(
-            urls.map((url) => ({ url, isExisting: true }))
-          );
-        } catch (e) {}
+      try {
+        const hotelUrls = hotelData.images ? JSON.parse(hotelData.images) : [];
+        setExistingHotelImages(
+          hotelUrls.map((url, index) => ({ url, id: `exist-hotel-${index}`, isExisting: true }))
+        );
+      } catch (e) {
+        setExistingHotelImages([]);
       }
-      if (hotelData.verify_images) {
-        try {
-          const urls = JSON.parse(hotelData.verify_images);
-          setExistingVerifyImages(
-            urls.map((url) => ({ url, isExisting: true }))
-          );
-        } catch (e) {}
+
+      try {
+        const verifyUrls = hotelData.verify_images ? JSON.parse(hotelData.verify_images) : [];
+        setExistingVerifyImages(
+          verifyUrls.map((url, index) => ({ url, id: `exist-verify-${index}`, isExisting: true }))
+        );
+      } catch (e) {
+        setExistingVerifyImages([]);
       }
     }
   }, [hotelData]);
 
-  // Báo cho parent biết ảnh mới thay đổi
+  // Báo ảnh mới cho parent
   useEffect(() => {
     onNewImagesChange?.({
       images: newHotelImages.map((img) => img.file),
@@ -53,106 +53,123 @@ export default function HotelImageUpload({
     });
   }, [newHotelImages, newVerifyImages, onNewImagesChange]);
 
+  // Dọn dẹp object URL khi component unmount hoặc ảnh bị xóa
+  useEffect(() => {
+    return () => {
+      [...newHotelImages, ...newVerifyImages].forEach((img) => {
+        URL.revokeObjectURL(img.url);
+      });
+    };
+  }, [newHotelImages, newVerifyImages]);
+
   const handleUpload = (event, setter) => {
     const files = Array.from(event.target.files);
     const newImgs = files.map((file) => ({
       file,
       url: URL.createObjectURL(file),
+      id: `new-${Math.random().toString(36).substr(2, 9)}`, // key ổn định
     }));
     setter((prev) => [...prev, ...newImgs]);
+    event.target.value = ""; // reset input để có thể upload lại cùng file
   };
 
-  const handleDelete = (index, setter) => {
-    setter((prev) => prev.filter((_, i) => i !== index));
+  const handleDelete = (id, setter, allImgs) => {
+    const imgToDelete = allImgs.find(img => img.id === id);
+    if (imgToDelete && !imgToDelete.isExisting) {
+      URL.revokeObjectURL(imgToDelete.url);
+    }
+    setter((prev) => prev.filter((img) => img.id !== id));
   };
 
-  const UploadBox = ({ onSelect }) => (
-    <label
-      style={{
-        border: "2px dashed #ccc",
-        borderRadius: 12,
-        width: 120,
-        height: 120,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        cursor: "pointer",
-      }}>
-      <input type='file' hidden multiple onChange={onSelect} />
-      <img src={add} alt='add' />
-    </label>
-  );
-
-  const ImagePreview = ({ img, index, setter }) => (
-    <Box
-      sx={{
-        width: 120,
-        height: 120,
-        borderRadius: 2,
-        overflow: "hidden",
-        position: "relative",
-      }}>
-      <img
-        src={img.url}
-        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        alt='preview'
-      />
-      {/* Chỉ cho xóa ảnh mới */}
-      {!img.isExisting && setter && (
-        <IconButton
-          size='small'
-          onClick={() => handleDelete(index, setter)}
-          sx={{
-            position: "absolute",
-            top: 4,
-            right: 4,
-            background: "rgba(0,0,0,0.5)",
-            color: "white",
+  // Memo các component con để tối ưu
+  const UploadBox = React.useMemo(() => {
+    return function UploadBoxInner({ onSelect }) {
+      return (
+        <label
+          style={{
+            border: "2px dashed #ccc",
+            borderRadius: 12,
+            width: 120,
+            height: 120,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
           }}>
-          <DeleteIcon fontSize='small' />
-        </IconButton>
-      )}
-    </Box>
-  );
+          <input type="file" hidden multiple accept="image/*" onChange={onSelect} />
+          <img src={add} alt="add" style={{ width: 40, height: 40 }} />
+        </label>
+      );
+    };
+  }, []);
 
-  const Section = ({
-    title,
-    desc,
-    existing = [],
-    newImgs = [],
-    setNewImgs,
-  }) => (
-    <Box sx={{ mb: 4 }}>
-      <Typography fontWeight={600} mb={1}>
-        {title}
-      </Typography>
-      <Typography variant='body2' color='text.secondary' mb={2}>
-        {desc}
-      </Typography>
+  const ImagePreview = React.useMemo(() => {
+    return function ImagePreviewInner({ img, onDelete }) {
+      return (
+        <Box
+          sx={{
+            width: 120,
+            height: 120,
+            borderRadius: 2,
+            overflow: "hidden",
+            position: "relative",
+            bgcolor: "#f5f5f5",
+          }}>
+          <img
+            src={img.url}
+            alt="preview"
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+          {onDelete && (
+            <IconButton
+              size="small"
+              onClick={onDelete}
+              sx={{
+                position: "absolute",
+                top: 4,
+                right: 4,
+                background: "rgba(0,0,0,0.6)",
+                color: "white",
+                "&:hover": { background: "rgba(0,0,0,0.8)" },
+              }}>
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          )}
+        </Box>
+      );
+    };
+  }, []);
 
-      <Grid container spacing={2}>
-        {/* Ảnh cũ */}
-        {existing.map((img, i) => (
-          <Grid item key={`exist-${i}`}>
-            <ImagePreview img={img} />
+  const Section = React.useCallback(({ title, desc, existing = [], newImgs = [], setNewImgs }) => {
+    const allImages = [...existing, ...newImgs];
+
+    return (
+      <Box sx={{ mb: 5 }}>
+        <Typography fontWeight={600} mb={1}>{title}</Typography>
+        <Typography variant="body2" color="text.secondary" mb={2}>{desc}</Typography>
+
+        <Grid container spacing={2}>
+          {allImages.map((img) => (
+            <Grid item key={img.id}>
+              <ImagePreview
+                img={img}
+                onDelete={
+                  img.isExisting
+                    ? null
+                    : () => handleDelete(img.id, setNewImgs, newImgs)
+                }
+              />
+            </Grid>
+          ))}
+
+          <Grid item>
+            <UploadBox onSelect={(e) => handleUpload(e, setNewImgs)} />
           </Grid>
-        ))}
-
-        {/* Ảnh mới */}
-        {newImgs.map((img, i) => (
-          <Grid item key={`new-${i}`}>
-            <ImagePreview img={img} index={i} setter={setNewImgs} />
-          </Grid>
-        ))}
-
-        {/* Nút upload */}
-        <Grid item>
-          <UploadBox onSelect={(e) => handleUpload(e, setNewImgs)} />
         </Grid>
-      </Grid>
-    </Box>
-  );
+      </Box>
+    );
+  }, []);
 
   return (
     <Box
@@ -162,16 +179,16 @@ export default function HotelImageUpload({
         borderRadius: 2,
       }}>
       <Section
-        title='Ảnh chụp biển hiệu khách sạn từ bên ngoài'
-        desc='Tải lên ít nhất 1 ảnh rõ nét về mặt tiền hoặc biển hiệu khách sạn. Ảnh này chỉ dùng để kiểm duyệt, không hiển thị trên Hotel Booking.'
+        title="Ảnh chụp biển hiệu khách sạn từ bên ngoài"
+        desc="Tải lên ít nhất 1 ảnh rõ nét về mặt tiền hoặc biển hiệu khách sạn. Ảnh này chỉ dùng để kiểm duyệt, không hiển thị trên Hotel Booking."
         existing={existingVerifyImages}
         newImgs={newVerifyImages}
         setNewImgs={setNewVerifyImages}
       />
 
       <Section
-        title='Ảnh khách sạn'
-        desc='Tải lên ít nhất 5 ảnh chụp từ nhiều góc độ khác nhau (sảnh, hành lang, khu vực chung, phòng, v.v.). Các ảnh này sẽ được hiển thị trên Hotel Booking.'
+        title="Ảnh khách sạn"
+        desc="Tải lên ít nhất 5 ảnh chụp từ nhiều góc độ khác nhau (sảnh, hành lang, khu vực chung, phòng, v.v.). Các ảnh này sẽ được hiển thị trên Hotel Booking."
         existing={existingHotelImages}
         newImgs={newHotelImages}
         setNewImgs={setNewHotelImages}
@@ -179,3 +196,5 @@ export default function HotelImageUpload({
     </Box>
   );
 }
+
+export default React.memo(HotelImageUpload);

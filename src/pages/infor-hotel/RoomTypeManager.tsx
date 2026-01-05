@@ -105,9 +105,9 @@ export default function RoomTypeManager({
   };
 
   useEffect(() => {
-    if (room && room.facilities) {
+    if (room && room.amenities) {
       try {
-        const parsed = JSON.parse(room.facilities as string);
+        const parsed = JSON.parse(room.amenities as string);
         if (Array.isArray(parsed)) {
           setSelectedIds(parsed);
         }
@@ -254,7 +254,7 @@ export default function RoomTypeManager({
 
       formData.append("name", toViJson(room.name));
       formData.append("description", toViJson(room.description || ""));
-      formData.append("facilities", JSON.stringify(selectedIds));
+      formData.append("amenities", JSON.stringify(selectedIds));
       formData.append("currency", "VND");
       formData.append("number", room.quantity || "1");
       formData.append("area_m2", room.area || "");

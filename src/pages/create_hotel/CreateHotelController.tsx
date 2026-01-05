@@ -30,6 +30,8 @@ const CreateHotelController = (props: Props) => {
       center,
       provinceId,
       roomTypes = [],
+      selectedIds,
+      typeHotel
     } = contextData;
 
     console.log("AAAA contextData ", contextData);
@@ -42,6 +44,9 @@ const CreateHotelController = (props: Props) => {
     hotelFormData.append("address", JSON.stringify({ vi: address }) || "");
     hotelFormData.append("lat", center?.lat?.toString() || "");
     hotelFormData.append("lng", center?.lng?.toString() || "");
+    hotelFormData.append("amenities", JSON.stringify(selectedIds));
+    hotelFormData.append("cooperation_type", typeHotel== "Khách sạn Listing" ? 'listing' :'contract');
+
 
     // rent_types: format đúng như backend yêu cầu
     const rentTypesObj: any = {};
@@ -105,7 +110,7 @@ const CreateHotelController = (props: Props) => {
 
       // facilities: gom các thông tin lại thành object JSON
 
-      roomForm.append("facilities", JSON.stringify(room.facilities));
+      roomForm.append("amenities", JSON.stringify(room.facilities));
 
       // Giá tiền
       roomForm.append(

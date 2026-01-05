@@ -13,9 +13,23 @@ import {
   Select,
   OutlinedInput,
   InputAdornment,
+  Stack,
+  Chip,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  Checkbox,
+  ListItemText,
+  Divider,
+  Button,
+  Modal,
+  InputAdornment as MuiInputAdornment,
 } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { useBookingContext } from "../../App";
+import { Add, Close, Search } from "@mui/icons-material";
+import { facilities } from "../../utils/utils";
 
 const businessTypes = ["Tình yêu", "Du lịch", "Homestay", "Camping"];
 
@@ -47,6 +61,7 @@ export default function HotelBasicInfo({setDataCreateHotel,
     // Theo ngày
     dailyStart: "",
     dailyEnd: "",
+    selectedIds:[]
   });
   const context = useBookingContext()
   useEffect(()=>{
@@ -336,6 +351,16 @@ export default function HotelBasicInfo({setDataCreateHotel,
           ))}
         </RadioGroup>
       </Box>
+      <Box mb={4}>
+        <Typography fontSize={14} fontWeight={600} mb={1.5}>
+         Tiện ích khách sạn
+        </Typography>
+
+        <FacilitySelector
+           onChange={(newIds) => updateField("selectedIds", newIds)}
+            selectedIds={formData.selectedIds}
+          />
+      </Box>
 
       {/* Thời gian kinh doanh */}
       <Box mb={2}>
@@ -393,6 +418,172 @@ export default function HotelBasicInfo({setDataCreateHotel,
       </Box>
 
       
+    </Box>
+  );
+}
+
+const modalStyle = {
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: { xs: "90%", sm: 500 },
+  maxHeight: "80vh",
+  bgcolor: "background.paper",
+  borderRadius: 3,
+  boxShadow: 24,
+  p: 3,
+  overflow: "hidden",
+  display: "flex",
+  flexDirection: "column",
+};
+function FacilitySelector({ selectedIds = [], onChange }) {
+  const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredFacilities = facilities.filter(
+    (fac) =>
+      fac.name.vi.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      fac.name.en.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Quan trọng: Khi toggle → cập nhật NGAY LẬP TỨC ra ngoài
+  const handleToggle = (id: string) => {
+    const newIds = selectedIds.includes(id)
+      ? selectedIds.filter((x) => x !== id)
+      : [...selectedIds, id];
+
+    onChange(newIds);  // ← Cập nhật ngay vào formData → chip hiện ngay
+  };
+
+  const handleDelete = (id: string) => {
+    const newIds = selectedIds.filter((x) => x !== id);
+    onChange(newIds);
+  };
+
+  // Nút này giờ chỉ đóng modal thôi, không cần commit nữa
+  const handleClose = () => {
+    setOpen(false);
+    setSearchTerm(""); // optional: reset search khi đóng
+  };
+
+  const selectedFacilities = facilities.filter((f) =>
+    selectedIds.includes(f.id)
+  );
+
+  return (
+    <Box mb={2}>
+      <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"}>
+      <Button
+  variant="outlined"
+  onClick={() => setOpen(true)}
+  startIcon={<Add />}
+  sx={{
+    height: "40px",
+    borderRadius: 2,
+    borderColor: "#ddd",
+    color: "#555",
+    textTransform: "none",
+    fontSize: "0.875rem",
+    fontWeight: 500,
+    justifyContent: "flex-start",
+    px: 2,
+    "&:hover": {
+      borderColor: "#98b720",
+      bgcolor: "rgba(152, 183, 32, 0.04)",
+    },
+    "& .MuiButton-startIcon": {
+      color: "#98b720",
+    },
+  }}
+>
+  {selectedFacilities.length > 0
+    ? `${selectedFacilities.length} tiện ích đã chọn`
+    : "Thêm tiện ích"}
+</Button>
+      </Box>
+
+      {/* Chips hiển thị bên ngoài – sẽ cập nhật ngay khi chọn */}
+      {selectedFacilities.length > 0 && (
+        <Stack direction='row' flexWrap='wrap' gap={1} mt={2}>
+          {selectedFacilities.map((fac) => (
+            <Chip
+              key={fac.id}
+              label={fac.name.vi}
+              onDelete={() => handleDelete(fac.id)}
+              deleteIcon={<Close />}
+              sx={{
+                bgcolor: "#7CB518",
+                color: "white",
+                "& .MuiChip-deleteIcon": { color: "white", opacity: 0.7 },
+              }}
+            />
+          ))}
+        </Stack>
+      )}
+
+      {/* Modal */}
+      <Modal open={open} onClose={handleClose}>
+        <Box sx={modalStyle}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant='h6'>Chọn tiện ích</Typography>
+            <Button onClick={handleClose} sx={{ minWidth: "auto", p: 0 }}>
+              <Close />
+            </Button>
+          </Box>
+
+          <TextField
+            fullWidth
+            placeholder='Tìm kiếm tiện ích'
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <Search />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ mb: 2 }}
+          />
+
+          <Box sx={{ flex: 1, overflow: "auto" }}>
+            <List disablePadding>
+              {filteredFacilities.map((fac, index) => (
+                <React.Fragment key={fac.id}>
+                  <ListItem disablePadding>
+                    <ListItemButton onClick={() => handleToggle(fac.id)}>
+                      <ListItemIcon sx={{ minWidth: 40 }}>
+                        <img src={fac.icon} alt={fac.name.vi} width={28} height={28} />
+                      </ListItemIcon>
+                      <ListItemText primary={fac.name.vi} />
+                      <Checkbox
+                        edge='end'
+                        checked={selectedIds.includes(fac.id)}  // ← dùng selectedIds từ props → luôn đúng
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                  {index < filteredFacilities.length - 1 && <Divider />}
+                </React.Fragment>
+              ))}
+            </List>
+          </Box>
+
+          <Button
+            variant='contained'
+            fullWidth
+            onClick={handleClose}
+            sx={{
+              mt: 3,
+              bgcolor: "#7CB518",
+              "&:hover": { bgcolor: "#7CB518" },
+              borderRadius: 8,
+              py: 1.5,
+            }}>
+            Đóng
+          </Button>
+        </Box>
+      </Modal>
     </Box>
   );
 }

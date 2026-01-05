@@ -31,6 +31,36 @@ const formatPrice = (price: number | null | undefined): string => {
     minimumFractionDigits: 0,
   }).format(price);
 };
+const renderStatusChip = (status) => {
+  const map = {
+    active: {
+      label: "Đang hoạt động",
+      sx: { bgcolor: "#98B720", color: "white" },
+    },
+    paused: {
+      label: "Tạm dừng",
+      sx: { bgcolor: "#FFB020", color: "white" },
+    },
+    pending: {
+      label: "Chờ duyệt",
+      sx: { bgcolor: "#1976D2", color: "white" },
+    },
+    terminated: {
+      label: "Đã kết thúc",
+      sx: { bgcolor: "#D32F2F", color: "white" },
+    },
+  };
+
+  const config = map[status];
+
+  return (
+    <Chip
+      label={config?.label || "Không xác định"}
+      size='small'
+      sx={config?.sx || { bgcolor: "#9E9E9E", color: "white" }}
+    />
+  );
+};
 const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom }: Props) => {
   // Parse room_types từ props
   const roomTypes = React.useMemo(() => {
@@ -141,16 +171,11 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom }: Props) => {
 
                     {/* Trang thái */}
                     <TableCell>
-                      <Chip
-                        label='Đang hoạt động'
-                        size='small'
-                        color='success'
-                        variant='outlined'
-                      />
+                      {renderStatusChip(room?.status)}
                     </TableCell>
 
                     {/* SL phòng bán - chưa có dữ liệu thực tế */}
-                    <TableCell>-</TableCell>
+                    <TableCell>{room.number}</TableCell>
 
                     {/* Giá theo giờ */}
                     <TableCell>{room.price_hourly_formatted}</TableCell>
