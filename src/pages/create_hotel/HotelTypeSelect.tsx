@@ -103,7 +103,7 @@ const renderCard = (title, features, buttonText, showBadge = false,onSelect,type
         onClick={()=>onSelect(title)}
         sx={{
           mt:!showBadge?0: 3,
-          background:typeHotel == title? "#8BC34A" : "transparent",
+          background:typeHotel == title? "#9AC33C" : "transparent",
           color: typeHotel == title?"white":"#5D6679",
           py: 1.4,
           fontSize: 16,

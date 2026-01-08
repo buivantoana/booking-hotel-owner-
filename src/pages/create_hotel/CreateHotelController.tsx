@@ -37,9 +37,9 @@ const CreateHotelController = (props: Props) => {
     console.log("AAAA contextData ", contextData);
     // ================== 1. TẠO KHÁCH SẠN (hotel.create) ==================
     const hotelFormData = new FormData();
-    hotelFormData.append("name", JSON.stringify({ vi: hotelName }) || "");
+    hotelFormData.append("name", JSON.stringify(hotelName) || "");
     hotelFormData.append("phone", phone || "");
-    hotelFormData.append("description", JSON.stringify({ vi: description }));
+    hotelFormData.append("description", JSON.stringify( description ));
     hotelFormData.append("city", provinceId || "");
     hotelFormData.append("address", JSON.stringify({ vi: address }) || "");
     hotelFormData.append("lat", center?.lat?.toString() || "");
@@ -101,11 +101,11 @@ const CreateHotelController = (props: Props) => {
       // Các trường bắt buộc phải là JSON string có key "vi"
       roomForm.append(
         "name",
-        JSON.stringify({ vi: room.name || "Phòng tiêu chuẩn" })
+        JSON.stringify(room.name)
       );
       roomForm.append(
         "description",
-        JSON.stringify({ vi: room.description || "" })
+        JSON.stringify(room.description )
       );
 
       // facilities: gom các thông tin lại thành object JSON

@@ -33,21 +33,32 @@ import { facilities } from "../../utils/utils";
 
 const businessTypes = ["Tình yêu", "Du lịch", "Homestay", "Camping"];
 
-export default function HotelBasicInfo({setDataCreateHotel,
+export default function HotelBasicInfo({ setDataCreateHotel,
+  selectedLang,
   dataCreateHotel,
-  onTempChange,   
+  onTempChange,
   errors = {},
   touched = {},
-  onFieldBlur}) {
+  onFieldBlur }) {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   /** ===============================
    * STATE TOÀN BỘ FORM
    =================================*/
   const [formData, setFormData] = useState({
-    hotelName: "",
+    hotelName: {
+      vi: "",
+      ko: "",
+      ja: "",
+      en: ""
+    },
     phone: "",
-    description: "",
+    description: {
+      vi: "",
+      ko: "",
+      ja: "",
+      en: ""
+    },
     businessType: "Tình yêu",
 
     // Theo giờ
@@ -61,14 +72,14 @@ export default function HotelBasicInfo({setDataCreateHotel,
     // Theo ngày
     dailyStart: "",
     dailyEnd: "",
-    selectedIds:[]
+    selectedIds: []
   });
   const context = useBookingContext()
-  useEffect(()=>{
-    if(context?.state?.create_hotel?.hotelName){
+  useEffect(() => {
+    if (context?.state?.create_hotel?.hotelName) {
       setFormData(context?.state?.create_hotel)
     }
-  },[context])
+  }, [context])
   /** Cập nhật field */
   const updateField = (field, value) => {
     setFormData(prev => {
@@ -83,7 +94,7 @@ export default function HotelBasicInfo({setDataCreateHotel,
   useEffect(() => {
     latestValue.current = formData;
   }, [formData]);
-  
+
   useEffect(() => {
     return () => {
       context.dispatch({
@@ -93,11 +104,11 @@ export default function HotelBasicInfo({setDataCreateHotel,
           create_hotel: { ...latestValue.current },
         },
       });
-      
+
       console.log("unmount value:", latestValue.current); // ✔ lấy đúng giá trị mới nhất
     };
   }, []);
-  console.log("formData",formData);
+  console.log("formData", formData);
   /** HOURS OPTIONS */
   const HOURS = [
     "04:00", "05:00", "06:00", "07:00", "08:00",
@@ -107,7 +118,7 @@ export default function HotelBasicInfo({setDataCreateHotel,
     "21:00", "22:00", "23:00", "00:00", "01:00", "02:00", "03:00",
   ];
 
- 
+
   /** ===============================
    * COMPONENT RENDER CARD TIME
    =================================*/
@@ -247,8 +258,8 @@ export default function HotelBasicInfo({setDataCreateHotel,
    * RENDER PAGE
    =================================*/
   return (
-    <Box p={4} bgcolor={"white"} borderRadius={"15px"} width="100%">
-      
+    <Box p={4} bgcolor={"white"} borderRadius={"15px"} >
+
       {/* Row: Tên + SĐT */}
       <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={3} mb={3}>
         <Box flex={1}>
@@ -260,9 +271,14 @@ export default function HotelBasicInfo({setDataCreateHotel,
             placeholder="Nhập tên khách sạn"
             error={touched.hotelName && !!errors.hotelName}
             helperText={touched.hotelName ? errors.hotelName : " "}
-            value={formData.hotelName}
+            value={formData.hotelName?.[selectedLang] || ""}
+            onChange={(e) =>
+              updateField("hotelName", {
+                ...formData.hotelName,
+                [selectedLang]: e.target.value,
+              })
+            }
             onBlur={() => onFieldBlur?.("hotelName")}
-            onChange={(e) => updateField("hotelName", e.target.value)}
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "16px",
@@ -307,15 +323,21 @@ export default function HotelBasicInfo({setDataCreateHotel,
         <Typography fontSize={14} fontWeight={600} mb={0.8}>
           Mô tả (không bắt buộc)
         </Typography>
-        <Typography fontSize={12}  mb={0.8}>
-        Viết một đoạn giới thiệu ngắn gọn về khách sạn của bạn. Mô tả sẽ được hiển thị tại trang chủ của khách sạn trên Hotel Booking.
+        <Typography fontSize={12} mb={0.8}>
+          Viết một đoạn giới thiệu ngắn gọn về khách sạn của bạn. Mô tả sẽ được hiển thị tại trang chủ của khách sạn trên Hotel Booking.
         </Typography>
         <TextField
           fullWidth
           multiline
           rows={4}
-          value={formData.description}
-          onChange={(e) => updateField("description", e.target.value)}
+          value={formData.description?.[selectedLang] || ""}
+            onChange={(e) =>
+              updateField("description", {
+                ...formData.description,
+                [selectedLang]: e.target.value,
+              })
+            }
+         
           placeholder="Nhập mô tả"
           sx={{
             "& .MuiOutlinedInput-root": {
@@ -353,13 +375,13 @@ export default function HotelBasicInfo({setDataCreateHotel,
       </Box>
       <Box mb={4}>
         <Typography fontSize={14} fontWeight={600} mb={1.5}>
-         Tiện ích khách sạn
+          Tiện ích khách sạn
         </Typography>
 
         <FacilitySelector
-           onChange={(newIds) => updateField("selectedIds", newIds)}
-            selectedIds={formData.selectedIds}
-          />
+          onChange={(newIds) => updateField("selectedIds", newIds)}
+          selectedIds={formData.selectedIds}
+        />
       </Box>
 
       {/* Thời gian kinh doanh */}
@@ -369,7 +391,7 @@ export default function HotelBasicInfo({setDataCreateHotel,
         </Typography>
 
         <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={3}>
-          
+
           {/* Theo giờ */}
           {renderTimeCard("Theo giờ", [
             {
@@ -417,7 +439,7 @@ export default function HotelBasicInfo({setDataCreateHotel,
         </Box>
       </Box>
 
-      
+
     </Box>
   );
 }
@@ -474,33 +496,33 @@ function FacilitySelector({ selectedIds = [], onChange }) {
   return (
     <Box mb={2}>
       <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"}>
-      <Button
-  variant="outlined"
-  onClick={() => setOpen(true)}
-  startIcon={<Add />}
-  sx={{
-    height: "40px",
-    borderRadius: 2,
-    borderColor: "#ddd",
-    color: "#555",
-    textTransform: "none",
-    fontSize: "0.875rem",
-    fontWeight: 500,
-    justifyContent: "flex-start",
-    px: 2,
-    "&:hover": {
-      borderColor: "#98b720",
-      bgcolor: "rgba(152, 183, 32, 0.04)",
-    },
-    "& .MuiButton-startIcon": {
-      color: "#98b720",
-    },
-  }}
->
-  {selectedFacilities.length > 0
-    ? `${selectedFacilities.length} tiện ích đã chọn`
-    : "Thêm tiện ích"}
-</Button>
+        <Button
+          variant="outlined"
+          onClick={() => setOpen(true)}
+          startIcon={<Add />}
+          sx={{
+            height: "40px",
+            borderRadius: 2,
+            borderColor: "#ddd",
+            color: "#555",
+            textTransform: "none",
+            fontSize: "0.875rem",
+            fontWeight: 500,
+            justifyContent: "flex-start",
+            px: 2,
+            "&:hover": {
+              borderColor: "#98b720",
+              bgcolor: "rgba(152, 183, 32, 0.04)",
+            },
+            "& .MuiButton-startIcon": {
+              color: "#98b720",
+            },
+          }}
+        >
+          {selectedFacilities.length > 0
+            ? `${selectedFacilities.length} tiện ích đã chọn`
+            : "Thêm tiện ích"}
+        </Button>
       </Box>
 
       {/* Chips hiển thị bên ngoài – sẽ cập nhật ngay khi chọn */}

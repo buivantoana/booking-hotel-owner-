@@ -1,12 +1,28 @@
 import {
+  Avatar,
   Button,
   CircularProgress,
   Container,
+  FormControl,
+  MenuItem,
+  Select,
   Typography,
   useTheme,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import LoginIcon from "@mui/icons-material/Login";
+import vn from "../../images/vn.png";
+import ja from "../../images/ja.png";
+import ko from "../../images/ko.png";
+import en from "../../images/en.png";
+
+const LANGUAGES = [
+  { code: "vi", label: "Tiếng Việt", flag: vn },
+  { code: "en", label: "English", flag: en },
+  { code: "ko", label: "Hàn Quốc", flag: ko },
+  { code: "ja", label: "Nhật Bản", flag: ja },
+];
+
 type Props = {};
 
 const CreateHotelView = ({ submitCreateHotel }) => {
@@ -16,7 +32,14 @@ const CreateHotelView = ({ submitCreateHotel }) => {
   const [typeHotel, setTypeHotel] = useState(
     persistedData.typeHotel || "Khách sạn Listing"
   );
-  
+
+  const [selectedLang, setSelectedLang] = React.useState<string>('vi');
+
+  const handleChange = (event) => {
+    setSelectedLang(event.target.value as string);
+    // Ở đây bạn có thể thêm logic thay đổi ngôn ngữ thực tế
+    console.log('Language changed to:', event.target.value);
+  };
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const handleStepClick = (id) => {
@@ -27,7 +50,7 @@ const CreateHotelView = ({ submitCreateHotel }) => {
     setTypeHotel(name);
     setTempData(prev => ({ ...prev, typeHotel: name }));
   };
- 
+
 
   // Dữ liệu tạm của step hiện tại (luôn mới nhất)
   const [tempData, setTempData] = useState({
@@ -158,7 +181,8 @@ const CreateHotelView = ({ submitCreateHotel }) => {
     <Box sx={{ background: "#f7f7f7" }}>
       <Container maxWidth='lg' sx={{ py: 4, minHeight: "100vh" }}>
         {step < 6 && (
-          <>
+          <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"}>
+          <Box>
             <Typography fontSize={"32px"} fontWeight={"600"}>
               Tạo khách sạn
             </Typography>
@@ -166,12 +190,82 @@ const CreateHotelView = ({ submitCreateHotel }) => {
               Để bắt đầu, vui lòng nhập các thông tin bên dưới về khách sạn của
               bạn.
             </Typography>
-          </>
+          </Box>
+          {(step != 1 && step < 6  ) && <FormControl sx={{ minWidth: 160 }}>
+          <Select
+            value={selectedLang}
+            onChange={handleChange}
+            displayEmpty
+            IconComponent={ArrowDropDown}
+            // Tùy chỉnh style để giống hệt ảnh
+            sx={{
+              bgcolor: 'white',
+              borderRadius: '10px', // bo tròn mạnh
+              height: 48,
+
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#9AC33C',
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#9AC33C',
+              },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#9AC33C',
+              },
+              '& .MuiSelect-icon': {
+                color: '#9AC33C', // màu xanh lá của mũi tên
+              },
+            }}
+            // Render giá trị đang chọn giống hệt ảnh
+            renderValue={(selected) => {
+              if (!selected) return <span>Chọn ngôn ngữ</span>;
+
+              const lang = LANGUAGES.find((item) => item.code === selected);
+              if (!lang) return null;
+
+              return (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Avatar
+                    src={lang.flag}
+                    alt={lang.label}
+                    sx={{ width: 24, height: 24,borderRadius:"5px" }}
+                    variant="square"
+                  />
+                  <Typography
+                    sx={{
+                      fontSize: '.9rem',
+                      fontWeight: 500,
+                      color: '#9AC33C', // màu xanh lá giống ảnh
+                    }}
+                  >
+                    {lang.label}
+                  </Typography>
+                </Box>
+              );
+            }}
+          >
+            {LANGUAGES.map((lang) => (
+              <MenuItem key={lang.code} value={lang.code}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Avatar
+                    src={lang.flag}
+                    alt={lang.label}
+                    sx={{ width: 24, height: 24,borderRadius:"5px" }}
+                    variant="square"
+                  />
+                  <Typography>{lang.label}</Typography>
+                </Box>
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>}
+          </Box>
         )}
 
         {step < 6 && (
           <StepIndicator activeStep={step} onStepChange={handleStepClick} />
         )}
+        
         <Box sx={{ my: 2 }}>
           {step == 1 && (
             <HotelTypeSelect
@@ -182,11 +276,12 @@ const CreateHotelView = ({ submitCreateHotel }) => {
           {step == 2 && (
             <HotelBasicInfo
               dataCreateHotel={persistedData}
-              setDataCreateHotel={() => {}}
+              setDataCreateHotel={() => { }}
               onTempChange={setTempData} //
               errors={stepErrors}
               touched={touched}
               onFieldBlur={markAsTouched}
+              selectedLang={selectedLang}
             />
           )}
           {step == 3 && (
@@ -212,6 +307,7 @@ const CreateHotelView = ({ submitCreateHotel }) => {
           {step == 5 && (
             <RoomTypeTabsModern
               onTempChange={setTempData}
+              selectedLang={selectedLang}
               errors={stepErrors}
               touched={touched}
               onFieldTouch={(field) =>
@@ -328,16 +424,16 @@ function StepIndicator({ activeStep = 1, onStepChange }) {
                 backgroundColor: isActive
                   ? "#9AC33C"
                   : isCompleted
-                  ? "#9AC33C"
-                  : "transparent",
+                    ? "#9AC33C"
+                    : "transparent",
                 color: isActive ? "white" : "#666",
                 fontWeight: 600,
                 fontSize: 14,
                 border: isActive
                   ? "1px solid transparent"
                   : isCompleted
-                  ? "1px solid transparent"
-                  : "1px solid #888",
+                    ? "1px solid transparent"
+                    : "1px solid #888",
               }}>
               {isCompleted ? (
                 <CheckIcon sx={{ fontSize: 20, color: "white" }} />
@@ -384,6 +480,7 @@ import {
 } from "../../utils/utils";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { ArrowDropDown } from "@mui/icons-material";
 
 const CreateSuccess = () => {
   const theme = useTheme();

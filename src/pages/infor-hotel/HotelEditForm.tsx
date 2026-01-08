@@ -21,15 +21,27 @@ import {
   ListItemIcon,
   ListItemText,
   Checkbox,
+  Avatar,
 } from "@mui/material";
 import HotelImageUpload from "./HotelImageUpload";
-import { Add, ArrowBackIos, Close, Search } from "@mui/icons-material";
+import { Add, ArrowBackIos, ArrowDropDown, Close, Search } from "@mui/icons-material";
 import { GoogleMap, LoadScript } from "@react-google-maps/api";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getHotel, updateHotel } from "../../service/hotel";
 import { toast } from "react-toastify";
 import { facilities } from "../../utils/utils";
+import vn from "../../images/vn.png";
+import ja from "../../images/ja.png";
+import ko from "../../images/ko.png";
+import en from "../../images/en.png";
+
+const LANGUAGES = [
+  { code: "vi", label: "Tiếng Việt", flag: vn },
+  { code: "en", label: "English", flag: en },
+  { code: "ko", label: "Hàn Quốc", flag: ko },
+  { code: "ja", label: "Nhật Bản", flag: ja },
+];
 
 export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }) {
   const [center, setCenter] = useState({ lat: 21.0285, lng: 105.8542 });
@@ -37,15 +49,31 @@ export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }
   const [hotel, setHotel] = useState(null); // dữ liệu hotel đã parse
   const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
+  const [selectedLang, setSelectedLang] = React.useState<string>('vi');
 
+  const handleChange = (event) => {
+    setSelectedLang(event.target.value as string);
+    // Ở đây bạn có thể thêm logic thay đổi ngôn ngữ thực tế
+    console.log('Language changed to:', event.target.value);
+  };
   const containerStyle = { width: "100%", height: "50vh" };
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   // State cho các field (controlled)
   const [formValues, setFormValues] = useState({
-    name: "",
+    name: {
+      vi: "",
+      ko: "",
+      ja: "",
+      en: ""
+    },
     phone: "",
     address: "",
-    description: "",
+    description: {
+      vi: "",
+      ko: "",
+      ja: "",
+      en: ""
+    },
     city: "hanoi",
     cooperation_type: "listing",
     rent_types: {
@@ -67,11 +95,11 @@ export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }
             setHotel(result);
 
             // Parse các trường JSON string
-            const parsedName = JSON.parse(result.name || '{"vi":""}').vi || "";
+            const parsedName = JSON.parse(result.name || '{"vi":""}') || "";
             const parsedAddress =
               JSON.parse(result.address || '{"vi":""}').vi || "";
             const parsedDesc =
-              JSON.parse(result.description || '{"vi":""}').vi || "";
+              JSON.parse(result.description || '{"vi":""}') || "";
             const parsedRentTypes = result.rent_types
               ? JSON.parse(result.rent_types)
               : {};
@@ -135,11 +163,11 @@ export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }
     const formData = new FormData();
 
     // Các field text
-    formData.append("name", JSON.stringify({ vi: formValues.name }));
+    formData.append("name", JSON.stringify(formValues.name ));
     formData.append("address", JSON.stringify({ vi: formValues.address }));
     formData.append(
       "description",
-      JSON.stringify({ vi: formValues.description })
+      JSON.stringify(formValues.description)
     );
     formData.append("city", formValues.city);
     formData.append("phone", formValues.phone);
@@ -175,7 +203,8 @@ export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }
   const memoizedHotelData = useMemo(() => hotel, [hotel?.id]);
   return (
     <Box>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
+      <Box display={"flex"}  mb={3} justifyContent={"space-between"} alignItems={"center"}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, }}>
         <ArrowBackIos
           sx={{
             fontSize: 20,
@@ -188,6 +217,75 @@ export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }
         <Typography fontSize={22} fontWeight={700} color='#222'>
           Cập nhật thông tin
         </Typography>
+      </Box>
+      <FormControl sx={{ minWidth: 160 }}>
+          <Select
+            value={selectedLang}
+            onChange={handleChange}
+            displayEmpty
+            IconComponent={ArrowDropDown}
+            // Tùy chỉnh style để giống hệt ảnh
+            sx={{
+              bgcolor: 'white',
+              borderRadius: '10px', // bo tròn mạnh
+              height: 48,
+
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#9AC33C',
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#9AC33C',
+              },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#9AC33C',
+              },
+              '& .MuiSelect-icon': {
+                color: '#9AC33C', // màu xanh lá của mũi tên
+              },
+            }}
+            // Render giá trị đang chọn giống hệt ảnh
+            renderValue={(selected) => {
+              if (!selected) return <span>Chọn ngôn ngữ</span>;
+
+              const lang = LANGUAGES.find((item) => item.code === selected);
+              if (!lang) return null;
+
+              return (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Avatar
+                    src={lang.flag}
+                    alt={lang.label}
+                    sx={{ width: 24, height: 24,borderRadius:"5px" }}
+                    variant="square"
+                  />
+                  <Typography
+                    sx={{
+                      fontSize: '.9rem',
+                      fontWeight: 500,
+                      color: '#9AC33C', // màu xanh lá giống ảnh
+                    }}
+                  >
+                    {lang.label}
+                  </Typography>
+                </Box>
+              );
+            }}
+          >
+            {LANGUAGES.map((lang) => (
+              <MenuItem key={lang.code} value={lang.code}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Avatar
+                    src={lang.flag}
+                    alt={lang.label}
+                    sx={{ width: 24, height: 24,borderRadius:"5px" }}
+                    variant="square"
+                  />
+                  <Typography>{lang.label}</Typography>
+                </Box>
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </Box>
 
       <Paper
@@ -220,7 +318,7 @@ export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }
                   <TextField
                     fullWidth
                     disabled
-                    value={formValues.name}
+                    value={formValues.name[selectedLang]}
                     onChange={(e) =>
                       setFormValues({ ...formValues, name: e.target.value })
                     }
@@ -405,17 +503,17 @@ export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }
                     fullWidth
                     multiline
                     rows={6}
-                    value={formValues.description}
+                    value={formValues.description[selectedLang]}
                     onChange={(e) =>
                       setFormValues({
                         ...formValues,
-                        description: e.target.value,
+                        description:{...formValues.description,[selectedLang]:e.target.value} ,
                       })
                     }
                     placeholder='Nhập mô tả về khách sạn của bạn'
                     variant='outlined'
                     inputProps={{ maxLength: 3000 }}
-                    helperText={`${formValues.description.length}/3000`}
+                    helperText={`${formValues.description[selectedLang].length}/3000`}
                     FormHelperTextProps={{
                       sx: { textAlign: "right", marginRight: 2, color: "#999" },
                     }}

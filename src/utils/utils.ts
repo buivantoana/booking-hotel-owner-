@@ -139,10 +139,13 @@ export function formattedDateHHMMDDMMYYYY(data) {
 export const validateBasicInfo = (data: any) => {
   const errors: Record<string, string> = {};
 
-  if (!data?.hotelName?.trim()) {
-    errors.hotelName = "Vui lòng nhập tên khách sạn";
-  }
+  const hotelNameValues = data?.hotelName
+  ? Object.values(data.hotelName).filter((v: any) => v?.trim())
+  : [];
 
+if (hotelNameValues.length === 0) {
+  errors.hotelName = "Vui lòng nhập tên khách sạn cho ít nhất một ngôn ngữ";
+}
   if (!data?.phone?.trim()) {
     errors.phone = "Vui lòng nhập số điện thoại";
   } else if (!/^0\d{9}$/.test(data.phone.replace(/\D/g, ""))) {
@@ -224,9 +227,13 @@ export const validateRoomTypes = (data: any) => {
 
   // Validate từng loại phòng
   roomTypes.forEach((room: any, index: number) => {
-    if (!room?.name?.trim()) {
-      errors[`room_${index}_name`] = `Loại phòng ${index + 1
-        }: Vui lòng nhập tên loại phòng`;
+    if (room?.name) {
+      const nameValues = Object.values(room.name).filter((v: any) => v?.toString().trim());
+      if (nameValues.length === 0) {
+        errors[`room_${index}_name`] = `Loại phòng ${index + 1}: Vui lòng nhập tên loại phòng cho ít nhất một ngôn ngữ`;
+      }
+    } else {
+      errors[`room_${index}_name`] = `Loại phòng ${index + 1}: Vui lòng nhập tên loại phòng cho ít nhất một ngôn ngữ`;
     }
     if (
       !room?.quantity?.trim() ||
@@ -252,10 +259,7 @@ export const validateRoomTypes = (data: any) => {
       errors[`room_${index}_direction`] = `Loại phòng ${index + 1
         }: Vui lòng chọn hướng phòng`;
     }
-    if (!room?.description?.trim()) {
-      errors[`room_${index}_description`] = `Loại phòng ${index + 1
-        }: Vui lòng nhập mô tả phòng`;
-    }
+   
     if ((room?.images || []).length < 3) {
       errors[`room_${index}_images`] = `Loại phòng ${index + 1
         }: Vui lòng tải lên ít nhất 3 ảnh phòng`;

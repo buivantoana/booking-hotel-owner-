@@ -54,12 +54,12 @@ interface Pricing {
 
 interface RoomType {
   id: string;
-  name: string;
+  name: {};
   quantity: string;
   area: string;
   bedType: string[]; // Đổi thành mảng id
   direction: string[]; // Đổi thành mảng id
-  description: string;
+  description: {};
   images: File[];
   imagePreviews: string[];
   pricing: Pricing;
@@ -71,6 +71,7 @@ export default function RoomTypeManager({
   errors = {},
   touched = {},
   onFieldTouch,
+  selectedLang
 }) {
   const context = useBookingContext();
   const dataRef = useRef<{ roomTypes: RoomType[]; activeTab: number }>({
@@ -96,12 +97,22 @@ export default function RoomTypeManager({
       roomTypes: [
         {
           id: Date.now().toString(),
-          name: "",
+          name:  {
+            vi: "",
+            ko: "",
+            ja: "",
+            en: ""
+          },
           quantity: "",
           area: "",
           bedType: [],
           direction: [],
-          description: "",
+          description:  {
+            vi: "",
+            ko: "",
+            ja: "",
+            en: ""
+          },
           images: [],
           imagePreviews: [],
           facilities: [],
@@ -175,12 +186,22 @@ export default function RoomTypeManager({
   const addRoomType = () => {
     const newRoom: RoomType = {
       id: Date.now().toString(),
-      name: "",
+      name:{
+        vi: "",
+        ko: "",
+        ja: "",
+        en: ""
+      },
       quantity: "",
       area: "",
       bedType: [],
       direction: [],
-      description: "",
+      description: {
+        vi: "",
+        ko: "",
+        ja: "",
+        en: ""
+      },
       images: [],
       imagePreviews: [],
       facilities: [],
@@ -300,9 +321,9 @@ export default function RoomTypeManager({
                 <TextField
                   fullWidth
                   placeholder='Nhập tên loại phòng'
-                  value={current?.name || ""}
+                  value={current?.name[selectedLang] || ""}
                   onChange={(e) => {
-                    updateRoomField("name", e.target.value);
+                    updateRoomField("name",{...current.name , [selectedLang]: e.target.value,});
                   }}
                   onBlur={() => {
                     handleTouch("name");
@@ -597,9 +618,9 @@ export default function RoomTypeManager({
                   multiline
                   rows={4}
                   placeholder='Nhập mô tả về loại phòng...'
-                  value={current?.description || ""}
+                  value={current?.description[selectedLang] || ""}
                   onChange={(e) => {
-                    updateRoomField("description", e.target.value);
+                    updateRoomField("description",{...current.description , [selectedLang]: e.target.value,});
                   }}
                   onBlur={() => {
                     handleTouch("description");
