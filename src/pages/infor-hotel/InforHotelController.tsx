@@ -1,29 +1,31 @@
 import React, { useEffect, useState } from "react";
 import InforHotelView from "./InforHotelView";
-import { getHotels, getLocations } from "../../service/hotel";
+import { getAttribute, getHotels, getLocations } from "../../service/hotel";
 
 type Props = {};
 
 const InforHotelController = (props: Props) => {
-  const [hotels,setHotels] = useState([])
+  const [hotels, setHotels] = useState([]);
   const [locations, setLocations] = useState<Location[]>([]);
-  useEffect(()=>{
-    getDataHotels()
-  },[])
-  const getDataHotels =async () => {
+  const [attribute, setAttribute] = useState({});
+  useEffect(() => {
+    getDataHotels();
+  }, []);
+  const getDataHotels = async () => {
     try {
       let result = await getHotels();
-      if(result?.hotels){
-        setHotels(result?.hotels)
+      if (result?.hotels) {
+        setHotels(result?.hotels);
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-     
+        const resultAttribute = await getAttribute();
+        setAttribute(resultAttribute);
         const result = await getLocations();
         // Giả sử API trả về { locations: [...] }
         if (result?.locations && Array.isArray(result.locations)) {
@@ -32,13 +34,19 @@ const InforHotelController = (props: Props) => {
       } catch (error) {
         console.error("Error fetching locations:", error);
       } finally {
-        
       }
     };
 
     fetchLocations();
   }, []);
-  return <InforHotelView hotels={hotels} locations={locations} getDataHotels={getDataHotels} />;
+  return (
+    <InforHotelView
+      hotels={hotels}
+      locations={locations}
+      getDataHotels={getDataHotels}
+      attribute={attribute}
+    />
+  );
 };
 
 export default InforHotelController;

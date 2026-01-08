@@ -99,6 +99,7 @@ export default function RoomTypeManager({
   getHotelDetail,
   isCreate,
   idHotel,
+  attribute,
 }: RoomTypeManagerProps) {
   const dataRef = useRef<{ roomTypes: RoomType[]; activeTab: number }>({
     roomTypes: [],
@@ -106,12 +107,12 @@ export default function RoomTypeManager({
   });
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchParams, setSearchParams] = useSearchParams();
-  const [selectedLang, setSelectedLang] = React.useState<string>('vi');
+  const [selectedLang, setSelectedLang] = React.useState<string>("vi");
 
   const handleChange = (event) => {
     setSelectedLang(event.target.value as string);
     // Ở đây bạn có thể thêm logic thay đổi ngôn ngữ thực tế
-    console.log('Language changed to:', event.target.value);
+    console.log("Language changed to:", event.target.value);
   };
   // Helper parse JSON đa ngôn ngữ
   const parseVi = (field?: string) => {
@@ -202,21 +203,21 @@ export default function RoomTypeManager({
       roomTypes: [
         {
           id: Date.now().toString(),
-          name:  {
+          name: {
             vi: "",
             ko: "",
             ja: "",
-            en: ""
+            en: "",
           },
           quantity: "",
           area: "",
           bedType: "",
           direction: "",
-          description:  {
+          description: {
             vi: "",
             ko: "",
             ja: "",
-            en: ""
+            en: "",
           },
           images: [],
           imagePreviews: [],
@@ -276,8 +277,7 @@ export default function RoomTypeManager({
   };
 
   const handleSubmitRoomType = async () => {
-    const toViJson = (value: string): string =>
-      JSON.stringify(value);
+    const toViJson = (value: string): string => JSON.stringify(value);
 
     const buildFormData = (room) => {
       const formData = new FormData();
@@ -372,89 +372,87 @@ export default function RoomTypeManager({
         </Box>
 
         <Box sx={{ flexGrow: 1 }} />
-          <Box display={"flex"} alignItems={"center"} gap={1}>
+        <Box display={"flex"} alignItems={"center"} gap={1}>
           <FormControl sx={{ minWidth: 160 }}>
-          <Select
-            value={selectedLang}
-            onChange={handleChange}
-            displayEmpty
-            IconComponent={ArrowDropDown}
-            // Tùy chỉnh style để giống hệt ảnh
+            <Select
+              value={selectedLang}
+              onChange={handleChange}
+              displayEmpty
+              IconComponent={ArrowDropDown}
+              // Tùy chỉnh style để giống hệt ảnh
+              sx={{
+                bgcolor: "white",
+                borderRadius: "10px", // bo tròn mạnh
+                height: 40,
+
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#9AC33C",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#9AC33C",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#9AC33C",
+                },
+                "& .MuiSelect-icon": {
+                  color: "#9AC33C", // màu xanh lá của mũi tên
+                },
+              }}
+              // Render giá trị đang chọn giống hệt ảnh
+              renderValue={(selected) => {
+                if (!selected) return <span>Chọn ngôn ngữ</span>;
+
+                const lang = LANGUAGES.find((item) => item.code === selected);
+                if (!lang) return null;
+
+                return (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                    <Avatar
+                      src={lang.flag}
+                      alt={lang.label}
+                      sx={{ width: 24, height: 24, borderRadius: "5px" }}
+                      variant='square'
+                    />
+                    <Typography
+                      sx={{
+                        fontSize: ".9rem",
+                        fontWeight: 500,
+                        color: "#9AC33C", // màu xanh lá giống ảnh
+                      }}>
+                      {lang.label}
+                    </Typography>
+                  </Box>
+                );
+              }}>
+              {LANGUAGES.map((lang) => (
+                <MenuItem key={lang.code} value={lang.code}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                    <Avatar
+                      src={lang.flag}
+                      alt={lang.label}
+                      sx={{ width: 24, height: 24, borderRadius: "5px" }}
+                      variant='square'
+                    />
+                    <Typography>{lang.label}</Typography>
+                  </Box>
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Button
+            variant='contained'
+            onClick={handleSubmitRoomType}
             sx={{
-              bgcolor: 'white',
-              borderRadius: '10px', // bo tròn mạnh
+              background: "#82B440",
+              borderRadius: 3,
+              textTransform: "none",
+              px: 3,
               height: 40,
-
-              '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#9AC33C',
-              },
-              '&:hover .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#9AC33C',
-              },
-              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#9AC33C',
-              },
-              '& .MuiSelect-icon': {
-                color: '#9AC33C', // màu xanh lá của mũi tên
-              },
-            }}
-            // Render giá trị đang chọn giống hệt ảnh
-            renderValue={(selected) => {
-              if (!selected) return <span>Chọn ngôn ngữ</span>;
-
-              const lang = LANGUAGES.find((item) => item.code === selected);
-              if (!lang) return null;
-
-              return (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <Avatar
-                    src={lang.flag}
-                    alt={lang.label}
-                    sx={{ width: 24, height: 24,borderRadius:"5px" }}
-                    variant="square"
-                  />
-                  <Typography
-                    sx={{
-                      fontSize: '.9rem',
-                      fontWeight: 500,
-                      color: '#9AC33C', // màu xanh lá giống ảnh
-                    }}
-                  >
-                    {lang.label}
-                  </Typography>
-                </Box>
-              );
-            }}
-          >
-            {LANGUAGES.map((lang) => (
-              <MenuItem key={lang.code} value={lang.code}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <Avatar
-                    src={lang.flag}
-                    alt={lang.label}
-                    sx={{ width: 24, height: 24,borderRadius:"5px" }}
-                    variant="square"
-                  />
-                  <Typography>{lang.label}</Typography>
-                </Box>
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <Button
-          variant='contained'
-          onClick={handleSubmitRoomType}
-          sx={{
-            background: "#82B440",
-            borderRadius: 3,
-            textTransform: "none",
-            px: 3,
-            height: 40,
-            "&:hover": { background: "#6fa336" },
-          }}>
-          {isCreate ? "Duyệt" : "Cập nhật"}
-        </Button>
-          </Box>
+              "&:hover": { background: "#6fa336" },
+            }}>
+            {isCreate ? "Duyệt" : "Cập nhật"}
+          </Button>
+        </Box>
       </Box>
       <Box sx={{ p: { xs: 2, md: 3 }, bgcolor: "white", borderRadius: 3 }}>
         {/* Tabs loại phòng */}
@@ -486,7 +484,10 @@ export default function RoomTypeManager({
                     placeholder='Nhập tên loại phòng'
                     value={current?.name[selectedLang] || ""}
                     onChange={(e) => {
-                      updateRoomField("name", {...current?.name,[selectedLang]:e.target.value});
+                      updateRoomField("name", {
+                        ...current?.name,
+                        [selectedLang]: e.target.value,
+                      });
                       handleTouch("name");
                     }}
                     sx={{
@@ -563,9 +564,9 @@ export default function RoomTypeManager({
                   </Typography>
                   <Autocomplete
                     multiple
-                    options={type_bed}
-                    getOptionLabel={(option) => option.label}
-                    value={type_bed.filter((opt) =>
+                    options={attribute?.bed_type}
+                    getOptionLabel={(option) => option.name[selectedLang]}
+                    value={attribute?.bed_type.filter((opt) =>
                       current?.bedType.includes(opt.id)
                     )}
                     isOptionEqualToValue={(option, value) =>
@@ -582,7 +583,7 @@ export default function RoomTypeManager({
                     renderTags={(tagValue, getTagProps) =>
                       tagValue.map((option, index) => (
                         <Chip
-                          label={option.label}
+                          label={option.name[selectedLang]}
                           size='small'
                           {...getTagProps({ index })}
                           key={index}
@@ -623,7 +624,7 @@ export default function RoomTypeManager({
                     renderOption={(props, option) => (
                       <li {...props} key={option.id}>
                         <BedIcon sx={{ mr: 2, color: "#999", fontSize: 20 }} />
-                        {option.label}
+                        {option.name[selectedLang]}
                       </li>
                     )}
                   />
@@ -638,10 +639,10 @@ export default function RoomTypeManager({
                   </Typography>
                   <Autocomplete
                     multiple
-                    options={direction}
-                    getOptionLabel={(option) => option.label}
+                    options={attribute?.direction}
+                    getOptionLabel={(option) => option.name[selectedLang]}
                     value={
-                      direction.filter((opt) =>
+                      attribute?.direction.filter((opt) =>
                         current?.direction.includes(opt.id)
                       ) || []
                     }
@@ -658,7 +659,7 @@ export default function RoomTypeManager({
                     renderTags={(tagValue, getTagProps) =>
                       tagValue.map((option, index) => (
                         <Chip
-                          label={option.label}
+                          label={option.name[selectedLang]}
                           size='small'
                           {...getTagProps({ index })}
                           key={index}
@@ -699,7 +700,7 @@ export default function RoomTypeManager({
                         <CompassCalibrationIcon
                           sx={{ mr: 2, color: "#999", fontSize: 20 }}
                         />
-                        {option.label}
+                        {option.name[selectedLang]}
                       </li>
                     )}
                   />
@@ -726,7 +727,10 @@ export default function RoomTypeManager({
                     placeholder='Nhập mô tả về loại phòng...'
                     value={current?.description[selectedLang] || ""}
                     onChange={(e) => {
-                      updateRoomField("description",{...current?.description,[selectedLang]: e.target.value});
+                      updateRoomField("description", {
+                        ...current?.description,
+                        [selectedLang]: e.target.value,
+                      });
                       handleTouch("description");
                     }}
                     inputProps={{ maxLength: 3000 }}
@@ -753,6 +757,7 @@ export default function RoomTypeManager({
 
         {/* Upload ảnh */}
         <RoomImagesUpload
+          attribute={attribute}
           setSelectedIds={setSelectedIds}
           selectedIds={selectedIds}
           previews={current?.imagePreviews || []}
@@ -784,6 +789,7 @@ function RoomImagesUpload({
   onChange,
   setSelectedIds,
   selectedIds,
+  attribute,
 }: {
   previews: string[];
   files: File[];
@@ -841,6 +847,7 @@ function RoomImagesUpload({
           <FacilitySelector
             setSelectedIds={setSelectedIds}
             selectedIds={selectedIds}
+            attribute={attribute}
           />
 
           <Typography
@@ -1198,11 +1205,11 @@ const modalStyle = {
   flexDirection: "column",
 };
 
-function FacilitySelector({ selectedIds, setSelectedIds }) {
+function FacilitySelector({ selectedIds, setSelectedIds, attribute }) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredFacilities = facilities.filter(
+  const filteredFacilities = attribute?.amenities.filter(
     (fac) =>
       fac.name.vi.toLowerCase().includes(searchTerm.toLowerCase()) ||
       fac.name.en.toLowerCase().includes(searchTerm.toLowerCase())
@@ -1224,7 +1231,7 @@ function FacilitySelector({ selectedIds, setSelectedIds }) {
     setOpen(false);
   };
 
-  const selectedFacilities = facilities.filter((f) =>
+  const selectedFacilities = attribute?.amenities.filter((f) =>
     selectedIds.includes(f.id)
   );
 

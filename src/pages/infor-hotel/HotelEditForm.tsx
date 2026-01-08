@@ -24,9 +24,21 @@ import {
   Avatar,
 } from "@mui/material";
 import HotelImageUpload from "./HotelImageUpload";
-import { Add, ArrowBackIos, ArrowDropDown, Close, Search } from "@mui/icons-material";
+import {
+  Add,
+  ArrowBackIos,
+  ArrowDropDown,
+  Close,
+  Search,
+} from "@mui/icons-material";
 import { GoogleMap, LoadScript } from "@react-google-maps/api";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useSearchParams } from "react-router-dom";
 import { getHotel, updateHotel } from "../../service/hotel";
 import { toast } from "react-toastify";
@@ -43,28 +55,40 @@ const LANGUAGES = [
   { code: "ja", label: "Nhật Bản", flag: ja },
 ];
 
-export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }) {
+export default function HotelEditFormExact({
+  setAction,
+  setRoom,
+  getHotelDetail,
+  attribute,
+}) {
   const [center, setCenter] = useState({ lat: 21.0285, lng: 105.8542 });
   const mapRef = useRef(null);
   const [hotel, setHotel] = useState(null); // dữ liệu hotel đã parse
   const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
-  const [selectedLang, setSelectedLang] = React.useState<string>('vi');
+  const [selectedLang, setSelectedLang] = React.useState<string>("vi");
 
   const handleChange = (event) => {
     setSelectedLang(event.target.value as string);
     // Ở đây bạn có thể thêm logic thay đổi ngôn ngữ thực tế
-    console.log('Language changed to:', event.target.value);
+    console.log("Language changed to:", event.target.value);
   };
   const containerStyle = { width: "100%", height: "50vh" };
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [lockedLangs, setLockedLangs] = useState<Record<string, boolean>>({
+    vi: false,
+    en: false,
+    ko: false,
+    ja: false,
+  });
+
   // State cho các field (controlled)
   const [formValues, setFormValues] = useState({
     name: {
       vi: "",
       ko: "",
       ja: "",
-      en: ""
+      en: "",
     },
     phone: "",
     address: "",
@@ -72,7 +96,7 @@ export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }
       vi: "",
       ko: "",
       ja: "",
-      en: ""
+      en: "",
     },
     city: "hanoi",
     cooperation_type: "listing",
@@ -82,7 +106,6 @@ export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }
     },
   });
 
-  
   // Ref để lưu ảnh mới upload (được HotelImageUpload cập nhật)
   const newImagesRef = useRef({ images: [], verify_images: [] });
 
@@ -95,25 +118,48 @@ export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }
             setHotel(result);
 
             // Parse các trường JSON string
-            const parsedName = JSON.parse(result.name || '{"vi":""}') || "";
+            const firstKey = Object.keys(
+              JSON.parse(result.name || '{"vi":""}')
+            )[0];
+            setSelectedLang(firstKey);
+            const parsedName =
+              {
+                vi: "",
+                ko: "",
+                ja: "",
+                en: "",
+                ...JSON.parse(result.name || '{"vi":""}'),
+              } || "";
             const parsedAddress =
               JSON.parse(result.address || '{"vi":""}').vi || "";
             const parsedDesc =
-              JSON.parse(result.description || '{"vi":""}') || "";
+              {
+                vi: "",
+                ko: "",
+                ja: "",
+                en: "",
+                ...JSON.parse(result.description || '{"vi":""}'),
+              } || "";
             const parsedRentTypes = result.rent_types
               ? JSON.parse(result.rent_types)
               : {};
 
-              if (result && result.amenities) {
-                try {
-                  const parsed = JSON.parse(result.amenities as string);
-                  if (Array.isArray(parsed)) {
-                    setSelectedIds(parsed);
-                  }
-                } catch (e) {
-                  console.warn("Không parse được facilities:", e);
+            if (result && result.amenities) {
+              try {
+                const parsed = JSON.parse(result.amenities as string);
+                if (Array.isArray(parsed)) {
+                  setSelectedIds(parsed);
                 }
+              } catch (e) {
+                console.warn("Không parse được facilities:", e);
               }
+            }
+            setLockedLangs({
+              vi: !!parsedName.vi,
+              en: !!parsedName.en,
+              ko: !!parsedName.ko,
+              ja: !!parsedName.ja,
+            });
             setFormValues({
               name: parsedName,
               phone: result.phone || "",
@@ -163,12 +209,9 @@ export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }
     const formData = new FormData();
 
     // Các field text
-    formData.append("name", JSON.stringify(formValues.name ));
+    formData.append("name", JSON.stringify(formValues.name));
     formData.append("address", JSON.stringify({ vi: formValues.address }));
-    formData.append(
-      "description",
-      JSON.stringify(formValues.description)
-    );
+    formData.append("description", JSON.stringify(formValues.description));
     formData.append("city", formValues.city);
     formData.append("phone", formValues.phone);
     formData.append("lat", center.lat);
@@ -189,9 +232,8 @@ export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }
       console.log("Update success", response);
       if (response?.hotel_id) {
         toast.success(response?.message);
-        getHotelDetail()
+        getHotelDetail();
         setAction("edit_detail");
-       
       } else {
         toast.success(response?.message);
       }
@@ -203,22 +245,26 @@ export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }
   const memoizedHotelData = useMemo(() => hotel, [hotel?.id]);
   return (
     <Box>
-      <Box display={"flex"}  mb={3} justifyContent={"space-between"} alignItems={"center"}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, }}>
-        <ArrowBackIos
-          sx={{
-            fontSize: 20,
-            color: "#666",
-            cursor: "pointer",
-            "&:hover": { color: "#333" },
-          }}
-          onClick={() => setAction("edit_detail")}
-        />
-        <Typography fontSize={22} fontWeight={700} color='#222'>
-          Cập nhật thông tin
-        </Typography>
-      </Box>
-      <FormControl sx={{ minWidth: 160 }}>
+      <Box
+        display={"flex"}
+        mb={3}
+        justifyContent={"space-between"}
+        alignItems={"center"}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <ArrowBackIos
+            sx={{
+              fontSize: 20,
+              color: "#666",
+              cursor: "pointer",
+              "&:hover": { color: "#333" },
+            }}
+            onClick={() => setAction("edit_detail")}
+          />
+          <Typography fontSize={22} fontWeight={700} color='#222'>
+            Cập nhật thông tin
+          </Typography>
+        </Box>
+        <FormControl sx={{ minWidth: 160 }}>
           <Select
             value={selectedLang}
             onChange={handleChange}
@@ -226,21 +272,21 @@ export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }
             IconComponent={ArrowDropDown}
             // Tùy chỉnh style để giống hệt ảnh
             sx={{
-              bgcolor: 'white',
-              borderRadius: '10px', // bo tròn mạnh
+              bgcolor: "white",
+              borderRadius: "10px", // bo tròn mạnh
               height: 48,
 
-              '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#9AC33C',
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: "#9AC33C",
               },
-              '&:hover .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#9AC33C',
+              "&:hover .MuiOutlinedInput-notchedOutline": {
+                borderColor: "#9AC33C",
               },
-              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#9AC33C',
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                borderColor: "#9AC33C",
               },
-              '& .MuiSelect-icon': {
-                color: '#9AC33C', // màu xanh lá của mũi tên
+              "& .MuiSelect-icon": {
+                color: "#9AC33C", // màu xanh lá của mũi tên
               },
             }}
             // Render giá trị đang chọn giống hệt ảnh
@@ -251,34 +297,32 @@ export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }
               if (!lang) return null;
 
               return (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                   <Avatar
                     src={lang.flag}
                     alt={lang.label}
-                    sx={{ width: 24, height: 24,borderRadius:"5px" }}
-                    variant="square"
+                    sx={{ width: 24, height: 24, borderRadius: "5px" }}
+                    variant='square'
                   />
                   <Typography
                     sx={{
-                      fontSize: '.9rem',
+                      fontSize: ".9rem",
                       fontWeight: 500,
-                      color: '#9AC33C', // màu xanh lá giống ảnh
-                    }}
-                  >
+                      color: "#9AC33C", // màu xanh lá giống ảnh
+                    }}>
                     {lang.label}
                   </Typography>
                 </Box>
               );
-            }}
-          >
+            }}>
             {LANGUAGES.map((lang) => (
               <MenuItem key={lang.code} value={lang.code}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                   <Avatar
                     src={lang.flag}
                     alt={lang.label}
-                    sx={{ width: 24, height: 24,borderRadius:"5px" }}
-                    variant="square"
+                    sx={{ width: 24, height: 24, borderRadius: "5px" }}
+                    variant='square'
                   />
                   <Typography>{lang.label}</Typography>
                 </Box>
@@ -317,10 +361,16 @@ export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }
                   </Typography>
                   <TextField
                     fullWidth
-                    disabled
+                    disabled={lockedLangs[selectedLang]}
                     value={formValues.name[selectedLang]}
                     onChange={(e) =>
-                      setFormValues({ ...formValues, name: e.target.value })
+                      setFormValues({
+                        ...formValues,
+                        name: {
+                          ...formValues.name,
+                          [selectedLang]: e.target.value,
+                        },
+                      })
                     }
                     variant='outlined'
                     sx={{
@@ -372,7 +422,7 @@ export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }
                   </Typography>
                   <FormControl fullWidth>
                     <Select
-                    disabled
+                      disabled
                       value={formValues.cooperation_type}
                       onChange={(e) =>
                         setFormValues({
@@ -507,13 +557,16 @@ export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }
                     onChange={(e) =>
                       setFormValues({
                         ...formValues,
-                        description:{...formValues.description,[selectedLang]:e.target.value} ,
+                        description: {
+                          ...formValues.description,
+                          [selectedLang]: e.target.value,
+                        },
                       })
                     }
                     placeholder='Nhập mô tả về khách sạn của bạn'
                     variant='outlined'
                     inputProps={{ maxLength: 3000 }}
-                    helperText={`${formValues.description[selectedLang].length}/3000`}
+                    helperText={`${formValues.description[selectedLang]?.length}/3000`}
                     FormHelperTextProps={{
                       sx: { textAlign: "right", marginRight: 2, color: "#999" },
                     }}
@@ -535,13 +588,13 @@ export default function HotelEditFormExact({ setAction, setRoom,getHotelDetail }
           <Grid container spacing={{ xs: 4, lg: 6 }}>
             <Grid item xs={12} lg={4}>
               <Typography variant='h6'>Tiện ích khách sạn</Typography>
-             
             </Grid>
             <Grid item xs={12} lg={8}>
-            <FacilitySelector
-           setSelectedIds={setSelectedIds}
-            selectedIds={selectedIds}
-          />
+              <FacilitySelector
+                setSelectedIds={setSelectedIds}
+                selectedIds={selectedIds}
+                attribute={attribute}
+              />
             </Grid>
           </Grid>
           <Divider sx={{ my: 4 }} />
@@ -616,11 +669,11 @@ const modalStyle = {
   display: "flex",
   flexDirection: "column",
 };
-function FacilitySelector({ selectedIds = [], setSelectedIds }) {
+function FacilitySelector({ selectedIds = [], setSelectedIds, attribute }) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredFacilities = facilities.filter(
+  const filteredFacilities = attribute?.amenities?.filter(
     (fac) =>
       fac.name.vi.toLowerCase().includes(searchTerm.toLowerCase()) ||
       fac.name.en.toLowerCase().includes(searchTerm.toLowerCase())
@@ -632,7 +685,7 @@ function FacilitySelector({ selectedIds = [], setSelectedIds }) {
       ? selectedIds.filter((x) => x !== id)
       : [...selectedIds, id];
 
-    setSelectedIds(newIds);  // ← Cập nhật ngay vào formData → chip hiện ngay
+    setSelectedIds(newIds); // ← Cập nhật ngay vào formData → chip hiện ngay
   };
 
   const handleDelete = (id: string) => {
@@ -646,40 +699,42 @@ function FacilitySelector({ selectedIds = [], setSelectedIds }) {
     setSearchTerm(""); // optional: reset search khi đóng
   };
 
-  const selectedFacilities = facilities.filter((f) =>
+  const selectedFacilities = attribute?.amenities.filter((f) =>
     selectedIds.includes(f.id)
   );
 
   return (
     <Box mb={2}>
-      <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"}>
-      <Button
-  variant="outlined"
-  onClick={() => setOpen(true)}
-  startIcon={<Add />}
-  sx={{
-    height: "40px",
-    borderRadius: 2,
-    borderColor: "#ddd",
-    color: "#555",
-    textTransform: "none",
-    fontSize: "0.875rem",
-    fontWeight: 500,
-    justifyContent: "flex-start",
-    px: 2,
-    "&:hover": {
-      borderColor: "#98b720",
-      bgcolor: "rgba(152, 183, 32, 0.04)",
-    },
-    "& .MuiButton-startIcon": {
-      color: "#98b720",
-    },
-  }}
->
-  {selectedFacilities.length > 0
-    ? `${selectedFacilities.length} tiện ích đã chọn`
-    : "Thêm tiện ích"}
-</Button>
+      <Box
+        display={"flex"}
+        alignItems={"center"}
+        justifyContent={"space-between"}>
+        <Button
+          variant='outlined'
+          onClick={() => setOpen(true)}
+          startIcon={<Add />}
+          sx={{
+            height: "40px",
+            borderRadius: 2,
+            borderColor: "#ddd",
+            color: "#555",
+            textTransform: "none",
+            fontSize: "0.875rem",
+            fontWeight: 500,
+            justifyContent: "flex-start",
+            px: 2,
+            "&:hover": {
+              borderColor: "#98b720",
+              bgcolor: "rgba(152, 183, 32, 0.04)",
+            },
+            "& .MuiButton-startIcon": {
+              color: "#98b720",
+            },
+          }}>
+          {selectedFacilities.length > 0
+            ? `${selectedFacilities.length} tiện ích đã chọn`
+            : "Thêm tiện ích"}
+        </Button>
       </Box>
 
       {/* Chips hiển thị bên ngoài – sẽ cập nhật ngay khi chọn */}
@@ -704,7 +759,11 @@ function FacilitySelector({ selectedIds = [], setSelectedIds }) {
       {/* Modal */}
       <Modal open={open} onClose={handleClose}>
         <Box sx={modalStyle}>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Box
+            display='flex'
+            justifyContent='space-between'
+            alignItems='center'
+            mb={2}>
             <Typography variant='h6'>Chọn tiện ích</Typography>
             <Button onClick={handleClose} sx={{ minWidth: "auto", p: 0 }}>
               <Close />
@@ -733,12 +792,17 @@ function FacilitySelector({ selectedIds = [], setSelectedIds }) {
                   <ListItem disablePadding>
                     <ListItemButton onClick={() => handleToggle(fac.id)}>
                       <ListItemIcon sx={{ minWidth: 40 }}>
-                        <img src={fac.icon} alt={fac.name.vi} width={28} height={28} />
+                        <img
+                          src={fac.icon}
+                          alt={fac.name.vi}
+                          width={28}
+                          height={28}
+                        />
                       </ListItemIcon>
                       <ListItemText primary={fac.name.vi} />
                       <Checkbox
                         edge='end'
-                        checked={selectedIds.includes(fac.id)}  // ← dùng selectedIds từ props → luôn đúng
+                        checked={selectedIds.includes(fac.id)} // ← dùng selectedIds từ props → luôn đúng
                       />
                     </ListItemButton>
                   </ListItem>

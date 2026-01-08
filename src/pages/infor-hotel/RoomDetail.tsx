@@ -30,13 +30,10 @@ import {
   type_bed,
 } from "../../utils/utils";
 
-const getLabelsByIds = (
-  ids: string[] | null | undefined,
-  list: typeof type_bed
-) => {
+const getLabelsByIds = (ids: string[] | null | undefined, list) => {
   if (!ids || !Array.isArray(ids) || ids.length === 0) return [];
   return ids
-    .map((id) => list.find((item) => item.id === id)?.label)
+    .map((id) => list.find((item) => item.id === id)?.name?.vi)
     .filter(Boolean) as string[];
 };
 const renderStatusChip = (status) => {
@@ -74,6 +71,7 @@ export default function RoomDetail({
   room,
   getHotelDetail,
   detailHotel,
+  attribute,
 }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -111,10 +109,10 @@ export default function RoomDetail({
   }, [room?.direction]);
 
   // Chuyển sang label để hiển thị
-  const bedTypeLabels = getLabelsByIds(bedTypeIds, type_bed);
-  const directionLabels = getLabelsByIds(directionIds, direction);
+  const bedTypeLabels = getLabelsByIds(bedTypeIds, attribute?.bed_type);
+  const directionLabels = getLabelsByIds(directionIds, attribute?.direction);
   const area = room?.area_m2 ? `${room.area_m2}m²` : "-";
-
+  console.log("AAAAA attribute", attribute);
   // Parse hình ảnh phòng
   const roomImages = React.useMemo(() => {
     if (!room?.images) return [];
@@ -152,10 +150,6 @@ export default function RoomDetail({
     }
   }, [room?.facilities]);
 
-  const selectedFacilities = React.useMemo(
-    () => facilities.filter((fac) => facilityIds.includes(fac.id)),
-    [facilities, facilityIds]
-  );
   return (
     <Box sx={{ minHeight: "100vh" }}>
       {/* Dialog ngừng kinh doanh */}
@@ -327,7 +321,7 @@ export default function RoomDetail({
               <Typography color='gray'>{parsedNameHotel}</Typography>
             </Box>
 
-           {renderStatusChip(room?.status)}
+            {renderStatusChip(room?.status)}
 
             <Box sx={{ flexGrow: 1 }} />
 
@@ -453,7 +447,7 @@ export default function RoomDetail({
                 };
 
                 // Map id → object đầy đủ (label + icon)
-                const selectedFacilities = facilities.filter((fac) =>
+                const selectedFacilities = attribute?.amenities?.filter((fac) =>
                   facilityIds().includes(fac.id)
                 );
 
@@ -639,6 +633,7 @@ export default function RoomDetail({
             getHotelDetail={getHotelDetail}
             setAction={setAction}
             room={room}
+            attribute={attribute}
           />
         </Box>
       )}

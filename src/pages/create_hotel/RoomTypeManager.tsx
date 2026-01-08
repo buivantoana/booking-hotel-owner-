@@ -71,7 +71,8 @@ export default function RoomTypeManager({
   errors = {},
   touched = {},
   onFieldTouch,
-  selectedLang
+  selectedLang,
+  attribute,
 }) {
   const context = useBookingContext();
   const dataRef = useRef<{ roomTypes: RoomType[]; activeTab: number }>({
@@ -97,21 +98,21 @@ export default function RoomTypeManager({
       roomTypes: [
         {
           id: Date.now().toString(),
-          name:  {
+          name: {
             vi: "",
             ko: "",
             ja: "",
-            en: ""
+            en: "",
           },
           quantity: "",
           area: "",
           bedType: [],
           direction: [],
-          description:  {
+          description: {
             vi: "",
             ko: "",
             ja: "",
-            en: ""
+            en: "",
           },
           images: [],
           imagePreviews: [],
@@ -186,11 +187,11 @@ export default function RoomTypeManager({
   const addRoomType = () => {
     const newRoom: RoomType = {
       id: Date.now().toString(),
-      name:{
+      name: {
         vi: "",
         ko: "",
         ja: "",
-        en: ""
+        en: "",
       },
       quantity: "",
       area: "",
@@ -200,7 +201,7 @@ export default function RoomTypeManager({
         vi: "",
         ko: "",
         ja: "",
-        en: ""
+        en: "",
       },
       images: [],
       imagePreviews: [],
@@ -323,7 +324,10 @@ export default function RoomTypeManager({
                   placeholder='Nhập tên loại phòng'
                   value={current?.name[selectedLang] || ""}
                   onChange={(e) => {
-                    updateRoomField("name",{...current.name , [selectedLang]: e.target.value,});
+                    updateRoomField("name", {
+                      ...current.name,
+                      [selectedLang]: e.target.value,
+                    });
                   }}
                   onBlur={() => {
                     handleTouch("name");
@@ -434,9 +438,9 @@ export default function RoomTypeManager({
                 </Typography>
                 <Autocomplete
                   multiple
-                  options={type_bed}
-                  getOptionLabel={(option) => option.label}
-                  value={type_bed.filter((opt) =>
+                  options={attribute?.bed_type}
+                  getOptionLabel={(option) => option.name?.vi}
+                  value={attribute?.bed_type.filter((opt) =>
                     current?.bedType.includes(opt.id)
                   )}
                   isOptionEqualToValue={(option, value) =>
@@ -455,7 +459,7 @@ export default function RoomTypeManager({
                   renderTags={(tagValue, getTagProps) =>
                     tagValue.map((option, index) => (
                       <Chip
-                        label={option.label}
+                        label={option.name?.vi}
                         size='small'
                         {...getTagProps({ index })}
                         key={index}
@@ -501,7 +505,7 @@ export default function RoomTypeManager({
                   renderOption={(props, option, { selected }) => (
                     <li {...props} key={option.id}>
                       <BedIcon sx={{ mr: 2, color: "#999", fontSize: 20 }} />
-                      {option.label}
+                      {option.name?.vi}
                       {selected && (
                         <CheckIcon sx={{ ml: "auto", color: "#4caf50" }} />
                       )}
@@ -519,9 +523,9 @@ export default function RoomTypeManager({
                 </Typography>
                 <Autocomplete
                   multiple
-                  options={direction}
-                  getOptionLabel={(option) => option.label}
-                  value={direction.filter((opt) =>
+                  options={attribute?.direction}
+                  getOptionLabel={(option) => option.name?.vi}
+                  value={attribute?.direction.filter((opt) =>
                     current?.direction.includes(opt.id)
                   )}
                   isOptionEqualToValue={(option, value) =>
@@ -540,7 +544,7 @@ export default function RoomTypeManager({
                   renderTags={(tagValue, getTagProps) =>
                     tagValue.map((option, index) => (
                       <Chip
-                        label={option.label}
+                        label={option.name?.vi}
                         size='small'
                         {...getTagProps({ index })}
                         key={index}
@@ -590,7 +594,7 @@ export default function RoomTypeManager({
                       <CompassCalibrationIcon
                         sx={{ mr: 2, color: "#999", fontSize: 20 }}
                       />
-                      {option.label}
+                      {option.name?.vi}
                       {selected && (
                         <CheckIcon sx={{ ml: "auto", color: "#4caf50" }} />
                       )}
@@ -620,7 +624,10 @@ export default function RoomTypeManager({
                   placeholder='Nhập mô tả về loại phòng...'
                   value={current?.description[selectedLang] || ""}
                   onChange={(e) => {
-                    updateRoomField("description",{...current.description , [selectedLang]: e.target.value,});
+                    updateRoomField("description", {
+                      ...current.description,
+                      [selectedLang]: e.target.value,
+                    });
                   }}
                   onBlur={() => {
                     handleTouch("description");
@@ -656,6 +663,7 @@ export default function RoomTypeManager({
 
       <Divider sx={{ my: 4 }} />
       <FacilitySelector
+        attribute={attribute}
         selectedIds={current?.facilities || []}
         onChange={updateFacilities}
         onBlur={() => handleTouch("facilities")}
@@ -1071,6 +1079,7 @@ function FacilitySelector({
   onBlur,
   error,
   helperText,
+  attribute,
 }: {
   selectedIds: string[];
   onChange: (ids: string[]) => void;
@@ -1081,7 +1090,7 @@ function FacilitySelector({
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredFacilities = facilities.filter((fac) =>
+  const filteredFacilities = attribute?.amenities.filter((fac) =>
     fac.name.vi.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -1096,7 +1105,7 @@ function FacilitySelector({
     onChange(selectedIds.filter((x) => x !== id));
   };
 
-  const selectedFacilities = facilities.filter((f) =>
+  const selectedFacilities = attribute?.amenities.filter((f) =>
     selectedIds.includes(f.id)
   );
 

@@ -33,13 +33,16 @@ import { facilities } from "../../utils/utils";
 
 const businessTypes = ["Tình yêu", "Du lịch", "Homestay", "Camping"];
 
-export default function HotelBasicInfo({ setDataCreateHotel,
+export default function HotelBasicInfo({
+  setDataCreateHotel,
   selectedLang,
   dataCreateHotel,
   onTempChange,
   errors = {},
   touched = {},
-  onFieldBlur }) {
+  onFieldBlur,
+  attribute,
+}) {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   /** ===============================
@@ -50,14 +53,14 @@ export default function HotelBasicInfo({ setDataCreateHotel,
       vi: "",
       ko: "",
       ja: "",
-      en: ""
+      en: "",
     },
     phone: "",
     description: {
       vi: "",
       ko: "",
       ja: "",
-      en: ""
+      en: "",
     },
     businessType: "Tình yêu",
 
@@ -72,17 +75,17 @@ export default function HotelBasicInfo({ setDataCreateHotel,
     // Theo ngày
     dailyStart: "",
     dailyEnd: "",
-    selectedIds: []
+    selectedIds: [],
   });
-  const context = useBookingContext()
+  const context = useBookingContext();
   useEffect(() => {
     if (context?.state?.create_hotel?.hotelName) {
-      setFormData(context?.state?.create_hotel)
+      setFormData(context?.state?.create_hotel);
     }
-  }, [context])
+  }, [context]);
   /** Cập nhật field */
   const updateField = (field, value) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const newData = { ...prev, [field]: value };
       onTempChange?.(newData); // ← báo ngay cho CreateHotelView
       return newData;
@@ -111,13 +114,31 @@ export default function HotelBasicInfo({ setDataCreateHotel,
   console.log("formData", formData);
   /** HOURS OPTIONS */
   const HOURS = [
-    "04:00", "05:00", "06:00", "07:00", "08:00",
-    "09:00", "10:00", "11:00", "12:00",
-    "13:00", "14:00", "15:00", "16:00",
-    "17:00", "18:00", "19:00", "20:00",
-    "21:00", "22:00", "23:00", "00:00", "01:00", "02:00", "03:00",
+    "04:00",
+    "05:00",
+    "06:00",
+    "07:00",
+    "08:00",
+    "09:00",
+    "10:00",
+    "11:00",
+    "12:00",
+    "13:00",
+    "14:00",
+    "15:00",
+    "16:00",
+    "17:00",
+    "18:00",
+    "19:00",
+    "20:00",
+    "21:00",
+    "22:00",
+    "23:00",
+    "00:00",
+    "01:00",
+    "02:00",
+    "03:00",
   ];
-
 
   /** ===============================
    * COMPONENT RENDER CARD TIME
@@ -129,33 +150,30 @@ export default function HotelBasicInfo({ setDataCreateHotel,
         borderRadius: 2,
         width: "100%",
         border: "1px solid #E5E7EB",
-      }}
-    >
+      }}>
       <Typography
         fontWeight={600}
-        color="#555"
-        textAlign="center"
+        color='#555'
+        textAlign='center'
         mb={2}
-        fontSize={15}
-      >
+        fontSize={15}>
         {title}
       </Typography>
 
-      <Box display="flex" flexDirection="column" gap={2}>
+      <Box display='flex' flexDirection='column' gap={2}>
         {fields.map((item, i) => (
           <Box key={i}>
-            <Typography fontSize={14} color="#444" mb={0.5}>
+            <Typography fontSize={14} color='#444' mb={0.5}>
               {item.label}
             </Typography>
 
             {/* START TIME */}
             <Box
-              display="flex"
+              display='flex'
               flexDirection={isMobile ? "column" : "row"}
               gap={2}
-              alignItems="center"
-            >
-              <FormControl size="small" fullWidth>
+              alignItems='center'>
+              <FormControl size='small' fullWidth>
                 <Select
                   value={item.startValue}
                   onChange={(e) => item.onStartChange(e.target.value)}
@@ -163,8 +181,10 @@ export default function HotelBasicInfo({ setDataCreateHotel,
                   input={
                     <OutlinedInput
                       startAdornment={
-                        <InputAdornment position="start">
-                          <AccessTimeIcon sx={{ fontSize: 20, color: "#98b720" }} />
+                        <InputAdornment position='start'>
+                          <AccessTimeIcon
+                            sx={{ fontSize: 20, color: "#98b720" }}
+                          />
                         </InputAdornment>
                       }
                       sx={{
@@ -179,9 +199,8 @@ export default function HotelBasicInfo({ setDataCreateHotel,
                         },
                       }}
                     />
-                  }
-                >
-                  <MenuItem disabled value="">
+                  }>
+                  <MenuItem disabled value=''>
                     {item.startPlaceholder}
                   </MenuItem>
 
@@ -193,20 +212,19 @@ export default function HotelBasicInfo({ setDataCreateHotel,
                 </Select>
               </FormControl>
 
-              <Typography width={"20%"} fontSize={14} color="#555">
+              <Typography width={"20%"} fontSize={14} color='#555'>
                 ngày {item.startDay}
               </Typography>
             </Box>
 
             {/* END TIME */}
             <Box
-              display="flex"
+              display='flex'
               flexDirection={isMobile ? "column" : "row"}
               gap={2}
               mt={1.5}
-              alignItems="center"
-            >
-              <FormControl size="small" fullWidth>
+              alignItems='center'>
+              <FormControl size='small' fullWidth>
                 <Select
                   value={item.endValue}
                   onChange={(e) => item.onEndChange(e.target.value)}
@@ -214,8 +232,10 @@ export default function HotelBasicInfo({ setDataCreateHotel,
                   input={
                     <OutlinedInput
                       startAdornment={
-                        <InputAdornment position="start">
-                          <AccessTimeIcon sx={{ fontSize: 20, color: "#98b720" }} />
+                        <InputAdornment position='start'>
+                          <AccessTimeIcon
+                            sx={{ fontSize: 20, color: "#98b720" }}
+                          />
                         </InputAdornment>
                       }
                       sx={{
@@ -230,9 +250,8 @@ export default function HotelBasicInfo({ setDataCreateHotel,
                         },
                       }}
                     />
-                  }
-                >
-                  <MenuItem disabled value="">
+                  }>
+                  <MenuItem disabled value=''>
                     {item.endPlaceholder}
                   </MenuItem>
 
@@ -244,7 +263,7 @@ export default function HotelBasicInfo({ setDataCreateHotel,
                 </Select>
               </FormControl>
 
-              <Typography width={"20%"} fontSize={14} color="#555">
+              <Typography width={"20%"} fontSize={14} color='#555'>
                 ngày {item.endDay}
               </Typography>
             </Box>
@@ -258,17 +277,20 @@ export default function HotelBasicInfo({ setDataCreateHotel,
    * RENDER PAGE
    =================================*/
   return (
-    <Box p={4} bgcolor={"white"} borderRadius={"15px"} >
-
+    <Box p={4} bgcolor={"white"} borderRadius={"15px"}>
       {/* Row: Tên + SĐT */}
-      <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={3} mb={3}>
+      <Box
+        display='flex'
+        flexDirection={isMobile ? "column" : "row"}
+        gap={3}
+        mb={3}>
         <Box flex={1}>
           <Typography fontSize={14} fontWeight={600} mb={0.8}>
             Tên khách sạn
           </Typography>
           <TextField
             fullWidth
-            placeholder="Nhập tên khách sạn"
+            placeholder='Nhập tên khách sạn'
             error={touched.hotelName && !!errors.hotelName}
             helperText={touched.hotelName ? errors.hotelName : " "}
             value={formData.hotelName?.[selectedLang] || ""}
@@ -303,7 +325,7 @@ export default function HotelBasicInfo({ setDataCreateHotel,
             value={formData.phone || ""}
             onChange={(e) => updateField("phone", e.target.value)}
             onBlur={() => onFieldBlur?.("phone")}
-            placeholder="Nhập số điện thoại"
+            placeholder='Nhập số điện thoại'
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "16px",
@@ -324,21 +346,21 @@ export default function HotelBasicInfo({ setDataCreateHotel,
           Mô tả (không bắt buộc)
         </Typography>
         <Typography fontSize={12} mb={0.8}>
-          Viết một đoạn giới thiệu ngắn gọn về khách sạn của bạn. Mô tả sẽ được hiển thị tại trang chủ của khách sạn trên Hotel Booking.
+          Viết một đoạn giới thiệu ngắn gọn về khách sạn của bạn. Mô tả sẽ được
+          hiển thị tại trang chủ của khách sạn trên Hotel Booking.
         </Typography>
         <TextField
           fullWidth
           multiline
           rows={4}
           value={formData.description?.[selectedLang] || ""}
-            onChange={(e) =>
-              updateField("description", {
-                ...formData.description,
-                [selectedLang]: e.target.value,
-              })
-            }
-         
-          placeholder="Nhập mô tả"
+          onChange={(e) =>
+            updateField("description", {
+              ...formData.description,
+              [selectedLang]: e.target.value,
+            })
+          }
+          placeholder='Nhập mô tả'
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: "16px",
@@ -360,8 +382,7 @@ export default function HotelBasicInfo({ setDataCreateHotel,
         <RadioGroup
           row
           value={formData.businessType}
-          onChange={(e) => updateField("businessType", e.target.value)}
-        >
+          onChange={(e) => updateField("businessType", e.target.value)}>
           {businessTypes.map((type) => (
             <FormControlLabel
               key={type}
@@ -381,6 +402,7 @@ export default function HotelBasicInfo({ setDataCreateHotel,
         <FacilitySelector
           onChange={(newIds) => updateField("selectedIds", newIds)}
           selectedIds={formData.selectedIds}
+          attribute={attribute}
         />
       </Box>
 
@@ -390,8 +412,7 @@ export default function HotelBasicInfo({ setDataCreateHotel,
           Thời gian kinh doanh
         </Typography>
 
-        <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={3}>
-
+        <Box display='flex' flexDirection={isMobile ? "column" : "row"} gap={3}>
           {/* Theo giờ */}
           {renderTimeCard("Theo giờ", [
             {
@@ -438,8 +459,6 @@ export default function HotelBasicInfo({ setDataCreateHotel,
           ])}
         </Box>
       </Box>
-
-
     </Box>
   );
 }
@@ -459,11 +478,11 @@ const modalStyle = {
   display: "flex",
   flexDirection: "column",
 };
-function FacilitySelector({ selectedIds = [], onChange }) {
+function FacilitySelector({ selectedIds = [], onChange, attribute }) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredFacilities = facilities.filter(
+  const filteredFacilities = attribute?.amenities.filter(
     (fac) =>
       fac.name.vi.toLowerCase().includes(searchTerm.toLowerCase()) ||
       fac.name.en.toLowerCase().includes(searchTerm.toLowerCase())
@@ -475,7 +494,7 @@ function FacilitySelector({ selectedIds = [], onChange }) {
       ? selectedIds.filter((x) => x !== id)
       : [...selectedIds, id];
 
-    onChange(newIds);  // ← Cập nhật ngay vào formData → chip hiện ngay
+    onChange(newIds); // ← Cập nhật ngay vào formData → chip hiện ngay
   };
 
   const handleDelete = (id: string) => {
@@ -489,15 +508,18 @@ function FacilitySelector({ selectedIds = [], onChange }) {
     setSearchTerm(""); // optional: reset search khi đóng
   };
 
-  const selectedFacilities = facilities.filter((f) =>
+  const selectedFacilities = attribute?.amenities.filter((f) =>
     selectedIds.includes(f.id)
   );
 
   return (
     <Box mb={2}>
-      <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"}>
+      <Box
+        display={"flex"}
+        alignItems={"center"}
+        justifyContent={"space-between"}>
         <Button
-          variant="outlined"
+          variant='outlined'
           onClick={() => setOpen(true)}
           startIcon={<Add />}
           sx={{
@@ -517,8 +539,7 @@ function FacilitySelector({ selectedIds = [], onChange }) {
             "& .MuiButton-startIcon": {
               color: "#98b720",
             },
-          }}
-        >
+          }}>
           {selectedFacilities.length > 0
             ? `${selectedFacilities.length} tiện ích đã chọn`
             : "Thêm tiện ích"}
@@ -547,7 +568,11 @@ function FacilitySelector({ selectedIds = [], onChange }) {
       {/* Modal */}
       <Modal open={open} onClose={handleClose}>
         <Box sx={modalStyle}>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Box
+            display='flex'
+            justifyContent='space-between'
+            alignItems='center'
+            mb={2}>
             <Typography variant='h6'>Chọn tiện ích</Typography>
             <Button onClick={handleClose} sx={{ minWidth: "auto", p: 0 }}>
               <Close />
@@ -576,12 +601,17 @@ function FacilitySelector({ selectedIds = [], onChange }) {
                   <ListItem disablePadding>
                     <ListItemButton onClick={() => handleToggle(fac.id)}>
                       <ListItemIcon sx={{ minWidth: 40 }}>
-                        <img src={fac.icon} alt={fac.name.vi} width={28} height={28} />
+                        <img
+                          src={fac.icon}
+                          alt={fac.name.vi}
+                          width={28}
+                          height={28}
+                        />
                       </ListItemIcon>
                       <ListItemText primary={fac.name.vi} />
                       <Checkbox
                         edge='end'
-                        checked={selectedIds.includes(fac.id)}  // ← dùng selectedIds từ props → luôn đúng
+                        checked={selectedIds.includes(fac.id)} // ← dùng selectedIds từ props → luôn đúng
                       />
                     </ListItemButton>
                   </ListItem>

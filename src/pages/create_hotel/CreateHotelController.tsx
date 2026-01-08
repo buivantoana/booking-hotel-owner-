@@ -1,12 +1,28 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import CreateHotelView from "./CreateHotelView";
-import { createHotel, createRoomHotel } from "../../service/hotel";
+import {
+  createHotel,
+  createRoomHotel,
+  getAttribute,
+} from "../../service/hotel";
 
 type Props = {};
 
 const CreateHotelController = (props: Props) => {
   // src/utils/submitCreateHotel.ts
+  const [attribute, setAttribute] = useState({});
 
+  useEffect(() => {
+    fetchAttribute();
+  }, []);
+  const fetchAttribute = async () => {
+    try {
+      let result = await getAttribute();
+      setAttribute(result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const submitCreateHotel = async (contextData: any) => {
     if (!contextData) return;
 
@@ -31,7 +47,7 @@ const CreateHotelController = (props: Props) => {
       provinceId,
       roomTypes = [],
       selectedIds,
-      typeHotel
+      typeHotel,
     } = contextData;
 
     console.log("AAAA contextData ", contextData);
@@ -39,14 +55,16 @@ const CreateHotelController = (props: Props) => {
     const hotelFormData = new FormData();
     hotelFormData.append("name", JSON.stringify(hotelName) || "");
     hotelFormData.append("phone", phone || "");
-    hotelFormData.append("description", JSON.stringify( description ));
+    hotelFormData.append("description", JSON.stringify(description));
     hotelFormData.append("city", provinceId || "");
     hotelFormData.append("address", JSON.stringify({ vi: address }) || "");
     hotelFormData.append("lat", center?.lat?.toString() || "");
     hotelFormData.append("lng", center?.lng?.toString() || "");
     hotelFormData.append("amenities", JSON.stringify(selectedIds));
-    hotelFormData.append("cooperation_type", typeHotel== "Khách sạn Listing" ? 'listing' :'contract');
-
+    hotelFormData.append(
+      "cooperation_type",
+      typeHotel == "Khách sạn Listing" ? "listing" : "contract"
+    );
 
     // rent_types: format đúng như backend yêu cầu
     const rentTypesObj: any = {};
@@ -99,14 +117,8 @@ const CreateHotelController = (props: Props) => {
       const roomForm = new FormData();
 
       // Các trường bắt buộc phải là JSON string có key "vi"
-      roomForm.append(
-        "name",
-        JSON.stringify(room.name)
-      );
-      roomForm.append(
-        "description",
-        JSON.stringify(room.description )
-      );
+      roomForm.append("name", JSON.stringify(room.name));
+      roomForm.append("description", JSON.stringify(room.description));
 
       // facilities: gom các thông tin lại thành object JSON
 
@@ -164,7 +176,12 @@ const CreateHotelController = (props: Props) => {
 
     return { success: true, hotelId };
   };
-  return <CreateHotelView submitCreateHotel={submitCreateHotel} />;
+  return (
+    <CreateHotelView
+      attribute={attribute}
+      submitCreateHotel={submitCreateHotel}
+    />
+  );
 };
 
 export default CreateHotelController;
