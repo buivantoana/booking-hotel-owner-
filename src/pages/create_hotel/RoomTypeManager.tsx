@@ -439,7 +439,7 @@ export default function RoomTypeManager({
                 <Autocomplete
                   multiple
                   options={attribute?.bed_type}
-                  getOptionLabel={(option) => option.name?.vi}
+                  getOptionLabel={(option) => option.name?.[selectedLang]}
                   value={attribute?.bed_type.filter((opt) =>
                     current?.bedType.includes(opt.id)
                   )}
@@ -459,7 +459,7 @@ export default function RoomTypeManager({
                   renderTags={(tagValue, getTagProps) =>
                     tagValue.map((option, index) => (
                       <Chip
-                        label={option.name?.vi}
+                        label={option.name?.[selectedLang]}
                         size='small'
                         {...getTagProps({ index })}
                         key={index}
@@ -505,7 +505,7 @@ export default function RoomTypeManager({
                   renderOption={(props, option, { selected }) => (
                     <li {...props} key={option.id}>
                       <BedIcon sx={{ mr: 2, color: "#999", fontSize: 20 }} />
-                      {option.name?.vi}
+                      {option.name?.[selectedLang]}
                       {selected && (
                         <CheckIcon sx={{ ml: "auto", color: "#4caf50" }} />
                       )}
@@ -524,7 +524,7 @@ export default function RoomTypeManager({
                 <Autocomplete
                   multiple
                   options={attribute?.direction}
-                  getOptionLabel={(option) => option.name?.vi}
+                  getOptionLabel={(option) => option.name?.[selectedLang]}
                   value={attribute?.direction.filter((opt) =>
                     current?.direction.includes(opt.id)
                   )}
@@ -544,7 +544,7 @@ export default function RoomTypeManager({
                   renderTags={(tagValue, getTagProps) =>
                     tagValue.map((option, index) => (
                       <Chip
-                        label={option.name?.vi}
+                        label={option.name?.[selectedLang]}
                         size='small'
                         {...getTagProps({ index })}
                         key={index}
@@ -594,7 +594,7 @@ export default function RoomTypeManager({
                       <CompassCalibrationIcon
                         sx={{ mr: 2, color: "#999", fontSize: 20 }}
                       />
-                      {option.name?.vi}
+                      {option.name?.[selectedLang]}
                       {selected && (
                         <CheckIcon sx={{ ml: "auto", color: "#4caf50" }} />
                       )}
@@ -666,6 +666,7 @@ export default function RoomTypeManager({
         attribute={attribute}
         selectedIds={current?.facilities || []}
         onChange={updateFacilities}
+        selectedLang={selectedLang}
         onBlur={() => handleTouch("facilities")}
         error={
           touched[`room_${activeTab}_facilities`] &&
@@ -1080,6 +1081,7 @@ function FacilitySelector({
   error,
   helperText,
   attribute,
+  selectedLang
 }: {
   selectedIds: string[];
   onChange: (ids: string[]) => void;
@@ -1125,7 +1127,7 @@ function FacilitySelector({
           <TextField
             fullWidth
             placeholder='Chọn tiện ích phòng'
-            value={selectedFacilities.map((f) => f.name.vi).join(", ")}
+            value={selectedFacilities.map((f) => f.name[selectedLang]).join(", ")}
             onClick={() => setOpen(true)}
             onBlur={onBlur}
             error={error}
@@ -1159,7 +1161,7 @@ function FacilitySelector({
               {selectedFacilities.map((fac) => (
                 <Chip
                   key={fac.id}
-                  label={fac.name.vi}
+                  label={fac.name[selectedLang]}
                   onDelete={() => handleDelete(fac.id)}
                   deleteIcon={<CloseIcon />}
                   sx={{
@@ -1222,7 +1224,7 @@ function FacilitySelector({
                               height={28}
                             />
                           </ListItemIcon>
-                          <ListItemText primary={fac.name.vi} />
+                          <ListItemText primary={fac.name[selectedLang]} />
                           <Checkbox
                             edge='end'
                             checked={selectedIds.includes(fac.id)}

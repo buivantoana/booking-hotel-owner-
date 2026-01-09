@@ -119,7 +119,10 @@ export default function RoomTypeManager({
     if (!field) return "";
     try {
       const parsed = JSON.parse(field);
-      return parsed;
+      return { vi: "",
+      ko: "",
+      ja: "",
+      en: "",...parsed};
     } catch {
       return field;
     }
@@ -137,6 +140,15 @@ export default function RoomTypeManager({
       }
     }
   }, [room]);
+  useEffect(()=>{
+    if(room){
+      const firstKey = Object.keys(
+        JSON.parse(room.name || '{"vi":""}')
+      )[0];
+      setSelectedLang(firstKey);
+    }
+  },[room])
+  
   const getInitialData = (): { roomTypes: RoomType[]; activeTab: number } => {
     // Nếu có prop room → chế độ edit
     if (room) {
@@ -149,7 +161,7 @@ export default function RoomTypeManager({
             }
           })()
         : [];
-
+      
       return {
         roomTypes: [
           {
@@ -757,6 +769,7 @@ export default function RoomTypeManager({
 
         {/* Upload ảnh */}
         <RoomImagesUpload
+        selectedLang={selectedLang}
           attribute={attribute}
           setSelectedIds={setSelectedIds}
           selectedIds={selectedIds}
@@ -790,6 +803,7 @@ function RoomImagesUpload({
   setSelectedIds,
   selectedIds,
   attribute,
+  selectedLang
 }: {
   previews: string[];
   files: File[];
@@ -848,6 +862,7 @@ function RoomImagesUpload({
             setSelectedIds={setSelectedIds}
             selectedIds={selectedIds}
             attribute={attribute}
+            selectedLang={selectedLang}
           />
 
           <Typography
@@ -1205,7 +1220,7 @@ const modalStyle = {
   flexDirection: "column",
 };
 
-function FacilitySelector({ selectedIds, setSelectedIds, attribute }) {
+function FacilitySelector({ selectedIds, setSelectedIds, attribute,selectedLang }) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -1248,7 +1263,7 @@ function FacilitySelector({ selectedIds, setSelectedIds, attribute }) {
         </Typography>
         <TextField
           placeholder='Chọn tiện ích'
-          value={selectedFacilities.map((f) => f.name.vi).join(", ") || ""}
+          value={selectedFacilities.map((f) => f.name[selectedLang]).join(", ") || ""}
           onClick={() => setOpen(true)}
           InputProps={{
             readOnly: true,
@@ -1310,7 +1325,7 @@ function FacilitySelector({ selectedIds, setSelectedIds, attribute }) {
                             height={28}
                           />
                         </ListItemIcon>
-                        <ListItemText primary={fac.name.vi} />
+                        <ListItemText primary={fac.name[selectedLang]} />
                         <Checkbox
                           edge='end'
                           checked={selectedIds.includes(fac.id)}
@@ -1345,7 +1360,7 @@ function FacilitySelector({ selectedIds, setSelectedIds, attribute }) {
           {selectedFacilities.map((fac) => (
             <Chip
               key={fac.id}
-              label={fac.name.vi}
+              label={fac.name[selectedLang]}
               onDelete={() => handleDelete(fac.id)}
               deleteIcon={<CloseIcon />}
               sx={{

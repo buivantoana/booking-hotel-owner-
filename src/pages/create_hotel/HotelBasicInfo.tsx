@@ -403,6 +403,7 @@ export default function HotelBasicInfo({
           onChange={(newIds) => updateField("selectedIds", newIds)}
           selectedIds={formData.selectedIds}
           attribute={attribute}
+          selectedLang={selectedLang}
         />
       </Box>
 
@@ -478,7 +479,7 @@ const modalStyle = {
   display: "flex",
   flexDirection: "column",
 };
-function FacilitySelector({ selectedIds = [], onChange, attribute }) {
+function FacilitySelector({ selectedIds = [], onChange, attribute,selectedLang }) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -552,7 +553,7 @@ function FacilitySelector({ selectedIds = [], onChange, attribute }) {
           {selectedFacilities.map((fac) => (
             <Chip
               key={fac.id}
-              label={fac.name.vi}
+              label={fac.name[selectedLang]}
               onDelete={() => handleDelete(fac.id)}
               deleteIcon={<Close />}
               sx={{
@@ -608,7 +609,7 @@ function FacilitySelector({ selectedIds = [], onChange, attribute }) {
                           height={28}
                         />
                       </ListItemIcon>
-                      <ListItemText primary={fac.name.vi} />
+                      <ListItemText primary={fac.name[selectedLang]} />
                       <Checkbox
                         edge='end'
                         checked={selectedIds.includes(fac.id)} // ← dùng selectedIds từ props → luôn đúng
