@@ -594,6 +594,7 @@ export default function HotelEditFormExact({
                 setSelectedIds={setSelectedIds}
                 selectedIds={selectedIds}
                 attribute={attribute}
+                selectedLang={selectedLang}
               />
             </Grid>
           </Grid>
@@ -669,7 +670,7 @@ const modalStyle = {
   display: "flex",
   flexDirection: "column",
 };
-function FacilitySelector({ selectedIds = [], setSelectedIds, attribute }) {
+function FacilitySelector({ selectedIds = [], setSelectedIds, attribute,selectedLang }) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -743,7 +744,7 @@ function FacilitySelector({ selectedIds = [], setSelectedIds, attribute }) {
           {selectedFacilities.map((fac) => (
             <Chip
               key={fac.id}
-              label={fac.name.vi}
+              label={fac.name[selectedLang]}
               onDelete={() => handleDelete(fac.id)}
               deleteIcon={<Close />}
               sx={{
@@ -794,12 +795,12 @@ function FacilitySelector({ selectedIds = [], setSelectedIds, attribute }) {
                       <ListItemIcon sx={{ minWidth: 40 }}>
                         <img
                           src={fac.icon}
-                          alt={fac.name.vi}
+                          alt={fac.name[selectedLang]}
                           width={28}
                           height={28}
                         />
                       </ListItemIcon>
-                      <ListItemText primary={fac.name.vi} />
+                      <ListItemText primary={fac.name[selectedLang]} />
                       <Checkbox
                         edge='end'
                         checked={selectedIds.includes(fac.id)} // ← dùng selectedIds từ props → luôn đúng
