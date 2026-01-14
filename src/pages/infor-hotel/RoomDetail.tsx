@@ -14,6 +14,8 @@ import {
   DialogActions,
   Menu,
   MenuItem,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -73,6 +75,8 @@ export default function RoomDetail({
   detailHotel,
   attribute,
 }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [action, setAction] = useState("detail");
@@ -315,7 +319,7 @@ export default function RoomDetail({
               sx={{ fontSize: 30, mr: 1, cursor: "pointer" }}
             />
             <Box>
-              <Typography variant='h5' fontWeight={600}>
+              <Typography variant={isMobile?"h6":'h5'} fontWeight={600}>
                 {parsedName}
               </Typography>
               <Typography color='gray'>{parsedNameHotel}</Typography>
@@ -357,7 +361,7 @@ export default function RoomDetail({
               Thông tin phòng
             </Typography>
 
-            <Grid container spacing={2} mb={4}>
+            <Grid container spacing={isMobile?7:2} mb={4}>
               {[
                 { label: "Số lượng phòng bán", value: room?.number },
                 { label: "Diện tích", value: area },

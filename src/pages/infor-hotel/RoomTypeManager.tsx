@@ -18,6 +18,8 @@ import {
   IconButton,
   Avatar,
   FormControl,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import CloseIcon from "@mui/icons-material/Close";
@@ -108,7 +110,8 @@ export default function RoomTypeManager({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedLang, setSelectedLang] = React.useState<string>("vi");
-
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const handleChange = (event) => {
     setSelectedLang(event.target.value as string);
     // Ở đây bạn có thể thêm logic thay đổi ngôn ngữ thực tế
@@ -362,7 +365,7 @@ export default function RoomTypeManager({
 
   return (
     <>
-      <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+      <Box sx={{ display: "flex", alignItems: "center", mb: 3 ,flexWrap:"wrap"}}>
         <KeyboardArrowLeft
           onClick={() => {
             if (isCreate) {
@@ -378,7 +381,7 @@ export default function RoomTypeManager({
           sx={{ fontSize: 30, mr: 1, cursor: "pointer" }}
         />
         <Box>
-          <Typography variant='h5' fontWeight={600}>
+          <Typography variant={isMobile?"h6":'h5'} fontWeight={600}>
             {isCreate ? "Tạo loại phòng" : "Chỉnh sửa loại phòng"}
           </Typography>
         </Box>
@@ -471,7 +474,7 @@ export default function RoomTypeManager({
 
         {/* Các phần UI còn lại giữ nguyên */}
         <Box sx={{ py: 2 }}>
-          <Box display='flex' justifyContent='space-between' gap={4}>
+          <Box display='flex' flexDirection={{xs:"column",md:"row"}} justifyContent='space-between' gap={4}>
             <Box width={{ xs: "100%", md: "30%" }}>
               <Typography variant='h6' fontWeight={600} gutterBottom>
                 Thông tin phòng
@@ -845,7 +848,7 @@ function RoomImagesUpload({
 
   return (
     <Box sx={{ py: 4 }}>
-      <Box display='flex' justifyContent='space-between' gap={4}>
+      <Box display='flex' flexDirection={{xs:"column",md:"row"}} justifyContent='space-between' gap={4}>
         <Box width={{ xs: "100%", md: "30%" }}>
           <Typography variant='h6' fontWeight={600} gutterBottom>
             Tiện ích và hình ảnh
@@ -978,7 +981,7 @@ function RoomPricingSection({
 
   return (
     <Box sx={{ py: 4 }}>
-      <Box display='flex' justifyContent='space-between' gap={4}>
+      <Box display='flex'  flexDirection={{xs:"column",md:"row"}} justifyContent='space-between' gap={4}>
         <Box width={{ xs: "100%", md: "30%" }}>
           <Typography variant='h6' fontWeight={600} gutterBottom>
             Giá phòng
@@ -1254,7 +1257,9 @@ function FacilitySelector({ selectedIds, setSelectedIds, attribute,selectedLang 
     <Box mb={2}>
       <Box
         display={"flex"}
-        alignItems={"center"}
+        flexDirection={{xs:"column",md:"row"}}
+        alignItems={{xs:"start",md:"center"}}
+        gap={{xs:2,md:0}}
         justifyContent={"space-between"}>
         <Typography
           variant='body1'
@@ -1263,18 +1268,18 @@ function FacilitySelector({ selectedIds, setSelectedIds, attribute,selectedLang 
         </Typography>
         <TextField
           placeholder='Chọn tiện ích'
-          value={selectedFacilities.map((f) => f.name[selectedLang]).join(", ") || ""}
+          value={selectedFacilities?.map((f) => f.name[selectedLang]).join(", ") || ""}
           onClick={() => setOpen(true)}
           InputProps={{
             readOnly: true,
             startAdornment:
-              selectedFacilities.length > 0 ? (
+              selectedFacilities?.length > 0 ? (
                 <InputAdornment position='start'>
                   <SearchIcon sx={{ color: "text.secondary" }} />
                 </InputAdornment>
               ) : null,
             endAdornment:
-              selectedFacilities.length > 0 ? null : (
+              selectedFacilities?.length > 0 ? null : (
                 <InputAdornment position='end'>
                   <SearchIcon sx={{ color: "text.secondary" }} />
                 </InputAdornment>
@@ -1313,7 +1318,7 @@ function FacilitySelector({ selectedIds, setSelectedIds, attribute,selectedLang 
 
             <Box sx={{ flex: 1, overflow: "auto" }}>
               <List disablePadding>
-                {filteredFacilities.map((fac, index) => (
+                {filteredFacilities?.map((fac, index) => (
                   <React.Fragment key={fac.id}>
                     <ListItem disablePadding>
                       <ListItemButton onClick={() => handleToggle(fac.id)}>
@@ -1332,7 +1337,7 @@ function FacilitySelector({ selectedIds, setSelectedIds, attribute,selectedLang 
                         />
                       </ListItemButton>
                     </ListItem>
-                    {index < filteredFacilities.length - 1 && <Divider />}
+                    {index < filteredFacilities?.length - 1 && <Divider />}
                   </React.Fragment>
                 ))}
               </List>
@@ -1355,7 +1360,7 @@ function FacilitySelector({ selectedIds, setSelectedIds, attribute,selectedLang 
         </Modal>
       </Box>
       {/* Hiển thị các chip đã chọn bên dưới input */}
-      {selectedFacilities.length > 0 && (
+      {selectedFacilities?.length > 0 && (
         <Stack direction='row' flexWrap='wrap' gap={1} mt={2}>
           {selectedFacilities.map((fac) => (
             <Chip

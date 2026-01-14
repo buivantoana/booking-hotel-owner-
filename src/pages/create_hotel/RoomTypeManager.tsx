@@ -300,7 +300,7 @@ export default function RoomTypeManager({
 
       {/* Thông tin phòng */}
       <Box sx={{ py: 2 }}>
-        <Box display='flex' justifyContent='space-between' gap={4}>
+        <Box display='flex' flexDirection={{xs:"column",md:"row"}} justifyContent='space-between' gap={4}>
           <Box width={{ xs: "100%", md: "30%" }}>
             <Typography variant='h6' fontWeight={600} gutterBottom>
               Thông tin phòng
@@ -743,7 +743,7 @@ function RoomImagesUpload({
 
   return (
     <Box sx={{ py: 4 }}>
-      <Box display='flex' justifyContent='space-between' gap={4}>
+      <Box display='flex' flexDirection={{xs:"column",md:"row"}} justifyContent='space-between' gap={4}>
         <Box width={{ xs: "100%", md: "30%" }}>
           <Typography variant='h6' fontWeight={600} gutterBottom>
             Hình ảnh phòng
@@ -858,7 +858,7 @@ function RoomPricingSection({
 
   return (
     <Box sx={{ py: 4 }}>
-      <Box display='flex' justifyContent='space-between' gap={4}>
+      <Box display='flex' flexDirection={{xs:"column",md:"row"}} justifyContent='space-between' gap={4}>
         <Box width={{ xs: "100%", md: "30%" }}>
           <Typography variant='h6' fontWeight={600} gutterBottom>
             Giá phòng
@@ -1113,7 +1113,7 @@ function FacilitySelector({
 
   return (
     <Box sx={{ py: 4 }}>
-      <Box display='flex' justifyContent='space-between' gap={4}>
+      <Box display='flex' flexDirection={{xs:"column",md:"row"}} justifyContent='space-between' gap={4}>
         <Box width={{ xs: "100%", md: "30%" }}>
           <Typography variant='h6' fontWeight={600} gutterBottom>
             Tiện ích phòng

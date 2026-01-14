@@ -148,7 +148,7 @@ export default function HotelBasicInfo({
       sx={{
         p: 2.5,
         borderRadius: 2,
-        width: "100%",
+        width: {xs:"unset", md:"100%"},
         border: "1px solid #E5E7EB",
       }}>
       <Typography

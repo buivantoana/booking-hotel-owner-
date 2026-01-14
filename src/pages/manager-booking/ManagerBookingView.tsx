@@ -1215,7 +1215,7 @@ function ActionMenu({
   const showCheckOut = status === "checked_in";
   const showCancel = status === "pending";
 
-  // if (!showCheckIn && !showCheckOut && !showCancel) return null;
+  if (!showCheckIn && !showCheckOut && !showCancel) return null;
 
   /* ================= HANDLERS ================= */
 

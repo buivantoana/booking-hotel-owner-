@@ -41,18 +41,19 @@ export default function HotelTypeSelect({ onSelect,typeHotel }) {
       gap={3}
       width="100%"
     >
-      {renderCard("Khách sạn Listing", listingFeatures, "Chọn Listing",false,onSelect,typeHotel)}
-      {renderCard("Khách sạn Contract", contractFeatures, "Chọn Contract", true,onSelect,typeHotel)}
+      {renderCard("Khách sạn Listing", listingFeatures, "Chọn Listing",false,onSelect,typeHotel,isMobile)}
+      {renderCard("Khách sạn Contract", contractFeatures, "Chọn Contract", true,onSelect,typeHotel,isMobile)}
     </Box>
   );
 }
 
-const renderCard = (title, features, buttonText, showBadge = false,onSelect,typeHotel) => (
+const renderCard = (title, features, buttonText, showBadge = false,onSelect,typeHotel,isMobile) => {
+  return(
     <Card
       sx={{
         p: 4,
         borderRadius: 4,
-        width: "100%",
+        width:isMobile?"unset" : "100%",
         boxShadow: "0px 4px 20px rgba(0,0,0,0.05)",
         position: "relative",
       }}
@@ -61,11 +62,11 @@ const renderCard = (title, features, buttonText, showBadge = false,onSelect,type
       {showBadge && (
         <Chip
           icon={<FlightTakeoffIcon color="#5A8DEE" />}
-          label="Đối tác chính thức"
+          label={"Đối tác chính thức"}
           sx={{
             position: "absolute",
-            top: 16,
-            right: 16,
+            top: isMobile?10:16,
+            right: isMobile?10:16,
             background: "#EEF4FF",
             color: "#5A8DEE",
             fontWeight: 600,
@@ -121,4 +122,4 @@ const renderCard = (title, features, buttonText, showBadge = false,onSelect,type
         {buttonText}
       </Button>
     </Card>
-  );
+  )};

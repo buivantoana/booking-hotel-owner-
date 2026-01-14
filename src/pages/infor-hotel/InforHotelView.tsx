@@ -18,6 +18,9 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  useTheme,
+  useMediaQuery,
+  Divider,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -64,6 +67,8 @@ function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
           color: "rgba(152, 183, 32, 1)",
           fontWeight: 500,
           minWidth: 110,
+          position:"relative",
+          zIndex:"1000",
           "&:hover": { borderColor: "#bbb" },
         }}>
         Thao tác
@@ -119,6 +124,9 @@ export default function InforHotelView({
   locations,
   attribute,
 }) {
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [action, setAction] = useState("manager");
   const [idHotel, setIdHotel] = useState(null);
@@ -160,6 +168,213 @@ export default function InforHotelView({
       console.log(error);
     }
   };
+  const renderStats = () => (
+    <Box sx={{ mb: 3 }}>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={{ xs: 1.5, sm: 4 }}
+        color="#555"
+        fontSize={14}
+      >
+        <Box>
+          Tất cả <strong>{total}</strong>
+        </Box>
+        <Box>
+          Dạng hoạt động <strong>{active}</strong>
+        </Box>
+        <Box>
+          Ngừng kinh doanh <strong>{inactive}</strong>
+        </Box>
+      </Stack>
+    </Box>
+  );
+
+  // Desktop: Bảng như cũ
+  const renderDesktop = () => (
+    <Paper
+      elevation={0}
+      sx={{
+        borderRadius: "20px",
+        overflow: "hidden",
+        border: "1px solid #eee",
+        padding: 3,
+      }}
+    >
+      {renderStats()}
+
+      <TableContainer sx={{ overflowX: "auto" }}>
+        <Table sx={{ minWidth: 1000 }}>
+          <TableHead>
+            <TableRow sx={{ bgcolor: "#f8f9fa" }}>
+              {[
+                "#",
+                "Tên khách sạn",
+                "Tình trạng",
+                "Trạng thái",
+                "Địa chỉ",
+                "Hoa hồng",
+                "PT thanh toán",
+                "",
+              ].map((head) => (
+                <TableCell
+                  key={head}
+                  sx={{ fontWeight: 600, color: "#555", fontSize: 14 }}
+                >
+                  {head}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {hotels?.map((hotel, index) => (
+              <TableRow hover key={hotel.id}>
+                <TableCell>{index + 1}</TableCell>
+
+                <TableCell
+                  onClick={() => {
+                    navigate(`/info-hotel?id=${hotel.id}`);
+                    setAction("edit_detail");
+                  }}
+                  sx={{ fontWeight: 500, cursor: "pointer" }}
+                >
+                  {parseLang(hotel.name)}
+                </TableCell>
+
+                <TableCell>{renderCooperationChip(hotel.cooperation_type)}</TableCell>
+
+                <TableCell>{renderStatusChip(hotel.status)}</TableCell>
+
+                <TableCell sx={{ maxWidth: 280 }}>
+                  {parseLang(hotel.address)}
+                </TableCell>
+
+                <TableCell>{hotel.commission_rate}%</TableCell>
+
+                <TableCell>
+                  {hotel.cooperation_type === "listing" ? "Online" : "Cả hai"}
+                </TableCell>
+
+                <TableCell>
+                  <ActionMenu
+                    hotel={hotel}
+                    setIdHotel={setIdHotel}
+                    setAction={setAction}
+                    setDeleteDialogOpen={setDeleteDialogOpen}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Paper>
+  );
+
+  // Mobile: Card dọc
+  const renderMobile = () => (
+    <Paper
+      elevation={0}
+      sx={{
+        borderRadius: "20px",
+        overflow: "hidden",
+        border: "1px solid #eee",
+        p: 2, // giảm padding cho mobile
+      }}
+    >
+      {renderStats()}
+
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        {hotels?.map((hotel, index) => (
+          <Box
+            key={hotel.id}
+           
+            sx={{
+              bgcolor: "white",
+              borderRadius: "12px",
+              border: "1px solid #eee",
+              overflow: "hidden",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              "&:hover": {
+                boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+                transform: "translateY(-2px)",
+              },
+            }}
+          >
+            {/* Header card */}
+            <Box  onClick={() => {
+              navigate(`/info-hotel?id=${hotel.id}`);
+              setAction("edit_detail");
+            }} sx={{ p: 2, bgcolor: "#f8f9fa", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                <Typography variant="subtitle2" color="text.secondary">
+                  #{index + 1}
+                </Typography>
+                <Typography variant="subtitle1" fontWeight="600">
+                  {parseLang(hotel.name)}
+                </Typography>
+              </Stack>
+              {renderStatusChip(hotel.status)}
+            </Box>
+
+            <Divider />
+
+            {/* Nội dung chính */}
+            <Box sx={{ p: 2 }}>
+              <Stack spacing={1.5}>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Tình trạng hợp tác
+                  </Typography>
+                  <Box sx={{ mt: 0.5 }}>
+                    {renderCooperationChip(hotel.cooperation_type)}
+                  </Box>
+                </Box>
+
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Địa chỉ
+                  </Typography>
+                  <Typography variant="body1" sx={{ mt: 0.5 }}>
+                    {parseLang(hotel.address)}
+                  </Typography>
+                </Box>
+
+                <Stack direction="row" justifyContent="space-between">
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">
+                      Hoa hồng
+                    </Typography>
+                    <Typography fontWeight="600">{hotel.commission_rate}%</Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">
+                      PT thanh toán
+                    </Typography>
+                    <Typography fontWeight="500">
+                      {hotel.cooperation_type === "listing" ? "Online" : "Cả hai"}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Stack>
+            </Box>
+
+            {/* Thao tác */}
+            <Box sx={{ p: 2, bgcolor: "#fafafa", display: "flex", justifyContent: "flex-end" }}>
+              <ActionMenu
+                hotel={hotel}
+                setIdHotel={setIdHotel}
+                setAction={setAction}
+                setDeleteDialogOpen={setDeleteDialogOpen}
+              />
+            </Box>
+          </Box>
+        ))}
+      </Box>
+    </Paper>
+  );
   return (
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, minHeight: "100vh" }}>
       {action === "create_room" && (
@@ -169,6 +384,7 @@ export default function InforHotelView({
             setAction={setAction}
             isCreate={true}
             idHotel={detailHotel?.id}
+            attribute={attribute}
           />
         </Box>
       )}
@@ -209,7 +425,7 @@ export default function InforHotelView({
               alignItems: "center",
               mb: 4,
             }}>
-            <Typography variant='h5' fontWeight='bold'>
+            <Typography variant={isMobile?"h6":'h5'} fontWeight='bold'>
               Thông tin khách sạn
             </Typography>
 
@@ -224,7 +440,7 @@ export default function InforHotelView({
                 borderRadius: "50px",
                 textTransform: "none",
                 fontWeight: 600,
-                px: 3,
+                px:isMobile?1: 3,
                 py: 1.2,
                 boxShadow: "0 4px 15px rgba(102,187,106,0.4)",
                 "&:hover": { bgcolor: "#4caf50" },
@@ -236,95 +452,7 @@ export default function InforHotelView({
           {/* Stats */}
 
           {/* Table */}
-          <Paper
-            elevation={0}
-            sx={{
-              borderRadius: "20px",
-              overflow: "hidden",
-              border: "1px solid #eee",
-              padding: 3,
-            }}>
-            <Box sx={{ mb: 3 }}>
-              <Stack direction='row' spacing={4} color='#555' fontSize={14}>
-                <Box>
-                  Tất cả <strong>{total}</strong>
-                </Box>
-                <Box>
-                  Dạng hoạt động <strong>{active}</strong>
-                </Box>
-                <Box>
-                  Ngừng kinh doanh <strong>{inactive}</strong>
-                </Box>
-              </Stack>
-            </Box>
-            <TableContainer>
-              <Table sx={{ minWidth: 1000 }}>
-                <TableHead>
-                  <TableRow sx={{ bgcolor: "#f8f9fa" }}>
-                    {[
-                      "#",
-                      "Tên khách sạn",
-                      "Tình trạng",
-                      "Trạng thái",
-                      "Địa chỉ",
-                      "Hoa hồng",
-                      "PT thanh toán",
-                      "",
-                    ].map((head) => (
-                      <TableCell
-                        key={head}
-                        sx={{ fontWeight: 600, color: "#555", fontSize: 14 }}>
-                        {head}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {hotels?.map((hotel, index) => (
-                    <TableRow hover key={hotel.id}>
-                      <TableCell>{index + 1}</TableCell>
-
-                      <TableCell
-                        onClick={() => {
-                          navigate(`/info-hotel?id=${hotel.id}`);
-                          setAction("edit_detail");
-                        }}
-                        sx={{ fontWeight: 500, cursor: "pointer" }}>
-                        {parseLang(hotel.name)}
-                      </TableCell>
-
-                      <TableCell>
-                        {renderCooperationChip(hotel.cooperation_type)}
-                      </TableCell>
-
-                      <TableCell>{renderStatusChip(hotel.status)}</TableCell>
-
-                      <TableCell sx={{ maxWidth: 280 }}>
-                        {parseLang(hotel.address)}
-                      </TableCell>
-
-                      <TableCell>{hotel.commission_rate}%</TableCell>
-
-                      <TableCell>
-                        {hotel.cooperation_type === "listing"
-                          ? "Online"
-                          : "Cả hai"}
-                      </TableCell>
-
-                      <TableCell>
-                        <ActionMenu
-                          hotel={hotel}
-                          setIdHotel={setIdHotel}
-                          setAction={setAction}
-                          setDeleteDialogOpen={setDeleteDialogOpen}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Paper>
+          {isMobile ? renderMobile() : renderDesktop()}
           <Dialog
             open={deleteDialogOpen}
             onClose={() => setDeleteDialogOpen(false)}

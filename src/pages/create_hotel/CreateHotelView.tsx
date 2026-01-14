@@ -203,7 +203,7 @@ const CreateHotelView = ({ submitCreateHotel, attribute }) => {
             justifyContent={"space-between"}
             alignItems={"center"}>
             <Box>
-              <Typography fontSize={"32px"} fontWeight={"600"}>
+              <Typography fontSize={{xs:"25px",md:"32px"}} fontWeight={"600"}>
                 Tạo khách sạn
               </Typography>
               <Typography fontSize={"16px"} mt={1} color='#989FAD'>
@@ -419,85 +419,151 @@ const steps = [
 ];
 
 function StepIndicator({ activeStep = 1, onStepChange }) {
+  const theme = useTheme();
   const isMobile = useMediaQuery("(max-width:768px)");
 
   const handleClick = (stepId) => {
-    if (onStepChange) onStepChange(stepId);
+    if (onStepChange && stepId ) {
+      onStepChange(stepId);
+    }
   };
 
   return (
     <Box
-      display='flex'
-      flexDirection={isMobile ? "column" : "row"}
-      alignItems='center'
-      justifyContent='start'
-      gap={isMobile ? 2 : 4}
-      width='100%'
-      py={3}>
-      {steps.map((step, index) => {
-        const isCompleted = step.id < activeStep;
-        const isActive = step.id === activeStep;
+      sx={{
+       
+        py: { xs: 2, sm: 3 },
+        px: { xs: 1, sm: 0 },
+        position: "relative",
+      }}
+    >
+      {/* Container scroll ngang cho mobile */}
+      <Box
+        sx={{
+          overflowX: isMobile ? "auto" : "visible",
+          whiteSpace: isMobile ? "nowrap" : "normal",
+          pb: isMobile ? 1 : 0,
+          scrollbarWidth: "none",
+          "&::-webkit-scrollbar": { display: "none" },
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "flex-start",
+            gap: { xs: 2, sm: 4 },
+            minWidth: isMobile ? "max-content" : "auto",
+          }}
+        >
+          {steps.map((step, index) => {
+            const isCompleted = step.id < activeStep;
+            const isActive = step.id === activeStep;
 
-        return (
+            return (
+              <React.Fragment key={step.id}>
+                <Box
+                  onClick={() => handleClick(step.id)}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    cursor: step.id <= activeStep ? "pointer" : "not-allowed",
+                    opacity: step.id > activeStep ? 0.5 : 1,
+                    minWidth: isMobile ? 80 : "auto",
+                  }}
+                >
+                  {/* Icon */}
+                  <Box
+                    sx={{
+                      width: { xs: 36, sm: 32 },
+                      height: { xs: 36, sm: 32 },
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: isActive || isCompleted ? "#9AC33C" : "transparent",
+                      color: isActive || isCompleted ? "white" : "#666",
+                      fontWeight: 600,
+                      fontSize: { xs: 14, sm: 14 },
+                      border: isActive || isCompleted
+                        ? "none"
+                        : "1px solid #888",
+                      boxShadow: isActive ? "0 0 0 4px rgba(154, 195, 60, 0.2)" : "none",
+                    }}
+                  >
+                    {isCompleted ? (
+                      <CheckIcon sx={{ fontSize: { xs: 22, sm: 20 } }} />
+                    ) : (
+                      step.id
+                    )}
+                  </Box>
+
+                  {/* Label */}
+                  <Typography
+                    sx={{
+                      fontSize: { xs: 13, sm: 14 },
+                      fontWeight: isActive ? 600 : 400,
+                      color: isActive ? "#9AC33C" : "#888",
+                      whiteSpace: isMobile ? "normal" : "nowrap",
+                      maxWidth: isMobile ? 80 : "auto",
+                      textAlign: isMobile ? "center" : "left",
+                    }}
+                  >
+                    {step.label}
+                  </Typography>
+                </Box>
+
+                {/* Dấu nối */}
+                {index < steps.length - 1 && (
+                  <Box
+                    sx={{
+                      width: isMobile ? 20 : 40,
+                      height: 1,
+                      mt: 0.5,
+                      borderBottom: isCompleted
+                        ? "2px solid #9AC33C"
+                        : "2px dashed #ccc",
+                      mx: { xs: 0.5, sm: 1 },
+                    }}
+                  />
+                )}
+              </React.Fragment>
+            );
+          })}
+        </Box>
+      </Box>
+
+      {/* Fade hai đầu chỉ trên mobile */}
+      {isMobile && (
+        <>
           <Box
-            key={step.id}
-            display='flex'
-            alignItems='center'
-            gap={1}
-            sx={{ cursor: "pointer" }}
-            onClick={() => handleClick(step.id)}>
-            {/* Icon số hoặc check */}
-            <Box
-              width={32}
-              height={32}
-              borderRadius='50%'
-              display='flex'
-              alignItems='center'
-              justifyContent='center'
-              sx={{
-                backgroundColor: isActive
-                  ? "#9AC33C"
-                  : isCompleted
-                  ? "#9AC33C"
-                  : "transparent",
-                color: isActive ? "white" : "#666",
-                fontWeight: 600,
-                fontSize: 14,
-                border: isActive
-                  ? "1px solid transparent"
-                  : isCompleted
-                  ? "1px solid transparent"
-                  : "1px solid #888",
-              }}>
-              {isCompleted ? (
-                <CheckIcon sx={{ fontSize: 20, color: "white" }} />
-              ) : (
-                step.id
-              )}
-            </Box>
-
-            {/* Text label */}
-            <Typography
-              fontSize={14}
-              fontWeight={isActive ? 600 : 400}
-              color={isActive ? "#9AC33C" : "#888"}>
-              {step.label}
-            </Typography>
-
-            {/* Dấu gạch nối (desktop only) */}
-            {index < steps.length - 1 && !isMobile && (
-              <Box
-                sx={{
-                  width: 40,
-                  height: 1,
-                  mt: 0.5,
-                  borderBottom: "2px dashed #ccc",
-                }}
-              />
-            )}
-          </Box>
-        );
-      })}
+            sx={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: 40,
+              // background: "linear-gradient(to right, white, transparent)",
+              pointerEvents: "none",
+              zIndex: 2,
+            }}
+          />
+          <Box
+            sx={{
+              position: "absolute",
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: 40,
+              // background: "linear-gradient(to left, white, transparent)",
+              pointerEvents: "none",
+              zIndex: 2,
+            }}
+          />
+        </>
+      )}
     </Box>
   );
 }

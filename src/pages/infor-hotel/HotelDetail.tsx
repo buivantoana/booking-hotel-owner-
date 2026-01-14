@@ -6,6 +6,8 @@ import {
   TextField,
   InputAdornment,
   IconButton,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import {
   ArrowBackIos,
@@ -78,6 +80,8 @@ const renderStatusChip = (status) => {
   );
 };
 function HotelHeader({ setAction, detailHotel }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const parseVi = (str) => {
     if (!str) return "";
     try {
@@ -113,7 +117,7 @@ function HotelHeader({ setAction, detailHotel }) {
 
         <Box>
           <Typography
-            fontSize={22}
+            fontSize={isMobile?19:22}
             fontWeight={700}
             color='#222'
             sx={{ lineHeight: 1.2 }}>
@@ -136,6 +140,8 @@ function HotelInfoDetail({
   locations,
   attribute,
 }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [action, setAction] = useState("manager");
   const [searchRoom, setSearchRoom] = useState("");
   const parseVi = (str) => {
@@ -209,10 +215,13 @@ function HotelInfoDetail({
           justifyContent: "space-between",
           alignItems: "center",
           mb: 3,
+          flexWrap:"wrap",
+
+          gap:isMobile?2:0
         }}>
         <Box sx={{ display: "flex", gap: 4 }}>
           <Typography
-            fontSize={16}
+            fontSize={isMobile?14:16}
             fontWeight={600}
             onClick={() => setAction("manager")}
             color={action == "manager" ? "#98B720" : "#999"}
@@ -224,7 +233,7 @@ function HotelInfoDetail({
             Thông tin chung
           </Typography>
           <Typography
-            fontSize={16}
+            fontSize={isMobile?14:16}
             fontWeight={600}
             onClick={() => setAction("rooms")}
             color={action == "rooms" ? "#98B720" : "#999"}
@@ -245,8 +254,8 @@ function HotelInfoDetail({
               color: "white",
               fontWeight: 600,
               fontSize: 15,
-              px: 4,
-              py: 1.4,
+              px: isMobile?1:4,
+              py:isMobile?1: 1.4,
               borderRadius: "50px",
               textTransform: "none",
             }}>
@@ -254,7 +263,7 @@ function HotelInfoDetail({
           </Button>
         )}
         {action == "rooms" && (
-          <Box display={"flex"} alignItems={"center"} gap={2}>
+          <Box display={"flex"} alignItems={"center"} flexWrap={"wrap"} gap={2}>
             <TextField
               placeholder='Tìm loại phòng'
               value={searchRoom}
@@ -267,7 +276,7 @@ function HotelInfoDetail({
                 ),
               }}
               sx={{
-                width: 280,
+                width: isMobile?"100%":"280px",
                 "& .MuiOutlinedInput-root": {
                   height: 40,
                   borderRadius: "24px",
@@ -307,6 +316,7 @@ function HotelInfoDetail({
                 borderRadius: "50px",
                 textTransform: "none",
                 height: "40px",
+                width: isMobile?"100%":"unset"
               }}>
               Tạo loại phòng
             </Button>

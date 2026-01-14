@@ -22,6 +22,8 @@ import {
   ListItemText,
   Checkbox,
   Avatar,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import HotelImageUpload from "./HotelImageUpload";
 import {
@@ -67,7 +69,8 @@ export default function HotelEditFormExact({
   const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
   const [selectedLang, setSelectedLang] = React.useState<string>("vi");
-
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const handleChange = (event) => {
     setSelectedLang(event.target.value as string);
     // Ở đây bạn có thể thêm logic thay đổi ngôn ngữ thực tế
@@ -260,7 +263,7 @@ export default function HotelEditFormExact({
             }}
             onClick={() => setAction("edit_detail")}
           />
-          <Typography fontSize={22} fontWeight={700} color='#222'>
+          <Typography fontSize={isMobile?19:22} fontWeight={700} color='#222'>
             Cập nhật thông tin
           </Typography>
         </Box>
@@ -340,7 +343,7 @@ export default function HotelEditFormExact({
           overflow: "hidden",
           bgcolor: "#fff",
         }}>
-        <Box sx={{ p: { xs: 3, sm: 4, md: 3 } }}>
+        <Box sx={{ p: { xs: 1, sm: 4, md: 3 } }}>
           <Grid container spacing={{ xs: 4, lg: 6 }}>
             {/* Cột trái */}
             <Grid item xs={12} lg={4}>

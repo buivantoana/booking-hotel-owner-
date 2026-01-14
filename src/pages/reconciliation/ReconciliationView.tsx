@@ -26,6 +26,7 @@ import {
   FormGroup,
   FormControlLabel,
   Checkbox,
+  useTheme,
 } from "@mui/material";
 import {
   CheckCircle,
@@ -230,6 +231,223 @@ export default function ReconciliationView({
     { label: "Hoàn thành", value: "completed" },
    
   ];
+
+
+  // Desktop: Bảng gốc (giữ nguyên)
+  const renderDesktop = () => (
+    <TableContainer
+      sx={{
+        maxHeight: "calc(100vh - 380px)",
+        mt: 4,
+        overflowX: "auto",
+      }}
+    >
+      <Table stickyHeader>
+        <TableHead>
+          <TableRow sx={{ bgcolor: "#f5f5f5" }}>
+            <TableCell sx={{ fontWeight: 600, color: "#424242" }}>#</TableCell>
+            <TableCell sx={{ fontWeight: 600, color: "#424242" }}>
+              Tên khách sạn
+            </TableCell>
+            <TableCell sx={{ fontWeight: 600, color: "#424242" }}>
+              Địa điểm
+            </TableCell>
+            <TableCell sx={{ fontWeight: 600, color: "#424242" }}>
+              Kỳ đối soát
+            </TableCell>
+            <TableCell sx={{ fontWeight: 600, color: "#424242" }}>
+              Trạng thái
+            </TableCell>
+            <TableCell
+              align="right"
+              sx={{ fontWeight: 600, color: "#424242" }}
+            >
+              Tổng công nợ
+            </TableCell>
+            <TableCell
+              align="center"
+              sx={{ fontWeight: 600, color: "#424242" }}
+            >
+              Hạn đối soát
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={7} align="center">
+                <Typography>Đang tải...</Typography>
+              </TableCell>
+            </TableRow>
+          ) : tableData?.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={7} align="center">
+                <Typography>Không có dữ liệu đối soát</Typography>
+              </TableCell>
+            </TableRow>
+          ) : (
+            tableData?.map((row, index) => {
+              const statusStyle = getStatusColor(row.status);
+
+              return (
+                <TableRow key={index} hover>
+                  <TableCell>{row.id}</TableCell>
+
+                  <TableCell>
+                    <Typography
+                      sx={{ cursor: "pointer" }}
+                      onClick={() => {
+                        setSettlement(dataSettlement[index]);
+                      }}
+                      fontWeight="500"
+                    >
+                      {row.name}
+                    </Typography>
+                  </TableCell>
+
+                  <TableCell>
+                    <Typography variant="body2" color="text.secondary">
+                      {row.address}
+                    </Typography>
+                  </TableCell>
+
+                  <TableCell>{row.month}</TableCell>
+
+                  <TableCell>
+                    <Chip
+                      label={row.status}
+                      size="small"
+                      sx={{
+                        bgcolor: statusStyle.bg,
+                        color: statusStyle.color,
+                        fontWeight: 500,
+                        height: 26,
+                      }}
+                    />
+                  </TableCell>
+
+                  <TableCell
+                    align="right"
+                    sx={{
+                      color: row.total < 0 ? "#e53935" : "inherit",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {formatCurrency(row.total)}
+                  </TableCell>
+
+                  <TableCell align="center">{row.dueDate}</TableCell>
+                </TableRow>
+              );
+            })
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
+  // Mobile: Card dọc
+  const renderMobile = () => (
+    <Box sx={{ mt: 4, display: "flex", flexDirection: "column", gap: 3 }}>
+      {loading ? (
+        <Typography align="center">Đang tải...</Typography>
+      ) : tableData?.length === 0 ? (
+        <Typography align="center" color="text.secondary">
+          Không có dữ liệu đối soát
+        </Typography>
+      ) : (
+        tableData?.map((row, index) => {
+          const statusStyle = getStatusColor(row.status);
+
+          return (
+            <Paper
+              key={index}
+              elevation={0}
+              sx={{
+                borderRadius: "12px",
+                border: "1px solid #eee",
+                overflow: "hidden",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                cursor: "pointer",
+                transition: "all 0.2s",
+                "&:hover": {
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+                  transform: "translateY(-2px)",
+                },
+              }}
+              onClick={() => setSettlement(dataSettlement[index])}
+            >
+              {/* Header card */}
+              <Box
+                sx={{
+                  p: 2,
+                  bgcolor: "#f8f9fa",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Stack>
+                  <Typography variant="subtitle1" fontWeight="600">
+                    {row.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {row.address}
+                  </Typography>
+                </Stack>
+
+                <Chip
+                  label={row.status}
+                  size="small"
+                  sx={{
+                    bgcolor: statusStyle.bg,
+                    color: statusStyle.color,
+                    fontWeight: 500,
+                    height: 26,
+                  }}
+                />
+              </Box>
+
+              <Divider />
+
+              {/* Nội dung chính */}
+              <Box sx={{ p: 2 }}>
+                <Stack spacing={1.5}>
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography variant="body2" color="text.secondary">
+                      Kỳ đối soát
+                    </Typography>
+                    <Typography fontWeight="500">{row.month}</Typography>
+                  </Stack>
+
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography variant="body2" color="text.secondary">
+                      Tổng công nợ
+                    </Typography>
+                    <Typography
+                      sx={{
+                        color: row.total < 0 ? "#e53935" : "inherit",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {formatCurrency(row.total)}
+                    </Typography>
+                  </Stack>
+
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography variant="body2" color="text.secondary">
+                      Hạn đối soát
+                    </Typography>
+                    <Typography fontWeight="500">{row.dueDate}</Typography>
+                  </Stack>
+                </Stack>
+              </Box>
+            </Paper>
+          );
+        })
+      )}
+    </Box>
+  );
   return (
     <>
       {settlement && (
@@ -260,13 +478,13 @@ export default function ReconciliationView({
               alignItems: "center",
               mb: 4,
             }}>
-            <Typography variant='h5' fontWeight='600' color='#1a1a1a'>
+            <Typography variant={isMobile?"h6":'h5'} fontWeight='600' color='#1a1a1a'>
               Quản lý đối soát
             </Typography>
             <Typography
               variant='body2'
               color='#e53935'
-              sx={{ fontSize: "0.875rem" }}>
+              sx={{ fontSize:isMobile?"0.675rem": "0.875rem" }}>
               <span style={{ color: "#33AE3F" }}>
                 {" "}
                 (+) Hotel Booking sẽ thanh toán cho KS
@@ -409,126 +627,19 @@ export default function ReconciliationView({
                       cursor: "pointer",
                       borderRadius: "18px",
                       height: 36,
-                      bgcolor: isActive ? "#98b720" : "transparent",
+                      bgcolor: isActive ? "#98B720" : "transparent",
                       color: isActive ? "white" : "#666",
                       border: isActive ? "none" : "1px solid #e0e0e0",
                       fontWeight: isActive ? "bold" : "normal",
                       "&:hover": {
-                        bgcolor: isActive ? "#7cb342" : "#f5f5f5",
+                        bgcolor: isActive ? "#98B720" : "#f5f5f5",
                       },
                     }}
                   />
                 );
               })}
             </Stack>
-            <TableContainer sx={{ maxHeight: "calc(100vh - 380px)", mt: 4 }}>
-              <Table stickyHeader>
-                <TableHead>
-                  <TableRow sx={{ bgcolor: "#f5f5f5" }}>
-                    <TableCell sx={{ fontWeight: 600, color: "#424242" }}>
-                      #
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: "#424242" }}>
-                      Tên khách sạn
-                    </TableCell>
-                    {!isMobile && (
-                      <TableCell sx={{ fontWeight: 600, color: "#424242" }}>
-                        Địa điểm
-                      </TableCell>
-                    )}
-                    <TableCell sx={{ fontWeight: 600, color: "#424242" }}>
-                      Kỳ đối soát
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: "#424242" }}>
-                      Trạng thái
-                    </TableCell>
-
-                    <TableCell
-                      align='right'
-                      sx={{ fontWeight: 600, color: "#424242" }}>
-                      Tổng công nợ
-                    </TableCell>
-                    <TableCell
-                      align='center'
-                      sx={{ fontWeight: 600, color: "#424242" }}>
-                      Hạn đối soát
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={8} align="center">
-                      <Typography>Đang tải...</Typography>
-                    </TableCell>
-                  </TableRow>
-                ) :  <>
-                  {tableData?.map((row, index) => {
-                    const statusStyle = getStatusColor(row.status);
-
-                    return (
-                      <TableRow key={index} hover>
-                        <TableCell>{row.id}</TableCell>
-
-                        <TableCell>
-                          <Typography
-                            sx={{ cursor: "pointer" }}
-                            onClick={() => {
-                              setSettlement(dataSettlement[index]);
-                            }}
-                            fontWeight='500'>
-                            {row.name}
-                          </Typography>
-                          {isMobile && (
-                            <Typography
-                              variant='caption'
-                              color='text.secondary'
-                              display='block'>
-                              {row.address}
-                            </Typography>
-                          )}
-                        </TableCell>
-
-                        {!isMobile && (
-                          <TableCell>
-                            <Typography variant='body2' color='text.secondary'>
-                              {row.address}
-                            </Typography>
-                          </TableCell>
-                        )}
-
-                        <TableCell>{row.month}</TableCell>
-
-                        <TableCell>
-                          <Chip
-                            label={row.status}
-                            size='small'
-                            sx={{
-                              bgcolor: statusStyle.bg,
-                              color: statusStyle.color,
-                              fontWeight: 500,
-                              height: 26,
-                            }}
-                          />
-                        </TableCell>
-
-                        <TableCell
-                          align='right'
-                          sx={{
-                            color: row.total < 0 ? "#e53935" : "inherit",
-                            fontWeight: 500,
-                          }}>
-                          {formatCurrency(row.total)}
-                        </TableCell>
-
-                        <TableCell align='center'>{row.dueDate}</TableCell>
-                      </TableRow>
-                    );
-                  })}
-                  </>}
-                </TableBody>
-              </Table>
-            </TableContainer>
+            {isMobile ? renderMobile() : renderDesktop()}
 
             {/* Pagination */}
             <Box
@@ -599,6 +710,7 @@ function HotelDetailFinal({
   searchCode,
   setSearchCode,
 }) {
+  
   const [dataSettlementBooking, setDataSettlementBooking] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [pagination, setPagination] = useState({
@@ -735,6 +847,216 @@ function HotelDetailFinal({
     // Reset về trang 1 khi search
     fetchBooking(1);
   };
+
+  const renderDesktop = () => (
+    <TableContainer sx={{ overflowX: "auto", mt: 4 }}>
+      <Table stickyHeader>
+        <TableHead>
+          <TableRow sx={{ bgcolor: "#f5f7fa" }}>
+            {[
+              "#",
+              "Mã đặt phòng",
+              "Loại phòng",
+              "Thời gian",
+              "Tiền phòng",
+              "Tổng thanh toán",
+              "Phí hoa hồng",
+              "Công nợ",
+            ].map((h, i, arr) => (
+              <TableCell
+                key={h}
+                align={i === arr.length - 1 ? "right" : "left"}
+                sx={{
+                  fontWeight: 600,
+                  color: "#424242",
+                  fontSize: "0.875rem",
+                }}
+              >
+                {h}
+              </TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {dataSettlementBooking.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
+                <Typography color="#999">Không có dữ liệu đặt phòng</Typography>
+              </TableCell>
+            </TableRow>
+          ) : (
+            dataSettlementBooking.map((row, index) => {
+              const debt = row.partner_amount; // Công nợ
+              const isNegative = debt < 0;
+
+              return (
+                <TableRow key={row.id} hover>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell sx={{ fontWeight: 500 }}>
+                    {row.booking_code}
+                  </TableCell>
+                  <TableCell>
+                    {row.room_type_name} - {rentTypeLabel(row.rent_type)}
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      color: "#616161",
+                      fontSize: "0.875rem",
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    {formatDateTime(row.check_in)}
+                    <br />
+                    {formatDateTime(row.check_out)}
+                  </TableCell>
+                  <TableCell>{formatCurrency(row.booking_amount)}</TableCell>
+                  <TableCell>{formatCurrency(row.booking_amount)}</TableCell>
+                  <TableCell sx={{ color: "#616161" }}>
+                    {formatCurrency(row.commission_amount)}
+                  </TableCell>
+                  <TableCell
+                    align="right"
+                    sx={{
+                      fontWeight: 600,
+                      color: isNegative ? "#E53935" : "#98B720",
+                    }}
+                  >
+                    {isNegative
+                      ? `-${formatCurrency(Math.abs(debt))}`
+                      : formatCurrency(debt)}
+                  </TableCell>
+                </TableRow>
+              );
+            })
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
+  // Mobile: Card dọc
+  const renderMobile = () => (
+    <Box sx={{ mt: 4, display: "flex", flexDirection: "column", gap: 3 }}>
+      {dataSettlementBooking.length === 0 ? (
+        <Typography align="center" color="#999" py={6}>
+          Không có dữ liệu đặt phòng
+        </Typography>
+      ) : (
+        dataSettlementBooking.map((row, index) => {
+          const debt = row.partner_amount;
+          const isNegative = debt < 0;
+
+          return (
+            <Paper
+              key={row.id}
+              elevation={0}
+              sx={{
+                borderRadius: "12px",
+                border: "1px solid #eee",
+                overflow: "hidden",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              }}
+            >
+              {/* Header card */}
+              <Box
+                sx={{
+                  p: 2,
+                  bgcolor: "#f8f9fa",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Stack>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    #{index + 1}
+                  </Typography>
+                  <Typography variant="subtitle1" fontWeight="600">
+                    {row.booking_code}
+                  </Typography>
+                </Stack>
+              </Box>
+
+              <Divider />
+
+              {/* Nội dung chính */}
+              <Box sx={{ p: 2 }}>
+                <Stack spacing={1.5}>
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">
+                      Loại phòng
+                    </Typography>
+                    <Typography>
+                      {row.room_type_name} - {rentTypeLabel(row.rent_type)}
+                    </Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">
+                      Thời gian
+                    </Typography>
+                    <Typography variant="body2" color="#616161">
+                      {formatDateTime(row.check_in)}
+                      <br />
+                      {formatDateTime(row.check_out)}
+                    </Typography>
+                  </Box>
+
+                  <Stack direction="row" justifyContent="space-between">
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">
+                        Tiền phòng
+                      </Typography>
+                      <Typography>{formatCurrency(row.booking_amount)}</Typography>
+                    </Box>
+                    <Box textAlign="right">
+                      <Typography variant="body2" color="text.secondary">
+                        Tổng thanh toán
+                      </Typography>
+                      <Typography>{formatCurrency(row.booking_amount)}</Typography>
+                    </Box>
+                  </Stack>
+
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">
+                      Phí hoa hồng
+                    </Typography>
+                    <Typography color="#616161">
+                      {formatCurrency(row.commission_amount)}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+
+              {/* Công nợ - nổi bật ở dưới cùng */}
+              <Box
+                sx={{
+                  p: 2,
+                  bgcolor: "#fafafa",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Typography variant="body2" color="text.secondary">
+                  Công nợ
+                </Typography>
+                <Typography
+                  variant="h6"
+                  fontWeight={600}
+                  sx={{ color: isNegative ? "#E53935" : "#98B720" }}
+                >
+                  {isNegative
+                    ? `-${formatCurrency(Math.abs(debt))}`
+                    : formatCurrency(debt)}
+                </Typography>
+              </Box>
+            </Paper>
+          );
+        })
+      )}
+    </Box>
+  );
   return (
     <Box sx={{ bgcolor: "#f9fafb", minHeight: "100vh" }}>
       {/* Header – giống 100% */}
@@ -754,7 +1076,7 @@ function HotelDetailFinal({
               }}
               sx={{ fontSize: 32, mr: 1, cursor: "pointer" }}
             />
-            <Typography variant='h5' fontWeight='bold'>
+            <Typography variant={isMobile?"h6":'h5' }fontWeight='bold'>
               {parseLang(settlement?.hotel_name)}
             </Typography>
           </Box>
@@ -1008,97 +1330,7 @@ function HotelDetailFinal({
             />
           </Box>
 
-          <TableContainer>
-            <Table stickyHeader>
-              <TableHead>
-                <TableRow sx={{ bgcolor: "#f5f7fa" }}>
-                  {[
-                    "#",
-                    "Mã đặt phòng",
-                    "Loại phòng",
-                    "Thời gian",
-                    "Tiền phòng",
-                    "Tổng thanh toán",
-                    "Phí hoa hồng",
-                    "Công nợ",
-                  ].map((h, i, arr) => (
-                    <TableCell
-                      key={h}
-                      align={i === arr.length - 1 ? "right" : "left"}
-                      sx={{
-                        fontWeight: 600,
-                        color: "#424242",
-                        fontSize: "0.875rem",
-                      }}>
-                      {h}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {dataSettlementBooking.map((row, index) => {
-                  const debt = row.partner_amount; // Công nợ
-                  const isNegative = debt < 0;
-
-                  return (
-                    <TableRow key={row.id} hover>
-                      {/* # */}
-                      <TableCell>{index + 1}</TableCell>
-
-                      {/* Mã đặt phòng */}
-                      <TableCell sx={{ fontWeight: 500 }}>
-                        {row.booking_code}
-                      </TableCell>
-
-                      {/* Loại phòng */}
-                      <TableCell>
-                        {row.room_type_name} - {rentTypeLabel(row.rent_type)}
-                      </TableCell>
-
-                      {/* Thời gian */}
-                      <TableCell
-                        sx={{
-                          color: "#616161",
-                          fontSize: "0.875rem",
-                          lineHeight: 1.4,
-                        }}>
-                        {formatDateTime(row.check_in)}
-                        <br />
-                        {formatDateTime(row.check_out)}
-                      </TableCell>
-
-                      {/* Tiền phòng */}
-                      <TableCell>
-                        {formatCurrency(row.booking_amount)}
-                      </TableCell>
-
-                      {/* Tổng thanh toán */}
-                      <TableCell>
-                        {formatCurrency(row.booking_amount)}
-                      </TableCell>
-
-                      {/* Phí hoa hồng */}
-                      <TableCell sx={{ color: "#616161" }}>
-                        {formatCurrency(row.commission_amount)}
-                      </TableCell>
-
-                      {/* Công nợ */}
-                      <TableCell
-                        align='right'
-                        sx={{
-                          fontWeight: 600,
-                          color: isNegative ? "#E53935" : "#98B720",
-                        }}>
-                        {isNegative
-                          ? `-${formatCurrency(Math.abs(debt))}`
-                          : formatCurrency(debt)}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          {isMobile ? renderMobile() : renderDesktop()}
 
           <Box
             sx={{
@@ -1149,6 +1381,7 @@ function HotelDetailFinal({
         open={openModal}
         settlement={settlement}
         onClose={() => setOpenModal(false)}
+        isMobile={isMobile}
       />
     </Box>
   );
@@ -1163,6 +1396,7 @@ function ConfirmCompleteModal({
   onClose = () => {},
   fetchSettlements,
   settlement,
+  isMobile
 }) {
   let [action, setAction] = useState(1);
   let [banks, setBanks] = useState([]);
@@ -1289,7 +1523,7 @@ function ConfirmCompleteModal({
         },
       }}>
       {/* Header */}
-      <Box sx={{ px: 4, pt: 4, pb: 2 }}>
+      <Box sx={{ px: 1, pt: 2, pb: 2 }}>
         <Stack
           direction='row'
           justifyContent='space-between'
@@ -1308,7 +1542,7 @@ function ConfirmCompleteModal({
         justifyContent='center'
         spacing={4}
         mb={5}>
-        <Stack direction='row' alignItems='center' spacing={2}>
+        <Stack direction='row' alignItems='center' spacing={isMobile?1:2}>
           <Box
             sx={{
               width: 30,
@@ -1325,7 +1559,7 @@ function ConfirmCompleteModal({
             1
           </Box>
           <Typography fontWeight={600} fontSize={"12px"} color='#98B720'>
-            Xác nhận thông tin tài khoản thanh toán
+           {isMobile?"Xác nhận thông tin":" Xác nhận thông tin tài khoản thanh toán"}
           </Typography>
         </Stack>
 
@@ -1351,12 +1585,12 @@ function ConfirmCompleteModal({
             fontWeight={600}
             fontSize={"12px"}
             color={action == 5 ? "#98B720" : "#9E9E9E"}>
-            Xác nhận hoàn tất
+           {isMobile?"Hoàn tất":"Xác nhận hoàn tất"} 
           </Typography>
         </Stack>
       </Stack>
       {action == 1 && (
-        <DialogContent sx={{ px: 4, pb: 3 }}>
+        <DialogContent sx={{ px:isMobile?1: 4, pb: 3 }}>
           <Typography variant='body1' color='#424242' lineHeight={1.7} mb={4}>
             Bằng việc <strong>xác nhận đối soát ngay</strong>, Hotel Booking và
             khách sạn thống nhất nội dung đối soát. Sau khi đối soát hoàn tất,
@@ -1411,12 +1645,12 @@ function ConfirmCompleteModal({
         </DialogContent>
       )}
       {action == 4 && (
-        <DialogContent sx={{ px: 4, pb: 3 }}>
+        <DialogContent sx={{  px:isMobile?1: 4, pb: 3 }}>
           <PaymentQRInfo bankPrimary={bankPrimary} />
         </DialogContent>
       )}
       {action == 5 && (
-        <DialogContent sx={{ px: 4, pb: 3 }}>
+        <DialogContent sx={{  px:isMobile?1: 4, pb: 3 }}>
           <Box>
             {/* Tiêu đề chính */}
             <Typography variant='body2' gutterBottom>
@@ -1490,7 +1724,7 @@ function ConfirmCompleteModal({
         </DialogContent>
       )}
       {action == 2 && (
-        <DialogContent sx={{ px: 4, pb: 3 }}>
+        <DialogContent sx={{  px:isMobile?1: 4, pb: 3 }}>
           <Box display={"flex"} justifyContent={"space-between"}>
             <Typography variant='h6' fontWeight={600} color='#111' mb={4}>
               Thông tin tài khoản thanh toán
@@ -1556,7 +1790,7 @@ function ConfirmCompleteModal({
         </DialogContent>
       )}
       {action == 3 && (
-        <DialogContent sx={{ px: 4, pb: 3 }}>
+        <DialogContent sx={{  px:isMobile?1: 4, pb: 3 }}>
           {/* Step 1 - 2 */}
 
           {/* Tiêu đề + nút Chỉnh sửa */}
@@ -1750,9 +1984,9 @@ function ConfirmCompleteModal({
             fontWeight: 600,
             fontSize: "1rem",
             boxShadow: "none",
-            "&:hover": { bgcolor: "#388E3C", boxShadow: "none" },
+            "&:hover": { bgcolor: "#98B720", boxShadow: "none" },
           }}>
-          {action == 3 ? "Lưu" : action == 5 ? "Xác nhận hoàn tất" : "Tiếp tục"}
+          {action == 3 ? "Lưu" : action == 5 ? isMobile?"Hoàn tất":"Xác nhận hoàn tất" : "Tiếp tục"}
         </Button>
       </DialogActions>
     </Dialog>
