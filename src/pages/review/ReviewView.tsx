@@ -132,9 +132,9 @@ const Review = ({ reviews, hotels, idHotel, setIdHotel }) => {
         </Box>
       </Box>
 
-      <Card sx={{ borderRadius: 3, p: 4 }}>
+      <Card sx={{ borderRadius: 3, p: {xs:2,md:4} }}>
         <Paper elevation={0} sx={{ borderRadius: "16px", py: 3, px: 0 }}>
-          <Grid container alignItems='start'>
+          <Grid container gap={{xs:2,md:0}} alignItems='start'>
             <Grid item xs={12} md={6}>
               <Box display={"flex"} gap={4}>
                 <Box
@@ -142,8 +142,8 @@ const Review = ({ reviews, hotels, idHotel, setIdHotel }) => {
                     bgcolor: "#98b720",
                     color: "white",
                     borderRadius: "12px",
-                    px: 5,
-                    py: 2.5,
+                    px: {xs:3,md:5},
+                    py:{xs:1,md:2.5},
                     fontSize: "2rem",
                     fontWeight: 700,
                     display: "flex",
@@ -152,7 +152,7 @@ const Review = ({ reviews, hotels, idHotel, setIdHotel }) => {
                   }}>
                   <Typography variant='h2'>{avgRate}</Typography>
                 </Box>
-                <Box display={"flex"} flexDirection={"column"} gap={2}>
+                <Box display={"flex"} flexDirection={"column"} gap={{xs:0,md:2}}>
                   <Typography
                     fontWeight={600}
                     fontSize='1.7rem'
@@ -228,7 +228,7 @@ function HotelReview({
   onPageChange,
 }: any) {
   const [tab, setTab] = useState(0);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [selectedReview, setSelectedReview] = useState(null);
   const theme = useTheme();
   const [isEdit, setIsEdit] = useState(false);
@@ -306,19 +306,34 @@ function HotelReview({
         <Typography variant='h6' fontWeight='bold'>
           Danh sách đánh giá
         </Typography>
+        {isMobile&&<Button
+              variant='outlined'
+              size='small'
+              endIcon={<KeyboardArrowDown />}
+              onClick={handleToggle}
+              sx={{
+                borderRadius: 20,
+                textTransform: "none",
+                borderColor: "#ddd",
+                color: "#666",
+                fontSize: "14px",
+              }}>
+              {OPTIONS.find((item) => item.value == value)?.label}
+            </Button>}
       </Box>
-      <Card sx={{ borderRadius: 3, p: 4 }}>
+      <Card sx={{ borderRadius: 3, p: {xs:2,md:4} }}>
         {/* Tabs + Sort button - giữ nguyên 100% */}
         <Box
           display={"flex"}
           justifyContent={"space-between"}
+          flexWrap={"wrap"}
           alignItems={"center"}>
           <Tabs
             value={tab}
             onChange={(_, v) => setTab(v)}
             variant='fullWidth'
             sx={{
-              width: "50%",
+              width: {xs:"100%",md:"50%"},
               "& .MuiTabs-flexContainer": { gap: 1 },
               "& .MuiTab-root": {
                 textTransform: "none",
@@ -326,6 +341,7 @@ function HotelReview({
                 fontWeight: 500,
                 borderRadius: 5,
                 color: "#999",
+                padding:0
               },
               "& .Mui-selected": {
                 backgroundColor: "rgba(240, 241, 243, 1)",
@@ -339,7 +355,7 @@ function HotelReview({
             <Tab label='Đã phản hồi' />
           </Tabs>
           <>
-            <Button
+           {!isMobile&&<Button
               variant='outlined'
               size='small'
               endIcon={<KeyboardArrowDown />}
@@ -352,7 +368,7 @@ function HotelReview({
                 fontSize: "14px",
               }}>
               {OPTIONS.find((item) => item.value == value)?.label}
-            </Button>
+            </Button>}
 
             <Popper
               open={openFilter}
@@ -459,8 +475,8 @@ function HotelReview({
                 </Stack>
               </Box>
 
-              <ReviewContent sx={{ justifyContent: "space-between" }}>
-                <Box width={"26%"}>
+              <ReviewContent sx={{ justifyContent: "space-between",flexDirection:{xs:"column",md:"row"} }}>
+                <Box width={{xs:"100%",md:"26%"}}>
                   <Stack direction='row' spacing={2}>
                     <Avatar
                       src={review.avatar || undefined}
@@ -502,14 +518,14 @@ function HotelReview({
                   </Typography>
                 </Box>
 
-                <Box width={"70%"}>
+                <Box width={{xs:"100%",md:"70%"}}>
                   <Typography
                     variant='body1'
                     mt={2}
                     mb={2}
                     fontSize='15px'
                     sx={{
-                      width: "100%",
+                      
                       p: 3,
                       background: "rgba(240, 241, 243, 1)",
                       borderRadius: 1,
@@ -710,6 +726,8 @@ const StyledModal = styled(Dialog)(({ theme }) => ({
     width: "95%",
     margin: 16,
     boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+   
+    
   },
 }));
 
@@ -884,6 +902,7 @@ function ReviewDetailModal({
   return (
     <StyledModal
       open={open}
+     
       onClose={() => {
         setIsEdit(false);
         setOpen(false);

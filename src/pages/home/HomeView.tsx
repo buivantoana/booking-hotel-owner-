@@ -862,7 +862,7 @@ export default function HomeView({
       {/* Header */}
       <NotificationPopover anchorEl={anchorEl} setAnchorEl={setAnchorEl} />
       <Stack
-        direction={{ xs: "column", sm: "row" }}
+        direction={{ xs: "row", sm: "row" }}
         justifyContent='space-between'
         alignItems='center'
         mb={5}
@@ -902,7 +902,7 @@ export default function HomeView({
       {/* Tổng quan đặt phòng */}
       <Box display={"flex"} justifyContent={"space-between"}>
         <Box>
-          <Typography variant='h6' fontWeight='bold' mb={1}>
+          <Typography variant='h6' fontSize={{xs:"17px",md:"20px"}} fontWeight='bold' mb={1}>
             Tổng quan đặt phòng
           </Typography>
           <Typography variant='body2' color='text.secondary' mb={4}>
@@ -928,13 +928,13 @@ export default function HomeView({
                     <Avatar
                       sx={{
                         bgcolor: card.color,
-                        width: 56,
-                        height: 56,
+                        width: {xs:40,md:56},
+                        height: {xs:40,md:56},
                       }}>
-                      <card.icon sx={{ fontSize: 32, color: "white" }} />
+                      <card.icon sx={{ fontSize: {xs:25,md:32}, color: "white" }} />
                     </Avatar>
 
-                    <Typography variant='h6' fontWeight='bold'>
+                    <Typography variant='h6' fontSize={{xs:"17px",md:"20px"}} fontWeight='bold'>
                       {card.title}
                     </Typography>
                   </Stack>
@@ -973,11 +973,11 @@ export default function HomeView({
       </Grid>
 
       {/* Hiệu suất */}
-      <Typography variant='h6' fontWeight='bold' mb={4}>
+      <Typography variant='h6'  fontWeight='bold' mb={4}>
         Hiệu suất khách sạn
       </Typography>
 
-      <Grid container spacing={3} mb={8}>
+      <Grid container spacing={3} gap={{xs:4,md:0}} mb={8}>
         <Grid item xs={12} md={6}>
           <PerformanceChart
             title='Khách ghé thăm'
@@ -1009,7 +1009,7 @@ export default function HomeView({
           />
         </Grid>
       </Grid>
-      <Grid container spacing={3} mb={8}>
+      <Grid container spacing={3} gap={{xs:4,md:0}}  mb={8}>
         <Grid item xs={12} md={6}>
           <PerformanceChart
             title='Lượt đặt phòng'
@@ -1117,7 +1117,7 @@ const Review = ({ dataReview }) => {
         </Button>
       </Box>
 
-      <Card sx={{ borderRadius: 3, p: 4 }}>
+      <Card sx={{ borderRadius: 3, p: {xs:2,md:4} }}>
         <Grid container alignItems='center'>
           {/* AVG SCORE */}
           <Grid item xs={12} md={6}>

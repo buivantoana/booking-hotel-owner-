@@ -19,6 +19,7 @@ import {
   FormControlLabel,
   DialogContent,
   Dialog,
+  useTheme,
 } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import LockIcon from "@mui/icons-material/Lock";
@@ -162,10 +163,12 @@ export default function ManagerRoomView({
               </Box> */}
             </Box>
           </Box>
-          <Card sx={{ mt: 4 }}>
+          <Card sx={{ mt: 4,padding:{xs:0,md:3} }}>
             <Box
-              display='flex'
+              display={'flex'}
+              flexDirection={{xs:"column",md:"row"}}
               alignItems='center'
+              gap={{xs:2,md:0}}
               justifyContent='space-between'
               py={2}
               px={isMobile ? 1 : 2}
@@ -283,6 +286,7 @@ function QuickBlockDialog({
   onSuccess,
 }) {
   const [blockType, setBlockType] = useState("hourly");
+  const isMobile = useMediaQuery("(max-width:600px)");
   const [dateRange, setDateRange] = useState({
     checkIn: dayjs(),
     checkOut: dayjs().add(1, "day"),
@@ -422,7 +426,7 @@ function QuickBlockDialog({
           </IconButton>
         </Box>
 
-        <DialogContent sx={{ bgcolor: "#fff", p: 3 }}>
+        <DialogContent sx={{ bgcolor: "#fff", p: isMobile?1:3 }}>
           <Stack spacing={3.5}>
             {/* Loại đặt phòng */}
             <Box
@@ -468,7 +472,7 @@ function QuickBlockDialog({
                 <Stack
                   direction='row'
                   alignItems='center'
-                  width='60%'
+                  width={isMobile?"70%":'60%'}
                   spacing={2}>
                   <MobileTimePicker
                     value={startTime}
@@ -628,14 +632,14 @@ function QuickBlockDialog({
                 variant='outlined'
                 onClick={onClose}
                 fullWidth
-                sx={{ borderRadius: "50px", py: 1.5 }}>
+                sx={{ borderRadius: "50px", py:isMobile?1: 1.5 }}>
                 Hủy
               </Button>
               <Button
                 variant='contained'
                 onClick={handleSubmit}
                 fullWidth
-                sx={{ borderRadius: "50px", bgcolor: "#98B720", py: 1.5 }}>
+                sx={{ borderRadius: "50px", bgcolor: "#98B720", py:isMobile?1: 1.5 }}>
                 Xác nhận cập nhật
               </Button>
             </Stack>
@@ -676,76 +680,536 @@ function RoomScheduleTableHourly({
   handleOpenEdit,
   data,
 }: RoomScheduleTableHourlyProps) {
-  const dayGroups = groupSlotsByDate(data?.slots);
-  const totalSlots = data?.slots?.length;
-  const columnWidth = `${100 / totalSlots}%`;
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md")); // md ~ 900px
   const navigate = useNavigate();
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [editedValues, setEditedValues] = useState<{ [key: number]: number }>(
-    {}
-  );
-  console.log("AAAA", dayGroups);
-  return (
-    <Box p={2} bgcolor='#fff'>
-      {/* CHỈ 1 CONTAINER CUỘN DUY NHẤT */}
-      <Box
-        ref={scrollRef}
-        sx={{
-          overflowX: "auto",
-          overflowY: "hidden",
-          "&::-webkit-scrollbar": { height: 10 },
-          "&::-webkit-scrollbar-thumb": { background: "#aaa", borderRadius: 5 },
-          border: "1px solid #ccc",
-        }}>
-        {/* BẢNG THẬT - CỘT TRÁI CỐ ĐỊNH, PHẦN PHẢI CUỘN */}
-        <Box minWidth='fit-content'>
-          {" "}
-          {/* Đảm bảo đủ rộng để có scroll */}
-          {/* HEADER */}
-          <Box display='flex'>
-            {/* Cột trái cố định */}
-            <Box
-              width='280px'
-              flexShrink={0}
-              bgcolor={"white"}
-              position='sticky'
-              left={0}
-              zIndex={10}
-              borderRight='2px solid #ddd'
-              borderBottom='2px solid #ddd'
-            />
 
-            {/* Header phải */}
-            <Box flex={1}>
-              {/* Tháng */}
+  const dayGroups = groupSlotsByDate(data?.slots);
+
+  const [editedValues, setEditedValues] = useState<{ [key: number]: number }>({});
+
+  // Desktop version - giữ nguyên như cũ
+  const renderDesktop = () => {
+    const totalSlots = data?.slots?.length || 0;
+    const columnWidth = `${100 / totalSlots}%`;
+
+    return (
+      <Box p={2} bgcolor="#fff">
+        <Box
+          sx={{
+            overflowX: "auto",
+            overflowY: "hidden",
+            "&::-webkit-scrollbar": { height: 10 },
+            "&::-webkit-scrollbar-thumb": { background: "#aaa", borderRadius: 5 },
+            border: "1px solid #ccc",
+          }}
+        >
+          <Box minWidth="fit-content">
+            {/* HEADER */}
+            <Box display="flex">
+              {/* Cột trái cố định */}
               <Box
-                textAlign='start'
-                py={1.5}
-                px={2}
-                borderBottom='1px solid #eee'
-                bgcolor='#f9f9f9'>
-                <Typography fontWeight={600} fontSize={16}>
-                  {format(new Date(data?.start_time), "MMMM yyyy", {
-                    locale: vi,
-                  })}
+                width="280px"
+                flexShrink={0}
+                bgcolor="white"
+                position="sticky"
+                left={0}
+                zIndex={10}
+                borderRight="2px solid #ddd"
+                borderBottom="2px solid #ddd"
+              />
+
+              {/* Header phải */}
+              <Box flex={1}>
+                <Box
+                  textAlign="start"
+                  py={1.5}
+                  px={2}
+                  borderBottom="1px solid #eee"
+                  bgcolor="#f9f9f9"
+                >
+                  <Typography fontWeight={600} fontSize={16}>
+                    {format(new Date(data?.start_time), "MMMM yyyy", { locale: vi })}
+                  </Typography>
+                </Box>
+
+                {/* Ngày */}
+                <Box borderBottom="1px solid #ddd" bgcolor="white">
+                  <Box display="flex">
+                    {dayGroups?.map((g) => {
+                      const w = (g?.slots?.length / totalSlots) * 100;
+                      return (
+                        <Box
+                          key={g.date}
+                          width={`${w}%`}
+                          minWidth={`${g.slots.length * 80}px`}
+                          display="flex"
+                          justifyContent="start"
+                          py={2}
+                        >
+                          <Button
+                            variant="contained"
+                            sx={{
+                              bgcolor: "#98b720",
+                              color: "white",
+                              fontWeight: 600,
+                              minWidth: "140px",
+                              height: "40px",
+                              fontSize: "15px",
+                              borderRadius: "20px",
+                              boxShadow: "0 4px 15px rgba(152,183,32,0.4)",
+                              "&:hover": { bgcolor: "#80a61a" },
+                            }}
+                          >
+                            {g.dayOfMonth} {g.dayName}
+                          </Button>
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                </Box>
+
+                {/* Giờ */}
+                <Box display="flex" borderBottom="2px solid #ddd" bgcolor="#f5f5f5">
+                  {data?.slots?.map((s, i) => (
+                    <Box
+                      key={i}
+                      width={columnWidth}
+                      minWidth="150px"
+                      py={2}
+                      textAlign="center"
+                      borderRight="1px solid #eee"
+                    >
+                      <Typography fontWeight={600} fontSize={15}>
+                        {s.hour}
+                      </Typography>
+                      <Typography fontSize={11} color="#888">
+                        {format(new Date(s.from), "dd/MM")}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Rows */}
+            {[
+              { label: parseVi(data?.name), isName: true },
+              {
+                label: "Tình trạng phòng",
+                action: "Khóa nhanh",
+                onClick: () => handleOpenQuickBlock({ room_type_id: data?.room_type_id }),
+                isStatus: true,
+              },
+              { label: "Số phòng đặt", isBooked: true },
+              {
+                label: "Số phòng còn lại",
+                onClick: handleOpenEdit,
+                isRemaining: true,
+              },
+            ].map((row, idx) => (
+              <Box key={idx} display="flex">
+                <Box
+                  width="280px"
+                  flexShrink={0}
+                  bgcolor={idx === 0 ? "white" : "#fafafa"}
+                  position="sticky"
+                  left={0}
+                  zIndex={10}
+                  borderRight="2px solid #ddd"
+                  borderBottom="1px solid #ddd"
+                >
+                  <Box px={3} py={2} display="flex" justifyContent="space-between" alignItems="center">
+                    {row.isName ? (
+                      <>
+                        <Typography fontWeight={700} fontSize={18} display="flex" alignItems="center" gap={1}>
+                          {row.label} <KeyboardArrowUpIcon />
+                        </Typography>
+                        <Typography
+                          onClick={() =>
+                            navigate(`/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`)
+                          }
+                          color="#98b720"
+                          display="flex"
+                          alignItems="center"
+                          gap={0.5}
+                          sx={{ cursor: "pointer" }}
+                        >
+                          Xem <LaunchIcon fontSize="small" />
+                        </Typography>
+                      </>
+                    ) : (
+                      <>
+                        <Typography fontWeight={500}>{row.label}</Typography>
+                        {row.action && (
+                          <Typography
+                            onClick={row.onClick}
+                            sx={{ cursor: "pointer", color: "#98b720", fontWeight: 600 }}
+                          >
+                            {row.action}
+                          </Typography>
+                        )}
+                      </>
+                    )}
+                  </Box>
+                </Box>
+
+                <Box flex={1} display="flex">
+                  {data?.slots?.map((slot, i) => (
+                    <Box
+                      key={i}
+                      width={columnWidth}
+                      minWidth="150px"
+                      borderRight="1px solid #eee"
+                      borderBottom="1px solid #eee"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      py={1}
+                    >
+                      {row.isStatus && (
+                        <Box
+                          px={2}
+                          py={1}
+                          borderRadius="50px"
+                          fontSize={13}
+                          fontWeight={500}
+                          bgcolor={slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"}
+                          color={slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"}
+                        >
+                          {slot.remaining_rooms > 0 ? "Còn phòng" : "Hết phòng"}
+                        </Box>
+                      )}
+                      {row.isBooked && (
+                        <Typography fontWeight={600} color="#333">
+                          {slot.booked_rooms}
+                        </Typography>
+                      )}
+                      {row.isRemaining && (
+                        <TextField
+                          value={editedValues[i] ?? slot.remaining_rooms}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setEditedValues((prev) => ({
+                              ...prev,
+                              [i]: val === "" ? undefined : parseInt(val, 10),
+                            }));
+                          }}
+                          onBlur={(e) => {
+                            const newVal = parseInt(e.target.value, 10);
+                            if (!isNaN(newVal) && newVal !== slot.remaining_rooms) {
+                              handleOpenQuickBlock({
+                                room_type_id: data.room_type_id,
+                                rent_type: "hourly",
+                                start_time: slot.from,
+                                end_time: slot.to || slot.from,
+                                available_rooms: newVal,
+                                reason: "staff_shortage",
+                                note: "Thiếu nhân viên dọn phòng",
+                              });
+                            }
+                          }}
+                          type="number"
+                          size="small"
+                          inputProps={{ min: 0, style: { textAlign: "center", fontWeight: 600 } }}
+                          sx={{ width: 60 }}
+                        />
+                      )}
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            ))}
+
+            {/* Giá */}
+            {[
+              {
+                label: "Giá phòng/2h đầu",
+                value: `${data?.price_hourly?.toLocaleString("vi-VN")}đ`,
+                bg: "#fff3e9",
+                color: "#e65e00",
+              },
+              {
+                label: "Giá 1 giờ thêm",
+                value: `${data?.price_hourly_increment?.toLocaleString("vi-VN")}đ`,
+                bg: "#eef1ff",
+                color: "#4e6aff",
+              },
+            ].map((p) => (
+              <Box key={p.label} display="flex">
+                <Box
+                  width="280px"
+                  flexShrink={0}
+                  bgcolor="#f8f9fa"
+                  position="sticky"
+                  borderBottom="1px solid #ddd"
+                  left={0}
+                  zIndex={10}
+                  borderRight="2px solid #ddd"
+                >
+                  <Box px={3} py={2}>
+                    <Typography fontWeight={500}>{p.label}</Typography>
+                  </Box>
+                </Box>
+                <Box flex={1} display="flex" alignItems="center" pl={4}>
+                  <Box
+                    bgcolor={p.bg}
+                    color={p.color}
+                    px={4}
+                    py={1.5}
+                    borderRadius="50px"
+                    fontWeight={600}
+                    fontSize={15}
+                  >
+                    {p.value}
+                  </Box>
+                </Box>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      </Box>
+    );
+  };
+
+  // Mobile version - dạng card theo ngày
+  const renderMobile = () => {
+    return (
+      <Box p={2} bgcolor="#fff">
+        {/* Tháng */}
+        <Box
+          textAlign="center"
+          py={2}
+          bgcolor="#f9f9f9"
+          borderRadius="12px"
+          mb={3}
+        >
+          <Typography variant="h6" fontWeight={700}>
+            {format(new Date(data?.start_time), "MMMM yyyy", { locale: vi })}
+          </Typography>
+        </Box>
+
+        {dayGroups?.map((group) => (
+          <Box
+            key={group.date}
+            bgcolor="white"
+            borderRadius="12px"
+            boxShadow="0 2px 12px rgba(0,0,0,0.08)"
+            mb={3}
+            overflow="hidden"
+          >
+            {/* Header ngày */}
+            <Box bgcolor="#98b720" color="white" py={2} px={3}>
+              <Typography variant="h6" fontWeight={700}>
+                {group.dayOfMonth} {group.dayName}
+              </Typography>
+            </Box>
+
+            <Divider />
+
+            {/* Slots theo giờ */}
+            {group.slots?.map((slot, i) => (
+              <Box key={i} p={2} borderBottom="1px solid #eee">
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+                  <Typography fontWeight={600} fontSize={16}>
+                    {slot.hour} • {format(new Date(slot.from), "dd/MM")}
+                  </Typography>
+
+                  {/* Tình trạng phòng */}
+                  <Box
+                    px={2}
+                    py={0.8}
+                    borderRadius="50px"
+                    fontSize={13}
+                    fontWeight={600}
+                    bgcolor={slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"}
+                    color={slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"}
+                  >
+                    {slot.remaining_rooms > 0 ? "Còn phòng" : "Hết phòng"}
+                  </Box>
+                </Box>
+
+                <Box display="flex" justifyContent="space-between" mb={1.5}>
+                  <Typography color="text.secondary">Số phòng đặt:</Typography>
+                  <Typography fontWeight={600}>{slot.booked_rooms}</Typography>
+                </Box>
+
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                  <Typography color="text.secondary">Còn lại:</Typography>
+                  <TextField
+                    value={editedValues[i] ?? slot.remaining_rooms}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setEditedValues((prev) => ({
+                        ...prev,
+                        [i]: val === "" ? undefined : parseInt(val, 10),
+                      }));
+                    }}
+                    onBlur={(e) => {
+                      const newVal = parseInt(e.target.value, 10);
+                      if (!isNaN(newVal) && newVal !== slot.remaining_rooms) {
+                        handleOpenQuickBlock({
+                          room_type_id: data.room_type_id,
+                          rent_type: "hourly",
+                          start_time: slot.from,
+                          end_time: slot.to || slot.from,
+                          available_rooms: newVal,
+                          reason: "staff_shortage",
+                          note: "Thiếu nhân viên dọn phòng",
+                        });
+                      }
+                    }}
+                    type="number"
+                    size="small"
+                    inputProps={{ min: 0, style: { textAlign: "center" } }}
+                    sx={{ width: 80 }}
+                  />
+                </Box>
+
+                {/* Nút Khóa nhanh */}
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  fullWidth
+                  size="small"
+                  onClick={() =>
+                    handleOpenQuickBlock({ room_type_id: data?.room_type_id })
+                  }
+                >
+                  Khóa nhanh khung giờ này
+                </Button>
+              </Box>
+            ))}
+
+            {/* Thông tin phòng */}
+            <Box p={3} bgcolor="#fafafa">
+              <Typography fontWeight={700} mb={1}>
+                {parseVi(data?.name)}
+              </Typography>
+
+              <Box display="flex" justifyContent="space-between" mb={1}>
+                <Typography>Giá phòng/2h đầu:</Typography>
+                <Typography fontWeight={600} color="#e65e00">
+                  {data?.price_hourly?.toLocaleString("vi-VN")}đ
                 </Typography>
               </Box>
 
-              {/* Các ngày - căn giữa trên nhóm slot */}
-              <Box borderBottom='1px solid #ddd' bgcolor='white'>
-                <Box display='flex'>
-                  {dayGroups?.map((g) => {
-                    const w = (g?.slots?.length / totalSlots) * 100;
+              <Box display="flex" justifyContent="space-between">
+                <Typography>Giá 1 giờ thêm:</Typography>
+                <Typography fontWeight={600} color="#4e6aff">
+                  {data?.price_hourly_increment?.toLocaleString("vi-VN")}đ
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Action */}
+            <Box p={2} display="flex" gap={2}>
+              <Button
+                variant="outlined"
+                color="success"
+                fullWidth
+                onClick={handleOpenEdit}
+              >
+                Chỉnh sửa
+              </Button>
+
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                onClick={() =>
+                  navigate(`/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`)
+                }
+              >
+                Xem chi tiết
+              </Button>
+            </Box>
+          </Box>
+        ))}
+      </Box>
+    );
+  };
+
+  return isMobile ? renderMobile() : renderDesktop();
+}
+
+function RoomScheduleTableDaily({
+  handleOpenQuickBlock,
+  handleOpenEdit,
+  data,
+}) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md")); // ~900px
+  const navigate = useNavigate();
+
+  const dailySlots = data?.slots || [];
+  const [editedValues, setEditedValues] = useState<{ [key: number]: number }>({});
+
+  // Desktop version - giữ nguyên như cũ
+  const renderDesktop = () => {
+    const totalDays = dailySlots?.length || 0;
+    const columnWidth = `${100 / totalDays}%`;
+
+    return (
+      <Box p={2} bgcolor="#fff">
+        <Box
+          sx={{
+            overflowX: "auto",
+            overflowY: "hidden",
+            "&::-webkit-scrollbar": { height: 10 },
+            "&::-webkit-scrollbar-thumb": { background: "#aaa", borderRadius: 5 },
+            border: "1px solid #ccc",
+          }}
+        >
+          <Box minWidth="fit-content">
+            {/* HEADER */}
+            <Box display="flex">
+              <Box
+                width="280px"
+                flexShrink={0}
+                bgcolor="white"
+                position="sticky"
+                left={0}
+                zIndex={10}
+                borderRight="2px solid #ddd"
+                borderBottom="2px solid #ddd"
+              />
+
+              <Box flex={1}>
+                <Box
+                  textAlign="start"
+                  py={1.5}
+                  px={2}
+                  borderBottom="1px solid #eee"
+                  bgcolor="#f9f9f9"
+                >
+                  <Typography fontWeight={600} fontSize={16}>
+                    {format(new Date(data.start_time), "MMMM yyyy", { locale: vi })}
+                  </Typography>
+                </Box>
+
+                <Box display="flex" borderBottom="2px solid #ddd" bgcolor="white">
+                  {dailySlots?.map((slot) => {
+                    const dateObj = new Date(slot.date);
+                    const dayNum = format(dateObj, "dd");
+                    const dayName = format(dateObj, "EEEE", { locale: vi })
+                      .replace("Chủ nhật", "CN")
+                      .replace("Thứ ", "thứ ")
+                      .toLowerCase();
+
                     return (
                       <Box
-                        key={g.date}
-                        width={`${w}%`}
-                        minWidth={`${g.slots.length * 80}px`}
-                        display='flex'
-                        justifyContent='start'
-                        py={2}>
+                        key={slot.date}
+                        width={columnWidth}
+                        minWidth="150px"
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        py={2}
+                        borderRight="1px solid #eee"
+                      >
                         <Button
-                          variant='contained'
+                          variant="contained"
                           sx={{
                             bgcolor: "#98b720",
                             color: "white",
@@ -756,854 +1220,790 @@ function RoomScheduleTableHourly({
                             borderRadius: "20px",
                             boxShadow: "0 4px 15px rgba(152,183,32,0.4)",
                             "&:hover": { bgcolor: "#80a61a" },
-                          }}>
-                          {g.dayOfMonth} {g.dayName}
+                          }}
+                        >
+                          {dayNum} {dayName}
                         </Button>
                       </Box>
                     );
                   })}
                 </Box>
               </Box>
-
-              {/* Header giờ */}
-              <Box
-                display='flex'
-                borderBottom='2px solid #ddd'
-                bgcolor='#f5f5f5'>
-                {data?.slots?.map((s, i) => (
-                  <Box
-                    key={i}
-                    width={columnWidth}
-                    minWidth='150px'
-                    py={2}
-                    textAlign='center'
-                    borderRight='1px solid #eee'>
-                    <Typography fontWeight={600} fontSize={15}>
-                      {s.hour}
-                    </Typography>
-                    <Typography fontSize={11} color='#888'>
-                      {format(new Date(s.from), "dd/MM")}
-                    </Typography>
-                  </Box>
-                ))}
-              </Box>
             </Box>
-          </Box>
-          {/* CÁC DÒNG DỮ LIỆU */}
-          {[
-            { label: parseVi(data?.name), isName: true },
-            {
-              label: "Tình trạng phòng",
-              action: "Khóa nhanh",
-              onClick: () => {
-                handleOpenQuickBlock({ room_type_id: data?.room_type_id });
+
+            {/* Rows */}
+            {[
+              { label: parseVi(data?.name), isName: true },
+              {
+                label: "Tình trạng phòng",
+                action: "Khóa nhanh",
+                onClick: () => handleOpenQuickBlock({ room_type_id: data?.room_type_id, rent_type: "daily" }),
+                isStatus: true,
               },
-              isStatus: true,
-            },
-            { label: "Số phòng đặt", isBooked: true },
-            {
-              label: "Số phòng còn lại",
-              // action: "Chỉnh sửa",
-              onClick: handleOpenEdit,
-              isRemaining: true,
-            },
-          ].map((row, idx) => (
-            <Box key={idx} display='flex'>
-              {/* Cột trái cố định */}
-              <Box
-                width='280px'
-                flexShrink={0}
-                bgcolor={idx === 0 ? "white" : "#fafafa"}
-                position='sticky'
-                left={0}
-                zIndex={10}
-                borderRight='2px solid #ddd'
-                borderBottom='1px solid #ddd'>
+              { label: "Số phòng đặt", isBooked: true },
+              {
+                label: "Số phòng còn lại",
+                onClick: handleOpenEdit,
+                isRemaining: true,
+              },
+            ].map((row, idx) => (
+              <Box key={idx} display="flex" borderBottom="1px solid #eee">
                 <Box
-                  px={3}
-                  py={2}
-                  display='flex'
-                  justifyContent='space-between'
-                  alignItems='center'>
-                  {row.isName ? (
-                    <>
-                      <Typography
-                        fontWeight={700}
-                        fontSize={18}
-                        display='flex'
-                        alignItems='center'
-                        gap={1}>
-                        {row.label} <KeyboardArrowUpIcon />
-                      </Typography>
-                      <Typography
-                        onClick={() => {
-                          navigate(
-                            `/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`
-                          );
-                        }}
-                        color='#98b720'
-                        display='flex'
-                        alignItems='center'
-                        gap={0.5}
-                        sx={{ cursor: "pointer" }}>
-                        Xem <LaunchIcon fontSize='small' />
-                      </Typography>
-                    </>
-                  ) : (
-                    <>
-                      <Typography fontWeight={500}>{row.label}</Typography>
-                      {row.action && (
+                  width="280px"
+                  flexShrink={0}
+                  bgcolor={idx === 0 ? "white" : "#fafafa"}
+                  position="sticky"
+                  left={0}
+                  zIndex={10}
+                  borderRight="2px solid #ddd"
+                  borderBottom="1px solid #ddd"
+                >
+                  <Box px={3} py={2} display="flex" justifyContent="space-between" alignItems="center">
+                    {row.isName ? (
+                      <>
+                        <Typography fontWeight={700} fontSize={18} display="flex" alignItems="center" gap={1}>
+                          {row.label} <KeyboardArrowUpIcon />
+                        </Typography>
                         <Typography
-                          onClick={row.onClick}
-                          sx={{
-                            cursor: "pointer",
-                            color: "#98b720",
-                            fontWeight: 600,
-                          }}>
-                          {row.action}
+                          onClick={() =>
+                            navigate(`/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`)
+                          }
+                          color="#98b720"
+                          display="flex"
+                          alignItems="center"
+                          gap={0.5}
+                          sx={{ cursor: "pointer" }}
+                        >
+                          Xem <LaunchIcon fontSize="small" />
+                        </Typography>
+                      </>
+                    ) : (
+                      <>
+                        <Typography fontWeight={500}>{row.label}</Typography>
+                        {row.action && (
+                          <Typography
+                            onClick={row.onClick}
+                            sx={{ cursor: "pointer", color: "#98b720", fontWeight: 600 }}
+                          >
+                            {row.action}
+                          </Typography>
+                        )}
+                      </>
+                    )}
+                  </Box>
+                </Box>
+
+                <Box flex={1} display="flex">
+                  {dailySlots?.map((slot, i) => (
+                    <Box
+                      key={i}
+                      width={columnWidth}
+                      minWidth="150px"
+                      borderRight="1px solid #eee"
+                      borderBottom="1px solid #eee"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      py={2}
+                    >
+                      {row.isStatus && (
+                        <Box
+                          px={2}
+                          py={1}
+                          borderRadius="50px"
+                          fontSize={13}
+                          fontWeight={500}
+                          bgcolor={slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"}
+                          color={slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"}
+                        >
+                          {slot.remaining_rooms > 0 ? "Còn phòng" : "Hết phòng"}
+                        </Box>
+                      )}
+                      {row.isBooked && (
+                        <Typography fontWeight={600} color="#333">
+                          {slot.booked_rooms}
                         </Typography>
                       )}
-                    </>
-                  )}
+                      {row.isRemaining && (
+                        <TextField
+                          value={editedValues[i] ?? slot.remaining_rooms}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setEditedValues((prev) => ({
+                              ...prev,
+                              [i]: val === "" ? undefined : parseInt(val, 10),
+                            }));
+                          }}
+                          onBlur={(e) => {
+                            const newVal = parseInt(e.target.value, 10);
+                            if (!isNaN(newVal) && newVal !== slot.remaining_rooms) {
+                              handleOpenQuickBlock({
+                                room_type_id: data.room_type_id,
+                                rent_type: "daily",
+                                start_time: slot.from,
+                                end_time: slot.to || slot.from,
+                                available_rooms: newVal,
+                                reason: "staff_shortage",
+                                note: "Thiếu nhân viên dọn phòng",
+                              });
+                            }
+                          }}
+                          type="number"
+                          size="small"
+                          inputProps={{ min: 0, style: { textAlign: "center", fontWeight: 600 } }}
+                          sx={{ width: 60 }}
+                        />
+                      )}
+                    </Box>
+                  ))}
                 </Box>
               </Box>
+            ))}
 
-              {/* Dữ liệu phải */}
-              <Box flex={1} display='flex'>
-                {data?.slots?.map((slot, i) => (
-                  <Box
-                    key={i}
-                    width={columnWidth}
-                    minWidth='150px'
-                    borderRight='1px solid #eee'
-                    borderBottom='1px solid #eee'
-                    display='flex'
-                    alignItems='center'
-                    justifyContent='center'
-                    py={1}>
-                    {row.isStatus && (
-                      <Box
-                        px={2}
-                        py={1}
-                        borderRadius='50px'
-                        fontSize={13}
-                        fontWeight={500}
-                        bgcolor={
-                          slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"
-                        }
-                        color={
-                          slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"
-                        }>
-                        {slot.remaining_rooms > 0 ? "Còn phòng" : "Hết phòng"}
-                      </Box>
-                    )}
-                    {row.isBooked && (
-                      <Typography fontWeight={600} color='#333'>
-                        {slot.booked_rooms}
-                      </Typography>
-                    )}
-
-                    {row.isRemaining && (
-                      <TextField
-                        value={editedValues[i] ?? slot.remaining_rooms}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setEditedValues((prev) => ({
-                            ...prev,
-                            [i]: val === "" ? undefined : parseInt(val, 10),
-                          }));
-                        }}
-                        onBlur={(e) => {
-                          const newVal = parseInt(e.target.value, 10);
-                          console.log("AAAAA newVal", newVal);
-                          if (
-                            !isNaN(newVal) &&
-                            newVal !== slot.remaining_rooms
-                          ) {
-                            handleOpenQuickBlock({
-                              room_type_id: data.room_type_id,
-                              rent_type: "hourly", // hoặc "hourly" / "daily" / "overnight" tùy bảng
-                              start_time: slot.from,
-                              end_time: slot.to || slot.from, // overnight/daily có thể chỉ có date
-                              available_rooms: newVal,
-                              reason: "staff_shortage",
-                              note: "Thiếu nhân viên dọn phòng", // tùy chỉnh nếu cần
-                            });
-                          }
-                        }}
-                        type='number'
-                        size='small'
-                        inputProps={{
-                          min: 0,
-                          style: { textAlign: "center", fontWeight: 600 },
-                        }}
-                        sx={{ width: 60 }}
-                      />
-                    )}
-                  </Box>
-                ))}
-              </Box>
-            </Box>
-          ))}
-          {/* GIÁ - CŨNG CỐ ĐỊNH TRÁI */}
-          {[
-            {
-              label: "Giá phòng/2h đầu",
-              value: `${data?.price_hourly?.toLocaleString("vi-VN")}đ`,
-              bg: "#fff3e9",
-              color: "#e65e00",
-            },
-            {
-              label: "Giá 1 giờ thêm",
-              value: `${data?.price_hourly_increment?.toLocaleString(
-                "vi-VN"
-              )}đ`,
-              bg: "#eef1ff",
-              color: "#4e6aff",
-            },
-          ].map((p) => (
-            <Box key={p.label} display='flex'>
-              <Box
-                width='280px'
-                flexShrink={0}
-                bgcolor='#f8f9fa'
-                position='sticky'
-                borderBottom='1px solid #ddd'
-                left={0}
-                zIndex={10}
-                borderRight='2px solid #ddd'>
-                <Box px={3} py={2}>
-                  <Typography fontWeight={500}>{p.label}</Typography>
-                </Box>
-              </Box>
-              <Box flex={1} display='flex' alignItems='center' pl={4}>
+            {/* Giá */}
+            {[
+              {
+                label: "Giá phòng/đêm",
+                value: `${data?.price_daily?.toLocaleString("vi-VN")}đ`,
+                bg: "#fff3e9",
+                color: "#e65e00",
+              },
+            ].map((p) => (
+              <Box key={p.label} display="flex">
                 <Box
-                  bgcolor={p.bg}
-                  color={p.color}
-                  px={4}
-                  py={1.5}
-                  borderRadius='50px'
-                  fontWeight={600}
-                  fontSize={15}>
-                  {p.value}
+                  width="280px"
+                  flexShrink={0}
+                  bgcolor="#f8f9fa"
+                  position="sticky"
+                  left={0}
+                  zIndex={10}
+                  borderRight="2px solid #ddd"
+                  borderBottom="1px solid #ddd"
+                >
+                  <Box px={3} py={2}>
+                    <Typography fontWeight={500}>{p.label}</Typography>
+                  </Box>
+                </Box>
+                <Box flex={1} display="flex" alignItems="center" pl={4}>
+                  <Box
+                    bgcolor={p.bg}
+                    color={p.color}
+                    px={4}
+                    py={1.5}
+                    borderRadius="50px"
+                    fontWeight={600}
+                    fontSize={15}
+                  >
+                    {p.value}
+                  </Box>
                 </Box>
               </Box>
-            </Box>
-          ))}
+            ))}
+          </Box>
         </Box>
       </Box>
-    </Box>
-  );
-}
+    );
+  };
 
-function RoomScheduleTableDaily({
-  handleOpenQuickBlock,
-  handleOpenEdit,
-  data,
-}: RoomScheduleTableDailyProps) {
-  const isMobile = useMediaQuery("(max-width:768px)");
-  const dailySlots = data?.slots; // Giả sử sửa thành data?.daily_slots nếu cần
-  const totalDays = dailySlots?.length;
-  const columnWidth = `${100 / totalDays}%`;
-  const navigate = useNavigate();
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [editedValues, setEditedValues] = useState<{ [key: number]: number }>(
-    {}
-  );
+  // Mobile version - card theo ngày
+  const renderMobile = () => {
+    return (
+      <Box p={2} bgcolor="#fff">
+        {/* Tháng */}
+        <Box
+          textAlign="center"
+          py={2}
+          bgcolor="#f9f9f9"
+          borderRadius="12px"
+          mb={3}
+        >
+          <Typography variant="h6" fontWeight={700}>
+            {format(new Date(data.start_time), "MMMM yyyy", { locale: vi })}
+          </Typography>
+        </Box>
 
-  return (
-    <Box p={isMobile ? 1 : 2} bgcolor='#fff'>
-      <Box
-        ref={scrollRef}
-        sx={{
-          overflowX: "auto",
-          overflowY: "hidden",
-          "&::-webkit-scrollbar": { height: 10 },
-          "&::-webkit-scrollbar-thumb": { background: "#aaa", borderRadius: 5 },
-          border: "1px solid #ccc",
-        }}>
-        <Box minWidth='fit-content'>
-          {/* HEADER */}
-          <Box display='flex'>
-            {/* Cột trái cố định */}
+        {dailySlots?.map((slot, index) => {
+          const dateObj = new Date(slot.date);
+          const dayNum = format(dateObj, "dd");
+          const dayName = format(dateObj, "EEEE", { locale: vi })
+            .replace("Chủ nhật", "CN")
+            .replace("Thứ ", "thứ ")
+            .toLowerCase();
+
+          return (
             <Box
-              width='280px'
-              flexShrink={0}
-              bgcolor='white'
-              position='sticky'
-              left={0}
-              zIndex={10}
-              borderRight='2px solid #ddd'
-              borderBottom='2px solid #ddd'
-            />
-
-            {/* Header phải */}
-            <Box flex={1}>
-              {/* Tháng */}
-              <Box
-                textAlign='start'
-                py={1.5}
-                px={2}
-                borderBottom='1px solid #eee'
-                bgcolor='#f9f9f9'>
-                <Typography fontWeight={600} fontSize={16}>
-                  {format(new Date(data.start_time), "MMMM yyyy", {
-                    locale: vi,
-                  })}
+              key={slot.date}
+              bgcolor="white"
+              borderRadius="12px"
+              boxShadow="0 2px 12px rgba(0,0,0,0.08)"
+              mb={3}
+              overflow="hidden"
+            >
+              {/* Header ngày */}
+              <Box bgcolor="#98b720" color="white" py={2} px={3}>
+                <Typography variant="h6" fontWeight={700}>
+                  {dayNum} {dayName}
                 </Typography>
               </Box>
 
-              {/* Các ngày - mỗi ngày 1 cột */}
-              <Box display='flex' borderBottom='2px solid #ddd' bgcolor='white'>
-                {dailySlots?.map((slot) => {
-                  const dateObj = new Date(slot.date);
-                  const dayNum = format(dateObj, "dd");
-                  const dayName = format(dateObj, "EEEE", { locale: vi })
-                    .replace("Chủ nhật", "CN")
-                    .replace("Thứ ", "thứ ")
-                    .toLowerCase();
+              <Divider />
 
-                  return (
-                    <Box
-                      key={slot.date}
-                      width={columnWidth}
-                      minWidth='150px'
-                      display='flex'
-                      justifyContent='center'
-                      alignItems='center'
-                      py={2}
-                      borderRight='1px solid #eee'>
-                      <Button
-                        variant='contained'
-                        sx={{
-                          bgcolor: "#98b720",
-                          color: "white",
-                          fontWeight: 600,
-                          minWidth: "140px",
-                          height: "40px",
-                          fontSize: "15px",
-                          borderRadius: "20px",
-                          boxShadow: "0 4px 15px rgba(152,183,32,0.4)",
-                          "&:hover": { bgcolor: "#80a61a" },
-                        }}>
-                        {dayNum} {dayName}
-                      </Button>
-                    </Box>
-                  );
-                })}
-              </Box>
-            </Box>
-          </Box>
-
-          {/* CÁC DÒNG DỮ LIỆU */}
-          {[
-            { label: parseVi(data?.name), isName: true },
-            {
-              label: "Tình trạng phòng",
-              action: "Khóa nhanh",
-              onClick: handleOpenQuickBlock,
-              onClick: () => {
-                handleOpenQuickBlock({
-                  room_type_id: data?.room_type_id,
-                  rent_type: "daily",
-                });
-              },
-              isStatus: true,
-            },
-            { label: "Số phòng đặt", isBooked: true },
-            {
-              label: "Số phòng còn lại",
-              // action: "Chỉnh sửa",
-              onClick: handleOpenEdit,
-              isRemaining: true,
-            },
-          ].map((row, idx) => (
-            <Box key={idx} display='flex' borderBottom='1px solid #eee'>
-              {/* Cột trái cố định */}
-              <Box
-                width='280px'
-                flexShrink={0}
-                bgcolor={idx === 0 ? "white" : "#fafafa"}
-                position='sticky'
-                left={0}
-                zIndex={10}
-                borderRight='2px solid #ddd'
-                borderBottom='1px solid #ddd'>
-                <Box
-                  px={3}
-                  py={2}
-                  display='flex'
-                  justifyContent='space-between'
-                  alignItems='center'>
-                  {row.isName ? (
-                    <>
-                      <Typography
-                        fontWeight={700}
-                        fontSize={18}
-                        display='flex'
-                        alignItems='center'
-                        gap={1}>
-                        {row.label} <KeyboardArrowUpIcon />
-                      </Typography>
-                      <Typography
-                        onClick={() => {
-                          navigate(
-                            `/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`
-                          );
-                        }}
-                        color='#98b720'
-                        display='flex'
-                        alignItems='center'
-                        gap={0.5}
-                        sx={{ cursor: "pointer" }}>
-                        Xem <LaunchIcon fontSize='small' />
-                      </Typography>
-                    </>
-                  ) : (
-                    <>
-                      <Typography fontWeight={500}>{row.label}</Typography>
-                      {row.action && (
-                        <Typography
-                          onClick={row.onClick}
-                          sx={{
-                            cursor: "pointer",
-                            color: "#98b720",
-                            fontWeight: 600,
-                          }}>
-                          {row.action}
-                        </Typography>
-                      )}
-                    </>
-                  )}
-                </Box>
-              </Box>
-
-              {/* Dữ liệu phải - 3 cột */}
-              <Box flex={1} display='flex'>
-                {dailySlots?.map((slot, i) => (
+              {/* Thông tin */}
+              <Box p={2}>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                  <Typography fontWeight={600} fontSize={16}>
+                    Tình trạng phòng
+                  </Typography>
                   <Box
-                    key={i}
-                    width={columnWidth}
-                    minWidth='150px'
-                    borderRight='1px solid #eee'
-                    borderBottom='1px solid #eee'
-                    display='flex'
-                    alignItems='center'
-                    justifyContent='center'
-                    py={2}>
-                    {row.isStatus && (
-                      <Box
-                        px={2}
-                        py={1}
-                        borderRadius='50px'
-                        fontSize={13}
-                        fontWeight={500}
-                        bgcolor={
-                          slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"
-                        }
-                        color={
-                          slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"
-                        }>
-                        {slot.remaining_rooms > 0 ? "Còn phòng" : "Hết phòng"}
-                      </Box>
-                    )}
-                    {row.isBooked && (
-                      <Typography fontWeight={600} color='#333'>
-                        {slot.booked_rooms}
-                      </Typography>
-                    )}
-
-                    {row.isRemaining && (
-                      <TextField
-                        value={editedValues[i] ?? slot.remaining_rooms}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setEditedValues((prev) => ({
-                            ...prev,
-                            [i]: val === "" ? undefined : parseInt(val, 10),
-                          }));
-                        }}
-                        onBlur={(e) => {
-                          const newVal = parseInt(e.target.value, 10);
-                          if (
-                            !isNaN(newVal) &&
-                            newVal !== slot.remaining_rooms
-                          ) {
-                            handleOpenQuickBlock({
-                              room_type_id: data.room_type_id,
-                              rent_type: "daily", // hoặc "hourly" / "daily" / "overnight" tùy bảng
-                              start_time: slot.from,
-                              end_time: slot.to || slot.from, // overnight/daily có thể chỉ có date
-                              available_rooms: newVal,
-                              reason: "staff_shortage",
-                              note: "Thiếu nhân viên dọn phòng", // tùy chỉnh nếu cần
-                            });
-                          }
-                        }}
-                        type='number'
-                        size='small'
-                        inputProps={{
-                          min: 0,
-                          style: { textAlign: "center", fontWeight: 600 },
-                        }}
-                        sx={{ width: 60 }}
-                      />
-                    )}
+                    px={2}
+                    py={0.8}
+                    borderRadius="50px"
+                    fontSize={13}
+                    fontWeight={600}
+                    bgcolor={slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"}
+                    color={slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"}
+                  >
+                    {slot.remaining_rooms > 0 ? "Còn phòng" : "Hết phòng"}
                   </Box>
-                ))}
-              </Box>
-            </Box>
-          ))}
+                </Box>
 
-          {/* GIÁ */}
-          {[
-            {
-              label: "Giá phòng/đêm",
-              value: `${data?.price_daily?.toLocaleString("vi-VN")}đ`,
-              bg: "#fff3e9",
-              color: "#e65e00",
-            },
-          ].map((p) => (
-            <Box key={p.label} display='flex'>
-              <Box
-                width='280px'
-                flexShrink={0}
-                bgcolor='#f8f9fa'
-                position='sticky'
-                left={0}
-                zIndex={10}
-                borderRight='2px solid #ddd'
-                borderBottom='1px solid #ddd'>
-                <Box px={3} py={2}>
-                  <Typography fontWeight={500}>{p.label}</Typography>
+                <Box display="flex" justifyContent="space-between" mb={1.5}>
+                  <Typography color="text.secondary">Số phòng đặt:</Typography>
+                  <Typography fontWeight={600}>{slot.booked_rooms}</Typography>
+                </Box>
+
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                  <Typography color="text.secondary">Còn lại:</Typography>
+                  <TextField
+                    value={editedValues[index] ?? slot.remaining_rooms}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setEditedValues((prev) => ({
+                        ...prev,
+                        [index]: val === "" ? undefined : parseInt(val, 10),
+                      }));
+                    }}
+                    onBlur={(e) => {
+                      const newVal = parseInt(e.target.value, 10);
+                      if (!isNaN(newVal) && newVal !== slot.remaining_rooms) {
+                        handleOpenQuickBlock({
+                          room_type_id: data.room_type_id,
+                          rent_type: "daily",
+                          start_time: slot.from,
+                          end_time: slot.to || slot.from,
+                          available_rooms: newVal,
+                          reason: "staff_shortage",
+                          note: "Thiếu nhân viên dọn phòng",
+                        });
+                      }
+                    }}
+                    type="number"
+                    size="small"
+                    inputProps={{ min: 0, style: { textAlign: "center" } }}
+                    sx={{ width: 80 }}
+                  />
+                </Box>
+
+                {/* Nút Khóa nhanh */}
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  fullWidth
+                  size="small"
+                  onClick={() =>
+                    handleOpenQuickBlock({ room_type_id: data?.room_type_id, rent_type: "daily" })
+                  }
+                >
+                  Khóa nhanh ngày này
+                </Button>
+              </Box>
+
+              {/* Thông tin phòng */}
+              <Box p={3} bgcolor="#fafafa">
+                <Typography fontWeight={700} mb={1}>
+                  {parseVi(data?.name)}
+                </Typography>
+
+                <Box display="flex" justifyContent="space-between">
+                  <Typography>Giá phòng/đêm:</Typography>
+                  <Typography fontWeight={600} color="#e65e00">
+                    {data?.price_daily?.toLocaleString("vi-VN")}đ
+                  </Typography>
                 </Box>
               </Box>
-              <Box flex={1} display='flex' alignItems='center' pl={4}>
-                <Box
-                  bgcolor={p.bg}
-                  color={p.color}
-                  px={4}
-                  py={1.5}
-                  borderRadius='50px'
-                  fontWeight={600}
-                  fontSize={15}>
-                  {p.value}
-                </Box>
+
+              {/* Action */}
+              <Box p={2} display="flex" gap={2}>
+                <Button
+                  variant="outlined"
+                  color="success"
+                  fullWidth
+                  onClick={handleOpenEdit}
+                >
+                  Chỉnh sửa
+                </Button>
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  onClick={() =>
+                    navigate(`/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`)
+                  }
+                >
+                  Xem chi tiết
+                </Button>
               </Box>
             </Box>
-          ))}
-        </Box>
+          );
+        })}
       </Box>
-    </Box>
-  );
+    );
+  };
+
+  return isMobile ? renderMobile() : renderDesktop();
 }
 
 function RoomScheduleTableOvernight({
   handleOpenQuickBlock,
   handleOpenEdit,
   data,
-}: RoomScheduleTableDailyProps) {
-  const isMobile = useMediaQuery("(max-width:768px)");
-  const dailySlots = data?.slots; // Giả sử sửa thành data?.daily_slots nếu cần
-  const totalDays = dailySlots?.length;
-  const columnWidth = `${100 / totalDays}%`;
+}) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate();
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [editedValues, setEditedValues] = useState<{ [key: number]: number }>(
-    {}
-  );
 
-  return (
-    <Box p={isMobile ? 1 : 2} bgcolor='#fff'>
-      <Box
-        ref={scrollRef}
-        sx={{
-          overflowX: "auto",
-          overflowY: "hidden",
-          "&::-webkit-scrollbar": { height: 10 },
-          "&::-webkit-scrollbar-thumb": { background: "#aaa", borderRadius: 5 },
-          border: "1px solid #ccc",
-        }}>
-        <Box minWidth='fit-content'>
-          {/* HEADER */}
-          <Box display='flex'>
-            {/* Cột trái cố định */}
-            <Box
-              width='280px'
-              flexShrink={0}
-              bgcolor='white'
-              position='sticky'
-              left={0}
-              zIndex={10}
-              borderRight='2px solid #ddd'
-              borderBottom='2px solid #ddd'
-            />
+  const overnightSlots = data?.slots || [];
+  const [editedValues, setEditedValues] = useState<{ [key: number]: number }>({});
 
-            {/* Header phải */}
-            <Box flex={1}>
-              {/* Tháng */}
+  // Desktop version - giữ nguyên như cũ
+  const renderDesktop = () => {
+    const totalDays = overnightSlots?.length || 0;
+    const columnWidth = `${100 / totalDays}%`;
+
+    return (
+      <Box p={2} bgcolor="#fff">
+        <Box
+          sx={{
+            overflowX: "auto",
+            overflowY: "hidden",
+            "&::-webkit-scrollbar": { height: 10 },
+            "&::-webkit-scrollbar-thumb": { background: "#aaa", borderRadius: 5 },
+            border: "1px solid #ccc",
+          }}
+        >
+          <Box minWidth="fit-content">
+            {/* HEADER */}
+            <Box display="flex">
               <Box
-                textAlign='start'
-                py={1.5}
-                px={2}
-                borderBottom='1px solid #eee'
-                bgcolor='#f9f9f9'>
-                <Typography fontWeight={600} fontSize={16}>
-                  {format(new Date(data.start_time), "MMMM yyyy", {
-                    locale: vi,
+                width="280px"
+                flexShrink={0}
+                bgcolor="white"
+                position="sticky"
+                left={0}
+                zIndex={10}
+                borderRight="2px solid #ddd"
+                borderBottom="2px solid #ddd"
+              />
+
+              <Box flex={1}>
+                <Box
+                  textAlign="start"
+                  py={1.5}
+                  px={2}
+                  borderBottom="1px solid #eee"
+                  bgcolor="#f9f9f9"
+                >
+                  <Typography fontWeight={600} fontSize={16}>
+                    {format(new Date(data.start_time), "MMMM yyyy", { locale: vi })}
+                  </Typography>
+                </Box>
+
+                <Box display="flex" borderBottom="2px solid #ddd" bgcolor="white">
+                  {overnightSlots?.map((slot) => {
+                    const dateObj = slot?.date ? new Date(slot.date) : null;
+                    const dayNum = dateObj ? format(dateObj, "dd") : "";
+                    const dayName = dateObj
+                      ? format(dateObj, "EEEE", { locale: vi })
+                          .replace("Chủ nhật", "CN")
+                          .replace("Thứ ", "thứ ")
+                          .toLowerCase()
+                      : "";
+
+                    return (
+                      <Box
+                        key={slot.date}
+                        width={columnWidth}
+                        minWidth="150px"
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        py={2}
+                        borderRight="1px solid #eee"
+                      >
+                        <Button
+                          variant="contained"
+                          sx={{
+                            bgcolor: "#98b720",
+                            color: "white",
+                            fontWeight: 600,
+                            minWidth: "140px",
+                            height: "40px",
+                            fontSize: "15px",
+                            borderRadius: "20px",
+                            boxShadow: "0 4px 15px rgba(152,183,32,0.4)",
+                            "&:hover": { bgcolor: "#80a61a" },
+                          }}
+                        >
+                          {dayNum} {dayName}
+                        </Button>
+                      </Box>
+                    );
                   })}
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Rows */}
+            {[
+              { label: parseVi(data?.name), isName: true },
+              {
+                label: "Tình trạng phòng",
+                action: "Khóa nhanh",
+                onClick: () => handleOpenQuickBlock({ room_type_id: data?.room_type_id, rent_type: "overnight" }),
+                isStatus: true,
+              },
+              { label: "Số phòng đặt", isBooked: true },
+              {
+                label: "Số phòng còn lại",
+                onClick: handleOpenEdit,
+                isRemaining: true,
+              },
+            ].map((row, idx) => (
+              <Box key={idx} display="flex" borderBottom="1px solid #eee">
+                <Box
+                  width="280px"
+                  flexShrink={0}
+                  bgcolor={idx === 0 ? "white" : "#fafafa"}
+                  position="sticky"
+                  left={0}
+                  zIndex={10}
+                  borderRight="2px solid #ddd"
+                  borderBottom="1px solid #ddd"
+                >
+                  <Box px={3} py={2} display="flex" justifyContent="space-between" alignItems="center">
+                    {row.isName ? (
+                      <>
+                        <Typography fontWeight={700} fontSize={18} display="flex" alignItems="center" gap={1}>
+                          {row.label} <KeyboardArrowUpIcon />
+                        </Typography>
+                        <Typography
+                          onClick={() =>
+                            navigate(`/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`)
+                          }
+                          color="#98b720"
+                          display="flex"
+                          alignItems="center"
+                          gap={0.5}
+                          sx={{ cursor: "pointer" }}
+                        >
+                          Xem <LaunchIcon fontSize="small" />
+                        </Typography>
+                      </>
+                    ) : (
+                      <>
+                        <Typography fontWeight={500}>{row.label}</Typography>
+                        {row.action && (
+                          <Typography
+                            onClick={row.onClick}
+                            sx={{ cursor: "pointer", color: "#98b720", fontWeight: 600 }}
+                          >
+                            {row.action}
+                          </Typography>
+                        )}
+                      </>
+                    )}
+                  </Box>
+                </Box>
+
+                <Box flex={1} display="flex">
+                  {overnightSlots?.map((slot, i) => (
+                    <Box
+                      key={i}
+                      width={columnWidth}
+                      minWidth="150px"
+                      borderRight="1px solid #eee"
+                      borderBottom="1px solid #eee"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      py={2}
+                    >
+                      {row.isStatus && (
+                        <Box
+                          px={2}
+                          py={1}
+                          borderRadius="50px"
+                          fontSize={13}
+                          fontWeight={500}
+                          bgcolor={slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"}
+                          color={slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"}
+                        >
+                          {slot.remaining_rooms > 0 ? "Còn phòng" : "Hết phòng"}
+                        </Box>
+                      )}
+                      {row.isBooked && (
+                        <Typography fontWeight={600} color="#333">
+                          {slot.booked_rooms}
+                        </Typography>
+                      )}
+                      {row.isRemaining && (
+                        <TextField
+                          value={editedValues[i] ?? slot.remaining_rooms}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setEditedValues((prev) => ({
+                              ...prev,
+                              [i]: val === "" ? undefined : parseInt(val, 10),
+                            }));
+                          }}
+                          onBlur={(e) => {
+                            const newVal = parseInt(e.target.value, 10);
+                            if (!isNaN(newVal) && newVal !== slot.remaining_rooms) {
+                              handleOpenQuickBlock({
+                                room_type_id: data.room_type_id,
+                                rent_type: "overnight",
+                                start_time: slot.from,
+                                end_time: slot.to || slot.from,
+                                available_rooms: newVal,
+                                reason: "staff_shortage",
+                                note: "Thiếu nhân viên dọn phòng",
+                              });
+                            }
+                          }}
+                          type="number"
+                          size="small"
+                          inputProps={{ min: 0, style: { textAlign: "center", fontWeight: 600 } }}
+                          sx={{ width: 60 }}
+                        />
+                      )}
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            ))}
+
+            {/* Giá */}
+            {[
+              {
+                label: "Giá phòng/đêm",
+                value: `${data?.price_overnight?.toLocaleString("vi-VN")}đ`,
+                bg: "#fff3e9",
+                color: "#e65e00",
+              },
+            ].map((p) => (
+              <Box key={p.label} display="flex">
+                <Box
+                  width="280px"
+                  flexShrink={0}
+                  bgcolor="#f8f9fa"
+                  position="sticky"
+                  left={0}
+                  zIndex={10}
+                  borderRight="2px solid #ddd"
+                  borderBottom="1px solid #ddd"
+                >
+                  <Box px={3} py={2}>
+                    <Typography fontWeight={500}>{p.label}</Typography>
+                  </Box>
+                </Box>
+                <Box flex={1} display="flex" alignItems="center" pl={4}>
+                  <Box
+                    bgcolor={p.bg}
+                    color={p.color}
+                    px={4}
+                    py={1.5}
+                    borderRadius="50px"
+                    fontWeight={600}
+                    fontSize={15}
+                  >
+                    {p.value}
+                  </Box>
+                </Box>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      </Box>
+    );
+  };
+
+  // Mobile version - card theo ngày
+  const renderMobile = () => {
+    return (
+      <Box p={2} bgcolor="#fff">
+        {/* Tháng */}
+        <Box
+          textAlign="center"
+          py={2}
+          bgcolor="#f9f9f9"
+          borderRadius="12px"
+          mb={3}
+        >
+          <Typography variant="h6" fontWeight={700}>
+            {format(new Date(data.start_time), "MMMM yyyy", { locale: vi })}
+          </Typography>
+        </Box>
+
+        {overnightSlots?.map((slot, index) => {
+          const dateObj = slot?.date ? new Date(slot.date) : null;
+          const dayNum = dateObj ? format(dateObj, "dd") : "";
+          const dayName = dateObj
+            ? format(dateObj, "EEEE", { locale: vi })
+                .replace("Chủ nhật", "CN")
+                .replace("Thứ ", "thứ ")
+                .toLowerCase()
+            : "";
+
+          return (
+            <Box
+              key={slot.date}
+              bgcolor="white"
+              borderRadius="12px"
+              boxShadow="0 2px 12px rgba(0,0,0,0.08)"
+              mb={3}
+              overflow="hidden"
+            >
+              {/* Header ngày */}
+              <Box bgcolor="#98b720" color="white" py={2} px={3}>
+                <Typography variant="h6" fontWeight={700}>
+                  {dayNum} {dayName}
                 </Typography>
               </Box>
 
-              {/* Các ngày - mỗi ngày 1 cột */}
-              <Box display='flex' borderBottom='2px solid #ddd' bgcolor='white'>
-                {dailySlots?.map((slot) => {
-                  const dateObj = slot?.date && new Date(slot?.date);
-                  const dayNum = dateObj && format(dateObj, "dd");
-                  const dayName =
-                    dateObj &&
-                    format(dateObj, "EEEE", { locale: vi })
-                      .replace("Chủ nhật", "CN")
-                      .replace("Thứ ", "thứ ")
-                      .toLowerCase();
+              <Divider />
 
-                  return (
-                    <Box
-                      key={slot.date}
-                      width={columnWidth}
-                      minWidth='150px'
-                      display='flex'
-                      justifyContent='center'
-                      alignItems='center'
-                      py={2}
-                      borderRight='1px solid #eee'>
-                      <Button
-                        variant='contained'
-                        sx={{
-                          bgcolor: "#98b720",
-                          color: "white",
-                          fontWeight: 600,
-                          minWidth: "140px",
-                          height: "40px",
-                          fontSize: "15px",
-                          borderRadius: "20px",
-                          boxShadow: "0 4px 15px rgba(152,183,32,0.4)",
-                          "&:hover": { bgcolor: "#80a61a" },
-                        }}>
-                        {dayNum} {dayName}
-                      </Button>
-                    </Box>
-                  );
-                })}
-              </Box>
-            </Box>
-          </Box>
-
-          {/* CÁC DÒNG DỮ LIỆU */}
-          {[
-            { label: parseVi(data?.name), isName: true },
-            {
-              label: "Tình trạng phòng",
-              action: "Khóa nhanh",
-              onClick: () => {
-                handleOpenQuickBlock({
-                  room_type_id: data?.room_type_id,
-                  rent_type: "overnight",
-                });
-              },
-              isStatus: true,
-            },
-            { label: "Số phòng đặt", isBooked: true },
-            {
-              label: "Số phòng còn lại",
-              // action: "Chỉnh sửa",
-              onClick: handleOpenEdit,
-              isRemaining: true,
-            },
-          ]?.map((row, idx) => (
-            <Box key={idx} display='flex' borderBottom='1px solid #eee'>
-              {/* Cột trái cố định */}
-              <Box
-                width='280px'
-                flexShrink={0}
-                bgcolor={idx === 0 ? "white" : "#fafafa"}
-                position='sticky'
-                left={0}
-                zIndex={10}
-                borderRight='2px solid #ddd'
-                borderBottom='1px solid #ddd'>
-                <Box
-                  px={3}
-                  py={2}
-                  display='flex'
-                  justifyContent='space-between'
-                  alignItems='center'>
-                  {row.isName ? (
-                    <>
-                      <Typography
-                        fontWeight={700}
-                        fontSize={18}
-                        display='flex'
-                        alignItems='center'
-                        gap={1}>
-                        {row.label} <KeyboardArrowUpIcon />
-                      </Typography>
-                      <Typography
-                        onClick={() => {
-                          navigate(
-                            `/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`
-                          );
-                        }}
-                        color='#98b720'
-                        display='flex'
-                        alignItems='center'
-                        gap={0.5}
-                        sx={{ cursor: "pointer" }}>
-                        Xem <LaunchIcon fontSize='small' />
-                      </Typography>
-                    </>
-                  ) : (
-                    <>
-                      <Typography fontWeight={500}>{row.label}</Typography>
-                      {row.action && (
-                        <Typography
-                          onClick={row.onClick}
-                          sx={{
-                            cursor: "pointer",
-                            color: "#98b720",
-                            fontWeight: 600,
-                          }}>
-                          {row.action}
-                        </Typography>
-                      )}
-                    </>
-                  )}
-                </Box>
-              </Box>
-
-              {/* Dữ liệu phải - 3 cột */}
-              <Box flex={1} display='flex'>
-                {dailySlots?.map((slot, i) => (
+              {/* Thông tin */}
+              <Box p={2}>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                  <Typography fontWeight={600} fontSize={16}>
+                    Tình trạng phòng
+                  </Typography>
                   <Box
-                    key={i}
-                    width={columnWidth}
-                    minWidth='150px'
-                    borderRight='1px solid #eee'
-                    borderBottom='1px solid #eee'
-                    display='flex'
-                    alignItems='center'
-                    justifyContent='center'
-                    py={2}>
-                    {row.isStatus && (
-                      <Box
-                        px={2}
-                        py={1}
-                        borderRadius='50px'
-                        fontSize={13}
-                        fontWeight={500}
-                        bgcolor={
-                          slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"
-                        }
-                        color={
-                          slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"
-                        }>
-                        {slot.remaining_rooms > 0 ? "Còn phòng" : "Hết phòng"}
-                      </Box>
-                    )}
-                    {row.isBooked && (
-                      <Typography fontWeight={600} color='#333'>
-                        {slot.booked_rooms}
-                      </Typography>
-                    )}
-
-                    {row.isRemaining && (
-                      <TextField
-                        value={editedValues[i] ?? slot.remaining_rooms}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setEditedValues((prev) => ({
-                            ...prev,
-                            [i]: val === "" ? undefined : parseInt(val, 10),
-                          }));
-                        }}
-                        onBlur={(e) => {
-                          const newVal = parseInt(e.target.value, 10);
-                          if (
-                            !isNaN(newVal) &&
-                            newVal !== slot.remaining_rooms
-                          ) {
-                            handleOpenQuickBlock({
-                              room_type_id: data.room_type_id,
-                              rent_type: "overnight", // hoặc "hourly" / "daily" / "overnight" tùy bảng
-                              start_time: slot.from,
-                              end_time: slot.to || slot.from, // overnight/daily có thể chỉ có date
-                              available_rooms: newVal,
-                              reason: "staff_shortage",
-                              note: "Thiếu nhân viên dọn phòng", // tùy chỉnh nếu cần
-                            });
-                          }
-                        }}
-                        type='number'
-                        size='small'
-                        inputProps={{
-                          min: 0,
-                          style: { textAlign: "center", fontWeight: 600 },
-                        }}
-                        sx={{ width: 60 }}
-                      />
-                    )}
+                    px={2}
+                    py={0.8}
+                    borderRadius="50px"
+                    fontSize={13}
+                    fontWeight={600}
+                    bgcolor={slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"}
+                    color={slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"}
+                  >
+                    {slot.remaining_rooms > 0 ? "Còn phòng" : "Hết phòng"}
                   </Box>
-                ))}
-              </Box>
-            </Box>
-          ))}
+                </Box>
 
-          {/* GIÁ */}
-          {[
-            {
-              label: "Giá phòng/đêm",
-              value: `${data?.price_overnight?.toLocaleString("vi-VN")}đ`,
-              bg: "#fff3e9",
-              color: "#e65e00",
-            },
-          ].map((p) => (
-            <Box key={p.label} display='flex'>
-              <Box
-                width='280px'
-                flexShrink={0}
-                bgcolor='#f8f9fa'
-                position='sticky'
-                left={0}
-                zIndex={10}
-                borderRight='2px solid #ddd'
-                borderBottom='1px solid #ddd'>
-                <Box px={3} py={2}>
-                  <Typography fontWeight={500}>{p.label}</Typography>
+                <Box display="flex" justifyContent="space-between" mb={1.5}>
+                  <Typography color="text.secondary">Số phòng đặt:</Typography>
+                  <Typography fontWeight={600}>{slot.booked_rooms}</Typography>
+                </Box>
+
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                  <Typography color="text.secondary">Còn lại:</Typography>
+                  <TextField
+                    value={editedValues[index] ?? slot.remaining_rooms}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setEditedValues((prev) => ({
+                        ...prev,
+                        [index]: val === "" ? undefined : parseInt(val, 10),
+                      }));
+                    }}
+                    onBlur={(e) => {
+                      const newVal = parseInt(e.target.value, 10);
+                      if (!isNaN(newVal) && newVal !== slot.remaining_rooms) {
+                        handleOpenQuickBlock({
+                          room_type_id: data.room_type_id,
+                          rent_type: "overnight",
+                          start_time: slot.from,
+                          end_time: slot.to || slot.from,
+                          available_rooms: newVal,
+                          reason: "staff_shortage",
+                          note: "Thiếu nhân viên dọn phòng",
+                        });
+                      }
+                    }}
+                    type="number"
+                    size="small"
+                    inputProps={{ min: 0, style: { textAlign: "center" } }}
+                    sx={{ width: 80 }}
+                  />
+                </Box>
+
+                {/* Nút Khóa nhanh */}
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  fullWidth
+                  size="small"
+                  onClick={() =>
+                    handleOpenQuickBlock({ room_type_id: data?.room_type_id, rent_type: "overnight" })
+                  }
+                >
+                  Khóa nhanh ngày này
+                </Button>
+              </Box>
+
+              {/* Thông tin phòng */}
+              <Box p={3} bgcolor="#fafafa">
+                <Typography fontWeight={700} mb={1}>
+                  {parseVi(data?.name)}
+                </Typography>
+
+                <Box display="flex" justifyContent="space-between">
+                  <Typography>Giá phòng/đêm:</Typography>
+                  <Typography fontWeight={600} color="#e65e00">
+                    {data?.price_overnight?.toLocaleString("vi-VN")}đ
+                  </Typography>
                 </Box>
               </Box>
-              <Box flex={1} display='flex' alignItems='center' pl={4}>
-                <Box
-                  bgcolor={p.bg}
-                  color={p.color}
-                  px={4}
-                  py={1.5}
-                  borderRadius='50px'
-                  fontWeight={600}
-                  fontSize={15}>
-                  {p.value}
-                </Box>
+
+              {/* Action */}
+              <Box p={2} display="flex" gap={2}>
+                <Button
+                  variant="outlined"
+                  color="success"
+                  fullWidth
+                  onClick={handleOpenEdit}
+                >
+                  Chỉnh sửa
+                </Button>
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  onClick={() =>
+                    navigate(`/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`)
+                  }
+                >
+                  Xem chi tiết
+                </Button>
               </Box>
             </Box>
-          ))}
-        </Box>
+          );
+        })}
       </Box>
-    </Box>
-  );
+    );
+  };
+
+  return isMobile ? renderMobile() : renderDesktop();
 }
 
 const daysOfWeek = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
 function EditOperationDialog({ openEdit, onClose }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [selectedDays, setSelectedDays] = useState([
     "T2",
     "T3",
@@ -1689,7 +2089,7 @@ function EditOperationDialog({ openEdit, onClose }) {
             {/* Khoảng ngày & Thời gian áp dụng */}
             <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
               {/* Khoảng ngày */}
-              <Box width={"48%"}>
+              <Box width={isMobile?"100%":"48%"}>
                 <Typography
                   fontSize={13.5}
                   color='#777'
@@ -1746,7 +2146,7 @@ function EditOperationDialog({ openEdit, onClose }) {
               </Box>
 
               {/* Thời gian áp dụng */}
-              <Box width={"48%"}>
+              <Box width={isMobile?"100%":"48%"}>
                 <Typography
                   fontSize={13.5}
                   color='#777'
