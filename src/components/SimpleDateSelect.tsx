@@ -112,7 +112,7 @@ export default function SimpleDatePopup({ value, onChange }: Props) {
               setOpen(true);
             }}
             sx={{
-           
+              
               border: "1px solid #d0d5dd",
               borderRadius: 2,
               px: 2,
@@ -134,8 +134,8 @@ export default function SimpleDatePopup({ value, onChange }: Props) {
             open={open}
             anchorEl={anchorRef.current}
             placement='bottom-start'>
-            <Paper sx={{ mt: 1, borderRadius: 4 }}>
-              <Stack direction='row'>
+            <Paper sx={{ mt: 1, borderRadius: 4,width: {xs:"90%",md:680} }}>
+              <Stack direction={{xs:"column",md:'row'}}>
                 {/* ===== LEFT MENU ===== */}
                 <Stack width={160} p={2} spacing={1}>
                   <Typography
