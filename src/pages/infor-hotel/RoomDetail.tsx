@@ -113,8 +113,8 @@ export default function RoomDetail({
   }, [room?.direction]);
 
   // Chuyển sang label để hiển thị
-  const bedTypeLabels = getLabelsByIds(bedTypeIds, attribute?.bed_type);
-  const directionLabels = getLabelsByIds(directionIds, attribute?.direction);
+  const bedTypeLabels = getLabelsByIds(bedTypeIds, attribute?.bed_type||[]);
+  const directionLabels = getLabelsByIds(directionIds, attribute?.direction||[]);
   const area = room?.area_m2 ? `${room.area_m2}m²` : "-";
   console.log("AAAAA attribute", attribute);
   // Parse hình ảnh phòng

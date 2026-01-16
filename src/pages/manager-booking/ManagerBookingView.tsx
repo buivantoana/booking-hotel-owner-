@@ -584,15 +584,16 @@ export default function ManagerBookingView({
 
                     return (
                       <TableRow
-                        onClick={() => handleRowClick(row)} sx={{ cursor: "pointer" }} key={row.id} hover>
+                        sx={{ cursor: "pointer" }} key={row.id} hover>
                         <TableCell
+                         onClick={() => handleRowClick(row)}
                           sx={{
                             fontWeight: row.code.includes("(G)") ? "bold" : "normal",
                             color: row.code.includes("(G)") ? "#1976d2" : "#98B720",
                           }}>
                           {row.code}
                         </TableCell>
-                        <TableCell>
+                        <TableCell  onClick={() => handleRowClick(row)}>
                           <div>{row.total_price.toLocaleString()}đ</div>
                           <div style={{ marginTop: 8 }}>
                             <Box
@@ -607,16 +608,17 @@ export default function ManagerBookingView({
                             >{getPaymentLabel(row)}</Box>
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell  onClick={() => handleRowClick(row)}>
                           {rentTypeLabel}
                           <br />
                           <span style={{ color: "#98B720", fontSize: "0.875rem" }}>
                             {roomName}
                           </span>
                         </TableCell>
-                        <TableCell>{formatDateTime(row.check_in)}<br />{formatDateTime(row.check_out)}</TableCell>
+                        <TableCell  onClick={() => handleRowClick(row)}>{formatDateTime(row.check_in)}<br />{formatDateTime(row.check_out)}</TableCell>
 
-                        <TableCell>
+                        <TableCell  onClick={() => handleRowClick(row)}>
+                          
                           <Chip
                             label={statusLabel}
 
@@ -624,7 +626,7 @@ export default function ManagerBookingView({
                             sx={{ minWidth: 110, ...statusStyles[statusLabel] }}
                           />
                         </TableCell>
-                        <TableCell>
+                        <TableCell  onClick={() => handleRowClick(row)}>
                           <Tooltip title={row.note || "Không có ghi chú"}>
                             <IconButton size="small">
                               <img src={edit} onClick={(e) => {
@@ -1224,8 +1226,8 @@ function ActionMenu({
     setAnchorEl(e.currentTarget);
   };
 
-  const handleCloseMenu = (e) => {
-    e.stopPropagation();
+  const handleCloseMenu = () => {
+    // e.stopPropagation();
     setAnchorEl(null);
     // trả focus về nút "Thao tác" (quan trọng cho a11y)
     requestAnimationFrame(() => {
@@ -1276,7 +1278,7 @@ function ActionMenu({
         {showCheckIn && (
           <MenuItem
             onClick={(e) => {
-              e.stopPropagation();
+              // e.stopPropagation();
               setIdBooking(booking);
               openModalSafely(() => setOpenCheckIn(true));
             }}
@@ -1290,7 +1292,7 @@ function ActionMenu({
         {showCheckOut && (
           <MenuItem
             onClick={(e) => {
-              e.stopPropagation();
+              // e.stopPropagation();
               setIdBooking(booking);
               openModalSafely(() => setOpenCheckOut(true));
             }}
