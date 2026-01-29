@@ -238,7 +238,7 @@ export default function HotelLocationInput({
                 onChange={(e) => setAddress(e.target.value)}
                 onBlur={() => handleTouch("address")}
                 error={touched.address && !!errors.address}
-                helperText={touched.address ? errors.address : " "}
+                helperText={touched.address ? errors.address : ""}
                 variant="outlined"
                 sx={{
                   "& .MuiOutlinedInput-root": {

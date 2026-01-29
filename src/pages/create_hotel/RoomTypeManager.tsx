@@ -322,6 +322,7 @@ export default function RoomTypeManager({
                 <TextField
                   fullWidth
                   placeholder='Nhập tên loại phòng'
+                  
                   value={current?.name[selectedLang] || ""}
                   onChange={(e) => {
                     updateRoomField("name", {
@@ -339,7 +340,7 @@ export default function RoomTypeManager({
                   helperText={
                     touched[`room_${activeTab}_name`]
                       ? errors[`room_${activeTab}_name`]
-                      : " "
+                      : ""
                   }
                   variant='outlined'
                   sx={{
@@ -376,7 +377,7 @@ export default function RoomTypeManager({
                   helperText={
                     touched[`room_${activeTab}_quantity`]
                       ? errors[`room_${activeTab}_quantity`]
-                      : " "
+                      : ""
                   }
                   sx={{
                     "& .MuiOutlinedInput-root": {
@@ -412,7 +413,7 @@ export default function RoomTypeManager({
                   helperText={
                     touched[`room_${activeTab}_area`]
                       ? errors[`room_${activeTab}_area`]
-                      : " "
+                      : ""
                   }
                   InputProps={{
                     endAdornment: (
@@ -479,7 +480,7 @@ export default function RoomTypeManager({
                       helperText={
                         touched[`room_${activeTab}_bedType`]
                           ? errors[`room_${activeTab}_bedType`]
-                          : " "
+                          : ""
                       }
                       InputProps={{
                         ...params.InputProps,
@@ -566,7 +567,7 @@ export default function RoomTypeManager({
                       helperText={
                         touched[`room_${activeTab}_direction`]
                           ? errors[`room_${activeTab}_direction`]
-                          : " "
+                          : ""
                       }
                       InputProps={{
                         ...params.InputProps,
@@ -639,7 +640,7 @@ export default function RoomTypeManager({
                   helperText={
                     touched[`room_${activeTab}_description`]
                       ? errors[`room_${activeTab}_description`]
-                      : " "
+                      : ""
                   }
                   inputProps={{ maxLength: 3000 }}
                   sx={{

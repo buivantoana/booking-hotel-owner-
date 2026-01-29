@@ -245,6 +245,7 @@ export const validateRoomTypes = (data: any) => {
   // Validate từng loại phòng
   roomTypes.forEach((room: any, index: number) => {
     if (room?.name) {
+      console.log("AAAAA room?.name",room?.name)
       const nameValues = Object.values(room.name).filter((v: any) => v?.toString().trim());
       if (nameValues.length === 0) {
         errors[`room_${index}_name`] = `Vui lòng nhập tên loại phòng cho ít nhất một ngôn ngữ`;
@@ -266,10 +267,11 @@ export const validateRoomTypes = (data: any) => {
     ) {
       errors[`room_${index}_area`] = `Vui lòng nhập diện tích phòng hợp lệ (số > 0)`;
     }
-    if (!room?.bedType) {
+    console.log("AAAA room?.bedType",room?.bedType)
+    if (room?.bedType?.length == 0) {
       errors[`room_${index}_bedType`] = `Vui lòng chọn loại giường`;
     }
-    if (!room?.direction) {
+    if (room?.direction?.length == 0) {
       errors[`room_${index}_direction`] = `Vui lòng chọn hướng phòng`;
     }
    

@@ -327,7 +327,7 @@ export default function HotelBasicInfo({
             fullWidth
             placeholder='Nhập tên khách sạn'
             error={touched.hotelName && !!errors.hotelName}
-            helperText={touched.hotelName ? errors.hotelName : " "}
+            helperText={touched.hotelName ? errors.hotelName : ""}
             value={formData.hotelName?.[selectedLang] || ""}
             onChange={(e) =>
               updateField("hotelName", {
@@ -392,7 +392,7 @@ export default function HotelBasicInfo({
           <TextField
             fullWidth
             error={touched.phone && !!errors.phone}
-            helperText={touched.phone ? errors.phone : " "}
+            helperText={touched.phone ? errors.phone : ""}
             value={formData.phone || ""}
             onChange={(e) => updateField("phone", e.target.value)}
             onBlur={() => onFieldBlur?.("phone")}
