@@ -14,8 +14,8 @@ const listingFeatures = [
   "Đăng ký online dễ dàng, không cần ký hợp đồng ràng buộc",
   "Khách sạn hiển thị trên ứng dụng Hotel Booking không tốn chi phí hoa hồng",
   "Tăng hiển diện thương hiệu đến người dùng Hotel Booking",
-  "Khách sạn nhận đặt phòng qua điện thoại: Chủ động nhận và tư chối khách",
-  "Khách sạn nhận đặt phòng qua điện thoại: Chủ động nhận và tư chối khách",
+  "Khách sạn nhận đặt phòng qua hotline Khách sạn: Chủ động nhận và từ chối khách",
+  
   "Khách hàng có thể dễ dàng tìm kiếm, xem mô tả chi tiết và hình ảnh phòng",
 ];
 

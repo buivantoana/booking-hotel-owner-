@@ -229,7 +229,7 @@ export default function HotelLocationInput({
             {/* Địa chỉ chi tiết */}
             <Grid item xs={12}>
               <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-                Địa chỉ khách sạn
+                Địa chỉ khách sạn <Typography variant="span"  fontSize={"16px"} color="red">*</Typography>
               </Typography>
               <TextField
                 fullWidth

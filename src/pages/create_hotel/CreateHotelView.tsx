@@ -13,7 +13,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import LoginIcon from "@mui/icons-material/Login";
 import vn from "../../images/vn.png";
 import ja from "../../images/ja.png";
@@ -29,11 +29,12 @@ const LANGUAGES = [
 
 type Props = {};
 
-const CreateHotelView = ({ submitCreateHotel, attribute }) => {
+const CreateHotelView = ({ submitCreateHotel, attribute,step,setStep }) => {
   const context = useBookingContext();
   const persistedData = context?.state?.create_hotel || {};
-  const [step, setStep] = useState(1);
+  
   const [openLanguage, setOpenLanguage] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [typeHotel, setTypeHotel] = useState(
     persistedData.typeHotel || "Khách sạn Listing"
   );
@@ -111,8 +112,16 @@ const CreateHotelView = ({ submitCreateHotel, attribute }) => {
     setStepErrors(errors);
     setCanNext(isValid);
   }, [tempData, step]);
-
+  useEffect(() => {
+    setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }, 100);
+  }, [step]);
   const handleNext = async () => {
+   
     if (step === 2) {
       setTouched({
         hotelName: true,
@@ -152,12 +161,13 @@ const CreateHotelView = ({ submitCreateHotel, attribute }) => {
       });
       setTouched((prev) => ({ ...prev, ...allTouched }));
 
-      setStep(step + 1);
+     
 
       try {
         setLoading(true);
         let result = await submitCreateHotel(context?.state?.create_hotel);
         if (result.success) {
+          setStep(step + 1);
           toast.success("Tạo khách sạn thành công!");
         } else {
           setStep(step - 1);
@@ -167,6 +177,7 @@ const CreateHotelView = ({ submitCreateHotel, attribute }) => {
       } catch (err) {
         console.error(err);
         toast.error(err?.message);
+        // setStep(step - 1);
       } finally {
         setLoading(false);
       }
@@ -185,10 +196,11 @@ const CreateHotelView = ({ submitCreateHotel, attribute }) => {
         }
       }
     }
+    
   };
   console.log("AAAA context", context?.state?.create_hotel);
   return (
-    <Box sx={{ background: "#f7f7f7" }}>
+    <Box  sx={{ background: "#f7f7f7" }}>
       <LanguageModal
         open={openLanguage}
         onClose={() => setOpenLanguage(false)}
@@ -196,7 +208,12 @@ const CreateHotelView = ({ submitCreateHotel, attribute }) => {
         setSelectedLang={setSelectedLang}
         setStep={setStep}
       />
-      <Container maxWidth='lg' sx={{ py: 4, minHeight: "100vh" }}>
+      <Container maxWidth='lg'  ref={scrollContainerRef}  sx={{ 
+        py: 4, 
+        minHeight: "100vh",
+        overflowY: 'auto',          // ← Đảm bảo có scroll nếu content dài
+        WebkitOverflowScrolling: 'touch', // mượt trên iOS
+      }}>
         {step < 6 && (
           <Box
             display={"flex"}
@@ -472,6 +489,7 @@ function StepIndicator({ activeStep = 1, onStepChange }) {
                     cursor: step.id <= activeStep ? "pointer" : "not-allowed",
                     opacity: step.id > activeStep ? 0.5 : 1,
                     minWidth: isMobile ? 80 : "auto",
+                    pointerEvents:step.id <= activeStep ? "auto":"none" 
                   }}
                 >
                   {/* Icon */}

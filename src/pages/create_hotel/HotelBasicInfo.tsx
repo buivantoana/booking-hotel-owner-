@@ -25,13 +25,20 @@ import {
   Button,
   Modal,
   InputAdornment as MuiInputAdornment,
+  Tooltip,
 } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { useBookingContext } from "../../App";
-import { Add, Close, Search } from "@mui/icons-material";
+import { Add, Close, HelpOutlineOutlined, Search } from "@mui/icons-material";
 import { facilities } from "../../utils/utils";
 
 const businessTypes = ["Tình yêu", "Du lịch", "Homestay", "Camping"];
+const tooltipDescriptions = {
+  "Tình yêu": "Là loại hình khách sạn dành cho các cặp đôi, có thiết kế phòng riêng tư, tận hưởng không gian lãng mạn, đa dạng chủ đề, cho phép đặt theo giờ.",
+  "Du lịch": "Là loại hình khách sạn dành cho nghỉ dưỡng, công tác, du lịch cặp đôi, gia đình, khám phá địa phương cho mọi dạng đặt phòng và lên kế hoạch cho mọi chuyến đi.",
+  "Homestay": "Là loại hình dịch vụ phù hợp cho du lịch cặp đôi, nhóm bạn, gia đình hoặc người thích khám phá văn hóa địa phương nhưng cảm thấy gần gũi, thoải mái và trải nghiệm như ở nhà.",
+  "Camping": "Là hình thức dịch vụ gần gũi thiên nhiên, nơi du khách lưu trú trong lều, trại, bungalow hoặc xe camper, thường tại các khu rừng, đồi núi, bãi biển.",
+};
 
 export default function HotelBasicInfo({
   setDataCreateHotel,
@@ -143,132 +150,160 @@ export default function HotelBasicInfo({
   /** ===============================
    * COMPONENT RENDER CARD TIME
    =================================*/
-  const renderTimeCard = (title, fields) => (
+   const renderTimeCard = (title, fields) => (
     <Card
       sx={{
         p: 2.5,
         borderRadius: 2,
-        width: {xs:"unset", md:"100%"},
+        width: { xs: "unset", md: "100%" },
         border: "1px solid #E5E7EB",
-      }}>
+      }}
+    >
       <Typography
         fontWeight={600}
-        color='#555'
-        textAlign='center'
+        color="#555"
+        textAlign="center"
         mb={2}
-        fontSize={15}>
+        fontSize={15}
+      >
         {title}
       </Typography>
-
-      <Box display='flex' flexDirection='column' gap={2}>
-        {fields.map((item, i) => (
-          <Box key={i}>
-            <Typography fontSize={14} color='#444' mb={0.5}>
-              {item.label}
-            </Typography>
-
-            {/* START TIME */}
-            <Box
-              display='flex'
-              flexDirection={isMobile ? "column" : "row"}
-              gap={2}
-              alignItems='center'>
-              <FormControl size='small' fullWidth>
-                <Select
-                  value={item.startValue}
-                  onChange={(e) => item.onStartChange(e.target.value)}
-                  displayEmpty
-                  input={
-                    <OutlinedInput
-                      startAdornment={
-                        <InputAdornment position='start'>
-                          <AccessTimeIcon
-                            sx={{ fontSize: 20, color: "#98b720" }}
-                          />
-                        </InputAdornment>
-                      }
-                      sx={{
-                        height: 40,
-                        borderRadius: "12px",
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#ddd",
-                        },
-                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#98b720",
-                          borderWidth: 2,
-                        },
-                      }}
-                    />
-                  }>
-                  <MenuItem disabled value=''>
-                    {item.startPlaceholder}
-                  </MenuItem>
-
-                  {HOURS.map((h) => (
-                    <MenuItem key={h} value={h}>
-                      {h}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <Typography width={"20%"} fontSize={14} color='#555'>
-                ngày {item.startDay}
+  
+      <Box display="flex" flexDirection="column" gap={2}>
+        {fields.map((item, i) => {
+          // Giả sử HOURS là mảng ['00:00', '00:30', ..., '23:30']
+          // Tính toán các giờ kết thúc hợp lệ (sau giờ bắt đầu)
+          const startTime = item.startValue;
+          const availableEndTimes = startTime
+            ? HOURS.filter((h) => h > startTime) // So sánh chuỗi giờ HH:mm
+            : HOURS;
+  
+          // Nếu giờ kết thúc hiện tại không còn hợp lệ → reset về rỗng
+          const currentEndValid = availableEndTimes.includes(item.endValue);
+          const effectiveEndValue = currentEndValid ? item.endValue : "";
+  
+          // Nếu reset, gọi callback để cập nhật state
+          if (!currentEndValid && item.endValue !== "") {
+            item.onEndChange(""); // Reset end time nếu không hợp lệ
+          }
+  
+          return (
+            <Box key={i}>
+              <Typography fontSize={14} color="#444" mb={0.5}>
+                {item.label}
               </Typography>
-            </Box>
-
-            {/* END TIME */}
-            <Box
-              display='flex'
-              flexDirection={isMobile ? "column" : "row"}
-              gap={2}
-              mt={1.5}
-              alignItems='center'>
-              <FormControl size='small' fullWidth>
-                <Select
-                  value={item.endValue}
-                  onChange={(e) => item.onEndChange(e.target.value)}
-                  displayEmpty
-                  input={
-                    <OutlinedInput
-                      startAdornment={
-                        <InputAdornment position='start'>
-                          <AccessTimeIcon
-                            sx={{ fontSize: 20, color: "#98b720" }}
-                          />
-                        </InputAdornment>
+  
+              {/* START TIME */}
+              <Box
+                display="flex"
+                flexDirection={isMobile ? "column" : "row"}
+                gap={2}
+                alignItems="center"
+              >
+                <FormControl size="small" fullWidth>
+                  <Select
+                    value={item.startValue}
+                    onChange={(e) => {
+                      const newStart = e.target.value;
+                      item.onStartChange(newStart);
+                      // Nếu giờ kết thúc hiện tại ≤ giờ bắt đầu mới → reset end
+                      if (item.endValue && item.endValue <= newStart) {
+                        item.onEndChange("");
                       }
-                      sx={{
-                        height: 40,
-                        borderRadius: "12px",
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#ddd",
-                        },
-                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#98b720",
-                          borderWidth: 2,
-                        },
-                      }}
-                    />
-                  }>
-                  <MenuItem disabled value=''>
-                    {item.endPlaceholder}
-                  </MenuItem>
-
-                  {HOURS.map((h) => (
-                    <MenuItem key={h} value={h}>
-                      {h}
+                    }}
+                    displayEmpty
+                    input={
+                      <OutlinedInput
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <AccessTimeIcon sx={{ fontSize: 20, color: "#98b720" }} />
+                          </InputAdornment>
+                        }
+                        sx={{
+                          height: 40,
+                          borderRadius: "12px",
+                          "& .MuiOutlinedInput-notchedOutline": { borderColor: "#ddd" },
+                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#98b720",
+                            borderWidth: 2,
+                          },
+                        }}
+                      />
+                    }
+                  >
+                    <MenuItem disabled value="">
+                      {item.startPlaceholder}
                     </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <Typography width={"20%"} fontSize={14} color='#555'>
-                ngày {item.endDay}
-              </Typography>
+                    {HOURS.map((h) => (
+                      <MenuItem key={h} value={h}>
+                        {h}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+  
+                <Typography width="20%" fontSize={14} color="#555">
+                  ngày {item.startDay}
+                </Typography>
+              </Box>
+  
+              {/* END TIME */}
+              <Box
+                display="flex"
+                flexDirection={isMobile ? "column" : "row"}
+                gap={2}
+                mt={1.5}
+                alignItems="center"
+              >
+                <FormControl size="small" fullWidth>
+                  <Select
+                    value={effectiveEndValue} // Sử dụng giá trị đã kiểm tra hợp lệ
+                    onChange={(e) => item.onEndChange(e.target.value)}
+                    displayEmpty
+                    input={
+                      <OutlinedInput
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <AccessTimeIcon sx={{ fontSize: 20, color: "#98b720" }} />
+                          </InputAdornment>
+                        }
+                        sx={{
+                          height: 40,
+                          borderRadius: "12px",
+                          "& .MuiOutlinedInput-notchedOutline": { borderColor: "#ddd" },
+                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#98b720",
+                            borderWidth: 2,
+                          },
+                        }}
+                      />
+                    }
+                  >
+                    <MenuItem disabled value="">
+                      {item.endPlaceholder}
+                    </MenuItem>
+                    {availableEndTimes.map((h) => (
+                      <MenuItem key={h} value={h}>
+                        {h}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+  
+                <Typography width="20%" fontSize={14} color="#555">
+                  ngày {item.endDay}
+                </Typography>
+              </Box>
+  
+              {/* (Tùy chọn) Hiển thị cảnh báo nếu end time không hợp lệ */}
+              {!currentEndValid && item.startValue && (
+                <Typography color="error" fontSize={12} mt={0.5}>
+                  Giờ kết thúc phải sau giờ bắt đầu
+                </Typography>
+              )}
             </Box>
-          </Box>
-        ))}
+          );
+        })}
       </Box>
     </Card>
   );
@@ -286,7 +321,7 @@ export default function HotelBasicInfo({
         mb={3}>
         <Box flex={1}>
           <Typography fontSize={14} fontWeight={600} mb={0.8}>
-            Tên khách sạn
+            Tên khách sạn <Typography variant="span"  fontSize={"16px"} color="red">*</Typography>
           </Typography>
           <TextField
             fullWidth
@@ -315,9 +350,45 @@ export default function HotelBasicInfo({
         </Box>
 
         <Box flex={1}>
-          <Typography fontSize={14} fontWeight={600} mb={0.8}>
-            Số điện thoại
-          </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mb: 0.8 }}>
+  <Typography fontSize={14} fontWeight={600}>
+    Số điện thoại đặt phòng <Typography variant="span"  fontSize={"16px"} color="red">*</Typography>
+  </Typography>
+
+  <Tooltip
+    title="Cùng số điện thoại khách hàng có thể liên hệ đặt phòng"
+    
+    placement="right"          // Hiện popup bên phải icon
+    enterDelay={100}           // Delay nhẹ khi hover
+    leaveDelay={200}
+    sx={{
+      // Tùy chỉnh style tooltip cho đẹp (nền đen, chữ trắng, bo góc)
+      "& .MuiTooltip-tooltip": {
+        bgcolor: "#2d2d2d",
+        color: "#ffffff",
+        fontSize: "20px",
+        padding: "20px",
+        borderRadius: "6px",
+        maxWidth: 280,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
+      },
+      "& .MuiTooltip-arrow": {
+        color: "#2d2d2d",
+      },
+    }}
+  >
+    <HelpOutlineOutlined
+      sx={{
+        fontSize: 16,
+        color: "#98b720",        // Màu xanh của theme bạn
+      cursor:"pointer",
+        "&:hover": {
+          color: "#7a9a1a",      // Đậm hơn khi hover
+        },
+      }}
+    />
+  </Tooltip>
+</Box>
           <TextField
             fullWidth
             error={touched.phone && !!errors.phone}
@@ -354,13 +425,42 @@ export default function HotelBasicInfo({
           multiline
           rows={4}
           value={formData.description?.[selectedLang] || ""}
-          onChange={(e) =>
-            updateField("description", {
-              ...formData.description,
-              [selectedLang]: e.target.value,
-            })
+          onChange={(e) => {
+            const newValue = e.target.value;
+            // Giới hạn tối đa 3000 ký tự
+            if (newValue.length <= 3000) {
+              updateField("description", {
+                ...formData.description,
+                [selectedLang]: newValue,
+              });
+            } else {
+              // Nếu vượt quá, cắt bớt và giữ nguyên giá trị cũ (không cho nhập thêm)
+              updateField("description", {
+                ...formData.description,
+                [selectedLang]: newValue.slice(0, 3000),
+              });
+            }
+          }}
+          placeholder="Nhập mô tả"
+          error={formData.description?.[selectedLang]?.length > 3000}
+          helperText={
+            <Box
+              component="span"
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                color:
+                  formData.description?.[selectedLang]?.length > 3000
+                    ? "error.main"
+                    : formData.description?.[selectedLang]?.length > 2800
+                      ? "warning.main"
+                      : "text.secondary",
+                fontSize: "0.875rem",
+              }}
+            >
+              {formData.description?.[selectedLang]?.length || 0} / 3000
+            </Box>
           }
-          placeholder='Nhập mô tả'
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: "16px",
@@ -369,31 +469,71 @@ export default function HotelBasicInfo({
                 borderWidth: 1.5,
               },
             },
+            "& .MuiFormHelperText-root": {
+              margin: 0,
+              mt: 0.5,
+            },
           }}
         />
       </Box>
 
       {/* Loại hình kinh doanh */}
       <Box mb={4}>
-        <Typography fontSize={14} fontWeight={600} mb={1.5}>
-          Loại hình kinh doanh
-        </Typography>
+  <Typography fontSize={14} fontWeight={600} mb={1.5}>
+    Loại hình kinh doanh
+  </Typography>
 
-        <RadioGroup
-          row
-          value={formData.businessType}
-          onChange={(e) => updateField("businessType", e.target.value)}>
-          {businessTypes.map((type) => (
-            <FormControlLabel
-              key={type}
-              value={type}
-              control={<Radio sx={{ color: "#8BC34A !important" }} />}
-              label={type}
-              sx={{ mr: 4 }}
-            />
-          ))}
-        </RadioGroup>
-      </Box>
+  <RadioGroup
+    row
+    value={formData.businessType}
+    onChange={(e) => updateField("businessType", e.target.value)}
+  >
+    {["Tình yêu", "Du lịch", "Homestay", "Camping"].map((type) => (
+      <FormControlLabel
+        key={type}
+        value={type}
+        control={<Radio sx={{ color: "#8BC34A !important" }} />}
+        label={
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.7 }}>
+            <span>{type}</span>
+
+            {/* Icon ? + Tooltip chỉ hiện khi hover vào icon */}
+            <Tooltip
+              title={tooltipDescriptions[type]}
+              arrow
+              placement="top"
+              enterDelay={100}
+              sx={{
+                "& .MuiTooltip-tooltip": {
+                  bgcolor: "#2d2d2d",
+                  color: "#fff",
+                  fontSize: 13,
+                  padding: "10px 14px",
+                  borderRadius: "8px",
+                  maxWidth: 330,
+                  lineHeight: 1.5,
+                },
+                "& .MuiTooltip-arrow": { color: "#2d2d2d" },
+              }}
+            >
+              <HelpOutlineOutlined
+                sx={{
+                  fontSize: 16,
+                  color: "#98b720",
+                  cursor: "pointer",
+                  opacity: 0.7,
+                  transition: "all 0.2s",
+                  "&:hover": { opacity: 1, color: "#7a9a1a" },
+                }}
+              />
+            </Tooltip>
+          </Box>
+        }
+        sx={{ mr: 5 }}   // mr lớn hơn để có khoảng cách đẹp
+      />
+    ))}
+  </RadioGroup>
+</Box>
       <Box mb={4}>
         <Typography fontSize={14} fontWeight={600} mb={1.5}>
           Tiện ích khách sạn
@@ -479,7 +619,7 @@ const modalStyle = {
   display: "flex",
   flexDirection: "column",
 };
-function FacilitySelector({ selectedIds = [], onChange, attribute,selectedLang }) {
+function FacilitySelector({ selectedIds = [], onChange, attribute, selectedLang }) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 

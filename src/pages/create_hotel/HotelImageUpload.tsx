@@ -1,44 +1,48 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Box, Typography, IconButton, Grid, useMediaQuery } from "@mui/material";
+import { Box, Typography, IconButton, Grid, useMediaQuery, Tooltip } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import add from "../../images/gallery-add.png";
 import { useBookingContext } from "../../App";
+import { HelpOutlineOutlined } from "@mui/icons-material";
+import { toast } from "react-toastify"; // Đảm bảo đã import toast
 
-export default function HotelImageUpload({ onTempChange,
+export default function HotelImageUpload({
+  onTempChange,
   errors = {},
   touched = {},
   onFieldTouch,
-  isPadding }) {
+  isPadding,
+}) {
   const isMobile = useMediaQuery("(max-width:600px)");
+  const context = useBookingContext();
 
   const [outsideImages, setOutsideImages] = useState([]);
   const [hotelImages, setHotelImages] = useState([]);
-  const context = useBookingContext()
-  // ⭐ REF để luôn chứa dữ liệu mới nhất
+
   const dataRef = useRef({
     outsideImages: [],
-    hotelImages: []
+    hotelImages: [],
   });
+
   useEffect(() => {
     if (context?.state?.create_hotel?.outsideImages) {
-      setOutsideImages(context?.state?.create_hotel?.outsideImages);
+      setOutsideImages(context.state.create_hotel.outsideImages);
     }
     if (context?.state?.create_hotel?.hotelImages) {
-      setHotelImages(context?.state?.create_hotel?.hotelImages);
+      setHotelImages(context.state.create_hotel.hotelImages);
     }
-    
-  }, []);
+  }, [context?.state?.create_hotel]);
 
-  // ⭐ Update ref mỗi khi dữ liệu thay đổi
   useEffect(() => {
     const newData = { outsideImages, hotelImages };
     dataRef.current = newData;
-    onTempChange?.(newData); // realtime cho validate
+    onTempChange?.(newData);
   }, [outsideImages, hotelImages]);
-  const markTouched = (field: "outsideImages" | "hotelImages") => {
+
+  const markTouched = (field) => {
     onFieldTouch?.(field);
   };
-  // ⭐ Cleanup khi component unmount
+
   useEffect(() => {
     return () => {
       context.dispatch({
@@ -51,16 +55,55 @@ export default function HotelImageUpload({ onTempChange,
     };
   }, []);
 
-  // ------------------- UI Logic ----------------------
+  // ─── VALIDATE & UPLOAD ─────────────────────────────────────────────
+  const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
+  const ALLOWED_TYPES = ["image/jpeg", "image/png"]; // JPG, PNG
 
-  const handleUpload = (event: any, setter: any, field: "outsideImages" | "hotelImages") => {
-    markTouched(field); // đã tương tác
-    const files = Array.from(event.target.files);
-    const newImgs = files.map((file: any) => ({ file, url: URL.createObjectURL(file) }));
-    setter((prev: any) => [...prev, ...newImgs]);
+  const handleUpload = (event, setter, field) => {
+    markTouched(field);
+    const files = Array.from(event.target.files || []);
+
+    const validFiles = [];
+    const invalidFiles = [];
+
+    files.forEach((file) => {
+      // Kiểm tra định dạng
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        invalidFiles.push(file);
+        return;
+      }
+
+      // Kiểm tra dung lượng
+      if (file.size > MAX_FILE_SIZE) {
+        invalidFiles.push(file);
+        return;
+      }
+
+      validFiles.push({ file, url: URL.createObjectURL(file) });
+    });
+
+    // Nếu có file không hợp lệ → toast warning
+    if (invalidFiles.length > 0) {
+      toast.warning(
+        `Có ${invalidFiles.length} ảnh không hợp lệ: chỉ chấp nhận JPG/PNG và không quá 3MB.`,
+        {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        }
+      );
+    }
+
+    // Chỉ thêm ảnh hợp lệ vào state
+    if (validFiles.length > 0) {
+      setter((prev) => [...prev, ...validFiles]);
+    }
   };
 
-  const handleDelete = (index: number, setter: any, list: any[], field: "outsideImages" | "hotelImages") => {
+  const handleDelete = (index, setter, list, field) => {
     markTouched(field);
     const updated = [...list];
     updated.splice(index, 1);
@@ -81,12 +124,12 @@ export default function HotelImageUpload({ onTempChange,
         cursor: "pointer",
       }}
     >
-      <input type="file" hidden multiple onChange={onSelect} />
+      <input type="file" hidden multiple accept="image/jpeg,image/png" onChange={onSelect} />
       <img src={add} alt="" />
     </label>
   );
 
-  const ImagePreview = ({ img, index, list, setter }) => (
+  const ImagePreview = ({ img, index, list, setter, field }) => (
     <Box
       sx={{
         width: 120,
@@ -103,7 +146,7 @@ export default function HotelImageUpload({ onTempChange,
       />
       <IconButton
         size="small"
-        onClick={() => handleDelete(index, setter, list)}
+        onClick={() => handleDelete(index, setter, list, field)}
         sx={{
           position: "absolute",
           top: 4,
@@ -117,11 +160,38 @@ export default function HotelImageUpload({ onTempChange,
     </Box>
   );
 
-  const Section = ({ title, desc, images, setter,field }) => (
+  const Section = ({ title, desc, images, setter, field }) => (
     <Box sx={{ mb: 4 }}>
-      <Typography fontWeight={600} mb={1}>
+      <Typography fontWeight={600} display="flex" alignItems="center" gap={1} mb={1}>
         {title}
+        <Tooltip
+          title="Định dạng JPG, PNG và không quá 3MB"
+          placement="right"
+          enterDelay={100}
+          leaveDelay={200}
+          sx={{
+            "& .MuiTooltip-tooltip": {
+              bgcolor: "#2d2d2d",
+              color: "#ffffff",
+              fontSize: "14px",
+              padding: "10px 14px",
+              borderRadius: "6px",
+              maxWidth: 280,
+            },
+            "& .MuiTooltip-arrow": { color: "#2d2d2d" },
+          }}
+        >
+          <HelpOutlineOutlined
+            sx={{
+              fontSize: 18,
+              color: "#98b720",
+              cursor: "help",
+              "&:hover": { color: "#7a9a1a" },
+            }}
+          />
+        </Tooltip>
       </Typography>
+
       <Typography variant="body2" color="text.secondary" mb={2}>
         {desc}
       </Typography>
@@ -129,16 +199,17 @@ export default function HotelImageUpload({ onTempChange,
       <Grid container spacing={2}>
         {images.map((img, i) => (
           <Grid item key={i}>
-            <ImagePreview img={img} index={i} list={images} setter={setter} />
+            <ImagePreview img={img} index={i} list={images} setter={setter} field={field} />
           </Grid>
         ))}
 
         <Grid item>
-          <UploadBox onSelect={(e) => handleUpload(e, setter)} />
+          <UploadBox onSelect={(e) => handleUpload(e, setter, field)} />
         </Grid>
       </Grid>
+
       {(touched[field] || touched.submitAttempt) && errors[field] && (
-        <Typography color="error" fontSize={13} mb={2}>
+        <Typography color="error" fontSize={13} mt={1}>
           {errors[field]}
         </Typography>
       )}
@@ -151,8 +222,7 @@ export default function HotelImageUpload({ onTempChange,
         p: isPadding ? 0 : isMobile ? 2 : 4,
         mx: "auto",
         background: "white",
-        borderRadius: 2
-       
+        borderRadius: 2,
       }}
     >
       <Section

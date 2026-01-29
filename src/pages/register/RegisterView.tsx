@@ -49,48 +49,115 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
   setEmail,
   onNext,
 }) => {
-  const [touched, setTouched] = useState(false);
+  const [touchedPhone, setTouchedPhone] = useState(false);
+  const [touchedName, setTouchedName] = useState(false);
+  const [touchedEmail, setTouchedEmail] = useState(false);
   const [loading, setLoading] = useState(false);
+  const normalizePhone = (phone: string) => {
+    if (!phone) return "";
+    let p = phone.trim().replace(/\D/g, "");
+    if (p.startsWith("84")) p = p.slice(2);
+    if (p.startsWith("0")) p = p.slice(1);
+    return p;
+  };
+
+  const isValidPhone = (phone: string) => {
+    const normalized = normalizePhone(phone);
+    return normalized.length >= 9 && normalized.length <= 10 && /^[35789]/.test(normalized);
+  };
+
+  // Name - Đáp ứng đầy đủ yêu cầu test case
+  const isValidName = (value: string): { valid: boolean; error?: string } => {
+    if (!value) return { valid: false, error: "Tên không được để trống" };
+
+    const trimmed = value.trim();
+    if (trimmed === "") return { valid: false, error: "Tên không được chỉ chứa khoảng trắng" };
+    if (trimmed.length < 2) return { valid: false, error: "Tên phải có ít nhất 2 ký tự" };
+    if (trimmed.length > 100) return { valid: false, error: "Tên không được vượt quá 100 ký tự" };
+
+    // Chỉ cho phép chữ cái (bao gồm tiếng Việt) và khoảng trắng
+    const nameRegex = /^[A-Za-zÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪỬỮỰỲỴÝỶỸ\s]+$/;
+    if (!nameRegex.test(trimmed)) {
+      return { valid: false, error: "Tên chỉ được chứa chữ cái và khoảng trắng" };
+    }
+
+    // Không cho nhiều khoảng trắng liên tiếp
+    if (/\s{2,}/.test(trimmed)) {
+      return { valid: false, error: "Tên không được chứa nhiều khoảng trắng liên tiếp" };
+    }
+
+    return { valid: true };
+  };
+
+  // Email
+  const isValidEmail = (value: string): { valid: boolean; error?: string } => {
+    if (!value.trim()) return { valid: false, error: "Email không được để trống" };
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(value.trim())) {
+      return { valid: false, error: "Email không đúng định dạng" };
+    }
+
+    return { valid: true };
+  };
+
+  // ─── ERROR MESSAGES ──────────────────────────────────────────────
+  const nameValidation = isValidName(name);
+  const emailValidation = isValidEmail(Email);
+
+  const getNameError = () => {
+    if (!touchedName) return "";
+    return nameValidation.error || "";
+  };
+
+  const getEmailError = () => {
+    if (!touchedEmail) return "";
+    return emailValidation.error || "";
+  };
+
+  const getPhoneError = () => {
+    if (!touchedPhone) return "";
+    if (!phoneNumber) return "Số điện thoại không được để trống";
+    if (!isValidPhone(phoneNumber)) return "Số điện thoại không hợp lệ (9-10 số, bắt đầu bằng 3,5,7,8,9)";
+    return "";
+  };
+
+  // Form valid khi TẤT CẢ đều ok
+  const isFormValid =
+    isValidPhone(phoneNumber) &&
+    nameValidation.valid &&
+    emailValidation.valid &&
+    !loading;
+
   const handleSubmit = async (e: React.FormEvent) => {
-    setLoading(true);
     e.preventDefault();
-    if (phoneNumber && name && Email) {
-      try {
-        let result = await register({
-          name: name,
-          email: Email,
-          phone: "+84" + phoneNumber,
-        });
-        if (result?.message && !result?.code) {
-          toast.success(result?.message);
-          onNext();
-        } else {
-          toast.error(result?.message);
-        }
-      } catch (error) {
-        console.log(error);
+    setTouchedPhone(true);
+    setTouchedName(true);
+    setTouchedEmail(true);
+
+    if (!isFormValid) return;
+
+    setLoading(true);
+
+    try {
+      const result = await register({
+        name: name.trim(),           // luôn trim trước khi gửi
+        email: Email.trim(),
+        phone: "+84" + normalizePhone(phoneNumber),
+      });
+
+      if (result?.message && !result?.code) {
+        // toast.success("Đăng ký thành công");
+        onNext();
+      } else {
+        toast.error("Đăng ký thất bại" );
       }
+    } catch (error) {
+      toast.error("Có lỗi xảy ra, vui lòng thử lại");
+    } finally {
       setLoading(false);
     }
   };
-
-  const normalizePhone = (phone) => {
-    if (!phone) return "";
-    let p = phone.trim().replace(/\D/g, "");
-    if (p.startsWith("84")) p = p.slice(2); // bỏ 84 đầu nếu nhập +84
-    if (p.startsWith("0")) p = p.slice(1); // bỏ số 0 đầu nếu người dùng nhập
-    return p;
-  };
-  const isValidPhone = (phone) => {
-    if (!phone) return false;
-    if (phone.length > 9) return false;
-    const normalized = normalizePhone(phone);
-    if (!/^[35789]/.test(normalized)) return false; // đầu số hợp lệ
-    if (normalized.length < 9) return false; // độ dài
-    return true;
-  };
-  const isDisabled =
-    !phoneNumber || !name || !Email || !isValidPhone(phoneNumber) || loading;
   return (
     <Container maxWidth='lg' sx={{ display: "flex", alignItems: "center" }}>
       <Grid container sx={{ alignItems: "center", minHeight: "100vh" }}>
@@ -134,26 +201,18 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 Số điện thoại
               </Typography>
               <TextField
-                fullWidth
-                placeholder='Nhập số điện thoại'
-                variant='outlined'
-                value={phoneNumber}
-                onChange={(e) => {
-                  let val = e.target.value.replace(/\D/g, ""); // chỉ giữ số
-                  // loại bỏ 0 đầu tiên
-                  if (val.length > 20) val = val.slice(0, 20);
-                  if (val.startsWith("0")) val = val.slice(1);
-                  setPhoneNumber(val);
-                }}
-                onBlur={() => setTouched(true)} // chỉ validate khi blur
-                error={touched && !isValidPhone(phoneNumber)}
-                helperText={
-                  touched && !isValidPhone(phoneNumber)
-                    ? "Số điện thoại không hợp lệ, vui lòng nhập lại."
-                    : ""
-                }
+               fullWidth
+               placeholder="Nhập số điện thoại"
+               value={phoneNumber}
+               onChange={(e) => {
+                 const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                 setPhoneNumber(val);
+               }}
+               onBlur={() => setTouchedPhone(true)}
+               error={!!getPhoneError()}
+               helperText={getPhoneError() || " "}
                 sx={{
-                  mb: 3,
+                  mb: 1,
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "16px",
                     height: "60px",
@@ -193,7 +252,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                     </InputAdornment>
                   ),
                   endAdornment:
-                    touched && !isValidPhone(phoneNumber) ? (
+                  touchedPhone && !isValidPhone(phoneNumber) ? (
                       <InputAdornment position='end'>
                         <Box
                           sx={{
@@ -203,7 +262,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                           }}
                           onClick={() => {
                             setPhoneNumber("");
-                            setTouched(false); // reset error khi xóa
+                            setTouchedPhone(false); // reset error khi xóa
                           }}>
                           ✕
                         </Box>
@@ -218,11 +277,14 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
               </Typography>
               <TextField
                 fullWidth
-                placeholder='Nhập tên của bạn'
+                placeholder="Nhập tên của bạn"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                onBlur={() => setTouchedName(true)}
+                error={!!getNameError()}
+                helperText={getNameError() || " "}
                 sx={{
-                  mb: 3,
+                  mb: 1,
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "16px",
                     height: "60px",
@@ -241,9 +303,12 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
               </Typography>
               <TextField
                 fullWidth
-                placeholder='Nhập email của khách sạn'
+                placeholder="Nhập email của khách sạn"
                 value={Email}
                 onChange={(e) => setEmail(e.target.value)}
+                onBlur={() => setTouchedEmail(true)}
+                error={!!getEmailError()}
+                helperText={getEmailError() || " "}
                 sx={{
                   mb: 3,
                   "& .MuiOutlinedInput-root": {
@@ -279,20 +344,20 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
               <Button
                 type='submit'
                 fullWidth
-                disabled={isDisabled}
+                disabled={!isFormValid}
                 sx={{
                   mb: 3,
                   py: 1.5,
                   borderRadius: "16px",
-                  backgroundColor: isDisabled ? "#e0e0e0" : "#98b720",
-                  color: isDisabled ? "#888" : "#fff",
+                  backgroundColor: !isFormValid ? "#e0e0e0" : "#98b720",
+                  color: "white",
                   textTransform: "none",
                   fontWeight: 600,
                   fontSize: "18px",
                   height: "56px",
                   position: "relative",
                   "&:hover": {
-                    backgroundColor: isDisabled ? "#e0e0e0" : "#98b720",
+                    backgroundColor: !isFormValid ? "#e0e0e0" : "#98b720",
                   },
                 }}>
                 {loading ? (
@@ -397,7 +462,7 @@ const RegisterSuccess = ({ Email }) => {
         justifyContent: "center",
         py: 4,
       }}>
-      <Container maxWidth='sm'>
+      <Container sx={{width:"700px"}}>
         <Paper
           elevation={0}
           sx={{
@@ -459,7 +524,7 @@ const RegisterSuccess = ({ Email }) => {
                     bgcolor: "#7a9a1a",
                   },
                 }}>
-                Tạo khách sạn ngay
+                Đăng nhập ngay
               </Button>
             </Stack>
           </Stack>

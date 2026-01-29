@@ -317,7 +317,7 @@ export default function RoomTypeManager({
                   variant='subtitle2'
                   color='text.secondary'
                   gutterBottom>
-                  Tên loại phòng
+                  Tên loại phòng <Typography variant="span"  fontSize={"16px"} color="red">*</Typography>
                 </Typography>
                 <TextField
                   fullWidth
@@ -357,7 +357,7 @@ export default function RoomTypeManager({
                   variant='subtitle2'
                   color='text.secondary'
                   gutterBottom>
-                  Số lượng phòng bán
+                  Số lượng phòng bán <Typography variant="span"  fontSize={"16px"} color="red">*</Typography>
                 </Typography>
                 <TextField
                   fullWidth
@@ -393,7 +393,7 @@ export default function RoomTypeManager({
                   variant='subtitle2'
                   color='text.secondary'
                   gutterBottom>
-                  Diện tích phòng (m²)
+                  Diện tích phòng (m²) <Typography variant="span"  fontSize={"16px"} color="red">*</Typography>
                 </Typography>
                 <TextField
                   fullWidth
@@ -434,7 +434,7 @@ export default function RoomTypeManager({
                   variant='subtitle2'
                   color='text.secondary'
                   gutterBottom>
-                  Loại giường
+                  Loại giường <Typography variant="span"  fontSize={"16px"} color="red">*</Typography>
                 </Typography>
                 <Autocomplete
                   multiple
@@ -519,7 +519,7 @@ export default function RoomTypeManager({
                   variant='subtitle2'
                   color='text.secondary'
                   gutterBottom>
-                  Hướng phòng
+                  Hướng phòng <Typography variant="span"  fontSize={"16px"} color="red">*</Typography>
                 </Typography>
                 <Autocomplete
                   multiple
@@ -746,7 +746,7 @@ function RoomImagesUpload({
       <Box display='flex' flexDirection={{xs:"column",md:"row"}} justifyContent='space-between' gap={4}>
         <Box width={{ xs: "100%", md: "30%" }}>
           <Typography variant='h6' fontWeight={600} gutterBottom>
-            Hình ảnh phòng
+            Hình ảnh phòng <Typography variant="span"  fontSize={"16px"} color="red">*</Typography>
           </Typography>
         </Box>
         <Box width={{ xs: "100%", md: "65%" }}>
@@ -861,7 +861,7 @@ function RoomPricingSection({
       <Box display='flex' flexDirection={{xs:"column",md:"row"}} justifyContent='space-between' gap={4}>
         <Box width={{ xs: "100%", md: "30%" }}>
           <Typography variant='h6' fontWeight={600} gutterBottom>
-            Giá phòng
+            Giá phòng <Typography variant="span"  fontSize={"16px"} color="red">*</Typography>
           </Typography>
           <Typography variant='body2' color='text.secondary'>
             Thiết lập giá theo loại đặt phòng
@@ -1116,7 +1116,7 @@ function FacilitySelector({
       <Box display='flex' flexDirection={{xs:"column",md:"row"}} justifyContent='space-between' gap={4}>
         <Box width={{ xs: "100%", md: "30%" }}>
           <Typography variant='h6' fontWeight={600} gutterBottom>
-            Tiện ích phòng
+            Tiện ích phòng <Typography variant="span"  fontSize={"16px"} color="red">*</Typography>
           </Typography>
           <Typography variant='body2' color='text.secondary'>
             Chọn các tiện ích có sẵn trong loại phòng này

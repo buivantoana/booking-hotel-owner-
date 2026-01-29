@@ -139,20 +139,37 @@ export function formattedDateHHMMDDMMYYYY(data) {
 export const validateBasicInfo = (data: any) => {
   const errors: Record<string, string> = {};
 
+  // Validate tên khách sạn (giữ nguyên)
   const hotelNameValues = data?.hotelName
-  ? Object.values(data.hotelName).filter((v: any) => v?.trim())
-  : [];
+    ? Object.values(data.hotelName).filter((v: any) => v?.trim())
+    : [];
 
-if (hotelNameValues.length === 0) {
-  errors.hotelName = "Vui lòng nhập tên khách sạn cho ít nhất một ngôn ngữ";
-}
-  if (!data?.phone?.trim()) {
-    errors.phone = "Vui lòng nhập số điện thoại";
-  } else if (!/^0\d{9}$/.test(data.phone.replace(/\D/g, ""))) {
-    errors.phone = "Số điện thoại phải có 10 số, bắt đầu bằng 0";
+  if (hotelNameValues.length === 0) {
+    errors.hotelName = "Vui lòng nhập tên khách sạn cho ít nhất một ngôn ngữ";
   }
 
-  // Phải có ít nhất 1 khung giờ kinh doanh
+  // ─── VALIDATE PHONE ────────────────────────────────────────────────
+  if (!data?.phone?.trim()) {
+    errors.phone = "Vui lòng nhập số điện thoại";
+  } else {
+    // Loại bỏ tất cả ký tự không phải số
+    const cleanedPhone = data.phone.replace(/\D/g, "");
+
+    if (cleanedPhone.length !== 10) {
+      errors.phone = "Số điện thoại phải có đúng 10 số (thừa hoặc thiếu số)";
+    } else if (!cleanedPhone.startsWith("0")) {
+      errors.phone = "Số điện thoại phải bắt đầu bằng 0";
+    } else {
+      // Kiểm tra số thứ 2 PHẢI nằm trong 3,5,7,8,9
+      const secondDigit = cleanedPhone[1];
+      if (!["3", "5", "7", "8", "9"].includes(secondDigit)) {
+        errors.phone = "Nhập sai định dạng số điện thoại (phải bắt đầu bằng 03, 05, 07, 08, 09)";
+      }
+      // Nếu có secondDigit hợp lệ → KHÔNG set error → hợp lệ
+    }
+  }
+
+  // Validate khung giờ kinh doanh (giữ nguyên)
   const hasHourly = data?.hourlyStart && data?.hourlyEnd;
   const hasOvernight = data?.overnightStart && data?.overnightEnd;
   const hasDaily = data?.dailyStart && data?.dailyEnd;
@@ -230,39 +247,34 @@ export const validateRoomTypes = (data: any) => {
     if (room?.name) {
       const nameValues = Object.values(room.name).filter((v: any) => v?.toString().trim());
       if (nameValues.length === 0) {
-        errors[`room_${index}_name`] = `Loại phòng ${index + 1}: Vui lòng nhập tên loại phòng cho ít nhất một ngôn ngữ`;
+        errors[`room_${index}_name`] = `Vui lòng nhập tên loại phòng cho ít nhất một ngôn ngữ`;
       }
     } else {
-      errors[`room_${index}_name`] = `Loại phòng ${index + 1}: Vui lòng nhập tên loại phòng cho ít nhất một ngôn ngữ`;
+      errors[`room_${index}_name`] = `Vui lòng nhập tên loại phòng cho ít nhất một ngôn ngữ`;
     }
     if (
       !room?.quantity?.trim() ||
       isNaN(parseInt(room.quantity)) ||
       parseInt(room.quantity) <= 0
     ) {
-      errors[`room_${index}_quantity`] = `Loại phòng ${index + 1
-        }: Vui lòng nhập số lượng phòng hợp lệ (số nguyên > 0)`;
+      errors[`room_${index}_quantity`] = ` Vui lòng nhập số lượng phòng hợp lệ (số nguyên > 0)`;
     }
     if (
       !room?.area?.trim() ||
       isNaN(parseFloat(room.area)) ||
       parseFloat(room.area) <= 0
     ) {
-      errors[`room_${index}_area`] = `Loại phòng ${index + 1
-        }: Vui lòng nhập diện tích phòng hợp lệ (số > 0)`;
+      errors[`room_${index}_area`] = `Vui lòng nhập diện tích phòng hợp lệ (số > 0)`;
     }
     if (!room?.bedType) {
-      errors[`room_${index}_bedType`] = `Loại phòng ${index + 1
-        }: Vui lòng chọn loại giường`;
+      errors[`room_${index}_bedType`] = `Vui lòng chọn loại giường`;
     }
     if (!room?.direction) {
-      errors[`room_${index}_direction`] = `Loại phòng ${index + 1
-        }: Vui lòng chọn hướng phòng`;
+      errors[`room_${index}_direction`] = `Vui lòng chọn hướng phòng`;
     }
    
     if ((room?.images || []).length < 3) {
-      errors[`room_${index}_images`] = `Loại phòng ${index + 1
-        }: Vui lòng tải lên ít nhất 3 ảnh phòng`;
+      errors[`room_${index}_images`] = `Vui lòng tải lên ít nhất 3 ảnh phòng`;
     }
 
     // Pricing: phải có ít nhất 1 loại kinh doanh enabled và có giá hợp lệ
@@ -276,8 +288,7 @@ export const validateRoomTypes = (data: any) => {
       (pricing.daily?.enabled && pricing.daily.price?.trim());
 
     if (!hasValidPricing) {
-      errors[`room_${index}_pricing`] = `Loại phòng ${index + 1
-        }: Vui lòng thiết lập ít nhất một loại giá phòng hợp lệ (theo giờ, qua đêm hoặc theo ngày)`;
+      errors[`room_${index}_pricing`] = `Vui lòng thiết lập ít nhất một loại giá phòng hợp lệ (theo giờ, qua đêm hoặc theo ngày)`;
     }
   });
 

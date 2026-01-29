@@ -11,7 +11,7 @@ type Props = {};
 const CreateHotelController = (props: Props) => {
   // src/utils/submitCreateHotel.ts
   const [attribute, setAttribute] = useState({});
-
+  const [step, setStep] = useState(1);
   useEffect(() => {
     fetchAttribute();
   }, []);
@@ -180,6 +180,8 @@ const CreateHotelController = (props: Props) => {
     <CreateHotelView
       attribute={attribute}
       submitCreateHotel={submitCreateHotel}
+      setStep={setStep}
+      step={step}
     />
   );
 };
