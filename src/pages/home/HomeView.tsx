@@ -340,6 +340,7 @@ const PerformanceChart = ({
   setDateRangeRevenueEvent,
   setRoomType,
   roomType,
+  loading
 }: any) => {
   const isVisit = title.includes("ghé thăm");
   const [selectedPeriod, setSelectedPeriod] = useState<Dayjs | null>(dayjs());
@@ -459,6 +460,7 @@ const PerformanceChart = ({
         )}
 
         <Box sx={{ height: 280, position: "relative" }}>
+          {loading&& <Loading height={"100%"}/>}
           <ResponsiveContainer width='100%' height='100%'>
             <LineChart data={chartData} margin={{ left: -20, right: 10 }}>
               <CartesianGrid
@@ -822,6 +824,10 @@ export default function HomeView({
   hotels,
   idHotel,
   setIdHotel,
+  loadingBooked,
+  loadingCheckIn,
+  loadingView,
+  loadingVisit,
 }) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const BOOKING_ITEMS = [
@@ -985,6 +991,7 @@ export default function HomeView({
             change='26% so với tuần trước'
             subtitle='Khách ghé thăm tăng – bạn hãy thêm những ưu đãi để hút khách hơn nữa'
             data={dataEventVisit}
+            loading={loadingVisit}
             markedDateStart={dataEventVisit?.start?.[0]?.date}
             markedDateEnd={
               dataEventVisit?.end?.[dataEventVisit?.end?.length - 1]?.date
@@ -1000,6 +1007,7 @@ export default function HomeView({
             change='26% so với tuần trước'
             subtitle='Khách ít quan tâm – bạn hãy thử chiến dịch truyền thông để kéo lại sự chú ý'
             data={dataEventView}
+            loading={loadingView}
             markedDateStart={dataEventView?.start?.[0]?.date}
             markedDateEnd={
               dataEventView?.end?.[dataEventView?.end?.length - 1]?.date
@@ -1017,6 +1025,7 @@ export default function HomeView({
             change='26% so với tuần trước'
             subtitle='Đặt phòng đang tăng -  bạn hãy thêm những ưu đãi để hút khách hơn nữa'
             data={dataEventBooked}
+            loading={loadingBooked}
             markedDateStart={dataEventBooked?.start?.[0]?.date}
             markedDateEnd={
               dataEventBooked?.end?.[dataEventBooked?.end?.length - 1]?.date
@@ -1034,6 +1043,7 @@ export default function HomeView({
             change='26% so với tuần trước'
             subtitle='Khách nhận phòng giảm -  cần xem lại trải nghiệm khách khi nhận phòng'
             data={dataEventCheckin}
+            loading={loadingCheckIn}
             markedDateStart={dataEventCheckin?.start?.[0]?.date}
             markedDateEnd={
               dataEventCheckin?.end?.[dataEventCheckin?.end?.length - 1]?.date
@@ -1543,6 +1553,7 @@ import {
   SelectProps,
 } from "@mui/material";
 import HotelSelect from "../../components/HotelSelect";
+import Loading from "../../components/Loading";
 
 type RoomType = "all" | "hourly" | "overnight" | "daily";
 

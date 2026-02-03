@@ -936,7 +936,7 @@ function ReviewDetailModal({
             mb={2}
             flexWrap='wrap'>
             <Typography variant='body2' color='text.secondary'>
-              Mã đặt phòng: {detail.booking?.code || "-"}
+              Mã đặt phòng: {detail.booking?.code || "-"} | 
             </Typography>
 
             <Chip

@@ -291,30 +291,161 @@ function QuickBlockDialog({
     checkIn: dayjs(),
     checkOut: dayjs().add(1, "day"),
   });
-  const [startTime, setStartTime] = useState(dayjs().hour(15).minute(0));
-  const [endTime, setEndTime] = useState(dayjs().hour(16).minute(0));
+  
+  // Lấy giờ hiện tại
+  const now = dayjs();
+  const currentHour = now.hour();
+  
+  // Tính toán giờ mặc định
+  const getDefaultStartHour = () => {
+    const isToday = dateRange.checkIn.isSame(now, 'day');
+    if (isToday) {
+      // Nếu là hôm nay, bắt đầu từ giờ hiện tại + 1 (làm tròn lên)
+      return currentHour + 1;
+    }
+    return 9; // Mặc định 09:00 cho ngày khác
+  };
+  
+  const getDefaultEndHour = () => {
+    const isToday = dateRange.checkOut.isSame(now, 'day');
+    if (isToday) {
+      // Nếu checkout là hôm nay, kết thúc ở giờ cuối cùng trong ngày (23h)
+      return 23;
+    }
+    return 10; // Mặc định 10:00 cho ngày khác
+  };
+  
+  const [startTime, setStartTime] = useState(dayjs().hour(getDefaultStartHour()).minute(0));
+  const [endTime, setEndTime] = useState(dayjs().hour(getDefaultEndHour()).minute(0));
   const [availableRooms, setAvailableRooms] = useState(0);
   const [reason, setReason] = useState("");
   const [note, setNote] = useState("");
+
+  // Tạo danh sách giờ từ 00:00 đến 23:00
+  const generateTimeOptions = () => {
+    const options = [];
+    for (let i = 0; i < 24; i++) {
+      const hour = i.toString().padStart(2, '0');
+      options.push({ value: i, label: `${hour}:00` });
+    }
+    return options;
+  };
+
+  const timeOptions = generateTimeOptions();
+
+  // Lọc giờ cho startTime
+  const getFilteredStartTimeOptions = () => {
+    const isToday = dateRange.checkIn.isSame(now, 'day');
+    const isSameDay = dateRange.checkIn.isSame(dateRange.checkOut, 'day');
+    
+    if (!isToday) {
+      // Không phải hôm nay, hiển thị tất cả
+      return timeOptions;
+    }
+
+    // Là hôm nay, chỉ hiển thị các giờ từ giờ hiện tại + 1 trở đi
+    return timeOptions.filter(option => option.value > currentHour);
+  };
+
+  // Lọc giờ cho endTime
+  const getFilteredEndTimeOptions = () => {
+    const isStartToday = dateRange.checkIn.isSame(now, 'day');
+    const isEndToday = dateRange.checkOut.isSame(now, 'day');
+    const isSameDay = dateRange.checkIn.isSame(dateRange.checkOut, 'day');
+    
+    if (!isEndToday) {
+      // Nếu checkout không phải hôm nay, hiển thị tất cả
+      return timeOptions;
+    }
+
+    // Nếu checkout là hôm nay
+    if (isSameDay) {
+      // Cùng ngày với checkin (và là hôm nay)
+      // Chỉ hiển thị các giờ lớn hơn startTime và không quá 23h
+      return timeOptions.filter(option => 
+        option.value > startTime.hour() && option.value <= 23
+      );
+    } else {
+      // Khác ngày (checkout là hôm nay, checkin là ngày trước)
+      // Hiển thị tất cả các giờ từ 0-23, nhưng disable các giờ đã qua nếu là hôm nay
+      return timeOptions.map(option => ({
+        ...option,
+        disabled: option.value <= currentHour // Disable các giờ đã qua
+      }));
+    }
+  };
+
+  const filteredStartTimeOptions = getFilteredStartTimeOptions();
+  const filteredEndTimeOptions = getFilteredEndTimeOptions();
+
+  // Cập nhật startTime và endTime khi dateRange thay đổi
+  useEffect(() => {
+    const isToday = dateRange.checkIn.isSame(now, 'day');
+    const isSameDay = dateRange.checkIn.isSame(dateRange.checkOut, 'day');
+    
+    // Cập nhật startTime
+    let newStartHour = startTime.hour();
+    if (isToday) {
+      // Nếu là hôm nay, đảm bảo startTime không nhỏ hơn giờ hiện tại + 1
+      const minStartHour = currentHour + 1;
+      if (newStartHour <= currentHour) {
+        newStartHour = Math.min(minStartHour, 23);
+        setStartTime(dayjs().hour(newStartHour).minute(0));
+      }
+    } else {
+      // Nếu không phải hôm nay, reset về 0h nếu khác ngày với end
+      if (!isSameDay) {
+        setStartTime(dayjs().hour(0).minute(0));
+      }
+    }
+    
+    // Cập nhật endTime
+    let newEndHour = endTime.hour();
+    if (isSameDay) {
+      // Cùng ngày: endTime phải lớn hơn startTime
+      if (newEndHour <= newStartHour) {
+        newEndHour = Math.min(newStartHour + 1, 23);
+        setEndTime(dayjs().hour(newEndHour).minute(0));
+      }
+    } else {
+      // Khác ngày: endTime là 23h nếu checkout là ngày hôm nay, hoặc 23h nếu không
+      const isEndToday = dateRange.checkOut.isSame(now, 'day');
+      if (isEndToday) {
+        // Nếu checkout là hôm nay, endTime không được lớn hơn giờ hiện tại
+        newEndHour = Math.min(currentHour, 23);
+        setEndTime(dayjs().hour(newEndHour).minute(0));
+      } else {
+        // Không phải hôm nay, đặt là 23h
+        setEndTime(dayjs().hour(23).minute(0));
+      }
+    }
+  }, [dateRange]);
+
   console.log("AAAAA currentSlot", currentSlot);
-  // Đồng bộ dữ liệu khi currentSlot thay đổi (mỗi lần mở dialog với slot mới)
+
   useEffect(() => {
     if (!currentSlot || !openQuickBlock) {
-      // Reset về mặc định nếu không có slot hoặc dialog đóng
+      // Reset với giá trị mặc định thông minh
+      const today = dayjs();
+      const tomorrow = today.add(1, 'day');
+      
       setBlockType("hourly");
       setDateRange({
-        checkIn: dayjs(),
-        checkOut: dayjs().add(1, "day"),
+        checkIn: today,
+        checkOut: tomorrow,
       });
-      setStartTime(dayjs().hour(15).minute(0));
-      setEndTime(dayjs().hour(16).minute(0));
+      
+      // Set giờ mặc định thông minh
+      const startHour = Math.min(currentHour + 1, 23);
+      setStartTime(today.hour(startHour).minute(0));
+      setEndTime(tomorrow.hour(23).minute(0));
+      
       setAvailableRooms(0);
       setReason("");
       setNote("");
       return;
     }
 
-    // Fill dữ liệu từ currentSlot
     setBlockType(currentSlot.rent_type || "hourly");
     setAvailableRooms(currentSlot.available_rooms ?? 0);
     setReason(currentSlot.reason || "");
@@ -323,24 +454,21 @@ function QuickBlockDialog({
     const startDayjs = dayjs(currentSlot.start_time);
     const endDayjs = dayjs(currentSlot.end_time);
 
-    // Set ngày
     setDateRange({
       checkIn: startDayjs,
       checkOut: endDayjs,
     });
 
-    // Nếu là hourly → set giờ chính xác
     if (currentSlot.rent_type === "hourly") {
       setStartTime(startDayjs);
       setEndTime(endDayjs);
     } else {
-      // Daily / Overnight → set giờ mặc định (không dùng đến nhưng giữ cho an toàn)
       setStartTime(dayjs().hour(0).minute(0));
-      setEndTime(dayjs().hour(23).minute(59));
+      setEndTime(dayjs().hour(23).minute(0));
     }
   }, [currentSlot, openQuickBlock]);
 
-  const isHourly = blockType === "hourly"; // Dựa trên blockType hiện tại (người dùng có thể đổi)
+  const isHourly = blockType === "hourly";
 
   const getRentLabel = (type: string) => {
     switch (type) {
@@ -382,20 +510,57 @@ function QuickBlockDialog({
       note: note || undefined,
     };
 
-    console.log("Gửi API:", body); // Debug
+    console.log("Gửi API:", body);
 
     try {
       const result = await updateInventoryRooms(idHotel, body);
       if (result?.status == "created") {
-        toast.success("Khóa phòng thành công");
+        toast.success("Cập nhật số phòng còn lại thành công");
         onSuccess();
         onClose();
       } else {
-        toast.error("Khóa phòng thất bại");
+        toast.error("Cập nhật số phòng còn lại thất bại");
       }
     } catch (e) {
       console.error(e);
       alert("Lỗi kết nối mạng!");
+    }
+  };
+
+  // Handler khi dateRange thay đổi
+  const handleDateRangeChange = (newDateRange) => {
+    setDateRange(newDateRange);
+    
+    // Cập nhật giờ tự động dựa trên ngày mới
+    const isStartToday = newDateRange.checkIn.isSame(now, 'day');
+    const isEndToday = newDateRange.checkOut.isSame(now, 'day');
+    const isSameDay = newDateRange.checkIn.isSame(newDateRange.checkOut, 'day');
+    
+    if (isHourly) {
+      // Cập nhật startTime
+      let newStartHour = startTime.hour();
+      if (isStartToday) {
+        // Nếu checkin là hôm nay, startTime từ giờ hiện tại + 1
+        newStartHour = Math.min(currentHour + 1, 23);
+      } else if (!isSameDay) {
+        // Khác ngày, bắt đầu từ 0h
+        newStartHour = 0;
+      }
+      setStartTime(dayjs().hour(newStartHour).minute(0));
+      
+      // Cập nhật endTime
+      let newEndHour = endTime.hour();
+      if (isSameDay) {
+        // Cùng ngày: endTime phải lớn hơn startTime
+        newEndHour = Math.min(newStartHour + 1, 23);
+      } else if (isEndToday) {
+        // Checkout là hôm nay: endTime là giờ hiện tại (hoặc 23h nếu đã qua 23h)
+        newEndHour = Math.min(currentHour, 23);
+      } else {
+        // Không phải hôm nay: endTime là 23h
+        newEndHour = 23;
+      }
+      setEndTime(dayjs().hour(newEndHour).minute(0));
     }
   };
 
@@ -457,7 +622,11 @@ function QuickBlockDialog({
               <Typography fontSize={15} color='#888' fontWeight={500}>
                 Khoảng thời gian
               </Typography>
-              <SimpleDateSearchBar value={dateRange} onChange={setDateRange} />
+              <SimpleDateSearchBar 
+                value={dateRange} 
+                onChange={handleDateRangeChange} 
+                type={blockType}
+              />
             </Box>
 
             {/* Khung giờ - CHỈ HIỆN khi blockType là hourly */}
@@ -474,49 +643,69 @@ function QuickBlockDialog({
                   alignItems='center'
                   width={isMobile?"70%":'60%'}
                   spacing={2}>
-                  <MobileTimePicker
-                    value={startTime}
-                    onChange={setStartTime}
-                    ampm={false}
-                    slotProps={{
-                      textField: {
-                        size: "small",
-                        sx: {
-                          "& .MuiInputBase-root": { borderRadius: "32px" },
-                        },
-                        InputProps: {
-                          endAdornment: (
-                            <AccessTimeIcon
-                              sx={{ fontSize: 18, color: "#999" }}
-                            />
-                          ),
-                        },
-                      },
-                    }}
-                  />
+                  {/* Giờ bắt đầu */}
+                  <FormControl fullWidth>
+                    <Select
+                      value={startTime.hour()}
+                      onChange={(e) => {
+                        const hour = e.target.value as number;
+                        setStartTime(dayjs().hour(hour).minute(0));
+                        
+                        // Nếu endTime <= startTime, tự động tăng endTime
+                        if (endTime.hour() <= hour) {
+                          const newEndHour = Math.min(hour + 1, 23);
+                          setEndTime(dayjs().hour(newEndHour).minute(0));
+                        }
+                      }}
+                      size='small'
+                      sx={{ borderRadius: "32px", height: 40 }}
+                    >
+                      {filteredStartTimeOptions.map(option => (
+                        <MenuItem 
+                          key={`start-${option.value}`} 
+                          value={option.value}
+                        >
+                          {option.label}
+                          {dateRange.checkIn.isSame(now, 'day') && option.value === currentHour + 1 }
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  
                   <Typography color='#aaa' fontSize={18}>
                     —
                   </Typography>
-                  <MobileTimePicker
-                    value={endTime}
-                    onChange={setEndTime}
-                    ampm={false}
-                    slotProps={{
-                      textField: {
-                        size: "small",
-                        sx: {
-                          "& .MuiInputBase-root": { borderRadius: "32px" },
-                        },
-                        InputProps: {
-                          endAdornment: (
-                            <AccessTimeIcon
-                              sx={{ fontSize: 18, color: "#999" }}
-                            />
-                          ),
-                        },
-                      },
-                    }}
-                  />
+                  
+                  {/* Giờ kết thúc */}
+                  <FormControl fullWidth>
+                    <Select
+                      value={endTime.hour()}
+                      onChange={(e) => {
+                        const hour = e.target.value as number;
+                        setEndTime(dayjs().hour(hour).minute(0));
+                      }}
+                      size='small'
+                      sx={{ borderRadius: "32px", height: 40 }}
+                    >
+                      {filteredEndTimeOptions.map(option => {
+                        const isDisabled = option.disabled || option.value <= startTime.hour();
+                        const isLastHourOfDay = dateRange.checkOut.isSame(now, 'day') && option.value === Math.min(currentHour, 23);
+                        const isMaxHour = option.value === 23;
+                        
+                        return (
+                          <MenuItem 
+                            key={`end-${option.value}`} 
+                            value={option.value}
+                            disabled={isDisabled}
+                          >
+                            {option.label}
+                            {isLastHourOfDay}
+                            {!dateRange.checkOut.isSame(now, 'day') && isMaxHour }
+                          </MenuItem>
+                        );
+                      })}
+                    </Select>
+                  </FormControl>
                 </Stack>
               </Box>
             )}

@@ -43,6 +43,7 @@ const DateRangePicker = ({
   value,
   onClose,
   onApply,
+  type
 }: DateRangePickerProps) => {
   const [checkIn, setCheckIn] = useState<Dayjs | null>(value.checkIn);
   const [checkOut, setCheckOut] = useState<Dayjs | null>(value.checkOut);
@@ -55,7 +56,7 @@ const DateRangePicker = ({
   const handleDateClick = (date: Dayjs) => {
     if (!checkIn || (checkOut && date.isBefore(checkIn))) {
       setCheckIn(date);
-      setCheckOut(null);
+      setCheckOut(type && type == "hourly" ? date: null);
       return;
     }
 
@@ -65,7 +66,7 @@ const DateRangePicker = ({
     }
 
     setCheckIn(date);
-    setCheckOut(null);
+    setCheckOut(type && type == "hourly" ? date : null);
   };
 
   const handleApply = () => {
@@ -181,6 +182,7 @@ const DateRangePicker = ({
 export default function SimpleDateSearchBar({
   value,
   onChange,
+  type
 }: SimpleDateSearchBarProps) {
   const dateRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -221,6 +223,7 @@ export default function SimpleDateSearchBar({
               value={value}
               onClose={() => setOpen(false)}
               onApply={onChange}
+              type={type}
             />
           </Box>
         </Box>

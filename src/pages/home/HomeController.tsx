@@ -45,7 +45,10 @@ const HomeController = (props: Props) => {
   const [dataReview, setDataReview] = useState([]);
   const [hotels, setHotels] = useState([]);
   const [idHotel, setIdHotel] = useState(null);
-
+  const [loadingView,setLoadingView] = useState(false)
+  const [loadingBooked,setLoadingBooked] = useState(false)
+  const [loadingCheckIn,setLoadingCheckIn] = useState(false)
+  const [loadingVisit,setLoadingVisit] = useState(false)
   useEffect(() => {
     if (idHotel) getGeneral();
   }, [dateRange, idHotel]);
@@ -173,6 +176,7 @@ const HomeController = (props: Props) => {
   };
 
   const getGeneralRoomTypeBooking = async () => {
+      setLoadingBooked(true)
     try {
       let result = {
         start: [],
@@ -229,8 +233,10 @@ const HomeController = (props: Props) => {
     } catch (error) {
       console.log(error);
     }
+    setLoadingBooked(false)
   };
   const getGeneralRoomTypeCheckin = async () => {
+    setLoadingCheckIn(true)
     try {
       let result = {
         start: [],
@@ -287,8 +293,10 @@ const HomeController = (props: Props) => {
     } catch (error) {
       console.log(error);
     }
+    setLoadingCheckIn(false)
   };
   const getEnventVisitMonth = async () => {
+    setLoadingVisit(true)
     try {
       let result = { start: [], end: [] };
 
@@ -334,9 +342,11 @@ const HomeController = (props: Props) => {
     } catch (error) {
       console.log(error);
     }
+    setLoadingVisit(false)
   };
 
   const getEnventViewMonth = async () => {
+    setLoadingView(true)
     try {
       let result = { start: [], end: [] };
 
@@ -382,6 +392,7 @@ const HomeController = (props: Props) => {
     } catch (error) {
       console.log(error);
     }
+    setLoadingView(false)
   };
   useEffect(() => {
     if (idHotel) getDataReview();
@@ -449,6 +460,10 @@ const HomeController = (props: Props) => {
       hotels={hotels}
       idHotel={idHotel}
       setIdHotel={setIdHotel}
+      loadingBooked={loadingBooked}
+      loadingCheckIn={loadingCheckIn}
+      loadingView={loadingView}
+      loadingVisit={loadingVisit}
     />
   );
 };
