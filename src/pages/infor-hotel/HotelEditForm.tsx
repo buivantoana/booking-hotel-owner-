@@ -234,11 +234,11 @@ export default function HotelEditFormExact({
       const response = await updateHotel(searchParams.get("id"), formData);
       console.log("Update success", response);
       if (response?.hotel_id) {
-        toast.success(response?.message);
+        toast.success("Chỉnh sửa khách sạn thành công");
         getHotelDetail();
         setAction("edit_detail");
       } else {
-        toast.success(response?.message);
+        toast.success("Chỉnh sửa khách sạn thất bại");
       }
     } catch (err) {
       console.error(err);
@@ -358,7 +358,7 @@ export default function HotelEditFormExact({
                   <Typography
                     fontSize={15}
                     fontWeight={600}
-                    color='#333'
+                    color={lockedLangs[selectedLang]?"rgba(0, 0, 0, 0.38)":'#333'}
                     mb={1.2}>
                     Tên khách sạn
                   </Typography>
@@ -419,7 +419,7 @@ export default function HotelEditFormExact({
                   <Typography
                     fontSize={15}
                     fontWeight={600}
-                    color='#333'
+                    color={"rgba(0, 0, 0, 0.38)"}
                     mb={1.2}>
                     Tình trạng hợp tác
                   </Typography>
@@ -492,7 +492,7 @@ export default function HotelEditFormExact({
                   <Typography
                     fontSize={15}
                     fontWeight={600}
-                    color='#333'
+                    color={"rgba(0, 0, 0, 0.38)"}
                     mb={1.2}>
                     Địa chỉ
                   </Typography>
@@ -521,7 +521,7 @@ export default function HotelEditFormExact({
                     <Typography
                       fontSize={15}
                       fontWeight={600}
-                      color='#333'
+                      color={"rgba(0, 0, 0, 0.38)"}
                       mb={1.2}>
                       Tỉnh/Thành phố
                     </Typography>

@@ -171,9 +171,9 @@ function HotelInfoDetail({
   const rentTypes = detailHotel.rent_types
     ? JSON.parse(detailHotel.rent_types)
     : {};
-  const rentStr = `08:00 ~ 22:00 / ${rentTypes.overnight?.from || "22:00"} ~ ${
+  const rentStr = `08:00-22:00 / ${rentTypes.overnight?.from || "22:00"}-${
     rentTypes.overnight?.to || "08:00"
-  } / ${rentTypes.daily?.from || "14:00"} ~ ${rentTypes.daily?.to || "12:00"}`;
+  } / ${rentTypes.daily?.from || "14:00"}-${rentTypes.daily?.to || "12:00"}`;
 
   const images = detailHotel.images ? JSON.parse(detailHotel.images) : [];
   const imagesVerify = detailHotel.verify_images

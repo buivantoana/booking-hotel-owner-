@@ -29,9 +29,11 @@ import {
   ContentCopy as ContentCopyIcon,
   PauseCircleOutline as PauseCircleIcon,
   Close,
+  PlayArrowOutlined,
+  PlayCircle,
 } from "@mui/icons-material";
 import { useEffect, useState } from "react";
-import remove from "../../images/delete.png";
+import remove from "../../images/stop.png";
 import success from "../../images/Frame.png";
 import HotelDetail from "./HotelDetail";
 import HotelEditForm from "./HotelEditForm";
@@ -39,6 +41,7 @@ import RoomDetail from "./RoomDetail";
 import { getHotel, toggleHotels } from "../../service/hotel";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import RoomTypeManager from "./RoomTypeManager";
+import { toast } from "react-toastify";
 
 // Component menu thao tác
 function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
@@ -67,8 +70,8 @@ function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
           color: "rgba(152, 183, 32, 1)",
           fontWeight: 500,
           minWidth: 110,
-          position:"relative",
-          zIndex:"1000",
+          position: "relative",
+          zIndex: "1000",
           "&:hover": { borderColor: "#bbb" },
         }}>
         Thao tác
@@ -108,7 +111,7 @@ function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
             fontSize: 14,
             color: hotel?.status == "active" ? "#d32f2f" : "unset",
           }}>
-          <PauseCircleIcon fontSize='small' />
+          {hotel?.status == "paused" ? <PlayCircle fontSize='small' /> : <PauseCircleIcon fontSize='small' />}
           {hotel?.status == "paused"
             ? "Tiếp tục kinh doanh"
             : "Ngừng kinh doanh"}
@@ -248,7 +251,18 @@ export default function InforHotelView({
                     navigate(`/info-hotel?id=${hotel.id}`);
                     setAction("edit_detail");
                   }}
-                  sx={{ fontWeight: 500, cursor: "pointer" }}
+                  sx={{
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    transition: "transform 0.2s ease, background-color 0.2s ease", // mượt mà
+                    "&:hover": {
+                      transform: "scale(1.05)",
+                       // hoặc dùng màu bạn thích, ví dụ: "rgba(0,0,0,0.04)"
+                      // nếu muốn nổi bật hơn có thể thêm:
+                      // boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                      // zIndex: 1,
+                    },
+                  }}
                 >
                   {parseLang(hotel.name)}
                 </TableCell>
@@ -268,12 +282,12 @@ export default function InforHotelView({
                 </TableCell>
 
                 <TableCell>
-                  <ActionMenu
+                  {(hotel.status != "pending" && hotel.status != "rejected") && <ActionMenu
                     hotel={hotel}
                     setIdHotel={setIdHotel}
                     setAction={setAction}
                     setDeleteDialogOpen={setDeleteDialogOpen}
-                  />
+                  />}
                 </TableCell>
               </TableRow>
             ))}
@@ -300,7 +314,7 @@ export default function InforHotelView({
         {hotels?.map((hotel, index) => (
           <Box
             key={hotel.id}
-           
+
             sx={{
               bgcolor: "white",
               borderRadius: "12px",
@@ -316,7 +330,7 @@ export default function InforHotelView({
             }}
           >
             {/* Header card */}
-            <Box  onClick={() => {
+            <Box onClick={() => {
               navigate(`/info-hotel?id=${hotel.id}`);
               setAction("edit_detail");
             }} sx={{ p: 2, bgcolor: "#f8f9fa", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -376,12 +390,12 @@ export default function InforHotelView({
 
             {/* Thao tác */}
             <Box sx={{ p: 2, bgcolor: "#fafafa", display: "flex", justifyContent: "flex-end" }}>
-              <ActionMenu
+              {(hotel.status != "pending" && hotel.status != "rejected") && <ActionMenu
                 hotel={hotel}
                 setIdHotel={setIdHotel}
                 setAction={setAction}
                 setDeleteDialogOpen={setDeleteDialogOpen}
-              />
+              />}
             </Box>
           </Box>
         ))}
@@ -438,7 +452,7 @@ export default function InforHotelView({
               alignItems: "center",
               mb: 4,
             }}>
-            <Typography variant={isMobile?"h6":'h5'} fontWeight='bold'>
+            <Typography variant={isMobile ? "h6" : 'h5'} fontWeight='bold'>
               Thông tin khách sạn
             </Typography>
 
@@ -453,7 +467,7 @@ export default function InforHotelView({
                 borderRadius: "50px",
                 textTransform: "none",
                 fontWeight: 600,
-                px:isMobile?1: 3,
+                px: isMobile ? 1 : 3,
                 py: 1.2,
                 boxShadow: "0 4px 15px rgba(102,187,106,0.4)",
                 "&:hover": { bgcolor: "#4caf50" },
@@ -524,6 +538,7 @@ export default function InforHotelView({
                     if (result?.hotel_id) {
                       getDataHotels();
                       setDeleteDialogOpen(false);
+                      toast.success(idHotel?.status == "paused" ? "Mở lại kinh doanh thành công" : "Ngừng kinh doanh thành công")
                     }
                   } catch (error) {
                     console.log(error);
