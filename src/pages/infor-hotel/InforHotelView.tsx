@@ -134,6 +134,10 @@ export default function InforHotelView({
   const total = hotels.length;
   const navigate = useNavigate();
   const active = hotels.filter((h) => h.status === "active").length;
+  const confirm = hotels.filter((h) => h.status === "pending").length;
+  const paused = hotels.filter((h) => h.status === "paused").length;
+  const rejected = hotels.filter((h) => h.status === "rejected").length;
+  const terminated = hotels.filter((h) => h.status === "terminated").length;
   const inactive = total - active;
   const [detailHotel, setDetailHotel] = useState({});
   const [searchParams, setSearchParams] = useSearchParams();
@@ -180,10 +184,19 @@ export default function InforHotelView({
           Tất cả <strong>{total}</strong>
         </Box>
         <Box>
-          Dạng hoạt động <strong>{active}</strong>
+          Đạng hoạt động <strong>{active}</strong>
         </Box>
         <Box>
-          Ngừng kinh doanh <strong>{inactive}</strong>
+          Ngừng kinh doanh <strong>{paused}</strong>
+        </Box>
+        <Box>
+          Chờ duyệt <strong>{confirm}</strong>
+        </Box>
+        <Box>
+          Bị từ chối <strong>{rejected}</strong>
+        </Box>
+        <Box>
+          Ngừng hợp tác <strong>{terminated}</strong>
         </Box>
       </Stack>
     </Box>
@@ -571,8 +584,12 @@ const renderStatusChip = (status) => {
       sx: { bgcolor: "#1976D2", color: "white" },
     },
     terminated: {
-      label: "Đã kết thúc",
+      label: "Đã chấm dứt",
       sx: { bgcolor: "#D32F2F", color: "white" },
+    },
+    rejected: {
+      label: "Bị từ chối ",
+      sx: { bgcolor: "#a5a5a5", color: "white" },
     },
   };
 

@@ -941,7 +941,7 @@ function ReviewDetailModal({
 
             <Chip
               icon={<Bed sx={{ fontSize: 16 }} />}
-              label='Phòng luxury'
+              label={detail.booking?.room_type_name}
               size='small'
               sx={{ bgcolor: "#fff3e0", color: "#ef6c00", fontSize: 13 }}
             />

@@ -121,6 +121,10 @@ export default function HotelBasicInfo({
   console.log("formData", formData);
   /** HOURS OPTIONS */
   const HOURS = [
+    "00:00",
+    "01:00",
+    "02:00",
+    "03:00",
     "04:00",
     "05:00",
     "06:00",
@@ -141,16 +145,22 @@ export default function HotelBasicInfo({
     "21:00",
     "22:00",
     "23:00",
-    "00:00",
-    "01:00",
-    "02:00",
-    "03:00",
+    
+    
   ];
 
-  /** ===============================
-   * COMPONENT RENDER CARD TIME
-   =================================*/
-   const renderTimeCard = (title, fields) => (
+
+ const renderTimeCard = (title, fields) => {
+  // Xác định loại thời gian dựa trên title
+  const isOvernight = title === "Qua đêm";
+  const isDaily = title === "Theo ngày";
+  const isHourly = title === "Theo giờ";
+
+  // Sắp xếp giờ cho QUA ĐÊM: 21:00, 22:00, 23:00, 00:00
+  const OVERNIGHT_START_TIMES = ["21:00", "22:00", "23:00", "00:00"];
+  const OVERNIGHT_END_TIMES = ["00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00"];
+
+  return (
     <Card
       sx={{
         p: 2.5,
@@ -168,31 +178,61 @@ export default function HotelBasicInfo({
       >
         {title}
       </Typography>
-  
+
       <Box display="flex" flexDirection="column" gap={2}>
         {fields.map((item, i) => {
-          // Giả sử HOURS là mảng ['00:00', '00:30', ..., '23:30']
-          // Tính toán các giờ kết thúc hợp lệ (sau giờ bắt đầu)
-          const startTime = item.startValue;
-          const availableEndTimes = startTime
-            ? HOURS.filter((h) => h > startTime) // So sánh chuỗi giờ HH:mm
-            : HOURS;
-  
-          // Nếu giờ kết thúc hiện tại không còn hợp lệ → reset về rỗng
+          // Lọc giờ BẮT ĐẦU dựa trên loại
+          let availableStartTimes = HOURS;
+          
+          if (isOvernight) {
+            // QUA ĐÊM: chỉ được chọn từ 21:00 đến 00:00
+            availableStartTimes = OVERNIGHT_START_TIMES;
+          }
+
+          // Lọc giờ KẾT THÚC dựa trên loại và giờ bắt đầu
+          let availableEndTimes = HOURS;
+          
+          if (isOvernight) {
+            // QUA ĐÊM: luôn hiển thị giờ kết thúc từ 00:00-12:00 (sáng hôm sau)
+            availableEndTimes = OVERNIGHT_END_TIMES;
+            
+            // Nếu đã chọn giờ bắt đầu, cần kiểm tra logic
+            if (item.startValue) {
+              // Xử lý đặc biệt: Nếu bắt đầu là 00:00, thì kết thúc phải từ 01:00 trở đi
+              if (item.startValue === "00:00") {
+                availableEndTimes = OVERNIGHT_END_TIMES.filter(h => h > "00:00");
+              } 
+              // Nếu bắt đầu từ 21:00-23:00, thì tất cả giờ 00:00-12:00 đều hợp lệ (vì là ngày khác)
+              else {
+                // Tất cả đều hợp lệ vì khác ngày
+                availableEndTimes = OVERNIGHT_END_TIMES;
+              }
+            }
+          } else if (isDaily) {
+            // THEO NGÀY: chỉ cho phép chọn 12:00
+            availableEndTimes = ["12:00"];
+          } else if (item.startValue) {
+            // THEO GIỜ: bình thường, giờ kết thúc phải sau giờ bắt đầu
+            availableEndTimes = HOURS.filter((h) => h > item.startValue);
+          }
+
+          // Kiểm tra giờ kết thúc hiện tại có hợp lệ không
           const currentEndValid = availableEndTimes.includes(item.endValue);
           const effectiveEndValue = currentEndValid ? item.endValue : "";
-  
-          // Nếu reset, gọi callback để cập nhật state
-          if (!currentEndValid && item.endValue !== "") {
-            item.onEndChange(""); // Reset end time nếu không hợp lệ
-          }
-  
+
+          // Nếu giờ kết thúc không hợp lệ, reset về rỗng
+          useEffect(() => {
+            if (!currentEndValid && item.endValue !== "") {
+              item.onEndChange("");
+            }
+          }, [currentEndValid, item.endValue, item.onEndChange]);
+
           return (
             <Box key={i}>
               <Typography fontSize={14} color="#444" mb={0.5}>
                 {item.label}
               </Typography>
-  
+
               {/* START TIME */}
               <Box
                 display="flex"
@@ -206,8 +246,22 @@ export default function HotelBasicInfo({
                     onChange={(e) => {
                       const newStart = e.target.value;
                       item.onStartChange(newStart);
-                      // Nếu giờ kết thúc hiện tại ≤ giờ bắt đầu mới → reset end
-                      if (item.endValue && item.endValue <= newStart) {
+                      
+                      // Nếu là loại "Theo ngày", tự động đặt giờ kết thúc là 12:00
+                      if (isDaily && newStart) {
+                        item.onEndChange("12:00");
+                      }
+                      // Nếu là loại "Qua đêm"
+                      else if (isOvernight && item.endValue) {
+                        // Xử lý đặc biệt: Nếu bắt đầu là 00:00, kết thúc phải > 00:00
+                        if (newStart === "00:00" && item.endValue <= "00:00") {
+                          item.onEndChange("");
+                        }
+                        // Nếu bắt đầu từ 21:00-23:00, giữ nguyên end (vì khác ngày)
+                        // Không cần reset vì 00:00-12:00 đều hợp lệ
+                      }
+                      // Nếu là loại "Theo giờ" và giờ kết thúc không hợp lệ, reset
+                      else if (isHourly && item.endValue && item.endValue <= newStart) {
                         item.onEndChange("");
                       }
                     }}
@@ -234,19 +288,19 @@ export default function HotelBasicInfo({
                     <MenuItem disabled value="">
                       {item.startPlaceholder}
                     </MenuItem>
-                    {HOURS.map((h) => (
+                    {availableStartTimes.map((h) => (
                       <MenuItem key={h} value={h}>
-                        {h}
+                        {isOvernight && h === "00:00" ? "00:00 (nửa đêm)" : h}
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
-  
+
                 <Typography width="20%" fontSize={14} color="#555">
                   ngày {item.startDay}
                 </Typography>
               </Box>
-  
+
               {/* END TIME */}
               <Box
                 display="flex"
@@ -257,9 +311,10 @@ export default function HotelBasicInfo({
               >
                 <FormControl size="small" fullWidth>
                   <Select
-                    value={effectiveEndValue} // Sử dụng giá trị đã kiểm tra hợp lệ
+                    value={effectiveEndValue}
                     onChange={(e) => item.onEndChange(e.target.value)}
                     displayEmpty
+                    disabled={isDaily && item.startValue}
                     input={
                       <OutlinedInput
                         startAdornment={
@@ -284,21 +339,44 @@ export default function HotelBasicInfo({
                     </MenuItem>
                     {availableEndTimes.map((h) => (
                       <MenuItem key={h} value={h}>
-                        {h}
+                        {isOvernight ? `${h} (sáng hôm sau)` : h}
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
-  
+
                 <Typography width="20%" fontSize={14} color="#555">
                   ngày {item.endDay}
                 </Typography>
               </Box>
-  
-              {/* (Tùy chọn) Hiển thị cảnh báo nếu end time không hợp lệ */}
+
+              {/* Hiển thị cảnh báo nếu end time không hợp lệ */}
               {!currentEndValid && item.startValue && (
                 <Typography color="error" fontSize={12} mt={0.5}>
-                  Giờ kết thúc phải sau giờ bắt đầu
+                  {isOvernight 
+                    ? "Giờ kết thúc phải từ 00:00-12:00 sáng hôm sau" 
+                    : isDaily
+                    ? "Giờ kết thúc phải là 12:00"
+                    : "Giờ kết thúc phải sau giờ bắt đầu"}
+                </Typography>
+              )}
+              
+              {/* Hiển thị ghi chú đặc biệt cho từng loại */}
+              {isOvernight && !item.startValue && (
+                <Typography color="text.secondary" fontSize={11} mt={0.5}>
+                  Qua đêm: Bắt đầu từ 21:00-00:00, kết thúc từ 00:00-12:00 sáng hôm sau
+                </Typography>
+              )}
+              
+              {isOvernight && item.startValue && (
+                <Typography color="text.secondary" fontSize={11} mt={0.5}>
+                  Check-out: Sáng hôm sau, trước 12:00 trưa
+                </Typography>
+              )}
+              
+              {isDaily && item.startValue && (
+                <Typography color="text.secondary" fontSize={11} mt={0.5}>
+                  Check-out: 12:00 trưa ngày hôm sau
                 </Typography>
               )}
             </Box>
@@ -307,7 +385,7 @@ export default function HotelBasicInfo({
       </Box>
     </Card>
   );
-
+};
   /** ===============================
    * RENDER PAGE
    =================================*/

@@ -300,7 +300,7 @@ export async function getReviewstats(id) {
 export async function getHotels() {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.get(`/partner/hotel/my-hotels`, {
+    const response = await api.get(`/partner/hotel/my-hotels?limit=100`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

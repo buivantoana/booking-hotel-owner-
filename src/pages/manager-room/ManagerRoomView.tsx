@@ -917,7 +917,7 @@ function RoomScheduleTableHourly({
                   borderBottom="1px solid #eee"
                   bgcolor="#f9f9f9"
                 >
-                  <Typography fontWeight={600} fontSize={16}>
+                  <Typography fontWeight={600} sx={{textTransform:"capitalize"}} fontSize={16}>
                     {format(new Date(data?.start_time), "MMMM yyyy", { locale: vi })}
                   </Typography>
                 </Box>
@@ -948,9 +948,11 @@ function RoomScheduleTableHourly({
                               borderRadius: "20px",
                               boxShadow: "0 4px 15px rgba(152,183,32,0.4)",
                               "&:hover": { bgcolor: "#80a61a" },
+                              display:"flex",
+                              gap:.5
                             }}
                           >
-                            {g.dayOfMonth} {g.dayName}
+                            {g.dayOfMonth + " "}<Typography variant="span" sx={{textTransform:"capitalize"}}>{g.dayName}</Typography>
                           </Button>
                         </Box>
                       );
@@ -1140,7 +1142,7 @@ function RoomScheduleTableHourly({
                     <Typography fontWeight={500}>{p.label}</Typography>
                   </Box>
                 </Box>
-                <Box flex={1} display="flex" alignItems="center" pl={4}>
+                <Box width={"100%"}py={1} >
                   <Box
                     bgcolor={p.bg}
                     color={p.color}
