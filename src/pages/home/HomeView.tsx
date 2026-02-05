@@ -915,7 +915,7 @@ export default function HomeView({
             Tổng quan đặt phòng khách sạn của bạn trong hôm nay
           </Typography>
         </Box>
-        <SimpleDateSearchBar value={dateRange} onChange={setDateRange} />
+        <SimpleDateSearchBar type={"daily"} value={dateRange} onChange={setDateRange} />
       </Box>
 
       <Grid container spacing={3} mb={6}>

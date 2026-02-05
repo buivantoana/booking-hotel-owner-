@@ -301,228 +301,231 @@ export default function ManagerBookingView({
             {/* Label căn chuẩn */}
 
             <Stack
-  direction={{ xs: "column", sm: "row" }}
-  spacing={{ xs: 3, sm: 2 }}           // tăng khoảng cách dọc trên mobile
-  alignItems={{ xs: "stretch", sm: "end" }}  // mobile: full width, desktop: align bottom
-  mb={4}
-  sx={{
-    width: "100%",
-  }}
->
-  {/* Tìm kiếm */}
-  <Box sx={{ width: "100%" }}>
-    <Typography sx={{ mb: 1 }}>Tìm kiếm</Typography>
-    <TextField
-      fullWidth
-      placeholder="Tìm mã đặt phòng"
-      value={localFilters.booking_code}
-      onChange={(e) =>
-        setLocalFilters({
-          ...localFilters,
-          booking_code: e.target.value,
-        })
-      }
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            <SearchIcon sx={{ color: "#999" }} />
-          </InputAdornment>
-        ),
-      }}
-      sx={{
-        "& .MuiOutlinedInput-root": {
-          height: 44,                    // tăng chiều cao cho dễ chạm trên mobile
-          borderRadius: "24px",
-          backgroundColor: "#fff",
-          "& fieldset": {
-            borderColor: "#cddc39",
-            borderWidth: "1px",
-          },
-          "&:hover fieldset": {
-            borderColor: "#c0ca33",
-          },
-          "&.Mui-focused fieldset": {
-            borderColor: "#cddc39 !important",
-            boxShadow: "0 0 0 3px rgba(205, 220, 57, 0.2)",
-          },
-        },
-      }}
-    />
-  </Box>
-
-  {/* Loại đặt phòng */}
-  <Box sx={{ width: "100%" }}>
-    <Typography sx={{ mb: 1 }}>Loại đặt phòng</Typography>
-    <Select
-      fullWidth
-      displayEmpty
-      value={localFilters.rent_type}
-      onChange={(e) =>
-        setLocalFilters({
-          ...localFilters,
-          rent_type: e.target.value,
-        })
-      }
-      sx={{
-        height: 44,
-        borderRadius: "24px",
-        bgcolor: "#fff",
-        "& .MuiOutlinedInput-notchedOutline": {
-          borderColor: "#cddc39",
-          borderWidth: "1px",
-        },
-        "&:hover .MuiOutlinedInput-notchedOutline": {
-          borderColor: "#cddc39",
-        },
-        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-          borderColor: "#cddc39 !important",
-          borderWidth: "1px !important",
-        },
-        "& .MuiSelect-icon": {
-          color: "#cddc39",
-        },
-      }}
-    >
-      <MenuItem value="all">Tất cả</MenuItem>
-      <MenuItem value="hourly">Theo giờ</MenuItem>
-      <MenuItem value="daily">Qua ngày</MenuItem>
-      <MenuItem value="overnight">Qua đêm</MenuItem>
-    </Select>
-  </Box>
-
-  {/* Thời gian nhận phòng */}
-  <Box sx={{ width: "100%" }}>
-    <Typography sx={{ mb: 1 }}>Thời gian nhận phòng</Typography>
-    <SimpleDateSearchBar 
-      value={dateRange} 
-      onChange={setDateRange} 
-      // Nếu SimpleDateSearchBar hỗ trợ fullWidth thì thêm prop fullWidth={true}
-      // hoặc wrap trong Box với width 100% như trên
-    />
-  </Box>
-
-  {/* Nút tìm kiếm & reset - mobile nằm ngang dưới cùng */}
-  <Stack
-    direction="row"
-    spacing={2}
-    justifyContent="start"
-    sx={{
-      width: "100%",
-      mt: { xs: 2, sm: 0 },          // thêm khoảng cách trên mobile
-    }}
-  >
-    <Button
-      variant="contained"
-      onClick={handleSearch}
-      fullWidth={{ xs: true, sm: false }}  // full width trên mobile
-      sx={{
-        borderRadius: "24px",
-        bgcolor: "#98b720",
-        height: 44,
-        minWidth: { xs: "auto", sm: 120 },
-        fontSize: "1rem",
-      }}
-    >
-      Tìm kiếm
-    </Button>
-
-    <Button
-      variant="outlined"
-      onClick={handleReset}
-      fullWidth={{ xs: true, sm: false }}
-      sx={{
-        borderRadius: "24px",
-        height: 44,
-        minWidth: { xs: "auto", sm: 120 },
-        border: "1px solid rgba(208, 211, 217, 1)",
-        background: "rgba(240, 241, 243, 1)",
-        color: "black",
-        fontSize: "1rem",
-      }}
-    >
-      Xóa tìm kiếm
-    </Button>
-  </Stack>
-</Stack>
-
-            {/* Chip */}
-            <Box mt={3}>
-      {isMobile ? (
-        // Mobile: Horizontal scrollable slider
-        <Box
-          sx={{
-            overflowX: "auto",
-            whiteSpace: "nowrap",
-            pb: 1, // padding bottom để thanh scroll không che nội dung
-            "&::-webkit-scrollbar": {
-              height: 6,
-              display: "none", // ẩn scrollbar để đẹp hơn (tùy chọn)
-            },
-            scrollbarWidth: "none", // Firefox ẩn scrollbar
-            msOverflowStyle: "none", // IE/Edge ẩn
-          }}
-        >
-          <Stack
-            direction="row"
-            spacing={1.5}
-            sx={{ minWidth: "fit-content" }} // đảm bảo đủ rộng để scroll
-          >
-            {tabs.map((tab) => {
-              const isActive = localFilters.status === tab.value;
-              return (
-                <Chip
-                  key={tab.label}
-                  label={tab.label}
-                  onClick={() => handleTabChange(tab.label)}
+              direction={{ xs: "column", sm: "row" }}
+              gap={3}// tăng khoảng cách dọc trên mobile
+              alignItems={{ xs: "stretch", sm: "end" }}  // mobile: full width, desktop: align bottom
+              mb={4}
+              flexWrap={"wrap"}
+              sx={{
+                width: "100%",
+              }}
+            >
+              {/* Tìm kiếm */}
+              <Box sx={{ }}>
+                <Typography fontWeight={"bold"} sx={{ mb: 1 }}>Tìm kiếm</Typography>
+                <TextField
+                  fullWidth
+                  placeholder="Tìm mã đặt phòng"
+                  value={localFilters.booking_code}
+                  onChange={(e) =>
+                    setLocalFilters({
+                      ...localFilters,
+                      booking_code: e.target.value,
+                    })
+                  }
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon sx={{ color: "#999" }} />
+                      </InputAdornment>
+                    ),
+                  }}
                   sx={{
-                    cursor: "pointer",
-                    borderRadius: "18px",
-                    height: 36,
-                    minWidth: "fit-content", // chip không bị ép nhỏ
-                    bgcolor: isActive ? "#98b720" : "transparent",
-                    color: isActive ? "white" : "#666",
-                    border: isActive ? "none" : "1px solid #e0e0e0",
-                    fontWeight: isActive ? "bold" : "normal",
-                    px: 2.5, // padding ngang rộng hơn cho dễ chạm
-                    "&:hover": {
-                      bgcolor: isActive ? "#7cb342" : "#f5f5f5",
+                    "& .MuiOutlinedInput-root": {
+                      height: 44,                    // tăng chiều cao cho dễ chạm trên mobile
+                      borderRadius: "24px",
+                      backgroundColor: "#fff",
+                      "& fieldset": {
+                        borderColor: "#cddc39",
+                        borderWidth: "1px",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#c0ca33",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#cddc39 !important",
+                        boxShadow: "0 0 0 3px rgba(205, 220, 57, 0.2)",
+                      },
                     },
                   }}
                 />
-              );
-            })}
-          </Stack>
-        </Box>
-      ) : (
-        // Desktop: Giữ nguyên wrap như cũ
-        <Stack direction="row" flexWrap="wrap" gap={1.5}>
-          {tabs.map((tab) => {
-            const isActive = localFilters.status === tab.value;
-            return (
-              <Chip
-                key={tab.label}
-                label={tab.label}
-                onClick={() => handleTabChange(tab.label)}
+              </Box>
+
+              {/* Loại đặt phòng */}
+              <Box sx={{ }}>
+                <Typography fontWeight={"bold"} sx={{ mb: 1 }}>Loại đặt phòng</Typography>
+                <Select
+                  fullWidth
+                  displayEmpty
+                  value={localFilters.rent_type}
+                  onChange={(e) =>
+                    setLocalFilters({
+                      ...localFilters,
+                      rent_type: e.target.value,
+                    })
+                  }
+                  sx={{
+                    width:"200px",
+                    height: 44,
+                    borderRadius: "24px",
+                    bgcolor: "#fff",
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#cddc39",
+                      borderWidth: "1px",
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#cddc39",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#cddc39 !important",
+                      borderWidth: "1px !important",
+                    },
+                    "& .MuiSelect-icon": {
+                      color: "#cddc39",
+                    },
+                  }}
+                >
+                  <MenuItem value="all">Tất cả</MenuItem>
+                  <MenuItem value="hourly">Theo giờ</MenuItem>
+                  <MenuItem value="daily">Qua ngày</MenuItem>
+                  <MenuItem value="overnight">Qua đêm</MenuItem>
+                </Select>
+              </Box>
+
+              {/* Thời gian nhận phòng */}
+              <Box sx={{ }}>
+                <Typography fontWeight={"bold"} sx={{ mb: 1 }}>Thời gian nhận phòng</Typography>
+                <SimpleDateSearchBar
+                  value={dateRange}
+                  type="daily"
+                  onChange={setDateRange}
+                // Nếu SimpleDateSearchBar hỗ trợ fullWidth thì thêm prop fullWidth={true}
+                // hoặc wrap trong Box với width 100% như trên
+                />
+              </Box>
+
+              {/* Nút tìm kiếm & reset - mobile nằm ngang dưới cùng */}
+              <Stack
+                direction="row"
+                spacing={2}
+                justifyContent="start"
                 sx={{
-                  cursor: "pointer",
-                  borderRadius: "18px",
-                  height: 36,
-                  bgcolor: isActive ? "#98b720" : "transparent",
-                  color: isActive ? "white" : "#666",
-                  border: isActive ? "none" : "1px solid #e0e0e0",
-                  fontWeight: isActive ? "bold" : "normal",
-                  "&:hover": {
-                    bgcolor: isActive ? "#7cb342" : "#f5f5f5",
-                  },
+                  
+                  mt: { xs: 2, sm: 0 },          // thêm khoảng cách trên mobile
                 }}
-              />
-            );
-          })}
-        </Stack>
-      )}
-    </Box>
+              >
+                <Button
+                  variant="contained"
+                  onClick={handleSearch}
+                  fullWidth={{ xs: true, sm: false }}  // full width trên mobile
+                  sx={{
+                    borderRadius: "24px",
+                    bgcolor: "#98b720",
+                    height: 44,
+                    minWidth: { xs: "auto", sm: 120 },
+                    fontSize: "1rem",
+                  }}
+                >
+                  Tìm kiếm
+                </Button>
+
+                <Button
+                  variant="outlined"
+                  onClick={handleReset}
+                  fullWidth={{ xs: true, sm: true }}
+                  sx={{
+                    borderRadius: "24px",
+                    height: 44,
+                    minWidth: { xs: "auto", sm: 120 },
+                    border: "1px solid rgba(208, 211, 217, 1)",
+                    background: "rgba(240, 241, 243, 1)",
+                    color: "black",
+                    fontSize: "1rem",
+                  }}
+                >
+                  Xóa tìm kiếm
+                </Button>
+              </Stack>
+            </Stack>
+
+            {/* Chip */}
+            <Box mt={3}>
+              {isMobile ? (
+                // Mobile: Horizontal scrollable slider
+                <Box
+                  sx={{
+                    overflowX: "auto",
+                    whiteSpace: "nowrap",
+                    pb: 1, // padding bottom để thanh scroll không che nội dung
+                    "&::-webkit-scrollbar": {
+                      height: 6,
+                      display: "none", // ẩn scrollbar để đẹp hơn (tùy chọn)
+                    },
+                    scrollbarWidth: "none", // Firefox ẩn scrollbar
+                    msOverflowStyle: "none", // IE/Edge ẩn
+                  }}
+                >
+                  <Stack
+                    direction="row"
+                    spacing={1.5}
+                    sx={{ minWidth: "fit-content" }} // đảm bảo đủ rộng để scroll
+                  >
+                    {tabs.map((tab) => {
+                      const isActive = localFilters.status === tab.value;
+                      return (
+                        <Chip
+                          key={tab.label}
+                          label={tab.label}
+                          onClick={() => handleTabChange(tab.label)}
+                          sx={{
+                            cursor: "pointer",
+                            borderRadius: "18px",
+                            height: 36,
+                            minWidth: "fit-content", // chip không bị ép nhỏ
+                            bgcolor: isActive ? "#98b720" : "transparent",
+                            color: isActive ? "white" : "#666",
+                            border: isActive ? "none" : "1px solid #e0e0e0",
+                            fontWeight: isActive ? "bold" : "normal",
+                            px: 2.5, // padding ngang rộng hơn cho dễ chạm
+                            "&:hover": {
+                              bgcolor: isActive ? "#7cb342" : "#f5f5f5",
+                            },
+                          }}
+                        />
+                      );
+                    })}
+                  </Stack>
+                </Box>
+              ) : (
+                // Desktop: Giữ nguyên wrap như cũ
+                <Stack direction="row" flexWrap="wrap" gap={1.5}>
+                  {tabs.map((tab) => {
+                    const isActive = localFilters.status === tab.value;
+                    return (
+                      <Chip
+                        key={tab.label}
+                        label={tab.label}
+                        onClick={() => handleTabChange(tab.label)}
+                        sx={{
+                          cursor: "pointer",
+                          borderRadius: "18px",
+                          height: 36,
+                          bgcolor: isActive ? "#98b720" : "transparent",
+                          color: isActive ? "white" : "#666",
+                          border: isActive ? "none" : "1px solid #e0e0e0",
+                          fontWeight: isActive ? "bold" : "normal",
+                          "&:hover": {
+                            bgcolor: isActive ? "#7cb342" : "#f5f5f5",
+                          },
+                        }}
+                      />
+                    );
+                  })}
+                </Stack>
+              )}
+            </Box>
           </Stack>
-         {!isMobile ? <TableContainer sx={{ mt: 5, width: "100%" }}>
+          {!isMobile ? <TableContainer sx={{ mt: 5, width: "100%" }}>
             <Table>
               <TableHead>
                 <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
@@ -586,14 +589,14 @@ export default function ManagerBookingView({
                       <TableRow
                         sx={{ cursor: "pointer" }} key={row.id} hover>
                         <TableCell
-                         onClick={() => handleRowClick(row)}
+                          onClick={() => handleRowClick(row)}
                           sx={{
                             fontWeight: row.code.includes("(G)") ? "bold" : "normal",
                             color: row.code.includes("(G)") ? "#1976d2" : "#98B720",
                           }}>
                           {row.code}
                         </TableCell>
-                        <TableCell  onClick={() => handleRowClick(row)}>
+                        <TableCell onClick={() => handleRowClick(row)}>
                           <div>{row.total_price.toLocaleString()}đ</div>
                           <div style={{ marginTop: 8 }}>
                             <Box
@@ -608,17 +611,17 @@ export default function ManagerBookingView({
                             >{getPaymentLabel(row)}</Box>
                           </div>
                         </TableCell>
-                        <TableCell  onClick={() => handleRowClick(row)}>
+                        <TableCell onClick={() => handleRowClick(row)}>
                           {rentTypeLabel}
                           <br />
                           <span style={{ color: "#98B720", fontSize: "0.875rem" }}>
                             {roomName}
                           </span>
                         </TableCell>
-                        <TableCell  onClick={() => handleRowClick(row)}>{formatDateTime(row.check_in)}<br />{formatDateTime(row.check_out)}</TableCell>
+                        <TableCell onClick={() => handleRowClick(row)}>{formatDateTime(row.check_in)}<br />{formatDateTime(row.check_out)}</TableCell>
 
-                        <TableCell  onClick={() => handleRowClick(row)}>
-                          
+                        <TableCell onClick={() => handleRowClick(row)}>
+
                           <Chip
                             label={statusLabel}
 
@@ -626,7 +629,7 @@ export default function ManagerBookingView({
                             sx={{ minWidth: 110, ...statusStyles[statusLabel] }}
                           />
                         </TableCell>
-                        <TableCell  onClick={() => handleRowClick(row)}>
+                        <TableCell onClick={() => handleRowClick(row)}>
                           <Tooltip title={row.note || "Không có ghi chú"}>
                             <IconButton size="small">
                               <img src={edit} onClick={(e) => {
@@ -638,7 +641,7 @@ export default function ManagerBookingView({
                           </Tooltip>
                         </TableCell>
                         <TableCell align="center">
-                         
+
                           <ActionMenu
                             booking={row}
                             setIdBooking={setIdBooking}
@@ -653,145 +656,145 @@ export default function ManagerBookingView({
                 )}
               </TableBody>
             </Table>
-          </TableContainer>:<Box sx={{ mt: 4 }}>
-      {loading ? (
-        <Typography align="center">Đang tải...</Typography>
-      ) : bookings.length === 0 ? (
-        <Typography align="center">Không có dữ liệu đặt phòng</Typography>
-      ) : (
-        bookings.map((row) => {
-          const formatDateTime = (dateString) => dayjs(dateString).format("DD/MM/YYYY, HH:mm");
-          const rentTypeLabel =
-            row.rent_type === "hourly" ? "Theo giờ" :
-            row.rent_type === "daily" ? "Qua ngày" :
-            row.rent_type === "overnight" ? "Qua đêm" : "Không xác định";
-          const statusLabel = STATUS_API_TO_LABEL[row.status] || "Chờ xử lý";
-          const roomName = row.room_types?.[0]?.name || "N/A";
+          </TableContainer> : <Box sx={{ mt: 4 }}>
+            {loading ? (
+              <Typography align="center">Đang tải...</Typography>
+            ) : bookings.length === 0 ? (
+              <Typography align="center">Không có dữ liệu đặt phòng</Typography>
+            ) : (
+              bookings.map((row) => {
+                const formatDateTime = (dateString) => dayjs(dateString).format("DD/MM/YYYY, HH:mm");
+                const rentTypeLabel =
+                  row.rent_type === "hourly" ? "Theo giờ" :
+                    row.rent_type === "daily" ? "Qua ngày" :
+                      row.rent_type === "overnight" ? "Qua đêm" : "Không xác định";
+                const statusLabel = STATUS_API_TO_LABEL[row.status] || "Chờ xử lý";
+                const roomName = row.room_types?.[0]?.name || "N/A";
 
-          return (
-            <Box
-              key={row.id}
-              onClick={() => handleRowClick(row)}
-              sx={{
-                bgcolor: "white",
-                borderRadius: "12px",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-                mb: 3,
-                overflow: "hidden",
-                cursor: "pointer",
-                "&:hover": { boxShadow: "0 4px 20px rgba(0,0,0,0.12)" },
-              }}
-            >
-              {/* Header card */}
-              <Box
-                sx={{
-                  bgcolor: "#f5f5f5",
-                  p: 2,
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Box>
-                  <Typography variant="subtitle1" fontWeight="bold">
-                    {row.code}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {rentTypeLabel} • {roomName}
-                  </Typography>
-                </Box>
-                <Chip
-                  label={statusLabel}
-                  size="small"
-                  sx={{ ...statusStyles[statusLabel], minWidth: 100 }}
-                />
-              </Box>
-
-              <Divider />
-
-              {/* Nội dung chính */}
-              <Box sx={{ p: 2 }}>
-                <Stack spacing={1.5}>
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Tổng tiền:
-                    </Typography>
-                    <Typography fontWeight="bold">
-                      {row.total_price.toLocaleString()}đ
-                    </Typography>
-                    <Box
-                      sx={{
-                        display: "inline-block",
-                        mt: 0.5,
-                        px: 1.5,
-                        py: 0.5,
-                        borderRadius: "12px",
-                        fontSize: "0.8rem",
-                        ...paymentStatusStyles[getPaymentLabel(row)],
-                      }}
-                    >
-                      {getPaymentLabel(row)}
-                    </Box>
-                  </Box>
-
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Thời gian:
-                    </Typography>
-                    <Typography>
-                      Nhận: {formatDateTime(row.check_in)}
-                      <br />
-                      Trả: {formatDateTime(row.check_out)}
-                    </Typography>
-                  </Box>
-
-                  {row.note && (
-                    <Box>
-                      <Typography variant="body2" color="text.secondary">
-                        Ghi chú:
-                      </Typography>
-                      <Typography variant="body2">{row.note}</Typography>
-                    </Box>
-                  )}
-                </Stack>
-              </Box>
-
-              {/* Thao tác */}
-              <Box
-                sx={{
-                  p: 2,
-                  bgcolor: "#fafafa",
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: 1,
-                }}
-              >
-                <Tooltip title={row.note || "Không có ghi chú"}>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIdBooking(row);
-                      setOpenNote(true);
+                return (
+                  <Box
+                    key={row.id}
+                    onClick={() => handleRowClick(row)}
+                    sx={{
+                      bgcolor: "white",
+                      borderRadius: "12px",
+                      boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+                      mb: 3,
+                      overflow: "hidden",
+                      cursor: "pointer",
+                      "&:hover": { boxShadow: "0 4px 20px rgba(0,0,0,0.12)" },
                     }}
                   >
-                    <img src={edit} alt="edit" style={{ width: 20 }} />
-                  </IconButton>
-                </Tooltip>
+                    {/* Header card */}
+                    <Box
+                      sx={{
+                        bgcolor: "#f5f5f5",
+                        p: 2,
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Box>
+                        <Typography variant="subtitle1" fontWeight="bold">
+                          {row.code}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {rentTypeLabel} • {roomName}
+                        </Typography>
+                      </Box>
+                      <Chip
+                        label={statusLabel}
+                        size="small"
+                        sx={{ ...statusStyles[statusLabel], minWidth: 100 }}
+                      />
+                    </Box>
 
-                <ActionMenu
-                  booking={row}
-                  setIdBooking={setIdBooking}
-                  setOpenCheckOut={setOpenAccepp}
-                  setOpenCancel={setOpenCancel}
-                  setOpenCheckIn={setOpenCheckin}
-                />
-              </Box>
-            </Box>
-          );
-        })
-      )}
-    </Box>}
+                    <Divider />
+
+                    {/* Nội dung chính */}
+                    <Box sx={{ p: 2 }}>
+                      <Stack spacing={1.5}>
+                        <Box>
+                          <Typography variant="body2" color="text.secondary">
+                            Tổng tiền:
+                          </Typography>
+                          <Typography fontWeight="bold">
+                            {row.total_price.toLocaleString()}đ
+                          </Typography>
+                          <Box
+                            sx={{
+                              display: "inline-block",
+                              mt: 0.5,
+                              px: 1.5,
+                              py: 0.5,
+                              borderRadius: "12px",
+                              fontSize: "0.8rem",
+                              ...paymentStatusStyles[getPaymentLabel(row)],
+                            }}
+                          >
+                            {getPaymentLabel(row)}
+                          </Box>
+                        </Box>
+
+                        <Box>
+                          <Typography variant="body2" color="text.secondary">
+                            Thời gian:
+                          </Typography>
+                          <Typography>
+                            Nhận: {formatDateTime(row.check_in)}
+                            <br />
+                            Trả: {formatDateTime(row.check_out)}
+                          </Typography>
+                        </Box>
+
+                        {row.note && (
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">
+                              Ghi chú:
+                            </Typography>
+                            <Typography variant="body2">{row.note}</Typography>
+                          </Box>
+                        )}
+                      </Stack>
+                    </Box>
+
+                    {/* Thao tác */}
+                    <Box
+                      sx={{
+                        p: 2,
+                        bgcolor: "#fafafa",
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        gap: 1,
+                      }}
+                    >
+                      <Tooltip title={row.note || "Không có ghi chú"}>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIdBooking(row);
+                            setOpenNote(true);
+                          }}
+                        >
+                          <img src={edit} alt="edit" style={{ width: 20 }} />
+                        </IconButton>
+                      </Tooltip>
+
+                      <ActionMenu
+                        booking={row}
+                        setIdBooking={setIdBooking}
+                        setOpenCheckOut={setOpenAccepp}
+                        setOpenCancel={setOpenCancel}
+                        setOpenCheckIn={setOpenCheckin}
+                      />
+                    </Box>
+                  </Box>
+                );
+              })
+            )}
+          </Box>}
           <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
             <Pagination
               key={pagination.page} // ← THÊM DÒNG NÀY ĐỂ FORCE RE-RENDER KHI PAGE THAY ĐỔI
@@ -1209,7 +1212,7 @@ function ActionMenu({
 
   const open = Boolean(anchorEl);
 
- 
+
 
   const status = booking.status;
 
@@ -1222,7 +1225,7 @@ function ActionMenu({
   /* ================= HANDLERS ================= */
 
   const handleOpenMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
-     e.stopPropagation();
+    e.stopPropagation();
     setAnchorEl(e.currentTarget);
   };
 

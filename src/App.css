@@ -207,7 +207,9 @@ input[type="number"] {
   padding: 10px;
 }
 
-
+.MuiPickersCalendarHeader-label{
+  text-transform: capitalize;
+}
 .MuiCheckbox-root {
   padding: 8px !important;
   border-radius: 8px !important;

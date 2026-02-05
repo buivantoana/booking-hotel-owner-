@@ -448,7 +448,8 @@ function HotelReview({
                 <Stack
                   direction='row'
                   alignItems='center'
-                  spacing={2}
+                  gap={1}
+                  color='text.secondary'
                   flexWrap='wrap'>
                   {review.booking_code && (
                     <Typography
@@ -458,6 +459,7 @@ function HotelReview({
                       Mã đặt phòng: {review.booking_code}
                     </Typography>
                   )}
+                  |
                   {review.rent_type === "hourly" && (
                     <Chip
                       icon={<AccessTime sx={{ fontSize: 16 }} />}
@@ -471,6 +473,13 @@ function HotelReview({
                       }}
                     />
                   )}
+                  |
+                   <Typography
+                      variant='body2'
+                      color='text.secondary'
+                      fontSize='14px'>
+                      {review?.room_type_name}
+                    </Typography>
                   {/* Bạn có thể thêm chip loại phòng nếu cần */}
                 </Stack>
               </Box>

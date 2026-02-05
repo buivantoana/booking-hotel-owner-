@@ -18,7 +18,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { parseRoomName } from "../../utils/utils";
 import { useSearchParams } from "react-router-dom";
 
@@ -34,6 +34,7 @@ const formatPrice = (price: number | null | undefined): string => {
     minimumFractionDigits: 0,
   }).format(price);
 };
+
 const renderStatusChip = (status) => {
   const map = {
     active: {
@@ -66,6 +67,14 @@ const renderStatusChip = (status) => {
 };
 const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom }: Props) => {
   // Parse room_types từ props
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const total = detailHotel?.room_types.length;
+ 
+  const active = detailHotel?.room_types.filter((h) => h.status === "active").length;
+  const confirm = detailHotel?.room_types.filter((h) => h.status === "pending").length;
+  const paused = detailHotel?.room_types.filter((h) => h.status === "paused").length;
+  const rejected = detailHotel?.room_types.filter((h) => h.status === "rejected").length;
+  const terminated = detailHotel?.room_types.filter((h) => h.status === "terminated").length;
   const roomTypes = React.useMemo(() => {
     if (!detailHotel || !Array.isArray(detailHotel.room_types)) {
       return [];
@@ -77,6 +86,7 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom }: Props) => {
       price_hourly_formatted: formatPrice(room.price_hourly),
       price_overnight_formatted: formatPrice(room.price_overnight),
       price_daily_formatted: formatPrice(room.price_daily),
+      price_hourly_increment: formatPrice(room.price_hourly_increment),
     }));
   }, [detailHotel]);
 
@@ -94,40 +104,56 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom }: Props) => {
 
   const totalRooms = roomTypes.length;
   const displayedRooms = roomTypes.filter((acc) =>
-    acc.name.toLowerCase().includes(searchRoom.toLowerCase())
-  );
+  acc.name.toLowerCase().includes(searchRoom.toLowerCase()) &&(selectedStatus?
+  acc.status == selectedStatus:true)
+);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   // Phần thống kê (giữ nguyên cả desktop & mobile)
-  const renderStats = () => (
-    <Box sx={{ mb: 3 }}>
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        spacing={{ xs: 1.5, sm: 4 }}
-        color="#555"
-        fontSize={14}
-        flexWrap="wrap"
-      >
-        <Box>
-          Tất cả <strong>{totalRooms}</strong>
-        </Box>
-        <Box>
-          Đang hoạt động <strong>{totalRooms}</strong>
-        </Box>
-        <Box>
-          Ngừng kinh doanh <strong>0</strong>
-        </Box>
-        <Box>
-          Bị từ chối <strong>0</strong>
-        </Box>
-        <Box>
-          Ngừng hợp tác <strong>0</strong>
-        </Box>
-      </Stack>
-    </Box>
-  );
+  const renderStats = () => {
+    const stats = [
+      { label: "Tất cả", value: total, status: null },
+      { label: "Đang hoạt động", value: active, status: "active" },
+      { label: "Ngừng kinh doanh", value: paused, status: "paused" },
+      { label: "Chờ duyệt", value: confirm, status: "pending" },
+      { label: "Bị từ chối", value: rejected, status: "rejected" },
+      { label: "Ngừng hợp tác", value: terminated, status: "terminated" },
+    ];
 
+    return (
+      <Box sx={{ mb: 3 }}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={{ xs: 1.5, sm: 2.5, md: 2 }}
+          flexWrap="wrap"
+          color="#555"
+          fontSize={14}
+        >
+          {stats.map((item) => (
+            <Box
+              key={item.label}
+              onClick={() => setSelectedStatus(item.status)}
+              sx={{
+                cursor: "pointer",
+                px: 1.5,
+                py: 0.8,
+                borderRadius: "8px",
+                transition: "all 0.2s",
+                bgcolor: selectedStatus === item.status ? "#F0F1F3" : "transparent",
+
+                "&:hover": {
+                  bgcolor: selectedStatus === item.status ? "transparent" : "#F0F1F3",
+                },
+              }}
+            >
+              {item.label} <strong>{item.value}</strong>
+            </Box>
+          ))}
+        </Stack>
+      </Box>
+    );
+  };
   // Desktop: Bảng như gốc
   const renderDesktop = () => (
     <Paper
@@ -195,7 +221,8 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom }: Props) => {
                   <TableCell>{room.number}</TableCell>
 
                   {/* Giá theo giờ */}
-                  <TableCell>{room.price_hourly_formatted}</TableCell>
+                  <TableCell><Typography fontSize={"13.5px"} >{room.price_hourly_formatted} / 1 giờ đầu</Typography>
+                  <Typography fontSize={"13.5px"} >{room.price_hourly_increment} / 2 giờ thêm</Typography></TableCell>
 
                   {/* Giá qua đêm */}
                   <TableCell>{room.price_overnight_formatted}</TableCell>

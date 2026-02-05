@@ -117,7 +117,7 @@ function HotelHeader({ setAction, detailHotel }) {
 
         <Box>
           <Typography
-            fontSize={isMobile?19:22}
+            fontSize={isMobile ? 19 : 22}
             fontWeight={700}
             color='#222'
             sx={{ lineHeight: 1.2 }}>
@@ -171,9 +171,8 @@ function HotelInfoDetail({
   const rentTypes = detailHotel.rent_types
     ? JSON.parse(detailHotel.rent_types)
     : {};
-  const rentStr = `08:00-22:00 / ${rentTypes.overnight?.from || "22:00"}-${
-    rentTypes.overnight?.to || "08:00"
-  } / ${rentTypes.daily?.from || "14:00"}-${rentTypes.daily?.to || "12:00"}`;
+  const rentStr = `08:00-22:00 / ${rentTypes.overnight?.from || "22:00"}-${rentTypes.overnight?.to || "08:00"
+    } / ${rentTypes.daily?.from || "14:00"}-${rentTypes.daily?.to || "12:00"}`;
 
   const images = detailHotel.images ? JSON.parse(detailHotel.images) : [];
   const imagesVerify = detailHotel.verify_images
@@ -215,13 +214,13 @@ function HotelInfoDetail({
           justifyContent: "space-between",
           alignItems: "center",
           mb: 3,
-          flexWrap:"wrap",
+          flexWrap: "wrap",
 
-          gap:isMobile?2:0
+          gap: isMobile ? 2 : 0
         }}>
         <Box sx={{ display: "flex", gap: 4 }}>
           <Typography
-            fontSize={isMobile?14:16}
+            fontSize={isMobile ? 14 : 16}
             fontWeight={600}
             onClick={() => setAction("manager")}
             color={action == "manager" ? "#98B720" : "#999"}
@@ -233,7 +232,7 @@ function HotelInfoDetail({
             Thông tin chung
           </Typography>
           <Typography
-            fontSize={isMobile?14:16}
+            fontSize={isMobile ? 14 : 16}
             fontWeight={600}
             onClick={() => setAction("rooms")}
             color={action == "rooms" ? "#98B720" : "#999"}
@@ -254,8 +253,8 @@ function HotelInfoDetail({
               color: "white",
               fontWeight: 600,
               fontSize: 15,
-              px: isMobile?1:4,
-              py:isMobile?1: 1.4,
+              px: isMobile ? 1 : 4,
+              py: isMobile ? 1 : 1.4,
               borderRadius: "50px",
               textTransform: "none",
             }}>
@@ -276,7 +275,7 @@ function HotelInfoDetail({
                 ),
               }}
               sx={{
-                width: isMobile?"100%":"280px",
+                width: isMobile ? "100%" : "280px",
                 "& .MuiOutlinedInput-root": {
                   height: 40,
                   borderRadius: "24px",
@@ -316,7 +315,7 @@ function HotelInfoDetail({
                 borderRadius: "50px",
                 textTransform: "none",
                 height: "40px",
-                width: isMobile?"100%":"unset"
+                width: isMobile ? "100%" : "unset"
               }}>
               Tạo loại phòng
             </Button>
@@ -503,13 +502,36 @@ function HotelInfoDetail({
                   </Typography>
                 </Box>
 
-                <Box>
-                  <Typography fontSize={14} color='black' fontWeight={600}>
-                    Theo giờ/ Qua đêm/ Theo ngày
-                  </Typography>
-                  <Typography fontSize={15} color='#333'>
-                    {rentStr}
-                  </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start' }}>
+                  {/* Cột 1: Theo giờ */}
+                  <Box sx={{  width: 120 }}>
+                    <Typography fontSize={14} color="black" fontWeight={600}>
+                      Theo giờ
+                    </Typography>
+                    <Typography fontSize={15} color="#333">
+                      08:00 - 22:00
+                    </Typography>
+                  </Box>
+                  
+                  {/* Cột 2: Qua đêm */}
+                  <Box sx={{  width: 120 }}>
+                    <Typography fontSize={14} color="black" fontWeight={600}>
+                      Qua đêm
+                    </Typography>
+                    <Typography fontSize={15} color="#333">
+                      {rentTypes.overnight?.from || "22:00"} - {rentTypes.overnight?.to || "08:00"}
+                    </Typography>
+                  </Box>
+
+                  {/* Cột 3: Theo ngày */}
+                  <Box sx={{  width: 120 }}>
+                    <Typography fontSize={14} color="black" fontWeight={600}>
+                      Theo ngày
+                    </Typography>
+                    <Typography fontSize={15} color="#333">
+                      {rentTypes.daily?.from || "14:00"} - {rentTypes.daily?.to || "12:00"}
+                    </Typography>
+                  </Box>
                 </Box>
 
                 <Box>
@@ -630,8 +652,8 @@ function HotelInfoDetail({
                           typeof detailHotel.amenities === "string"
                             ? JSON.parse(detailHotel.amenities)
                             : Array.isArray(detailHotel.amenities)
-                            ? detailHotel.amenities
-                            : [];
+                              ? detailHotel.amenities
+                              : [];
                         return Array.isArray(parsed) ? parsed : [];
                       } catch (e) {
                         console.warn("Parse facilities error:", e);

@@ -203,7 +203,7 @@ export default function ManagerRoomView({
                   ))}
               </Box>
               {/* Date Range */}
-              <SimpleDateSearchBar value={dateRange} onChange={setDateRange} />
+              <SimpleDateSearchBar type="daily" value={dateRange} onChange={setDateRange} />
             </Box>
             <Box py={3}>
               {active == "hourly" && data?.room_types?.length > 0 && (
@@ -935,6 +935,7 @@ function RoomScheduleTableHourly({
                           display="flex"
                           justifyContent="start"
                           py={2}
+                          mx={2}
                         >
                           <Button
                             variant="contained"
@@ -942,7 +943,7 @@ function RoomScheduleTableHourly({
                               bgcolor: "#98b720",
                               color: "white",
                               fontWeight: 600,
-                              minWidth: "140px",
+                              minWidth: "110px",
                               height: "40px",
                               fontSize: "15px",
                               borderRadius: "20px",

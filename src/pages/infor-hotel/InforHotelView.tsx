@@ -21,6 +21,8 @@ import {
   useTheme,
   useMediaQuery,
   Divider,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -31,6 +33,7 @@ import {
   Close,
   PlayArrowOutlined,
   PlayCircle,
+  Check,
 } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import remove from "../../images/stop.png";
@@ -144,7 +147,9 @@ export default function InforHotelView({
   const inactive = total - active;
   const [detailHotel, setDetailHotel] = useState({});
   const [searchParams, setSearchParams] = useSearchParams();
-
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
   useEffect(() => {
     if (searchParams.get("id") || searchParams.get("hotel_id")) {
       getHotelDetail();
@@ -156,6 +161,9 @@ export default function InforHotelView({
       setAction("detail");
     }
   }, [searchParams]);
+  const filteredHotels = selectedStatus
+    ? hotels.filter(h => h.status === selectedStatus)
+    : hotels;
   const getHotelDetail = async () => {
     try {
       let result = await getHotel(
@@ -175,35 +183,53 @@ export default function InforHotelView({
       console.log(error);
     }
   };
-  const renderStats = () => (
-    <Box sx={{ mb: 3 }}>
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        spacing={{ xs: 1.5, sm: 4 }}
-        color="#555"
-        fontSize={14}
-      >
-        <Box>
-          Tất cả <strong>{total}</strong>
-        </Box>
-        <Box>
-          Đạng hoạt động <strong>{active}</strong>
-        </Box>
-        <Box>
-          Ngừng kinh doanh <strong>{paused}</strong>
-        </Box>
-        <Box>
-          Chờ duyệt <strong>{confirm}</strong>
-        </Box>
-        <Box>
-          Bị từ chối <strong>{rejected}</strong>
-        </Box>
-        <Box>
-          Ngừng hợp tác <strong>{terminated}</strong>
-        </Box>
-      </Stack>
-    </Box>
-  );
+  const showSuccessSnackbar = (message: string) => {
+    setSnackbarMessage(message);
+    setSnackbarOpen(true);
+  };
+  const renderStats = () => {
+    const stats = [
+      { label: "Tất cả", value: total, status: null },
+      { label: "Đang hoạt động", value: active, status: "active" },
+      { label: "Ngừng kinh doanh", value: paused, status: "paused" },
+      { label: "Chờ duyệt", value: confirm, status: "pending" },
+      { label: "Bị từ chối", value: rejected, status: "rejected" },
+      { label: "Ngừng hợp tác", value: terminated, status: "terminated" },
+    ];
+
+    return (
+      <Box sx={{ mb: 3 }}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={{ xs: 1.5, sm: 2.5, md: 2 }}
+          flexWrap="wrap"
+          color="#555"
+          fontSize={14}
+        >
+          {stats.map((item) => (
+            <Box
+              key={item.label}
+              onClick={() => setSelectedStatus(item.status)}
+              sx={{
+                cursor: "pointer",
+                px: 1.5,
+                py: 0.8,
+                borderRadius: "8px",
+                transition: "all 0.2s",
+                bgcolor: selectedStatus === item.status ? "#F0F1F3" : "transparent",
+
+                "&:hover": {
+                  bgcolor: selectedStatus === item.status ? "transparent" : "#F0F1F3",
+                },
+              }}
+            >
+              {item.label} <strong>{item.value}</strong>
+            </Box>
+          ))}
+        </Stack>
+      </Box>
+    );
+  };
 
   // Desktop: Bảng như cũ
   const renderDesktop = () => (
@@ -234,7 +260,7 @@ export default function InforHotelView({
               ].map((head) => (
                 <TableCell
                   key={head}
-                  sx={{ fontWeight: 600, color: "#555", fontSize: 14 }}
+                  sx={{ fontWeight: 600, color: "#555", fontSize: 14, whiteSpace: 'nowrap', }}
                 >
                   {head}
                 </TableCell>
@@ -242,7 +268,7 @@ export default function InforHotelView({
             </TableRow>
           </TableHead>
           <TableBody>
-            {hotels?.map((hotel, index) => (
+            {filteredHotels?.map((hotel, index) => (
               <TableRow hover key={hotel.id}>
                 <TableCell>{index + 1}</TableCell>
 
@@ -257,7 +283,7 @@ export default function InforHotelView({
                     transition: "transform 0.2s ease, background-color 0.2s ease", // mượt mà
                     "&:hover": {
                       transform: "scale(1.05)",
-                       // hoặc dùng màu bạn thích, ví dụ: "rgba(0,0,0,0.04)"
+                      // hoặc dùng màu bạn thích, ví dụ: "rgba(0,0,0,0.04)"
                       // nếu muốn nổi bật hơn có thể thêm:
                       // boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                       // zIndex: 1,
@@ -311,7 +337,7 @@ export default function InforHotelView({
       {renderStats()}
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-        {hotels?.map((hotel, index) => (
+        {filteredHotels?.map((hotel, index) => (
           <Box
             key={hotel.id}
 
@@ -445,6 +471,33 @@ export default function InforHotelView({
       {action == "manager" && (
         <>
           {/* Header */}
+          <Snackbar
+            open={snackbarOpen}
+            autoHideDuration={3000}           // tự đóng sau 4 giây
+            onClose={() => setSnackbarOpen(false)}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'center'            // ← Ở giữa top
+            }}
+          >
+            <Alert
+              onClose={() => setSnackbarOpen(false)}
+              severity="success"
+              variant="filled"
+              sx={{
+                width: '100%',
+                maxWidth: 500,                // giới hạn chiều rộng cho đẹp
+                boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                borderRadius: '12px',
+                fontWeight: 500,
+                background:"#EAF5ED",
+                color:"#20B720"
+              }}
+              icon={<Check/>}  // icon tick xanh
+            >
+              {snackbarMessage}
+            </Alert>
+          </Snackbar>
           <Box
             sx={{
               display: "flex",
@@ -538,7 +591,11 @@ export default function InforHotelView({
                     if (result?.hotel_id) {
                       getDataHotels();
                       setDeleteDialogOpen(false);
-                      toast.success(idHotel?.status == "paused" ? "Mở lại kinh doanh thành công" : "Ngừng kinh doanh thành công")
+                      showSuccessSnackbar(
+                        idHotel?.status === "paused"
+                          ? "Cập nhật trạng thái thành công"
+                          : "Gửi duyệt thành công"
+                      );
                     }
                   } catch (error) {
                     console.log(error);
