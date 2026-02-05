@@ -21,7 +21,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { parseRoomName } from "../../utils/utils";
 import { useSearchParams } from "react-router-dom";
-
+import empty from "../../images/Frame 1321317883.png"
 type Props = {
   onNext: (action: string, roomId?: string) => void;
   detailHotel: any; // dữ liệu hotel từ props
@@ -86,7 +86,7 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom }: Props) => {
       price_hourly_formatted: formatPrice(room.price_hourly),
       price_overnight_formatted: formatPrice(room.price_overnight),
       price_daily_formatted: formatPrice(room.price_daily),
-      price_hourly_increment: formatPrice(room.price_hourly_increment),
+      price_hourly_increment_formatted: formatPrice(room.price_hourly_increment),
     }));
   }, [detailHotel]);
 
@@ -168,7 +168,7 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom }: Props) => {
       {renderStats()}
 
       <TableContainer sx={{ overflowX: "auto" }}>
-        <Table sx={{ minWidth: 1000 }}>
+        <Table sx={{ }}>
           <TableHead>
             <TableRow sx={{ bgcolor: "#f8f9fa" }}>
               {[
@@ -193,7 +193,7 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom }: Props) => {
             {displayedRooms.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
-                  <Typography color="#999">Chưa có loại phòng nào</Typography>
+                  <img src={empty} alt="" />
                 </TableCell>
               </TableRow>
             ) : (
@@ -222,7 +222,7 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom }: Props) => {
 
                   {/* Giá theo giờ */}
                   <TableCell><Typography fontSize={"13.5px"} >{room.price_hourly_formatted} / 1 giờ đầu</Typography>
-                  <Typography fontSize={"13.5px"} >{room.price_hourly_increment} / 2 giờ thêm</Typography></TableCell>
+                  <Typography fontSize={"13.5px"} >{room.price_hourly_increment_formatted} / 2 giờ thêm</Typography></TableCell>
 
                   {/* Giá qua đêm */}
                   <TableCell>{room.price_overnight_formatted}</TableCell>

@@ -316,10 +316,10 @@ export default function RoomDetail({
                 setSearchParams(params);
                 onNext("edit_detail");
               }}
-              sx={{ fontSize: 30, mr: 1, cursor: "pointer" }}
+              sx={{ fontSize: 35, mr: 1, cursor: "pointer" }}
             />
-            <Box>
-              <Typography variant={isMobile?"h6":'h5'} fontWeight={600}>
+            <Box mr={4}>
+              <Typography mb={1} variant={isMobile?"h6":'h5'} fontWeight={600}>
                 {parsedName}
               </Typography>
               <Typography color='gray'>{parsedNameHotel}</Typography>
@@ -336,6 +336,7 @@ export default function RoomDetail({
 
             <Button
               variant='contained'
+              startIcon={<Edit />}
               onClick={() => setAction("edit")}
               sx={{
                 background: "#98B720",
@@ -474,19 +475,19 @@ export default function RoomDetail({
                           alignItems: "center",
                           gap: 1.5,
                           bgcolor: "#f8f9fa",
-                          border: "1px solid #e9ecef",
+                          border: "1px solid #98B720",
                           borderRadius: 3,
-                          px: 2,
-                          py: 1.5,
-                          minWidth: 140,
+                          px: 1.5,
+                          py: 1,
+                          
                         }}>
                         <Box
                           component='img'
                           src={fac.icon}
                           alt={fac.name.vi}
-                          sx={{ width: 32, height: 32, objectFit: "contain" }}
+                          sx={{  objectFit: "contain" }}
                         />
-                        <Typography fontWeight={500} fontSize='0.95rem'>
+                        <Typography fontWeight={500} color="#98B720" fontSize='0.95rem'>
                           {fac.name.vi}
                         </Typography>
                       </Box>
@@ -528,104 +529,123 @@ export default function RoomDetail({
               Giá phòng
             </Typography>
 
-            <Grid container spacing={3}>
-              {/* Theo giờ */}
-              <Grid item xs={12} md={4}>
-                <Card sx={{ borderRadius: 3, border: "1px solid #DCEFD8" }}>
-                  <CardContent>
-                    <Box
-                      sx={{
-                        background: "#E8F5E9",
-                        p: 1.5,
-                        borderRadius: 2,
-                        mb: 2,
-                        fontWeight: 700,
-                        color: "#2E7D32",
-                        display: "inline-block",
-                      }}>
-                      Theo giờ
-                    </Box>
-                    <Box display='flex' justifyContent='space-between'>
-                      <Box>
-                        <Typography fontWeight={600}>Giá 2 giờ đầu</Typography>
-                        <Typography
-                          color='#82B440'
-                          fontWeight={700}
-                          fontSize='1.2rem'>
-                          {formatPrice(room.price_hourly)}
-                        </Typography>
-                      </Box>
-                      <Box>
-                        <Typography fontWeight={600}>Giá giờ thêm</Typography>
-                        <Typography
-                          color='#82B440'
-                          fontWeight={700}
-                          fontSize='1.2rem'>
-                          {formatPrice(room.price_hourly_increment)}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <Typography fontSize={13} mt={2} color='#666'>
-                      ✓ Cho phép khách đặt tối đa thêm giờ tùy theo quy định
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
+            <Grid container spacing={3} sx={{ alignItems: 'stretch' }}>
+  {/* Theo giờ */}
+  <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
+    <Card 
+      sx={{ 
+        borderRadius: 3, 
+        border: "1px solid #DCEFD8",
+        flex: 1,           // ← quan trọng: giãn full height
+        display: 'flex',   // để CardContent có thể giãn
+        flexDirection: 'column'
+      }}
+    >
+      <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <Box
+          sx={{
+            background: "#E8F5E9",
+            p: 1.5,
+            borderRadius: 2,
+            mb: 2,
+            fontWeight: 700,
+            color: "#2E7D32",
+            display: "inline-block",
+          }}
+        >
+          Theo giờ
+        </Box>
+        <Box display='flex' justifyContent='space-between' sx={{ mb: 2 }}>
+          <Box>
+            <Typography fontWeight={600}>Giá 2 giờ đầu</Typography>
+            <Typography color='#82B440' fontWeight={700} fontSize='1.2rem'>
+              {formatPrice(room.price_hourly)}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography fontWeight={600}>Giá giờ thêm</Typography>
+            <Typography color='#82B440' fontWeight={700} fontSize='1.2rem'>
+              {formatPrice(room.price_hourly_increment)}
+            </Typography>
+          </Box>
+        </Box>
+        <Typography fontSize={13} mt='auto' color='#666'>
+          ✓ Cho phép khách đặt tối đa thêm giờ tùy theo quy định
+        </Typography>
+      </CardContent>
+    </Card>
+  </Grid>
 
-              {/* Qua đêm */}
-              <Grid item xs={12} md={4}>
-                <Card sx={{ borderRadius: 3, border: "1px solid #D4E4FB" }}>
-                  <CardContent>
-                    <Box
-                      sx={{
-                        background: "#E3F2FD",
-                        p: 1.5,
-                        borderRadius: 2,
-                        mb: 2,
-                        fontWeight: 700,
-                        color: "#1976D2",
-                        display: "inline-block",
-                      }}>
-                      Qua đêm
-                    </Box>
-                    <Typography fontWeight={600}>Giá 1 đêm</Typography>
-                    <Typography
-                      color='#1565C0'
-                      fontWeight={700}
-                      fontSize='1.4rem'>
-                      {formatPrice(room.price_overnight)}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
+  {/* Qua đêm */}
+  <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
+    <Card 
+      sx={{ 
+        borderRadius: 3, 
+        border: "1px solid #D4E4FB",
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column'
+      }}
+    >
+      <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <Box
+          sx={{
+            background: "#E3F2FD",
+            p: 1.5,
+            borderRadius: 2,
+            mb: 2,
+            fontWeight: 700,
+            color: "#1976D2",
+            display: "inline-block",
+          }}
+        >
+          Qua đêm
+        </Box>
+        <Box sx={{ mt: 'auto' }}>
+          <Typography fontWeight={600}>Giá 1 đêm</Typography>
+          <Typography color='#1565C0' fontWeight={700} fontSize='1.4rem'>
+            {formatPrice(room.price_overnight)}
+          </Typography>
+        </Box>
+      </CardContent>
+    </Card>
+  </Grid>
 
-              {/* Theo ngày */}
-              <Grid item xs={12} md={4}>
-                <Card sx={{ borderRadius: 3, border: "1px solid #FFF3C4" }}>
-                  <CardContent>
-                    <Box
-                      sx={{
-                        background: "#FFFDE7",
-                        p: 1.5,
-                        borderRadius: 2,
-                        mb: 2,
-                        fontWeight: 700,
-                        color: "#DAA200",
-                        display: "inline-block",
-                      }}>
-                      Theo ngày
-                    </Box>
-                    <Typography fontWeight={600}>Giá 1 ngày</Typography>
-                    <Typography
-                      color='#DAA200'
-                      fontWeight={700}
-                      fontSize='1.4rem'>
-                      {formatPrice(room.price_daily)}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
+  {/* Theo ngày */}
+  <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
+    <Card 
+      sx={{ 
+        borderRadius: 3, 
+        border: "1px solid #FFF3C4",
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column'
+      }}
+    >
+      <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <Box
+          sx={{
+            background: "#FFFDE7",
+            p: 1.5,
+            borderRadius: 2,
+            mb: 2,
+            fontWeight: 700,
+            color: "#DAA200",
+            display: "inline-block",
+          }}
+        >
+          Theo ngày
+        </Box>
+        <Box sx={{ mt: 'auto' }}>
+          <Typography fontWeight={600}>Giá 1 ngày</Typography>
+          <Typography color='#DAA200' fontWeight={700} fontSize='1.4rem'>
+            {formatPrice(room.price_daily)}
+          </Typography>
+        </Box>
+      </CardContent>
+    </Card>
+  </Grid>
+</Grid>
           </Box>
         </>
       )}
