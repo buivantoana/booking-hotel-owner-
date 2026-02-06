@@ -31,6 +31,7 @@ import {
 import {
   CheckCircle,
   KeyboardArrowLeft,
+  RadioButtonUnchecked,
   Search as SearchIcon,
 } from "@mui/icons-material";
 import { QRCodeCanvas } from "qrcode.react"; // npm install qrcode.react
@@ -132,6 +133,13 @@ const getStatusColor = (status: string) => {
       return { bg: "#F5F5F5", color: "#424242" };
   }
 };
+const STATUS_LABEL = {
+  draft: "Chưa đối soát",
+  pending: "Chờ xác nhận",
+  confirmed: "Chờ thanh toán",
+  paid: "Đã thanh toán",
+  completed: "Hoàn thành", // Giả sử
+};
 
 const formatCurrency = (amount: number) => {
   const abs = Math.abs(amount).toLocaleString("vi-VN");
@@ -166,13 +174,7 @@ export default function ReconciliationView({
     period_month: "",
     status: "all", // Thêm trạng thái
   });
-  const STATUS_LABEL = {
-    draft: "Chưa đối soát",
-    pending: "Chờ xác nhận",
-    confirmed: "Chờ thanh toán",
-    paid: "Đã thanh toán",
-    completed: "Hoàn thành", // Giả sử
-  };
+
   const tableData = dataSettlement.map((item, index) => ({
     id: index + 1, // hoặc item.id nếu muốn
     name: parseLang(item.hotel_name, "vi"),
@@ -234,11 +236,11 @@ export default function ReconciliationView({
 
   function formatMonthYear(value) {
     if (!value) return "";
-  
+
     const [year, month] = value.split("-");
     return `Tháng ${parseInt(month, 10)}, ${year}`;
   }
-  
+
   // Desktop: Bảng gốc (giữ nguyên)
   const renderDesktop = () => (
     <TableContainer
@@ -543,7 +545,7 @@ export default function ReconciliationView({
                   }
 
                   sx={{
-                    width:"100%",
+                    width: "100%",
                     "& .MuiOutlinedInput-root": {
                       height: 44,
                       borderRadius: "50px",
@@ -579,9 +581,9 @@ export default function ReconciliationView({
                     borderRadius: "50px",
                     fontWeight: 500,
                     fontSize: "1rem",
-                    width:"100%",
+                    width: "100%",
                     "& .MuiOutlinedInput-root": {
-                      width:"100%",
+                      width: "100%",
                     },
                     "& .MuiOutlinedInput-notchedOutline": {
                       borderColor: "#cddc39",
@@ -762,6 +764,7 @@ function HotelDetailFinal({
   let [bankPrimary, setBankPrimary] = useState(null);
   // Ref để lưu timer debounce
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const statusStyle = getStatusColor(STATUS_LABEL[settlement.status] ?? settlement.status);
   // useEffect(() => {
   //   if (debounceTimer.current) {
   //     clearTimeout(debounceTimer.current);
@@ -888,7 +891,7 @@ function HotelDetailFinal({
 
   const renderDesktop = () => (
     <TableContainer sx={{ overflowX: "auto", mt: 4 }}>
-      <Table stickyHeader>
+      <Table >
         <TableHead>
           <TableRow sx={{ bgcolor: "#f5f7fa" }}>
             {[
@@ -908,6 +911,7 @@ function HotelDetailFinal({
                   fontWeight: 600,
                   color: "#424242",
                   fontSize: "0.875rem",
+                  whiteSpace: 'nowrap',
                 }}
               >
                 {h}
@@ -948,7 +952,8 @@ function HotelDetailFinal({
                     {formatDateTime(row.check_out)}
                   </TableCell>
                   <TableCell>{formatCurrency(row.booking_amount)}</TableCell>
-                  <TableCell>{formatCurrency(row.booking_amount)}</TableCell>
+                  <TableCell><Typography>{formatCurrency(row.booking_amount)}</Typography>
+                    <Typography color="#989FAD" fontSize={"13px"}>{row?.payment_method == "Cash" ? "Trả tại KS" : "Trả online"}</Typography></TableCell>
                   <TableCell sx={{ color: "#616161" }}>
                     {formatCurrency(row.commission_amount)}
                   </TableCell>
@@ -1114,9 +1119,22 @@ function HotelDetailFinal({
               }}
               sx={{ fontSize: 32, mr: 1, cursor: "pointer" }}
             />
-            <Typography variant={isMobile ? "h6" : 'h5'} fontWeight='bold'>
-              {parseLang(settlement?.hotel_name)}
-            </Typography>
+            <Box>
+              <Typography variant={isMobile ? "h6" : 'h5'} mr={1} fontWeight='bold'>
+                {parseLang(settlement?.hotel_name)}
+              </Typography>
+              <Typography color="#5D6679">Tháng {settlement?.period_month?.split("-")?.[1]}</Typography>
+            </Box>
+            <Chip
+              label={STATUS_LABEL[settlement.status] ?? settlement.status}
+              size="small"
+              sx={{
+                bgcolor: statusStyle.bg,
+                color: statusStyle.color,
+                fontWeight: 500,
+                height: 26,
+              }}
+            />
           </Box>
         </Box>
 
@@ -1142,9 +1160,10 @@ function HotelDetailFinal({
               direction={{ xs: "column", md: "row" }}
               spacing={{ xs: 2, md: 4 }}
               alignItems={{ md: "flex-start" }}
+              height={"100%"}
               justifyContent='space-between'>
               {/* Cột trái */}
-              <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Box sx={{ flex: .8, minWidth: 0 }}>
                 {/* Công nợ phát sinh */}
                 <Stack
                   direction='row'
@@ -1154,7 +1173,7 @@ function HotelDetailFinal({
                   <Typography variant='body1' color='#424242'>
                     Công nợ phát sinh trong tháng
                   </Typography>
-                  <Typography variant='h6' fontWeight={600} color='#98B720'>
+                  <Typography variant='h6' fontWeight={600} color='#33AE3F'>
                     {formatCurrency(debtInMonth)}
                   </Typography>
                 </Stack>
@@ -1171,7 +1190,7 @@ function HotelDetailFinal({
                     Công nợ khấu trừ
                   </Typography>
                   <Typography variant='h6' fontWeight={600} color='#E53935'>
-                    -{formatCurrency(deductedDebt)}
+                    {formatCurrency(deductedDebt)}
                   </Typography>
                 </Stack>
 
@@ -1184,10 +1203,10 @@ function HotelDetailFinal({
                   justifyContent='space-between'
                   alignItems='center'
                   mb={1.5}>
-                  <Typography variant='h6' fontWeight={700} color='#98B720'>
+                  <Typography variant='h6' fontWeight={700} color='#33AE3F'>
                     Tổng công nợ
                   </Typography>
-                  <Typography variant='h5' fontWeight={700} color='#98B720'>
+                  <Typography variant='h5' fontWeight={700} color='#33AE3F'>
                     {formatCurrency(totalDebt)}
                   </Typography>
                 </Stack>
@@ -1206,7 +1225,7 @@ function HotelDetailFinal({
               </Box>
 
               {/* Cột giữa */}
-              <Box sx={{ textAlign: "left", flexShrink: 0 }}>
+              <Box sx={{ textAlign: "left", flexShrink: 0, flex: .4 }}>
                 <Typography variant='body2' color='#616161' gutterBottom>
                   Thời gian ghi nhận đặt phòng
                 </Typography>
@@ -1225,9 +1244,9 @@ function HotelDetailFinal({
 
               {/* Cột phải */}
               <Box
-                sx={{ textAlign: { xs: "left", md: "right" }, flexShrink: 0 }}>
+                sx={{ textAlign: { xs: "left", md: "right" }, flexShrink: 0, height: "100%" }}>
                 {settlement?.status == "pending" ? (
-                  <>
+                  <Box height={"100%"} mt={isMobile ? 0 : 7} >
                     <Button
                       variant='contained'
                       onClick={() => {
@@ -1252,7 +1271,7 @@ function HotelDetailFinal({
                       Vui lòng hoàn tất đối soát trước <strong>{deadlineTextPending}</strong> để nhận thanh toán dự kiến vào ngày làm việc kế tiếp
 
                     </Typography>
-                  </>
+                  </Box>
                 ) : (
                   <>
                     <Typography
@@ -1436,7 +1455,7 @@ function ConfirmCompleteModal({
   settlement,
   isMobile
 }) {
-  let [action, setAction] = useState(1);
+  let [action, setAction] = useState(2);
   let [banks, setBanks] = useState([]);
   let [bankPrimary, setBankPrimary] = useState(null);
   const [accountNumber, setAccountNumber] = useState("0123456789");
@@ -1534,13 +1553,13 @@ function ConfirmCompleteModal({
   const handleConfirm = async () => {
     try {
       let result = await confirmHotelsSettlement(settlement?.id);
-      if (result?.message) {
+      if (result?.message && !result?.code) {
         fetchSettlements(1);
-        setAction(1);
+        setAction(2);
         onClose();
-        toast.success(result?.message);
+        toast.success("Hoàn tất đối soát thành công");
       } else {
-        toast.error(result?.message);
+        toast.error("Hoàn tất đối soát thất bại");
       }
       console.log("AAA result handleConfirm", result);
     } catch (error) {
@@ -1708,22 +1727,30 @@ function ConfirmCompleteModal({
                   <Checkbox
                     checked={checked1}
                     onChange={handleChange1}
-                    icon={<CheckCircleOutlineIcon sx={{ color: "grey.500" }} />}
-                    checkedIcon={
-                      <CheckCircleOutlineIcon sx={{ color: "#98B720" }} />
-                    }
                     sx={{
-                      "& .MuiSvgIcon-root": { fontSize: 25 },
+                      color: '#98B720',              // màu viền khi unchecked
+                      '&.Mui-checked': {
+                        color: '#98B720',             // màu filled khi checked
+                      },
+                      '& .MuiSvgIcon-root': {
+                        fontSize: 28,                 // to hơn mặc định (thường 24)
+                      },
+                      padding: 0.5,                   // thu nhỏ padding nếu cần
                     }}
                   />
                 }
                 label={
-                  <Typography fontSize={"15px"}>
-                    Bảng đối soát hiện tại đúng và đủ các đặt phòng trong kỳ đối
-                    soát.
+                  <Typography fontSize="15px" sx={{ ml: 1 }}>
+                    Bảng đối soát hiện tại đúng và đủ các đặt phòng trong kỳ đối soát.
                   </Typography>
                 }
-                sx={{ alignItems: "center", mt: 1 }}
+                sx={{
+                  alignItems: 'center',         // text dài vẫn thẳng hàng
+                  mt: 1,
+                  '& .MuiFormControlLabel-label': {
+                    lineHeight: 1.4,
+                  },
+                }}
               />
 
               <FormControlLabel
@@ -1731,21 +1758,30 @@ function ConfirmCompleteModal({
                   <Checkbox
                     checked={checked2}
                     onChange={handleChange2}
-                    icon={<CheckCircleOutlineIcon sx={{ color: "grey.500" }} />}
-                    checkedIcon={
-                      <CheckCircleOutlineIcon sx={{ color: "#98B720" }} />
-                    }
                     sx={{
-                      "& .MuiSvgIcon-root": { fontSize: 25 },
+                      color: '#98B720',
+                      '&.Mui-checked': {
+                        color: '#98B720',
+                      },
+                      '& .MuiSvgIcon-root': {
+                        fontSize: 28,
+                      },
+                      padding: 0.5,
                     }}
                   />
                 }
                 label={
-                  <Typography fontSize={"15px"}>
+                  <Typography fontSize="15px" sx={{ ml: 1 }}>
                     Số tiền công nợ là đúng theo số tiền trong kỳ đối soát
                   </Typography>
                 }
-                sx={{ alignItems: "center", mt: 2 }}
+                sx={{
+                  alignItems: 'center',
+                  mt: 2,
+                  '& .MuiFormControlLabel-label': {
+                    lineHeight: 1.4,
+                  },
+                }}
               />
             </FormGroup>
 
@@ -1979,7 +2015,7 @@ function ConfirmCompleteModal({
             } else if (isEdit && action == 3) {
               setAction(2);
             } else {
-              setAction(1);
+              setAction(2);
               onClose();
             }
           }}

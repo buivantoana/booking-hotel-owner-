@@ -137,9 +137,17 @@ const UserProfileButton = ({setMobileOpen}) => {
               handleClose();
               navigate("/manager-profile");
             }}
-            sx={{ cursor: "pointer" }}
-            variant="h6"
+            sx={{ cursor: "pointer",borderRadius:1 , p:1, transition: "transform 0.2s ease, background-color 0.2s ease", // mượt mà,b
+            "&:hover": {
+              background: "#F0F1F3",
+              // hoặc dùng màu bạn thích, ví dụ: "rgba(0,0,0,0.04)"
+              // nếu muốn nổi bật hơn có thể thêm:
+              // boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+              // zIndex: 1,
+            }, }}
+            variant="body1"
             color="text.primary"
+            fontWeight="bold"
             gutterBottom
           >
             Hồ sơ cá nhân
@@ -158,7 +166,14 @@ const UserProfileButton = ({setMobileOpen}) => {
               handleClose();
             }}
             fontWeight="bold"
-            sx={{ cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
+            sx={{ cursor: "pointer",borderRadius:1 , p:1, transition: "transform 0.2s ease, background-color 0.2s ease", // mượt mà,b
+            "&:hover": {
+              background: "#F0F1F3",
+              // hoặc dùng màu bạn thích, ví dụ: "rgba(0,0,0,0.04)"
+              // nếu muốn nổi bật hơn có thể thêm:
+              // boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+              // zIndex: 1,
+             } }}
           >
             Đăng xuất
           </Typography>

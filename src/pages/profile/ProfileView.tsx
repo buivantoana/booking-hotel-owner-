@@ -16,6 +16,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useBookingContext } from "../../App";
 import { userUpdate } from "../../service/admin";
+import { toast } from "react-toastify";
 
 const ProfileView = () => {
   // State cho các field
@@ -147,9 +148,9 @@ const ProfileView = () => {
     try {
       const result = await userUpdate(payload);
       if (result?.code === "OK") {
-        setSnackbarSeverity("success");
-        setSnackbarMessage("Cập nhật hồ sơ thành công!");
-        setOpenSnackbar(true);
+        // setSnackbarSeverity("success");
+        toast.success("Cập nhật hồ sơ thành công!");
+        // setOpenSnackbar(true);
         localStorage.setItem(
           "user",
           JSON.stringify({
