@@ -222,17 +222,23 @@ export default function ReconciliationView({
 
     onFilterChange(updatedFilters);
   };
- 
+
   const tabs = [
     { label: "Tất cả", value: "all" },
     { label: "Chờ xác nhận", value: "pending" },
     { label: "Chờ thanh toán", value: "confirmed" },
     { label: "Đã thanh toán", value: "paid" },
     { label: "Hoàn thành", value: "completed" },
-   
+
   ];
 
-
+  function formatMonthYear(value) {
+    if (!value) return "";
+  
+    const [year, month] = value.split("-");
+    return `Tháng ${parseInt(month, 10)}, ${year}`;
+  }
+  
   // Desktop: Bảng gốc (giữ nguyên)
   const renderDesktop = () => (
     <TableContainer
@@ -295,7 +301,18 @@ export default function ReconciliationView({
 
                   <TableCell>
                     <Typography
-                      sx={{ cursor: "pointer" }}
+                      sx={{
+                        fontWeight: 500,
+                        cursor: "pointer",
+                        transition: "transform 0.2s ease, background-color 0.2s ease", // mượt mà
+                        "&:hover": {
+                          transform: "scale(1.05)",
+                          // hoặc dùng màu bạn thích, ví dụ: "rgba(0,0,0,0.04)"
+                          // nếu muốn nổi bật hơn có thể thêm:
+                          // boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                          // zIndex: 1,
+                        },
+                      }}
                       onClick={() => {
                         setSettlement(dataSettlement[index]);
                       }}
@@ -311,7 +328,7 @@ export default function ReconciliationView({
                     </Typography>
                   </TableCell>
 
-                  <TableCell>{row.month}</TableCell>
+                  <TableCell>{formatMonthYear(row.month)}</TableCell>
 
                   <TableCell>
                     <Chip
@@ -329,7 +346,7 @@ export default function ReconciliationView({
                   <TableCell
                     align="right"
                     sx={{
-                      color: row.total < 0 ? "#e53935" : "inherit",
+                      color: row.total < 0 ? "#e53935" : "#33AE3F",
                       fontWeight: 500,
                     }}
                   >
@@ -478,13 +495,13 @@ export default function ReconciliationView({
               alignItems: "center",
               mb: 4,
             }}>
-            <Typography variant={isMobile?"h6":'h5'} fontWeight='600' color='#1a1a1a'>
+            <Typography variant={isMobile ? "h6" : 'h5'} fontWeight='600' color='#1a1a1a'>
               Quản lý đối soát
             </Typography>
             <Typography
               variant='body2'
               color='#e53935'
-              sx={{ fontSize:isMobile?"0.675rem": "0.875rem" }}>
+              sx={{ fontSize: isMobile ? "0.675rem" : "0.875rem" }}>
               <span style={{ color: "#33AE3F" }}>
                 {" "}
                 (+) Hotel Booking sẽ thanh toán cho KS
@@ -510,92 +527,112 @@ export default function ReconciliationView({
             <Stack
               direction={{ xs: "column", md: "row" }}
               spacing={2}
-              alignItems={{ md: "center" }}
+              alignItems={{ md: "end" }}
               mb={3}>
-              <TextField
-                placeholder='Tên khách sạn'
-                value={localFilters.hotel_name}
-                onChange={(e) =>
-                  setLocalFilters((prev) => ({
-                    ...prev,
-                    hotel_name: e.target.value,
-                  }))
-                }
-                size='small'
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    height: 40,
+              <Box flex={1}>
 
-                    borderRadius: 2,
-                    fontWeight: 600,
-                    fontSize: "1rem",
-                    "& fieldset": {
-                      borderColor: "#cddc39",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#cddc39",
-                    },
-                  },
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position='start'>
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-
-              <FormControl
-                size='small'
-                sx={{
-                  height: 40,
-
-                  fontWeight: 500,
-                  fontSize: "1rem",
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 2,
-                  },
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#cddc39",
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#cddc39",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#cddc39",
-                  },
-                  "& .MuiSelect-icon": { color: "#666", fontSize: "28px" },
-                }}>
-                <Select
-                  defaultValue=''
-                  value={localFilters.period_month}
+                <Typography fontWeight={"bold"} sx={{ mb: 1 }}>Tìm kiếm</Typography>
+                <TextField
+                  placeholder='Tên khách sạn'
+                  value={localFilters.hotel_name}
                   onChange={(e) =>
                     setLocalFilters((prev) => ({
                       ...prev,
-                      period_month: e.target.value,
+                      hotel_name: e.target.value,
                     }))
                   }
-                  displayEmpty>
-                  <MenuItem value='' disabled>
-                    Chọn kỳ đối soát
-                  </MenuItem>
-                  <MenuItem value='2025-11'>Tháng 11.2025</MenuItem>
-                  <MenuItem value='2025-12'>Tháng 12.2025</MenuItem>
-                  <MenuItem value='2026-01'>Tháng 01.2026</MenuItem>
-                </Select>
-              </FormControl>
 
-              <Box sx={{ display: "flex", gap: 1, ml: { md: "auto" } }}>
+                  sx={{
+                    width:"100%",
+                    "& .MuiOutlinedInput-root": {
+                      height: 44,
+                      borderRadius: "50px",
+
+
+                      fontSize: "1rem",
+                      "& fieldset": {
+                        borderColor: "#cddc39",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#cddc39",
+                      },
+                    },
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position='start'>
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
+              </Box>
+
+              <Box flex={1}>
+                <Typography fontWeight={"bold"} sx={{ mb: 1 }}>Kì đối soát</Typography>
+
+                <FormControl
+
+                  sx={{
+                    height: 44,
+                    borderRadius: "50px",
+                    fontWeight: 500,
+                    fontSize: "1rem",
+                    width:"100%",
+                    "& .MuiOutlinedInput-root": {
+                      width:"100%",
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#cddc39",
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#cddc39",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#cddc39",
+                    },
+                    "& .MuiSelect-icon": { color: "#666", fontSize: "28px" },
+                  }}>
+
+                  <Select
+                    sx={{ height: "44px", borderRadius: "50px" }}
+                    value={localFilters.period_month || ""}
+                    onChange={(e) =>
+                      setLocalFilters((prev) => ({
+                        ...prev,
+                        period_month: e.target.value,
+                      }))
+                    }
+                    displayEmpty
+                    renderValue={(selected) => {
+                      if (!selected) {
+                        return <span style={{ color: "#999" }}>Chọn kỳ đối soát</span>;
+                      }
+                      return selected;
+                    }}
+                  >
+
+
+                    <MenuItem value="2025-11">Tháng 11.2025</MenuItem>
+                    <MenuItem value="2025-12">Tháng 12.2025</MenuItem>
+                    <MenuItem value="2026-01">Tháng 01.2026</MenuItem>
+                  </Select>
+
+                </FormControl>
+              </Box>
+
+              <Box flex={.7} sx={{ display: "flex", gap: 1, ml: { md: "auto" } }}>
                 <Button
                   variant='contained'
                   color='success'
                   onClick={handleSearch}
                   sx={{
-                    borderRadius: 2,
+                    borderRadius: "50px",
                     textTransform: "none",
                     background: "#98B720",
                     color: "white",
+                    height: "44px"
                   }}>
                   Tìm kiếm
                 </Button>
@@ -603,11 +640,12 @@ export default function ReconciliationView({
                   variant='outlined'
                   onClick={handleReset}
                   sx={{
-                    borderRadius: 2,
+                    borderRadius: "50px",
                     textTransform: "none",
                     color: "#48505E",
                     background: "#F0F1F3",
                     border: "none",
+                    height: "44px"
                   }}>
                   Xóa tìm kiếm
                 </Button>
@@ -616,7 +654,7 @@ export default function ReconciliationView({
 
             {/* Tabs */}
             <Stack direction='row' spacing={1} flexWrap='wrap' gap={1}>
-            {tabs.map((tab) => {
+              {tabs.map((tab) => {
                 const isActive = localFilters.status === tab.value;
                 return (
                   <Chip
@@ -710,7 +748,7 @@ function HotelDetailFinal({
   searchCode,
   setSearchCode,
 }) {
-  
+
   const [dataSettlementBooking, setDataSettlementBooking] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [pagination, setPagination] = useState({
@@ -831,7 +869,7 @@ function HotelDetailFinal({
     settlement?.end_time
   )}`;
 
-  const deadlineText = `${formatDate(settlement?.confirmed_at,15)}`;
+  const deadlineText = `${formatDate(settlement?.confirmed_at, 15)}`;
   const deadlineTextPending = `${formatDate(settlement?.confirm_deadline)}`;
   const deadlineTextPaid = `${formatTime(settlement?.paid_at)} - ${formatDate(settlement?.paid_at)}`;
 
@@ -1076,7 +1114,7 @@ function HotelDetailFinal({
               }}
               sx={{ fontSize: 32, mr: 1, cursor: "pointer" }}
             />
-            <Typography variant={isMobile?"h6":'h5' }fontWeight='bold'>
+            <Typography variant={isMobile ? "h6" : 'h5'} fontWeight='bold'>
               {parseLang(settlement?.hotel_name)}
             </Typography>
           </Box>
@@ -1190,29 +1228,29 @@ function HotelDetailFinal({
                 sx={{ textAlign: { xs: "left", md: "right" }, flexShrink: 0 }}>
                 {settlement?.status == "pending" ? (
                   <>
-                  <Button
-                    variant='contained'
-                    onClick={() => {
-                      setOpenModal(true);
-                    }}
-                    sx={{
-                      bgcolor: "#98B720",
-                      borderRadius: 10,
-                      px: 5,
-                      py: 1.5,
-                      fontWeight: 600,
-                      textTransform: "none",
-                      boxShadow: "none",
-                      mb: 2,
-                    }}>
-                    Hoàn tất đối soát
-                  </Button>
-                  <Typography
+                    <Button
+                      variant='contained'
+                      onClick={() => {
+                        setOpenModal(true);
+                      }}
+                      sx={{
+                        bgcolor: "#98B720",
+                        borderRadius: 10,
+                        px: 5,
+                        py: 1.5,
+                        fontWeight: 600,
+                        textTransform: "none",
+                        boxShadow: "none",
+                        mb: 2,
+                      }}>
+                      Hoàn tất đối soát
+                    </Button>
+                    <Typography
                       variant='body2'
                       color='#616161'
                       sx={{ maxWidth: 340 }}>
-                  Vui lòng hoàn tất đối soát trước <strong>{deadlineTextPending}</strong> để nhận thanh toán dự kiến vào ngày làm việc kế tiếp
-                      
+                      Vui lòng hoàn tất đối soát trước <strong>{deadlineTextPending}</strong> để nhận thanh toán dự kiến vào ngày làm việc kế tiếp
+
                     </Typography>
                   </>
                 ) : (
@@ -1221,8 +1259,8 @@ function HotelDetailFinal({
                       variant='body2'
                       color='#616161'
                       sx={{ maxWidth: 340 }}>
-                   {settlement.status == 'paid' ? "Đã thanh toán vào lúc" : "Sẽ thanh toán công nợ chậm nhất vào ngày"}   <strong>{settlement.status == 'paid' ?deadlineTextPaid: deadlineText}</strong>  qua tài khoản:
-                      
+                      {settlement.status == 'paid' ? "Đã thanh toán vào lúc" : "Sẽ thanh toán công nợ chậm nhất vào ngày"}   <strong>{settlement.status == 'paid' ? deadlineTextPaid : deadlineText}</strong>  qua tài khoản:
+
                     </Typography>
 
                     <Stack spacing={1.5} mt={2}>
@@ -1249,7 +1287,7 @@ function HotelDetailFinal({
                           Người thụ hưởng
                         </Typography>
                         <Typography fontWeight={"700"}>
-                          {settlement?.bank_account_name ||  bankPrimary?.account_name}
+                          {settlement?.bank_account_name || bankPrimary?.account_name}
                         </Typography>
                       </Box>
                       <Divider sx={{ mt: 1, borderColor: "#EEEEEE" }} />
@@ -1393,7 +1431,7 @@ import { Alert } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 function ConfirmCompleteModal({
   open = false,
-  onClose = () => {},
+  onClose = () => { },
   fetchSettlements,
   settlement,
   isMobile
@@ -1542,7 +1580,7 @@ function ConfirmCompleteModal({
         justifyContent='center'
         spacing={4}
         mb={5}>
-        <Stack direction='row' alignItems='center' spacing={isMobile?1:2}>
+        <Stack direction='row' alignItems='center' spacing={isMobile ? 1 : 2}>
           <Box
             sx={{
               width: 30,
@@ -1559,7 +1597,7 @@ function ConfirmCompleteModal({
             1
           </Box>
           <Typography fontWeight={600} fontSize={"12px"} color='#98B720'>
-           {isMobile?"Xác nhận thông tin":" Xác nhận thông tin tài khoản thanh toán"}
+            {isMobile ? "Xác nhận thông tin" : " Xác nhận thông tin tài khoản thanh toán"}
           </Typography>
         </Stack>
 
@@ -1585,12 +1623,12 @@ function ConfirmCompleteModal({
             fontWeight={600}
             fontSize={"12px"}
             color={action == 5 ? "#98B720" : "#9E9E9E"}>
-           {isMobile?"Hoàn tất":"Xác nhận hoàn tất"} 
+            {isMobile ? "Hoàn tất" : "Xác nhận hoàn tất"}
           </Typography>
         </Stack>
       </Stack>
       {action == 1 && (
-        <DialogContent sx={{ px:isMobile?1: 4, pb: 3 }}>
+        <DialogContent sx={{ px: isMobile ? 1 : 4, pb: 3 }}>
           <Typography variant='body1' color='#424242' lineHeight={1.7} mb={4}>
             Bằng việc <strong>xác nhận đối soát ngay</strong>, Hotel Booking và
             khách sạn thống nhất nội dung đối soát. Sau khi đối soát hoàn tất,
@@ -1645,12 +1683,12 @@ function ConfirmCompleteModal({
         </DialogContent>
       )}
       {action == 4 && (
-        <DialogContent sx={{  px:isMobile?1: 4, pb: 3 }}>
+        <DialogContent sx={{ px: isMobile ? 1 : 4, pb: 3 }}>
           <PaymentQRInfo bankPrimary={bankPrimary} />
         </DialogContent>
       )}
       {action == 5 && (
-        <DialogContent sx={{  px:isMobile?1: 4, pb: 3 }}>
+        <DialogContent sx={{ px: isMobile ? 1 : 4, pb: 3 }}>
           <Box>
             {/* Tiêu đề chính */}
             <Typography variant='body2' gutterBottom>
@@ -1724,7 +1762,7 @@ function ConfirmCompleteModal({
         </DialogContent>
       )}
       {action == 2 && (
-        <DialogContent sx={{  px:isMobile?1: 4, pb: 3 }}>
+        <DialogContent sx={{ px: isMobile ? 1 : 4, pb: 3 }}>
           <Box display={"flex"} justifyContent={"space-between"}>
             <Typography variant='h6' fontWeight={600} color='#111' mb={4}>
               Thông tin tài khoản thanh toán
@@ -1790,7 +1828,7 @@ function ConfirmCompleteModal({
         </DialogContent>
       )}
       {action == 3 && (
-        <DialogContent sx={{  px:isMobile?1: 4, pb: 3 }}>
+        <DialogContent sx={{ px: isMobile ? 1 : 4, pb: 3 }}>
           {/* Step 1 - 2 */}
 
           {/* Tiêu đề + nút Chỉnh sửa */}
@@ -1986,7 +2024,7 @@ function ConfirmCompleteModal({
             boxShadow: "none",
             "&:hover": { bgcolor: "#98B720", boxShadow: "none" },
           }}>
-          {action == 3 ? "Lưu" : action == 5 ? isMobile?"Hoàn tất":"Xác nhận hoàn tất" : "Tiếp tục"}
+          {action == 3 ? "Lưu" : action == 5 ? isMobile ? "Hoàn tất" : "Xác nhận hoàn tất" : "Tiếp tục"}
         </Button>
       </DialogActions>
     </Dialog>

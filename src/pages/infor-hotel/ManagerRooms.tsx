@@ -65,11 +65,12 @@ const renderStatusChip = (status) => {
     />
   );
 };
-const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom }: Props) => {
+const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom , setActionRoom,
+  actionRoom }: Props) => {
   // Parse room_types từ props
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const total = detailHotel?.room_types.length;
- 
+  
   const active = detailHotel?.room_types.filter((h) => h.status === "active").length;
   const confirm = detailHotel?.room_types.filter((h) => h.status === "pending").length;
   const paused = detailHotel?.room_types.filter((h) => h.status === "paused").length;
@@ -100,6 +101,7 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom }: Props) => {
   const handleRoomClick = (room) => {
     setRoom(room);
     onNext("detail");
+    setActionRoom("edit")
   };
 
   const totalRooms = roomTypes.length;
@@ -221,8 +223,8 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom }: Props) => {
                   <TableCell>{room.number}</TableCell>
 
                   {/* Giá theo giờ */}
-                  <TableCell><Typography fontSize={"13.5px"} >{room.price_hourly_formatted} / 1 giờ đầu</Typography>
-                  <Typography fontSize={"13.5px"} >{room.price_hourly_increment_formatted} / 2 giờ thêm</Typography></TableCell>
+                  <TableCell><Typography fontSize={"13.5px"} >{room.price_hourly_formatted} / 2 giờ đầu</Typography>
+                  <Typography fontSize={"13.5px"} >{room.price_hourly_increment_formatted} / mỗi giờ thêm</Typography></TableCell>
 
                   {/* Giá qua đêm */}
                   <TableCell>{room.price_overnight_formatted}</TableCell>
@@ -232,7 +234,9 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom }: Props) => {
 
                   {/* Thao tác */}
                   <TableCell align="right">
-                    <ActionMenu handleDetailRoom={() => handleRoomClick(room)} />
+                    <ActionMenu handleDetailRoom={() => {
+                     
+                      handleRoomClick(room)}} />
                   </TableCell>
                 </TableRow>
               ))

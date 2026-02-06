@@ -150,6 +150,7 @@ export default function InforHotelView({
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [actionRoom, setActionRoom] = useState<string | null>("detail");
   useEffect(() => {
     if (searchParams.get("id") || searchParams.get("hotel_id")) {
       getHotelDetail();
@@ -448,6 +449,8 @@ export default function InforHotelView({
           room={room}
           onNext={setAction}
           attribute={attribute}
+          setAction={setActionRoom}
+          action={actionRoom}
         />
       )}
       {action == "edit_form" && (
@@ -466,6 +469,8 @@ export default function InforHotelView({
           setAction={setAction}
           locations={locations}
           attribute={attribute}
+          setActionRoom={setActionRoom}
+          actionRoom={actionRoom}
         />
       )}
       {action == "manager" && (

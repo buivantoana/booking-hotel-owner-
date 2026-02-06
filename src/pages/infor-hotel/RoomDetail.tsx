@@ -74,12 +74,14 @@ export default function RoomDetail({
   getHotelDetail,
   detailHotel,
   attribute,
+  action,
+  setAction
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  const [action, setAction] = useState("detail");
+ 
   const [searchParams, setSearchParams] = useSearchParams();
   // Parse dữ liệu từ room props
   const parsedName = room ? parseRoomName(room.name) || "Không có tên" : "";
@@ -601,7 +603,7 @@ export default function RoomDetail({
         >
           Qua đêm
         </Box>
-        <Box sx={{ mt: 'auto' }}>
+        <Box sx={{  }}>
           <Typography fontWeight={600}>Giá 1 đêm</Typography>
           <Typography color='#1565C0' fontWeight={700} fontSize='1.4rem'>
             {formatPrice(room.price_overnight)}
@@ -636,7 +638,7 @@ export default function RoomDetail({
         >
           Theo ngày
         </Box>
-        <Box sx={{ mt: 'auto' }}>
+        <Box sx={{  }}>
           <Typography fontWeight={600}>Giá 1 ngày</Typography>
           <Typography color='#DAA200' fontWeight={700} fontSize='1.4rem'>
             {formatPrice(room.price_daily)}

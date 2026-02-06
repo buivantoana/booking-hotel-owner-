@@ -146,7 +146,7 @@ export default function RoomTypeManager({
   useEffect(()=>{
     if(room){
       const firstKey = Object.keys(
-        JSON.parse(room.name || '{"vi":""}')
+         JSON.parse(room.name || '{"vi":""}')
       )[0];
       setSelectedLang(firstKey);
     }
@@ -352,10 +352,11 @@ export default function RoomTypeManager({
       }
 
       if (result?.room_type_id) {
-        toast.success(result?.message);
+        toast.success("Cập nhật phòng thành công");
         getHotelDetail();
+        setAction("detail");
       } else {
-        toast.error(result?.message || "Update room type failed");
+        toast.error("Cập nhật phòng thất bại");
       }
     } catch (error) {
       console.error(error);
@@ -363,6 +364,64 @@ export default function RoomTypeManager({
     }
   };
 
+  // Hàm kiểm tra xem form có hợp lệ để submit không
+  const isFormValid = (): boolean => {
+    if (!current) return false;
+  
+    const nameValues = Object.values(current.name || {});
+    const hasName = nameValues.some((val) => 
+      typeof val === 'string' && val.trim().length > 0
+    );
+  
+    const hasQuantity = !!current.quantity && !isNaN(Number(current.quantity)) && Number(current.quantity) > 0;
+    const hasArea = !!current.area && !isNaN(Number(current.area)) && Number(current.area) > 0;
+  
+    const hasBedType = Array.isArray(current.bedType) && current.bedType.length > 0;
+    const hasDirection = Array.isArray(current.direction) && current.direction.length > 0;
+  
+    // Pricing
+    let pricingValid = true;
+    let activeCount = 0;
+  
+    const pricing = current.pricing;
+  
+    if (pricing?.hourly?.enabled) {
+      const first = pricing.hourly.firstHours?.trim();
+      if (!first || isNaN(Number(first)) || Number(first) <= 0) {
+        pricingValid = false;
+      }
+      activeCount++;
+    }
+  
+    if (pricing?.overnight?.enabled) {
+      const price = pricing.overnight.price?.trim();
+      if (!price || isNaN(Number(price)) || Number(price) <= 0) {
+        pricingValid = false;
+      }
+      activeCount++;
+    }
+  
+    if (pricing?.daily?.enabled) {
+      const price = pricing.daily.price?.trim();
+      if (!price || isNaN(Number(price)) || Number(price) <= 0) {
+        pricingValid = false;
+      }
+      activeCount++;
+    }
+  
+    const hasAtLeastOnePricing = activeCount >= 1;
+  
+   
+    return (
+      hasName &&
+      hasQuantity &&
+      hasArea &&
+      hasBedType &&
+      hasDirection &&
+      hasAtLeastOnePricing &&
+      pricingValid
+    );
+  };
   return (
     <>
       <Box sx={{ display: "flex", alignItems: "center", mb: 3 ,flexWrap:"wrap"}}>
@@ -457,6 +516,7 @@ export default function RoomTypeManager({
           <Button
             variant='contained'
             onClick={handleSubmitRoomType}
+            disabled={!isFormValid()}
             sx={{
               background: "#82B440",
               borderRadius: 3,

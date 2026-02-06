@@ -33,6 +33,8 @@ export default function HotelDetail({
   getHotelDetail,
   locations,
   attribute,
+  setActionRoom,
+  actionRoom,
 }) {
   return (
     <Box sx={{ minHeight: "100vh" }}>
@@ -44,6 +46,8 @@ export default function HotelDetail({
         setRoom={setRoom}
         locations={locations}
         attribute={attribute}
+        setActionRoom={setActionRoom}
+        actionRoom={actionRoom}
       />
     </Box>
   );
@@ -139,6 +143,8 @@ function HotelInfoDetail({
   getHotelDetail,
   locations,
   attribute,
+  setActionRoom,
+        actionRoom
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -330,6 +336,8 @@ function HotelInfoDetail({
           detailHotel={detailHotel}
           getHotelDetail={getHotelDetail}
           searchRoom={searchRoom}
+          setActionRoom={setActionRoom}
+        actionRoom={actionRoom}
         />
       )}
 
