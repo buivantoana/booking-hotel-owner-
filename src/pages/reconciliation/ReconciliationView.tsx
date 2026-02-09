@@ -961,7 +961,7 @@ function HotelDetailFinal({
                     align="right"
                     sx={{
                       fontWeight: 600,
-                      color: isNegative ? "#E53935" : "#98B720",
+                      color: isNegative ? "#E53935" : "#33AE3F",
                     }}
                   >
                     {isNegative
@@ -1596,14 +1596,14 @@ function ConfirmCompleteModal({
       <Stack
         direction='row'
         alignItems='center'
-        justifyContent='center'
-        spacing={4}
-        mb={5}>
+        justifyContent='start'
+        spacing={2}
+        mb={3}>
         <Stack direction='row' alignItems='center' spacing={isMobile ? 1 : 2}>
           <Box
             sx={{
-              width: 30,
-              height: 30,
+              width:action != 5?40: 30,
+              height:action != 5?40: 30,
               bgcolor: "#98B720",
               color: "white",
               borderRadius: "50%",
@@ -1615,8 +1615,8 @@ function ConfirmCompleteModal({
             }}>
             1
           </Box>
-          <Typography fontWeight={600} fontSize={"12px"} color='#98B720'>
-            {isMobile ? "Xác nhận thông tin" : " Xác nhận thông tin tài khoản thanh toán"}
+          <Typography fontWeight={600} fontSize={"16px"} color='#98B720'>
+            {isMobile ? "Xác nhận thông tin" : "Thông tin tài khoản thanh toán"}
           </Typography>
         </Stack>
 
@@ -1625,8 +1625,8 @@ function ConfirmCompleteModal({
         <Stack direction='row' alignItems='center' spacing={2}>
           <Box
             sx={{
-              width: 30,
-              height: 30,
+              width:action == 5?40: 30,
+              height:action == 5?40: 30,
               bgcolor: action == 5 ? "#98B720" : "#EEEEEE",
               color: action == 5 ? "white" : "#9E9E9E",
               borderRadius: "50%",
@@ -1640,14 +1640,14 @@ function ConfirmCompleteModal({
           </Box>
           <Typography
             fontWeight={600}
-            fontSize={"12px"}
+            fontSize={"16px"}
             color={action == 5 ? "#98B720" : "#9E9E9E"}>
-            {isMobile ? "Hoàn tất" : "Xác nhận hoàn tất"}
+            {isMobile ? "Hoàn tất" : "Hoàn tất"}
           </Typography>
         </Stack>
       </Stack>
       {action == 1 && (
-        <DialogContent sx={{ px: isMobile ? 1 : 4, pb: 3 }}>
+        <DialogContent sx={{ px: isMobile ? 1 : 1, pb: 3 }}>
           <Typography variant='body1' color='#424242' lineHeight={1.7} mb={4}>
             Bằng việc <strong>xác nhận đối soát ngay</strong>, Hotel Booking và
             khách sạn thống nhất nội dung đối soát. Sau khi đối soát hoàn tất,
@@ -1702,12 +1702,12 @@ function ConfirmCompleteModal({
         </DialogContent>
       )}
       {action == 4 && (
-        <DialogContent sx={{ px: isMobile ? 1 : 4, pb: 3 }}>
+        <DialogContent sx={{ px: isMobile ? 1 : 1, pb: 3 }}>
           <PaymentQRInfo bankPrimary={bankPrimary} />
         </DialogContent>
       )}
       {action == 5 && (
-        <DialogContent sx={{ px: isMobile ? 1 : 4, pb: 3 }}>
+        <DialogContent sx={{ px: isMobile ? 1 : 1, pb: 3 }}>
           <Box>
             {/* Tiêu đề chính */}
             <Typography variant='body2' gutterBottom>
@@ -1798,7 +1798,7 @@ function ConfirmCompleteModal({
         </DialogContent>
       )}
       {action == 2 && (
-        <DialogContent sx={{ px: isMobile ? 1 : 4, pb: 3 }}>
+        <DialogContent sx={{ px: isMobile ? 1 : 1, pb: 3 }}>
           <Box display={"flex"} justifyContent={"space-between"}>
             <Typography variant='h6' fontWeight={600} color='#111' mb={4}>
               Thông tin tài khoản thanh toán
@@ -1864,7 +1864,7 @@ function ConfirmCompleteModal({
         </DialogContent>
       )}
       {action == 3 && (
-        <DialogContent sx={{ px: isMobile ? 1 : 4, pb: 3 }}>
+        <DialogContent sx={{ px: isMobile ? 1 : 1, pb: 3 }}>
           {/* Step 1 - 2 */}
 
           {/* Tiêu đề + nút Chỉnh sửa */}
