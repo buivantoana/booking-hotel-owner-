@@ -389,6 +389,8 @@ export const parseRoomName = (name?: string) => {
   }
 };
 
+export  const formatCurrency = (value: number) =>
+value?.toLocaleString("vi-VN") + "đ";
 export const type_bed = [
   {
     "id": "single_bed_1",

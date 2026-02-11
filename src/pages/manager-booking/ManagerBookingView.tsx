@@ -196,14 +196,15 @@ export default function ManagerBookingView({
     setOpenDetail(true);
   };
   const handleSearch = () => {
-    // Format dateRange thành chuỗi cho API
-
     const formatDateForAPI = (date: dayjs.Dayjs) => {
       if (!date) {
         return
       }
       return date.format("YYYY-MM-DDTHH:mm:ssZ");
     };
+    // Format dateRange thành chuỗi cho API
+
+
 
     const updatedFilters = {
       ...localFilters,
@@ -214,6 +215,23 @@ export default function ManagerBookingView({
     onFilterChange(updatedFilters);
   };
 
+  useEffect(() => {
+    if (dateRange.checkIn && dateRange?.checkOut) {
+      const formatDateForAPI = (date: dayjs.Dayjs) => {
+        if (!date) {
+          return
+        }
+        return date.format("YYYY-MM-DDTHH:mm:ssZ");
+      };
+      const updatedFilters = {
+        ...localFilters,
+        check_in_from: formatDateForAPI(dateRange?.checkIn),
+        check_in_to: formatDateForAPI(dateRange?.checkOut),
+      };
+
+      onFilterChange(updatedFilters);
+    }
+  }, [dateRange])
   // Xử lý thay đổi tab (status)
   const handleTabChange = (tabLabel: string) => {
     const selectedTab = tabs.find(tab => tab.label === tabLabel);
@@ -253,8 +271,8 @@ export default function ManagerBookingView({
     });
 
     const resetDateRange = {
-      checkIn: dayjs(),
-      checkOut: dayjs().add(1, "day"),
+      checkIn: null,
+      checkOut: null,
     };
 
     setDateRange(resetDateRange);
@@ -311,7 +329,7 @@ export default function ManagerBookingView({
               }}
             >
               {/* Tìm kiếm */}
-              <Box sx={{ }}>
+              <Box sx={{}}>
                 <Typography fontWeight={"bold"} sx={{ mb: 1 }}>Tìm kiếm</Typography>
                 <TextField
                   fullWidth
@@ -352,7 +370,7 @@ export default function ManagerBookingView({
               </Box>
 
               {/* Loại đặt phòng */}
-              <Box sx={{ }}>
+              <Box sx={{}}>
                 <Typography fontWeight={"bold"} sx={{ mb: 1 }}>Loại đặt phòng</Typography>
                 <Select
                   fullWidth
@@ -365,7 +383,7 @@ export default function ManagerBookingView({
                     })
                   }
                   sx={{
-                    width:"200px",
+                    width: "200px",
                     height: 44,
                     borderRadius: "24px",
                     bgcolor: "#fff",
@@ -393,12 +411,13 @@ export default function ManagerBookingView({
               </Box>
 
               {/* Thời gian nhận phòng */}
-              <Box sx={{ }}>
+              <Box sx={{}}>
                 <Typography fontWeight={"bold"} sx={{ mb: 1 }}>Thời gian nhận phòng</Typography>
                 <SimpleDateSearchBar
                   value={dateRange}
                   type="daily"
                   onChange={setDateRange}
+                  restrictToFuture={true}
                 // Nếu SimpleDateSearchBar hỗ trợ fullWidth thì thêm prop fullWidth={true}
                 // hoặc wrap trong Box với width 100% như trên
                 />
@@ -410,7 +429,7 @@ export default function ManagerBookingView({
                 spacing={2}
                 justifyContent="start"
                 sx={{
-                  
+
                   mt: { xs: 2, sm: 0 },          // thêm khoảng cách trên mobile
                 }}
               >
@@ -583,7 +602,7 @@ export default function ManagerBookingView({
 
                     const statusLabel = STATUS_API_TO_LABEL[row.status] || "Chờ xử lý";
 
-                    const roomName = row.room_types?.[0]?.name || "N/A";
+                    const roomName = parseRoomName(row.room_types?.[0]?.name) || "N/A";
 
                     return (
                       <TableRow
@@ -597,7 +616,7 @@ export default function ManagerBookingView({
                           {row.code}
                         </TableCell>
                         <TableCell onClick={() => handleRowClick(row)}>
-                          <div>{row.total_price.toLocaleString()}đ</div>
+                          <div>{formatCurrency(row.total_price)}</div>
                           <div style={{ marginTop: 8 }}>
                             <Box
 
@@ -1016,10 +1035,10 @@ function NoteModal({ openNote, onClose, booking, fetchBookings, idHotel }) {
     try {
       let result = await updateBooking(booking.id, { note: note })
       if (result?.booking_id) {
-        toast.success(result?.message)
+        toast.success("Ghi chú thành công")
         fetchBookings(idHotel)
       } else {
-        toast.success(result?.message)
+        toast.success("Ghi chú thất bại")
       }
     } catch (error) {
       console.log(error)
@@ -1301,7 +1320,7 @@ function ActionMenu({
             }}
             sx={{ gap: 1.5 }}
           >
-            <LogoutIcon fontSize="small" color="primary" />
+            <CheckCircleOutlineIcon fontSize="small" color="success" />
             Khách trả phòng
           </MenuItem>
         )}
@@ -1330,6 +1349,7 @@ import HotelSelect from "../../components/HotelSelect";
 import { updateBooking } from "../../service/booking";
 import { toast } from "react-toastify";
 import SimpleDateSearchBar from "../../components/SimpleDateSearchBar";
+import { formatCurrency, parseRoomName } from "../../utils/utils";
 
 const formatTime = (dateString: string) => {
   return dayjs(dateString).format("HH:mm");

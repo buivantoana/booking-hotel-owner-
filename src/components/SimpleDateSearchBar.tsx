@@ -47,12 +47,13 @@ const DateRangePicker = ({
   value,
   onClose,
   onApply,
-  type
+  type,
+  restrictToFuture = false,
 }: DateRangePickerProps) => {
   const [checkIn, setCheckIn] = useState<Dayjs | null>(value.checkIn || dayjs());
   const [checkOut, setCheckOut] = useState<Dayjs | null>(value.checkOut || null);
   const [selecting, setSelecting] = useState<"checkIn" | "checkOut">("checkIn");
-
+  const today = dayjs().startOf("day");
   useEffect(() => {
     setCheckIn(value.checkIn || dayjs());
     setCheckOut(value.checkOut || null);
@@ -132,11 +133,12 @@ const DateRangePicker = ({
     const today = dayjs().startOf("day");
     const isPast = day.isBefore(today, "day");
     const isSelected = checkIn?.isSame(day, "day");
-
+    const isDisabled = restrictToFuture && day.isAfter(today, "day");
     return (
       <Button
         {...props}
-        disabled={isPast}
+        // disabled={isPast}
+        disabled={isDisabled}
         onClick={() => handleDateClick(day)}
         sx={{
           minWidth: 36,
@@ -144,9 +146,9 @@ const DateRangePicker = ({
           borderRadius: "50%",
           bgcolor: isSelected ? "#98b720" : "transparent",
           color: isSelected ? "#fff" : "inherit",
-          cursor: isPast ? "default" : "pointer",
+          cursor: isDisabled ? "default" : "pointer",
           "&:hover": {
-            bgcolor: isPast ? "transparent" : "#e8f5e8",
+            bgcolor: isDisabled ? "transparent" : "#e8f5e8",
           },
         }}>
         {day.format("D")}
@@ -157,13 +159,13 @@ const DateRangePicker = ({
   const renderDayOvernight = (props: any) => {
     const day = props.day as Dayjs;
     const today = dayjs().startOf("day");
-    const isPast = day.isBefore(today, "day");
+    const isDisabled = restrictToFuture && day.isAfter(today, "day");
     const isSelected = checkIn?.isSame(day, "day");
 
     return (
       <Button
         {...props}
-        disabled={isPast}
+        disabled={isDisabled}
         onClick={() => handleDateClick(day)}
         sx={{
           minWidth: 36,
@@ -171,9 +173,9 @@ const DateRangePicker = ({
           borderRadius: "50%",
           bgcolor: isSelected ? "#98b720" : "transparent",
           color: isSelected ? "#fff" : "inherit",
-          cursor: isPast ? "default" : "pointer",
+          cursor: isDisabled ? "default" : "pointer",
           "&:hover": {
-            bgcolor: isPast ? "transparent" : "#e8f5e8",
+            bgcolor: isDisabled ? "transparent" : "#e8f5e8",
           },
         }}>
         {day.format("D")}
@@ -188,11 +190,11 @@ const DateRangePicker = ({
     const isStart = checkIn?.isSame(day, "day");
     const isEnd = checkOut?.isSame(day, "day");
     const isInRange = checkIn && checkOut && day.isAfter(checkIn, "day") && day.isBefore(checkOut, "day");
-
+    const isDisabled = restrictToFuture && day.isAfter(today, "day");
     return (
       <Button
         {...props}
-        disabled={isPast}
+        disabled={isDisabled}
         onClick={() => handleDateClick(day)}
         sx={{
           minWidth: 36,
@@ -204,11 +206,11 @@ const DateRangePicker = ({
               ? "#f0f8f0"
               : "transparent",
           color: isStart || isEnd ? "#fff" : "inherit",
-          cursor: isPast ? "default" : "pointer",
+          cursor: isDisabled ? "default" : "pointer",
           fontWeight: isStart || isEnd ? 600 : 400,
           position: "relative",
           "&:hover": {
-            bgcolor: isPast ? "transparent" : isStart || isEnd ? "#7a8f1a" : "#e8f5e8",
+            bgcolor: isDisabled ? "transparent" : isStart || isEnd ? "#7a8f1a" : "#e8f5e8",
           },
           // Hiệu ứng range Airbnb style
           ...(isInRange && {
@@ -396,7 +398,8 @@ const DateRangePicker = ({
 export default function SimpleDateSearchBar({
   value,
   onChange,
-  type
+  type,
+  restrictToFuture
 }: SimpleDateSearchBarProps) {
   const dateRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -470,6 +473,7 @@ export default function SimpleDateSearchBar({
               onClose={() => setOpen(false)}
               onApply={onChange}
               type={type}
+              restrictToFuture={restrictToFuture}
             />
           </Box>
         </Box>

@@ -104,7 +104,7 @@ function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
           <ContentCopyIcon fontSize='small' sx={{ color: "#666" }} />
           Nhân bản
         </MenuItem> */}
-        <MenuItem
+      {(hotel.status != "pending" && hotel.status != "rejected") &&   <MenuItem
           onClick={() => {
             setIdHotel(hotel);
             setDeleteDialogOpen(true);
@@ -118,7 +118,7 @@ function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
           {hotel?.status == "paused"
             ? "Tiếp tục kinh doanh"
             : "Ngừng kinh doanh"}
-        </MenuItem>
+        </MenuItem>}
       </Menu>
     </>
   );
@@ -309,12 +309,12 @@ export default function InforHotelView({
                 </TableCell>
 
                 <TableCell>
-                  {(hotel.status != "pending" && hotel.status != "rejected") && <ActionMenu
+                  <ActionMenu
                     hotel={hotel}
                     setIdHotel={setIdHotel}
                     setAction={setAction}
                     setDeleteDialogOpen={setDeleteDialogOpen}
-                  />}
+                  />
                 </TableCell>
               </TableRow>
             ))}
