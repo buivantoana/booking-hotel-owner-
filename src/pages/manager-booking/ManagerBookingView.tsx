@@ -39,54 +39,49 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-import edit from "../../images/brush-square.png"
+import edit from "../../images/brush-square.png";
 
 const statusStyles: Record<string, any> = {
   "Chờ khách xác nhận": {
-    color: "#F97316",          // cam (giữ nguyên như cũ cho "Chờ khách xác nhận" / "Chờ xử lý")
+    color: "#F97316", // cam (giữ nguyên như cũ cho "Chờ khách xác nhận" / "Chờ xử lý")
     backgroundColor: "#FFEDD5",
   },
   "Chờ nhận phòng": {
-    color: "#2979FF",          // xanh dương (giữ nguyên như cũ cho "Chờ nhận phòng")
+    color: "#2979FF", // xanh dương (giữ nguyên như cũ cho "Chờ nhận phòng")
     backgroundColor: "#EAF2FF",
   },
   "Đã nhận phòng": {
-    color: "#8B5CF6",          // tím (giữ nguyên như cũ)
+    color: "#8B5CF6", // tím (giữ nguyên như cũ)
     backgroundColor: "#F3E8FF",
   },
   "Đã trả phòng": {
-    color: "#22C55E",          // xanh lá (giữ nguyên như cũ cho "Hoàn thành")
+    color: "#22C55E", // xanh lá (giữ nguyên như cũ cho "Hoàn thành")
     backgroundColor: "#DCFCE7",
   },
   "Đã huỷ": {
-    color: "#EF4444",          // đỏ (giữ nguyên như cũ cho "Hủy phòng")
+    color: "#EF4444", // đỏ (giữ nguyên như cũ cho "Hủy phòng")
     backgroundColor: "#FEE2E2",
   },
   "Không nhận phòng": {
-    color: "#EF4444",          // đỏ (giữ nguyên như cũ cho "Không nhận phòng")
+    color: "#EF4444", // đỏ (giữ nguyên như cũ cho "Không nhận phòng")
     backgroundColor: "#FEE2E2",
   },
 };
 const paymentStatusStyles: Record<string, any> = {
   "Thanh toán tại khách sạn": {
-    color: "#F97316",          // cam
-
+    color: "#F97316", // cam
   },
   "Đã thanh toán": {
-    color: "#22C55E",          // xanh lá
-
+    color: "#22C55E", // xanh lá
   },
   "Đã hoàn tiền": {
-    color: "#EF4444",          // đỏ
-
+    color: "#EF4444", // đỏ
   },
   "Thanh toán không thành công": {
-    color: "#EF4444",          // đỏ
-
+    color: "#EF4444", // đỏ
   },
   "Đã huỷ": {
-    color: "#666666",          // xám
-
+    color: "#666666", // xám
   },
 };
 
@@ -198,13 +193,11 @@ export default function ManagerBookingView({
   const handleSearch = () => {
     const formatDateForAPI = (date: dayjs.Dayjs) => {
       if (!date) {
-        return
+        return;
       }
       return date.format("YYYY-MM-DDTHH:mm:ssZ");
     };
     // Format dateRange thành chuỗi cho API
-
-
 
     const updatedFilters = {
       ...localFilters,
@@ -219,7 +212,7 @@ export default function ManagerBookingView({
     if (dateRange.checkIn && dateRange?.checkOut) {
       const formatDateForAPI = (date: dayjs.Dayjs) => {
         if (!date) {
-          return
+          return;
         }
         return date.format("YYYY-MM-DDTHH:mm:ssZ");
       };
@@ -231,10 +224,10 @@ export default function ManagerBookingView({
 
       onFilterChange(updatedFilters);
     }
-  }, [dateRange])
+  }, [dateRange]);
   // Xử lý thay đổi tab (status)
   const handleTabChange = (tabLabel: string) => {
-    const selectedTab = tabs.find(tab => tab.label === tabLabel);
+    const selectedTab = tabs.find((tab) => tab.label === tabLabel);
     if (!selectedTab) return;
 
     const status = selectedTab.value;
@@ -249,8 +242,12 @@ export default function ManagerBookingView({
     // Cập nhật filter cho controller (giữ nguyên date range hiện tại)
     const updatedFilters = {
       ...updatedLocalFilters,
-      check_in_from: dateRange?.checkIn ? formatDateForAPI(dateRange.checkIn) : "",
-      check_in_to: dateRange?.checkOut ? formatDateForAPI(dateRange.checkOut) : "",
+      check_in_from: dateRange?.checkIn
+        ? formatDateForAPI(dateRange.checkIn)
+        : "",
+      check_in_to: dateRange?.checkOut
+        ? formatDateForAPI(dateRange.checkOut)
+        : "",
     };
 
     onFilterChange(updatedFilters);
@@ -281,7 +278,6 @@ export default function ManagerBookingView({
 
   // Đếm số lượng booking theo status
 
-
   // Danh sách tab với số lượng
   const tabs = [
     { label: "Tất cả", value: "all" },
@@ -301,8 +297,7 @@ export default function ManagerBookingView({
         </Typography>
 
         {/* Hotel Selector */}
-        <FormControl fullWidth sx={{ mb: 3, ml: .2, maxWidth: 300 }}>
-
+        <FormControl fullWidth sx={{ mb: 3, ml: 0.2, maxWidth: 300 }}>
           <HotelSelect
             value={idHotel}
             hotelsData={hotels}
@@ -320,20 +315,21 @@ export default function ManagerBookingView({
 
             <Stack
               direction={{ xs: "column", sm: "row" }}
-              gap={3}// tăng khoảng cách dọc trên mobile
-              alignItems={{ xs: "stretch", sm: "end" }}  // mobile: full width, desktop: align bottom
+              gap={3} // tăng khoảng cách dọc trên mobile
+              alignItems={{ xs: "stretch", sm: "end" }} // mobile: full width, desktop: align bottom
               mb={4}
               flexWrap={"wrap"}
               sx={{
                 width: "100%",
-              }}
-            >
+              }}>
               {/* Tìm kiếm */}
               <Box sx={{}}>
-                <Typography fontWeight={"bold"} sx={{ mb: 1 }}>Tìm kiếm</Typography>
+                <Typography fontWeight={"bold"} sx={{ mb: 1 }}>
+                  Tìm kiếm
+                </Typography>
                 <TextField
                   fullWidth
-                  placeholder="Tìm mã đặt phòng"
+                  placeholder='Tìm mã đặt phòng'
                   value={localFilters.booking_code}
                   onChange={(e) =>
                     setLocalFilters({
@@ -343,14 +339,14 @@ export default function ManagerBookingView({
                   }
                   InputProps={{
                     startAdornment: (
-                      <InputAdornment position="start">
+                      <InputAdornment position='start'>
                         <SearchIcon sx={{ color: "#999" }} />
                       </InputAdornment>
                     ),
                   }}
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      height: 44,                    // tăng chiều cao cho dễ chạm trên mobile
+                      height: 44, // tăng chiều cao cho dễ chạm trên mobile
                       borderRadius: "24px",
                       backgroundColor: "#fff",
                       "& fieldset": {
@@ -371,7 +367,9 @@ export default function ManagerBookingView({
 
               {/* Loại đặt phòng */}
               <Box sx={{}}>
-                <Typography fontWeight={"bold"} sx={{ mb: 1 }}>Loại đặt phòng</Typography>
+                <Typography fontWeight={"bold"} sx={{ mb: 1 }}>
+                  Loại đặt phòng
+                </Typography>
                 <Select
                   fullWidth
                   displayEmpty
@@ -401,55 +399,53 @@ export default function ManagerBookingView({
                     "& .MuiSelect-icon": {
                       color: "#cddc39",
                     },
-                  }}
-                >
-                  <MenuItem value="all">Tất cả</MenuItem>
-                  <MenuItem value="hourly">Theo giờ</MenuItem>
-                  <MenuItem value="daily">Qua ngày</MenuItem>
-                  <MenuItem value="overnight">Qua đêm</MenuItem>
+                  }}>
+                  <MenuItem value='all'>Tất cả</MenuItem>
+                  <MenuItem value='hourly'>Theo giờ</MenuItem>
+                  <MenuItem value='daily'>Qua ngày</MenuItem>
+                  <MenuItem value='overnight'>Qua đêm</MenuItem>
                 </Select>
               </Box>
 
               {/* Thời gian nhận phòng */}
               <Box sx={{}}>
-                <Typography fontWeight={"bold"} sx={{ mb: 1 }}>Thời gian nhận phòng</Typography>
+                <Typography fontWeight={"bold"} sx={{ mb: 1 }}>
+                  Thời gian nhận phòng
+                </Typography>
                 <SimpleDateSearchBar
                   value={dateRange}
-                  type="daily"
+                  type='daily'
                   onChange={setDateRange}
                   restrictToFuture={true}
-                // Nếu SimpleDateSearchBar hỗ trợ fullWidth thì thêm prop fullWidth={true}
-                // hoặc wrap trong Box với width 100% như trên
+                  // Nếu SimpleDateSearchBar hỗ trợ fullWidth thì thêm prop fullWidth={true}
+                  // hoặc wrap trong Box với width 100% như trên
                 />
               </Box>
 
               {/* Nút tìm kiếm & reset - mobile nằm ngang dưới cùng */}
               <Stack
-                direction="row"
+                direction='row'
                 spacing={2}
-                justifyContent="start"
+                justifyContent='start'
                 sx={{
-
-                  mt: { xs: 2, sm: 0 },          // thêm khoảng cách trên mobile
-                }}
-              >
+                  mt: { xs: 2, sm: 0 }, // thêm khoảng cách trên mobile
+                }}>
                 <Button
-                  variant="contained"
+                  variant='contained'
                   onClick={handleSearch}
-                  fullWidth={{ xs: true, sm: false }}  // full width trên mobile
+                  fullWidth={{ xs: true, sm: false }} // full width trên mobile
                   sx={{
                     borderRadius: "24px",
                     bgcolor: "#98b720",
                     height: 44,
                     minWidth: { xs: "auto", sm: 120 },
                     fontSize: "1rem",
-                  }}
-                >
+                  }}>
                   Tìm kiếm
                 </Button>
 
                 <Button
-                  variant="outlined"
+                  variant='outlined'
                   onClick={handleReset}
                   fullWidth={{ xs: true, sm: true }}
                   sx={{
@@ -460,8 +456,7 @@ export default function ManagerBookingView({
                     background: "rgba(240, 241, 243, 1)",
                     color: "black",
                     fontSize: "1rem",
-                  }}
-                >
+                  }}>
                   Xóa tìm kiếm
                 </Button>
               </Stack>
@@ -482,10 +477,9 @@ export default function ManagerBookingView({
                     },
                     scrollbarWidth: "none", // Firefox ẩn scrollbar
                     msOverflowStyle: "none", // IE/Edge ẩn
-                  }}
-                >
+                  }}>
                   <Stack
-                    direction="row"
+                    direction='row'
                     spacing={1.5}
                     sx={{ minWidth: "fit-content" }} // đảm bảo đủ rộng để scroll
                   >
@@ -517,7 +511,7 @@ export default function ManagerBookingView({
                 </Box>
               ) : (
                 // Desktop: Giữ nguyên wrap như cũ
-                <Stack direction="row" flexWrap="wrap" gap={1.5}>
+                <Stack direction='row' flexWrap='wrap' gap={1.5}>
                   {tabs.map((tab) => {
                     const isActive = localFilters.status === tab.value;
                     return (
@@ -544,276 +538,304 @@ export default function ManagerBookingView({
               )}
             </Box>
           </Stack>
-          {!isMobile ? <TableContainer sx={{ mt: 5, width: "100%" }}>
-            <Table>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                  <TableCell>
-                    <strong>Mã đặt phòng</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Tổng số tiền thanh toán</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Loại đặt phòng</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Thời gian</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Tình trạng đặt phòng</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Ghi chú</strong>
-                  </TableCell>
-                  <TableCell align='center'>
-                    <strong>Thao tác</strong>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={8} align="center">
-                      <Typography>Đang tải...</Typography>
+          {!isMobile ? (
+            <TableContainer sx={{ mt: 5, width: "100%" }}>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                    <TableCell>
+                      <strong>Mã đặt phòng</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>Tổng số tiền thanh toán</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>Loại đặt phòng</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>Thời gian</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>Tình trạng đặt phòng</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>Ghi chú</strong>
+                    </TableCell>
+                    <TableCell align='center'>
+                      <strong>Thao tác</strong>
                     </TableCell>
                   </TableRow>
-                ) : bookings.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} align="center">
-                      <Typography>Không có dữ liệu đặt phòng</Typography>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  bookings.map((row) => {
-                    // Format ngày giờ
-                    const formatDateTime = (dateString: string) => {
-                      return dayjs(dateString).format("DD/MM/YYYY, HH:mm");
-                    };
+                </TableHead>
+                <TableBody>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={8} align='center'>
+                        <Typography>Đang tải...</Typography>
+                      </TableCell>
+                    </TableRow>
+                  ) : bookings.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} align='center'>
+                        <Typography>Không có dữ liệu đặt phòng</Typography>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    bookings.map((row) => {
+                      // Format ngày giờ
+                      const formatDateTime = (dateString: string) => {
+                        return dayjs(dateString).format("DD/MM/YYYY, HH:mm");
+                      };
 
-                    const rentTypeLabel =
-                      row.rent_type === "hourly"
-                        ? "Theo giờ"
-                        : row.rent_type === "daily"
+                      const rentTypeLabel =
+                        row.rent_type === "hourly"
+                          ? "Theo giờ"
+                          : row.rent_type === "daily"
                           ? "Qua ngày"
                           : row.rent_type === "overnight"
-                            ? "Qua đêm"
-                            : "Không xác định";
+                          ? "Qua đêm"
+                          : "Không xác định";
 
-                    const statusLabel = STATUS_API_TO_LABEL[row.status] || "Chờ xử lý";
+                      const statusLabel =
+                        STATUS_API_TO_LABEL[row.status] || "Chờ xử lý";
 
-                    const roomName = parseRoomName(row.room_types?.[0]?.name) || "N/A";
+                      const roomName =
+                        parseRoomName(row.room_types?.[0]?.name) || "N/A";
 
-                    return (
-                      <TableRow
-                        sx={{ cursor: "pointer" }} key={row.id} hover>
-                        <TableCell
-                          onClick={() => handleRowClick(row)}
-                          sx={{
-                            fontWeight: row.code.includes("(G)") ? "bold" : "normal",
-                            color: row.code.includes("(G)") ? "#1976d2" : "#98B720",
-                          }}>
-                          {row.code}
-                        </TableCell>
-                        <TableCell onClick={() => handleRowClick(row)}>
-                          <div>{formatCurrency(row.total_price)}</div>
-                          <div style={{ marginTop: 8 }}>
-                            <Box
-
-                              sx={{
-                                minWidth: 140,
-                                height: 28,
-                                fontSize: "0.825rem",
-                                fontWeight: "medium",
-                                ...paymentStatusStyles[getPaymentLabel(row)],
-                              }}
-                            >{getPaymentLabel(row)}</Box>
-                          </div>
-                        </TableCell>
-                        <TableCell onClick={() => handleRowClick(row)}>
-                          {rentTypeLabel}
-                          <br />
-                          <span style={{ color: "#98B720", fontSize: "0.875rem" }}>
-                            {roomName}
-                          </span>
-                        </TableCell>
-                        <TableCell onClick={() => handleRowClick(row)}>{formatDateTime(row.check_in)}<br />{formatDateTime(row.check_out)}</TableCell>
-
-                        <TableCell onClick={() => handleRowClick(row)}>
-
-                          <Chip
-                            label={statusLabel}
-
-                            size="small"
-                            sx={{ minWidth: 110, ...statusStyles[statusLabel] }}
-                          />
-                        </TableCell>
-                        <TableCell onClick={() => handleRowClick(row)}>
-                          <Tooltip title={row.note || "Không có ghi chú"}>
-                            <IconButton size="small">
-                              <img src={edit} onClick={(e) => {
-                                e.stopPropagation();
-                                setIdBooking(row)
-                                setOpenNote(true)
-                              }} fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </TableCell>
-                        <TableCell align="center">
-
-                          <ActionMenu
-                            booking={row}
-                            setIdBooking={setIdBooking}
-                            setOpenCheckOut={setOpenAccepp}
-                            setOpenCancel={setOpenCancel}
-                            setOpenCheckIn={setOpenCheckin}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer> : <Box sx={{ mt: 4 }}>
-            {loading ? (
-              <Typography align="center">Đang tải...</Typography>
-            ) : bookings.length === 0 ? (
-              <Typography align="center">Không có dữ liệu đặt phòng</Typography>
-            ) : (
-              bookings.map((row) => {
-                const formatDateTime = (dateString) => dayjs(dateString).format("DD/MM/YYYY, HH:mm");
-                const rentTypeLabel =
-                  row.rent_type === "hourly" ? "Theo giờ" :
-                    row.rent_type === "daily" ? "Qua ngày" :
-                      row.rent_type === "overnight" ? "Qua đêm" : "Không xác định";
-                const statusLabel = STATUS_API_TO_LABEL[row.status] || "Chờ xử lý";
-                const roomName = row.room_types?.[0]?.name || "N/A";
-
-                return (
-                  <Box
-                    key={row.id}
-                    onClick={() => handleRowClick(row)}
-                    sx={{
-                      bgcolor: "white",
-                      borderRadius: "12px",
-                      boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-                      mb: 3,
-                      overflow: "hidden",
-                      cursor: "pointer",
-                      "&:hover": { boxShadow: "0 4px 20px rgba(0,0,0,0.12)" },
-                    }}
-                  >
-                    {/* Header card */}
-                    <Box
-                      sx={{
-                        bgcolor: "#f5f5f5",
-                        p: 2,
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Box>
-                        <Typography variant="subtitle1" fontWeight="bold">
-                          {row.code}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {rentTypeLabel} • {roomName}
-                        </Typography>
-                      </Box>
-                      <Chip
-                        label={statusLabel}
-                        size="small"
-                        sx={{ ...statusStyles[statusLabel], minWidth: 100 }}
-                      />
-                    </Box>
-
-                    <Divider />
-
-                    {/* Nội dung chính */}
-                    <Box sx={{ p: 2 }}>
-                      <Stack spacing={1.5}>
-                        <Box>
-                          <Typography variant="body2" color="text.secondary">
-                            Tổng tiền:
-                          </Typography>
-                          <Typography fontWeight="bold">
-                            {row.total_price.toLocaleString()}đ
-                          </Typography>
-                          <Box
+                      return (
+                        <TableRow sx={{ cursor: "pointer" }} key={row.id} hover>
+                          <TableCell
+                            onClick={() => handleRowClick(row)}
                             sx={{
-                              display: "inline-block",
-                              mt: 0.5,
-                              px: 1.5,
-                              py: 0.5,
-                              borderRadius: "12px",
-                              fontSize: "0.8rem",
-                              ...paymentStatusStyles[getPaymentLabel(row)],
-                            }}
-                          >
-                            {getPaymentLabel(row)}
-                          </Box>
-                        </Box>
-
-                        <Box>
-                          <Typography variant="body2" color="text.secondary">
-                            Thời gian:
-                          </Typography>
-                          <Typography>
-                            Nhận: {formatDateTime(row.check_in)}
+                              fontWeight: row.code.includes("(G)")
+                                ? "bold"
+                                : "normal",
+                              color: row.code.includes("(G)")
+                                ? "#1976d2"
+                                : "#98B720",
+                            }}>
+                            {row.code}
+                          </TableCell>
+                          <TableCell onClick={() => handleRowClick(row)}>
+                            <div>{formatCurrency(row.total_price)}</div>
+                            <div style={{ marginTop: 8 }}>
+                              <Box
+                                sx={{
+                                  minWidth: 140,
+                                  height: 28,
+                                  fontSize: "0.825rem",
+                                  fontWeight: "medium",
+                                  ...paymentStatusStyles[getPaymentLabel(row)],
+                                }}>
+                                {getPaymentLabel(row)}
+                              </Box>
+                            </div>
+                          </TableCell>
+                          <TableCell onClick={() => handleRowClick(row)}>
+                            {rentTypeLabel}
                             <br />
-                            Trả: {formatDateTime(row.check_out)}
+                            <span
+                              style={{
+                                color: "#98B720",
+                                fontSize: "0.875rem",
+                              }}>
+                              {roomName}
+                            </span>
+                          </TableCell>
+                          <TableCell onClick={() => handleRowClick(row)}>
+                            {formatDateTime(row.check_in)}
+                            <br />
+                            {formatDateTime(row.check_out)}
+                          </TableCell>
+
+                          <TableCell onClick={() => handleRowClick(row)}>
+                            <Chip
+                              label={statusLabel}
+                              size='small'
+                              sx={{
+                                minWidth: 110,
+                                ...statusStyles[statusLabel],
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell onClick={() => handleRowClick(row)}>
+                            <Tooltip title={row.note || "Không có ghi chú"}>
+                              <IconButton size='small'>
+                                <img
+                                  src={edit}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIdBooking(row);
+                                    setOpenNote(true);
+                                  }}
+                                  fontSize='small'
+                                />
+                              </IconButton>
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell align='center'>
+                            <ActionMenu
+                              booking={row}
+                              setIdBooking={setIdBooking}
+                              setOpenCheckOut={setOpenAccepp}
+                              setOpenCancel={setOpenCancel}
+                              setOpenCheckIn={setOpenCheckin}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <Box sx={{ mt: 4 }}>
+              {loading ? (
+                <Typography align='center'>Đang tải...</Typography>
+              ) : bookings.length === 0 ? (
+                <Typography align='center'>
+                  Không có dữ liệu đặt phòng
+                </Typography>
+              ) : (
+                bookings.map((row) => {
+                  const formatDateTime = (dateString) =>
+                    dayjs(dateString).format("DD/MM/YYYY, HH:mm");
+                  const rentTypeLabel =
+                    row.rent_type === "hourly"
+                      ? "Theo giờ"
+                      : row.rent_type === "daily"
+                      ? "Qua ngày"
+                      : row.rent_type === "overnight"
+                      ? "Qua đêm"
+                      : "Không xác định";
+                  const statusLabel =
+                    STATUS_API_TO_LABEL[row.status] || "Chờ xử lý";
+                  const roomName = row.room_types?.[0]?.name || "N/A";
+
+                  return (
+                    <Box
+                      key={row.id}
+                      onClick={() => handleRowClick(row)}
+                      sx={{
+                        bgcolor: "white",
+                        borderRadius: "12px",
+                        boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+                        mb: 3,
+                        overflow: "hidden",
+                        cursor: "pointer",
+                        "&:hover": { boxShadow: "0 4px 20px rgba(0,0,0,0.12)" },
+                      }}>
+                      {/* Header card */}
+                      <Box
+                        sx={{
+                          bgcolor: "#f5f5f5",
+                          p: 2,
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}>
+                        <Box>
+                          <Typography variant='subtitle1' fontWeight='bold'>
+                            {row.code}
+                          </Typography>
+                          <Typography variant='caption' color='text.secondary'>
+                            {rentTypeLabel} • {roomName}
                           </Typography>
                         </Box>
+                        <Chip
+                          label={statusLabel}
+                          size='small'
+                          sx={{ ...statusStyles[statusLabel], minWidth: 100 }}
+                        />
+                      </Box>
 
-                        {row.note && (
+                      <Divider />
+
+                      {/* Nội dung chính */}
+                      <Box sx={{ p: 2 }}>
+                        <Stack spacing={1.5}>
                           <Box>
-                            <Typography variant="body2" color="text.secondary">
-                              Ghi chú:
+                            <Typography variant='body2' color='text.secondary'>
+                              Tổng tiền:
                             </Typography>
-                            <Typography variant="body2">{row.note}</Typography>
+                            <Typography fontWeight='bold'>
+                              {row.total_price.toLocaleString()}đ
+                            </Typography>
+                            <Box
+                              sx={{
+                                display: "inline-block",
+                                mt: 0.5,
+                                px: 1.5,
+                                py: 0.5,
+                                borderRadius: "12px",
+                                fontSize: "0.8rem",
+                                ...paymentStatusStyles[getPaymentLabel(row)],
+                              }}>
+                              {getPaymentLabel(row)}
+                            </Box>
                           </Box>
-                        )}
-                      </Stack>
-                    </Box>
 
-                    {/* Thao tác */}
-                    <Box
-                      sx={{
-                        p: 2,
-                        bgcolor: "#fafafa",
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        gap: 1,
-                      }}
-                    >
-                      <Tooltip title={row.note || "Không có ghi chú"}>
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIdBooking(row);
-                            setOpenNote(true);
-                          }}
-                        >
-                          <img src={edit} alt="edit" style={{ width: 20 }} />
-                        </IconButton>
-                      </Tooltip>
+                          <Box>
+                            <Typography variant='body2' color='text.secondary'>
+                              Thời gian:
+                            </Typography>
+                            <Typography>
+                              Nhận: {formatDateTime(row.check_in)}
+                              <br />
+                              Trả: {formatDateTime(row.check_out)}
+                            </Typography>
+                          </Box>
 
-                      <ActionMenu
-                        booking={row}
-                        setIdBooking={setIdBooking}
-                        setOpenCheckOut={setOpenAccepp}
-                        setOpenCancel={setOpenCancel}
-                        setOpenCheckIn={setOpenCheckin}
-                      />
+                          {row.note && (
+                            <Box>
+                              <Typography
+                                variant='body2'
+                                color='text.secondary'>
+                                Ghi chú:
+                              </Typography>
+                              <Typography variant='body2'>
+                                {row.note}
+                              </Typography>
+                            </Box>
+                          )}
+                        </Stack>
+                      </Box>
+
+                      {/* Thao tác */}
+                      <Box
+                        sx={{
+                          p: 2,
+                          bgcolor: "#fafafa",
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          gap: 1,
+                        }}>
+                        <Tooltip title={row.note || "Không có ghi chú"}>
+                          <IconButton
+                            size='small'
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setIdBooking(row);
+                              setOpenNote(true);
+                            }}>
+                            <img src={edit} alt='edit' style={{ width: 20 }} />
+                          </IconButton>
+                        </Tooltip>
+
+                        <ActionMenu
+                          booking={row}
+                          setIdBooking={setIdBooking}
+                          setOpenCheckOut={setOpenAccepp}
+                          setOpenCancel={setOpenCancel}
+                          setOpenCheckIn={setOpenCheckin}
+                        />
+                      </Box>
                     </Box>
-                  </Box>
-                );
-              })
-            )}
-          </Box>}
+                  );
+                })
+              )}
+            </Box>
+          )}
           <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
             <Pagination
               key={pagination.page} // ← THÊM DÒNG NÀY ĐỂ FORCE RE-RENDER KHI PAGE THAY ĐỔI
@@ -822,7 +844,7 @@ export default function ManagerBookingView({
               onChange={onPageChange}
               siblingCount={1}
               boundaryCount={1}
-              color="primary"
+              color='primary'
               size={isMobile ? "medium" : "large"}
               sx={{
                 // Tùy chỉnh trang active
@@ -848,35 +870,41 @@ export default function ManagerBookingView({
                   color: "#666",
                 },
               }}
-
             />
-
           </Stack>
         </Paper>
 
         {/* Table */}
 
         {/* Pagination */}
-
       </Box>
-      <NoteModal openNote={openNote} fetchBookings={fetchBookings} idHotel={idHotel} booking={idBooking} onClose={() => setOpenNote(false)} />
+      <NoteModal
+        openNote={openNote}
+        fetchBookings={fetchBookings}
+        idHotel={idHotel}
+        booking={idBooking}
+        onClose={() => setOpenNote(false)}
+      />
       <CancelBookingModal
         openCancel={openCancel}
         onClose={() => setOpenCancel(false)}
         booking={idBooking}
-        fetchBookings={fetchBookings} idHotel={idHotel}
+        fetchBookings={fetchBookings}
+        idHotel={idHotel}
       />
       <CheckoutConfirmModal
         openAccepp={openAccepp}
         onClose={() => setOpenAccepp(false)}
         booking={idBooking}
-        fetchBookings={fetchBookings} idHotel={idHotel}
+        fetchBookings={fetchBookings}
+        idHotel={idHotel}
       />
       <CheckinConfirmModal
         openCheckin={openCheckin}
         onClose={() => setOpenCheckin(false)}
         booking={idBooking}
-        fetchBookings={fetchBookings} idHotel={idHotel}
+        fetchBookings={fetchBookings}
+        idHotel={idHotel}
       />
       <BookingDetailModal
         open={openDetail}
@@ -900,83 +928,86 @@ function BookingDetailModal({ open, onClose, booking }) {
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="sm"
+      maxWidth='sm'
       fullWidth
       PaperProps={{
         sx: {
           borderRadius: 4,
           boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
         },
-      }}
-    >
+      }}>
       <DialogTitle sx={{ pb: 2 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6" fontWeight="bold">
+        <Stack
+          direction='row'
+          justifyContent='space-between'
+          alignItems='center'>
+          <Typography variant='h6' fontWeight='bold'>
             Chi tiết mã đặt phòng
           </Typography>
-          <IconButton onClick={onClose} size="small">
+          <IconButton onClick={onClose} size='small'>
             <CloseIcon />
           </IconButton>
         </Stack>
       </DialogTitle>
 
-      <DialogContent >
+      <DialogContent>
         <Stack spacing={3}>
           {/* Thông tin đặt phòng */}
           <Stack spacing={2}>
             <Box display={"flex"} justifyContent={"space-between"}>
-              <Typography variant="subtitle1" fontWeight="bold">
+              <Typography variant='subtitle1' fontWeight='bold'>
                 Thông tin đặt phòng
               </Typography>
               <Chip
                 label={statusLabel}
-
-                size="small"
+                size='small'
                 sx={{ minWidth: 110, ...statusStyles[statusLabel] }}
               />
             </Box>
 
-
-
-            <Stack direction="row" justifyContent="space-between">
-              <Typography color="text.secondary">Thời gian đặt phòng:</Typography>
-              <Typography fontWeight="medium">
+            <Stack direction='row' justifyContent='space-between'>
+              <Typography color='text.secondary'>
+                Thời gian đặt phòng:
+              </Typography>
+              <Typography fontWeight='medium'>
                 {formatDateTime(booking.created_at)}
               </Typography>
             </Stack>
 
-            <Stack direction="row" justifyContent="space-between">
-              <Typography color="text.secondary">Tên người đặt:</Typography>
-              <Typography fontWeight="medium">{booking.customer_name || "Nguyễn Văn A"}</Typography>
+            <Stack direction='row' justifyContent='space-between'>
+              <Typography color='text.secondary'>Tên người đặt:</Typography>
+              <Typography fontWeight='medium'>
+                {booking.customer_name || "Nguyễn Văn A"}
+              </Typography>
             </Stack>
 
-            <Stack direction="row" justifyContent="space-between">
-              <Typography color="text.secondary">Số điện thoại:</Typography>
-              <Typography fontWeight="medium">{booking.customer_phone || "0123456789"}</Typography>
+            <Stack direction='row' justifyContent='space-between'>
+              <Typography color='text.secondary'>Số điện thoại:</Typography>
+              <Typography fontWeight='medium'>
+                {booking.customer_phone || "0123456789"}
+              </Typography>
             </Stack>
 
-            <Stack direction="row" justifyContent="space-between">
-              <Typography color="text.secondary">Loại đặt phòng:</Typography>
-              <Typography fontWeight="medium">{rentTypeLabel}</Typography>
+            <Stack direction='row' justifyContent='space-between'>
+              <Typography color='text.secondary'>Loại đặt phòng:</Typography>
+              <Typography fontWeight='medium'>{rentTypeLabel}</Typography>
             </Stack>
 
-            <Stack direction="row" justifyContent="space-between">
-              <Typography color="text.secondary">Loại phòng:</Typography>
-              <Typography fontWeight="medium">
+            <Stack direction='row' justifyContent='space-between'>
+              <Typography color='text.secondary'>Loại phòng:</Typography>
+              <Typography fontWeight='medium'>
                 {booking.room_types?.[0]?.name || "Vip123"}
               </Typography>
             </Stack>
 
-            <Stack direction="row" justifyContent="space-between">
-              <Typography color="text.secondary">Thời gian lưu trú:</Typography>
-              <Typography fontWeight="medium">
-                {formatDateTime(booking.check_in)} - {formatDateTime(booking.check_out)}
+            <Stack direction='row' justifyContent='space-between'>
+              <Typography color='text.secondary'>Thời gian lưu trú:</Typography>
+              <Typography fontWeight='medium'>
+                {formatDateTime(booking.check_in)} -{" "}
+                {formatDateTime(booking.check_out)}
               </Typography>
             </Stack>
           </Stack>
-
-
-
         </Stack>
       </DialogContent>
     </Dialog>
@@ -1012,10 +1043,10 @@ function NoteModal({ openNote, onClose, booking, fetchBookings, idHotel }) {
     booking.rent_type === "hourly"
       ? "Theo giờ"
       : booking.rent_type === "daily"
-        ? "Qua ngày"
-        : booking.rent_type === "overnight"
-          ? "Qua đêm"
-          : "Không xác định";
+      ? "Qua ngày"
+      : booking.rent_type === "overnight"
+      ? "Qua đêm"
+      : "Không xác định";
 
   // Map trạng thái để hiển thị chip
   const statusLabel = STATUS_API_TO_LABEL[booking.status] || "Chờ xử lý";
@@ -1033,23 +1064,23 @@ function NoteModal({ openNote, onClose, booking, fetchBookings, idHotel }) {
 
   const handleNoteBooking = async () => {
     try {
-      let result = await updateBooking(booking.id, { note: note })
+      let result = await updateBooking(booking.id, { note: note });
       if (result?.booking_id) {
-        toast.success("Ghi chú thành công")
-        fetchBookings(idHotel)
+        toast.success("Ghi chú thành công");
+        fetchBookings(idHotel);
       } else {
-        toast.success("Ghi chú thất bại")
+        toast.success("Ghi chú thất bại");
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   return (
     <Dialog
       open={openNote}
       onClose={onClose}
-      maxWidth="sm"
+      maxWidth='sm'
       fullWidth
       PaperProps={{
         sx: {
@@ -1057,15 +1088,17 @@ function NoteModal({ openNote, onClose, booking, fetchBookings, idHotel }) {
           boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
           overflow: "hidden",
         },
-      }}
-    >
+      }}>
       {/* Header */}
       <DialogTitle sx={{ pb: 1, pt: 3, px: 2 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6" fontWeight="bold">
+        <Stack
+          direction='row'
+          justifyContent='space-between'
+          alignItems='center'>
+          <Typography variant='h6' fontWeight='bold'>
             Ghi chú
           </Typography>
-          <IconButton onClick={onClose} size="small">
+          <IconButton onClick={onClose} size='small'>
             <CloseIcon />
           </IconButton>
         </Stack>
@@ -1074,29 +1107,31 @@ function NoteModal({ openNote, onClose, booking, fetchBookings, idHotel }) {
       <DialogContent sx={{ px: 2, pb: 4 }}>
         {/* Mã đặt phòng */}
         <Stack spacing={0.5} mb={3}>
-          <Typography color="text.secondary" fontSize="0.875rem">
+          <Typography color='text.secondary' fontSize='0.875rem'>
             Mã đặt phòng:
           </Typography>
-          <Typography fontWeight="bold" fontSize="1.1rem">
+          <Typography fontWeight='bold' fontSize='1.1rem'>
             {booking.code}
           </Typography>
         </Stack>
 
         {/* Ô nhập ghi chú */}
         <Stack spacing={1} mb={3}>
-          <Typography fontSize="0.875rem" color="text.secondary">
+          <Typography fontSize='0.875rem' color='text.secondary'>
             Nhập nội dung (không bắt buộc)
           </Typography>
           <TextField
             multiline
             rows={4}
-            placeholder="Nhập ghi chú..."
+            placeholder='Nhập ghi chú...'
             value={note}
             onChange={(e) => setNote(e.target.value)}
             InputProps={{
               endAdornment: (
-                <InputAdornment position="end" sx={{ alignSelf: "flex-end", mb: 1, mr: 1 }}>
-                  <Typography variant="caption" color="text.disabled">
+                <InputAdornment
+                  position='end'
+                  sx={{ alignSelf: "flex-end", mb: 1, mr: 1 }}>
+                  <Typography variant='caption' color='text.disabled'>
                     {note.length}/300
                   </Typography>
                 </InputAdornment>
@@ -1104,13 +1139,12 @@ function NoteModal({ openNote, onClose, booking, fetchBookings, idHotel }) {
             }}
             sx={{
               "& .MuiOutlinedInput-root": {
-
                 borderRadius: 1,
 
                 backgroundColor: "#fff",
                 "& fieldset": {
                   borderColor: "#cddc39", // Border mặc định
-                  borderWidth: "1px",     // Tăng độ dày nếu muốn nổi bật hơn
+                  borderWidth: "1px", // Tăng độ dày nếu muốn nổi bật hơn
                 },
                 "&:hover fieldset": {
                   borderColor: "#c0ca33", // Hover: đậm hơn một chút (tùy chọn)
@@ -1133,13 +1167,17 @@ function NoteModal({ openNote, onClose, booking, fetchBookings, idHotel }) {
         <Divider sx={{ my: 3 }} />
 
         {/* Thông tin đặt phòng */}
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography fontWeight="bold" color="primary">
+        <Box
+          display='flex'
+          justifyContent='space-between'
+          alignItems='center'
+          mb={2}>
+          <Typography fontWeight='bold' color='primary'>
             Thông tin đặt phòng
           </Typography>
           <Chip
             label={statusLabel}
-            size="small"
+            size='small'
             sx={{
               bgcolor: statusColor.bg,
               color: statusColor.color,
@@ -1150,22 +1188,26 @@ function NoteModal({ openNote, onClose, booking, fetchBookings, idHotel }) {
         </Box>
 
         <Stack spacing={2}>
-          <Stack direction="row" justifyContent="space-between">
-            <Typography color="text.secondary">Loại đặt phòng:</Typography>
-            <Typography fontWeight="medium">{rentTypeLabel}</Typography>
+          <Stack direction='row' justifyContent='space-between'>
+            <Typography color='text.secondary'>Loại đặt phòng:</Typography>
+            <Typography fontWeight='medium'>{rentTypeLabel}</Typography>
           </Stack>
 
-          <Stack direction="row" justifyContent="space-between">
-            <Typography color="text.secondary">Loại phòng:</Typography>
-            <Typography fontWeight="medium">{roomName}</Typography>
+          <Stack direction='row' justifyContent='space-between'>
+            <Typography color='text.secondary'>Loại phòng:</Typography>
+            <Typography fontWeight='medium'>{roomName}</Typography>
           </Stack>
 
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography color="text.secondary">Thời gian:</Typography>
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <AccessTimeIcon fontSize="small" sx={{ color: "#999" }} />
-              <Typography fontWeight="medium">
-                {formatDateTime(booking.check_in)} - {formatDateTime(booking.check_out)}
+          <Stack
+            direction='row'
+            justifyContent='space-between'
+            alignItems='center'>
+            <Typography color='text.secondary'>Thời gian:</Typography>
+            <Stack direction='row' alignItems='center' spacing={1}>
+              <AccessTimeIcon fontSize='small' sx={{ color: "#999" }} />
+              <Typography fontWeight='medium'>
+                {formatDateTime(booking.check_in)} -{" "}
+                {formatDateTime(booking.check_out)}
               </Typography>
             </Stack>
           </Stack>
@@ -1174,9 +1216,9 @@ function NoteModal({ openNote, onClose, booking, fetchBookings, idHotel }) {
         <Divider sx={{ my: 3 }} />
 
         {/* Nút hành động */}
-        <Stack direction="row" justifyContent="flex-end" spacing={2} mt={5}>
+        <Stack direction='row' justifyContent='flex-end' spacing={2} mt={5}>
           <Button
-            variant="outlined"
+            variant='outlined'
             onClick={onClose}
             sx={{
               borderRadius: 8,
@@ -1184,15 +1226,14 @@ function NoteModal({ openNote, onClose, booking, fetchBookings, idHotel }) {
               textTransform: "none",
               color: "#666",
               borderColor: "#ddd",
-            }}
-          >
+            }}>
             Hủy
           </Button>
           <Button
-            variant="contained"
+            variant='contained'
             onClick={() => {
               // TODO: Gọi API lưu ghi chú ở đây
-              handleNoteBooking()
+              handleNoteBooking();
               onClose();
             }}
             sx={{
@@ -1204,8 +1245,7 @@ function NoteModal({ openNote, onClose, booking, fetchBookings, idHotel }) {
               boxShadow: "0 4px 12px rgba(139,195,74,0.4)",
               "&:hover": { bgcolor: "#7cb342" },
               textTransform: "none",
-            }}
-          >
+            }}>
             Lưu ghi chú
           </Button>
         </Stack>
@@ -1213,7 +1253,6 @@ function NoteModal({ openNote, onClose, booking, fetchBookings, idHotel }) {
     </Dialog>
   );
 }
-
 
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
@@ -1230,8 +1269,6 @@ function ActionMenu({
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   const open = Boolean(anchorEl);
-
-
 
   const status = booking.status;
 
@@ -1268,8 +1305,8 @@ function ActionMenu({
     <>
       <Button
         ref={triggerRef}
-        variant="outlined"
-        size="small"
+        variant='outlined'
+        size='small'
         endIcon={<MoreVertIcon />}
         onClick={handleOpenMenu}
         sx={{
@@ -1279,8 +1316,7 @@ function ActionMenu({
           color: "#98b720",
           fontWeight: 500,
           minWidth: 110,
-        }}
-      >
+        }}>
         Thao tác
       </Button>
 
@@ -1295,8 +1331,7 @@ function ActionMenu({
             mt: 1,
             boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
           },
-        }}
-      >
+        }}>
         {showCheckIn && (
           <MenuItem
             onClick={(e) => {
@@ -1304,9 +1339,8 @@ function ActionMenu({
               setIdBooking(booking);
               openModalSafely(() => setOpenCheckIn(true));
             }}
-            sx={{ gap: 1.5 }}
-          >
-            <CheckCircleOutlineIcon fontSize="small" color="success" />
+            sx={{ gap: 1.5 }}>
+            <CheckCircleOutlineIcon fontSize='small' color='success' />
             Khách nhận phòng
           </MenuItem>
         )}
@@ -1318,9 +1352,8 @@ function ActionMenu({
               setIdBooking(booking);
               openModalSafely(() => setOpenCheckOut(true));
             }}
-            sx={{ gap: 1.5 }}
-          >
-            <CheckCircleOutlineIcon fontSize="small" color="success" />
+            sx={{ gap: 1.5 }}>
+            <CheckCircleOutlineIcon fontSize='small' color='success' />
             Khách trả phòng
           </MenuItem>
         )}
@@ -1332,9 +1365,8 @@ function ActionMenu({
               setIdBooking(booking);
               openModalSafely(() => setOpenCancel(true));
             }}
-            sx={{ gap: 1.5, color: "error.main" }}
-          >
-            <HighlightOffIcon fontSize="small" />
+            sx={{ gap: 1.5, color: "error.main" }}>
+            <HighlightOffIcon fontSize='small' />
             Hủy đặt phòng
           </MenuItem>
         )}
@@ -1342,7 +1374,6 @@ function ActionMenu({
     </>
   );
 }
-
 
 import { RadioGroup, FormControlLabel, Radio } from "@mui/material";
 import HotelSelect from "../../components/HotelSelect";
@@ -1362,17 +1393,27 @@ const formatDate = (dateString: string) => {
 // Map loại đặt phòng
 const getRentTypeLabel = (rent_type: string) => {
   switch (rent_type) {
-    case "hourly": return "Theo giờ";
-    case "daily": return "Qua ngày";
-    case "overnight": return "Qua đêm";
-    default: return "Không xác định";
+    case "hourly":
+      return "Theo giờ";
+    case "daily":
+      return "Qua ngày";
+    case "overnight":
+      return "Qua đêm";
+    default:
+      return "Không xác định";
   }
 };
 
 // ===================================================================
 // 1. Modal HỦY ĐẶT PHÒNG
 // ===================================================================
-function CancelBookingModal({ openCancel, onClose, booking, fetchBookings, idHotel }) {
+function CancelBookingModal({
+  openCancel,
+  onClose,
+  booking,
+  fetchBookings,
+  idHotel,
+}) {
   const [reason, setReason] = useState("");
 
   const reasons = [
@@ -1392,23 +1433,29 @@ function CancelBookingModal({ openCancel, onClose, booking, fetchBookings, idHot
 
   const handleCancelBooking = async () => {
     try {
-      let result = await updateBooking(booking.id, { reason: reason, status: "cancelled" })
+      let result = await updateBooking(booking.id, {
+        reason: reason,
+        status: "cancelled",
+      });
       if (result?.booking_id) {
-        toast.success(result?.message)
-        fetchBookings(idHotel)
+        toast.success(result?.message);
+        fetchBookings(idHotel);
       } else {
-        toast.success(result?.message)
+        toast.success(result?.message);
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   return (
-    <Dialog open={openCancel} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={openCancel} onClose={onClose} maxWidth='sm' fullWidth>
       <DialogTitle sx={{ pb: 1 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6" fontWeight="bold">
+        <Stack
+          direction='row'
+          justifyContent='space-between'
+          alignItems='center'>
+          <Typography variant='h6' fontWeight='bold'>
             Hủy đặt phòng
           </Typography>
           <IconButton onClick={onClose}>
@@ -1427,30 +1474,34 @@ function CancelBookingModal({ openCancel, onClose, booking, fetchBookings, idHot
             borderRadius: 3,
             p: 2,
             mb: 3,
-          }}
-        >
+          }}>
           <Stack spacing={1.5}>
-            <Stack direction="row" justifyContent="space-between">
-              <Typography fontSize="0.95rem">Loại phòng:</Typography>
-              <Typography fontWeight="bold" color="#7cb342">
+            <Stack direction='row' justifyContent='space-between'>
+              <Typography fontSize='0.95rem'>Loại phòng:</Typography>
+              <Typography fontWeight='bold' color='#7cb342'>
                 {roomName}
               </Typography>
             </Stack>
             <Divider sx={{ bgcolor: "#d0e8a0" }} />
-            <Stack direction="row" alignItems="center" spacing={1} justifyContent="space-between">
-              <Stack direction="row" alignItems="center" spacing={1}>
+            <Stack
+              direction='row'
+              alignItems='center'
+              spacing={1}
+              justifyContent='space-between'>
+              <Stack direction='row' alignItems='center' spacing={1}>
                 <AccessTimeIcon sx={{ fontSize: 18, color: "#999" }} />
-                <Typography fontSize="0.95rem">{rentType}</Typography>
+                <Typography fontSize='0.95rem'>{rentType}</Typography>
               </Stack>
-              <Typography fontWeight="medium">
-                {formatTime(booking.check_in)} - {formatTime(booking.check_out)} ngày {formatDate(booking.check_in)}
+              <Typography fontWeight='medium'>
+                {formatTime(booking.check_in)} - {formatTime(booking.check_out)}{" "}
+                ngày {formatDate(booking.check_in)}
               </Typography>
             </Stack>
           </Stack>
         </Paper>
 
         {/* Chọn lý do hủy */}
-        <Typography fontWeight="medium" mb={2}>
+        <Typography fontWeight='medium' mb={2}>
           Chọn lý do hủy phòng{" "}
           <span style={{ color: "#ef6c00" }}>(bắt buộc)</span>
         </Typography>
@@ -1461,8 +1512,17 @@ function CancelBookingModal({ openCancel, onClose, booking, fetchBookings, idHot
               <FormControlLabel
                 key={item}
                 value={item}
-                control={<Radio size="small" sx={{ "& .MuiSvgIcon-root": { fontSize: 20 } }} />}
-                label={<Typography fontSize="0.95rem" sx={{ ml: 0.5 }}>{item}</Typography>}
+                control={
+                  <Radio
+                    size='small'
+                    sx={{ "& .MuiSvgIcon-root": { fontSize: 20 } }}
+                  />
+                }
+                label={
+                  <Typography fontSize='0.95rem' sx={{ ml: 0.5 }}>
+                    {item}
+                  </Typography>
+                }
                 sx={{
                   bgcolor: "#fafafa",
                   borderRadius: 2,
@@ -1477,16 +1537,25 @@ function CancelBookingModal({ openCancel, onClose, booking, fetchBookings, idHot
         </RadioGroup>
 
         {/* Nút */}
-        <Stack direction="row" justifyContent="flex-end" spacing={2} mt={5}>
-          <Button variant="outlined" onClick={onClose} sx={{ borderRadius: 8, px: 4, textTransform: "none", color: "#666", borderColor: "#ddd" }}>
+        <Stack direction='row' justifyContent='flex-end' spacing={2} mt={5}>
+          <Button
+            variant='outlined'
+            onClick={onClose}
+            sx={{
+              borderRadius: 8,
+              px: 4,
+              textTransform: "none",
+              color: "#666",
+              borderColor: "#ddd",
+            }}>
             Hủy
           </Button>
           <Button
-            variant="contained"
+            variant='contained'
             disabled={!reason}
             onClick={() => {
               // TODO: Gọi API hủy booking với reason
-              handleCancelBooking()
+              handleCancelBooking();
               onClose();
             }}
             sx={{
@@ -1500,8 +1569,7 @@ function CancelBookingModal({ openCancel, onClose, booking, fetchBookings, idHot
               "&:hover": { bgcolor: "#7cb342" },
               "&:disabled": { bgcolor: "#c8e6c9" },
               textTransform: "none",
-            }}
-          >
+            }}>
             Hủy đặt phòng
           </Button>
         </Stack>
@@ -1513,32 +1581,41 @@ function CancelBookingModal({ openCancel, onClose, booking, fetchBookings, idHot
 // ===================================================================
 // 2. Modal XÁC NHẬN KHÁCH TRẢ PHÒNG
 // ===================================================================
-function CheckoutConfirmModal({ openAccepp, onClose, booking, fetchBookings, idHotel }) {
+function CheckoutConfirmModal({
+  openAccepp,
+  onClose,
+  booking,
+  fetchBookings,
+  idHotel,
+}) {
   if (!booking) return null;
 
   const roomName = booking.room_types?.[0]?.name || "N/A";
   const rentType = getRentTypeLabel(booking.rent_type);
   const handleCheckoutBooking = async () => {
     try {
-      let result = await updateBooking(booking.id, { status: "checked_out" })
+      let result = await updateBooking(booking.id, { status: "checked_out" });
       if (result?.booking_id) {
-        toast.success(result?.message)
-        fetchBookings(idHotel)
+        toast.success("Khách trả phòng thành công");
+        fetchBookings(idHotel);
       } else {
-        toast.success(result?.message)
+        toast.success("Khách trả phòng thất bại");
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
   return (
-    <Dialog open={openAccepp} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={openAccepp} onClose={onClose} maxWidth='sm' fullWidth>
       <DialogTitle sx={{ pb: 1, pt: 3 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6" fontWeight="bold">
+        <Stack
+          direction='row'
+          justifyContent='space-between'
+          alignItems='center'>
+          <Typography variant='h6' fontWeight='bold'>
             Xác nhận Khách trả phòng
           </Typography>
-          <IconButton onClick={onClose} size="small">
+          <IconButton onClick={onClose} size='small'>
             <CloseIcon />
           </IconButton>
         </Stack>
@@ -1546,13 +1623,21 @@ function CheckoutConfirmModal({ openAccepp, onClose, booking, fetchBookings, idH
 
       <DialogContent sx={{ pt: 2, pb: 4 }}>
         <Stack spacing={2} mb={3}>
-          <Stack direction="row" justifyContent="space-between">
-            <Typography color="text.secondary" fontSize="0.95rem">Khách sạn:</Typography>
-            <Typography fontWeight="bold">{booking.hotel_name || "Khách sạn XYZ"}</Typography>
+          <Stack direction='row' justifyContent='space-between'>
+            <Typography color='text.secondary' fontSize='0.95rem'>
+              Khách sạn:
+            </Typography>
+            <Typography fontWeight='bold'>
+              {booking.hotel_name || "Khách sạn XYZ"}
+            </Typography>
           </Stack>
-          <Stack direction="row" justifyContent="space-between">
-            <Typography color="text.secondary" fontSize="0.95rem">Mã đặt phòng:</Typography>
-            <Typography fontWeight="bold" fontSize="1.1rem">{booking.code}</Typography>
+          <Stack direction='row' justifyContent='space-between'>
+            <Typography color='text.secondary' fontSize='0.95rem'>
+              Mã đặt phòng:
+            </Typography>
+            <Typography fontWeight='bold' fontSize='1.1rem'>
+              {booking.code}
+            </Typography>
           </Stack>
         </Stack>
 
@@ -1564,37 +1649,53 @@ function CheckoutConfirmModal({ openAccepp, onClose, booking, fetchBookings, idH
             borderRadius: 3,
             p: 2.5,
             mb: 4,
-          }}
-        >
+          }}>
           <Stack spacing={2}>
-            <Stack direction="row" justifyContent="space-between">
-              <Typography fontSize="0.95rem">Loại phòng:</Typography>
-              <Typography fontWeight="bold" color="#7cb342">{roomName}</Typography>
+            <Stack direction='row' justifyContent='space-between'>
+              <Typography fontSize='0.95rem'>Loại phòng:</Typography>
+              <Typography fontWeight='bold' color='#7cb342'>
+                {roomName}
+              </Typography>
             </Stack>
             <Divider sx={{ bgcolor: "#d0e8a0" }} />
-            <Stack direction="row" alignItems="center" justifyContent="space-between">
-              <Stack direction="row" alignItems="center" spacing={1.5}>
-                <CheckCircleOutlineIcon sx={{ color: "#98b720", fontSize: 20 }} />
-                <Typography fontWeight="medium">{rentType}</Typography>
+            <Stack
+              direction='row'
+              alignItems='center'
+              justifyContent='space-between'>
+              <Stack direction='row' alignItems='center' spacing={1.5}>
+                <CheckCircleOutlineIcon
+                  sx={{ color: "#98b720", fontSize: 20 }}
+                />
+                <Typography fontWeight='medium'>{rentType}</Typography>
               </Stack>
-              <Typography fontWeight="medium" textAlign="right">
-                {formatTime(booking.check_in)} - {formatTime(booking.check_out)} ngày {formatDate(booking.check_in)}
+              <Typography fontWeight='medium' textAlign='right'>
+                {formatTime(booking.check_in)} - {formatTime(booking.check_out)}{" "}
+                ngày {formatDate(booking.check_in)}
               </Typography>
             </Stack>
           </Stack>
         </Paper>
 
-        <Stack direction="row" justifyContent="flex-end" spacing={2} mt={2}>
-          <Button variant="outlined" onClick={onClose} sx={{ borderRadius: 8, px: 4, minWidth: 120, textTransform: "none", color: "#666", borderColor: "#ddd" }}>
+        <Stack direction='row' justifyContent='flex-end' spacing={2} mt={2}>
+          <Button
+            variant='outlined'
+            onClick={onClose}
+            sx={{
+              borderRadius: 8,
+              px: 4,
+              minWidth: 120,
+              textTransform: "none",
+              color: "#666",
+              borderColor: "#ddd",
+            }}>
             Hủy
           </Button>
           <Button
-            variant="contained"
-            startIcon={<CheckCircleOutlineIcon />}
+            variant='contained'
             onClick={() => {
               // TODO: Gọi API xác nhận trả phòng
               console.log("Xác nhận trả phòng cho booking:", booking.id);
-              handleCheckoutBooking()
+              handleCheckoutBooking();
               onClose();
             }}
             sx={{
@@ -1607,8 +1708,7 @@ function CheckoutConfirmModal({ openAccepp, onClose, booking, fetchBookings, idH
               boxShadow: "0 4px 15px rgba(139,195,74,0.4)",
               "&:hover": { bgcolor: "#7cb342" },
               textTransform: "none",
-            }}
-          >
+            }}>
             Khách trả phòng
           </Button>
         </Stack>
@@ -1620,32 +1720,41 @@ function CheckoutConfirmModal({ openAccepp, onClose, booking, fetchBookings, idH
 // ===================================================================
 // 3. Modal XÁC NHẬN KHÁCH NHẬN PHÒNG
 // ===================================================================
-function CheckinConfirmModal({ openCheckin, onClose, booking, fetchBookings, idHotel }) {
+function CheckinConfirmModal({
+  openCheckin,
+  onClose,
+  booking,
+  fetchBookings,
+  idHotel,
+}) {
   if (!booking) return null;
 
   const roomName = booking.room_types?.[0]?.name || "N/A";
   const rentType = getRentTypeLabel(booking.rent_type);
   const handleCheckinBooking = async () => {
     try {
-      let result = await updateBooking(booking.id, { status: "checked_in" })
+      let result = await updateBooking(booking.id, { status: "checked_in" });
       if (result?.booking_id) {
-        toast.success(result?.message)
-        fetchBookings(idHotel)
+        toast.success(result?.message);
+        fetchBookings(idHotel);
       } else {
-        toast.success(result?.message)
+        toast.success(result?.message);
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
   return (
-    <Dialog open={openCheckin} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={openCheckin} onClose={onClose} maxWidth='sm' fullWidth>
       <DialogTitle sx={{ pb: 1, pt: 3 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6" fontWeight="bold">
+        <Stack
+          direction='row'
+          justifyContent='space-between'
+          alignItems='center'>
+          <Typography variant='h6' fontWeight='bold'>
             Xác nhận khách đến nhận phòng
           </Typography>
-          <IconButton onClick={onClose} size="small">
+          <IconButton onClick={onClose} size='small'>
             <CloseIcon />
           </IconButton>
         </Stack>
@@ -1653,13 +1762,21 @@ function CheckinConfirmModal({ openCheckin, onClose, booking, fetchBookings, idH
 
       <DialogContent sx={{ pt: 2, pb: 4 }}>
         <Stack spacing={2} mb={3}>
-          <Stack direction="row" justifyContent="space-between">
-            <Typography color="text.secondary" fontSize="0.95rem">Khách sạn:</Typography>
-            <Typography fontWeight="bold">{booking.hotel_name || "Khách sạn XYZ"}</Typography>
+          <Stack direction='row' justifyContent='space-between'>
+            <Typography color='text.secondary' fontSize='0.95rem'>
+              Khách sạn:
+            </Typography>
+            <Typography fontWeight='bold'>
+              {booking.hotel_name || "Khách sạn XYZ"}
+            </Typography>
           </Stack>
-          <Stack direction="row" justifyContent="space-between">
-            <Typography color="text.secondary" fontSize="0.95rem">Mã đặt phòng:</Typography>
-            <Typography fontWeight="bold" fontSize="1.1rem">{booking.code}</Typography>
+          <Stack direction='row' justifyContent='space-between'>
+            <Typography color='text.secondary' fontSize='0.95rem'>
+              Mã đặt phòng:
+            </Typography>
+            <Typography fontWeight='bold' fontSize='1.1rem'>
+              {booking.code}
+            </Typography>
           </Stack>
         </Stack>
 
@@ -1671,37 +1788,54 @@ function CheckinConfirmModal({ openCheckin, onClose, booking, fetchBookings, idH
             borderRadius: 3,
             p: 2.5,
             mb: 4,
-          }}
-        >
+          }}>
           <Stack spacing={2}>
-            <Stack direction="row" justifyContent="space-between">
-              <Typography fontSize="0.95rem">Loại phòng:</Typography>
-              <Typography fontWeight="bold" color="#7cb342">{roomName}</Typography>
+            <Stack direction='row' justifyContent='space-between'>
+              <Typography fontSize='0.95rem'>Loại phòng:</Typography>
+              <Typography fontWeight='bold' color='#7cb342'>
+                {roomName}
+              </Typography>
             </Stack>
             <Divider sx={{ bgcolor: "#d0e8a0" }} />
-            <Stack direction="row" alignItems="center" justifyContent="space-between">
-              <Stack direction="row" alignItems="center" spacing={1.5}>
-                <CheckCircleOutlineIcon sx={{ color: "#98b720", fontSize: 20 }} />
-                <Typography fontWeight="medium">{rentType}</Typography>
+            <Stack
+              direction='row'
+              alignItems='center'
+              justifyContent='space-between'>
+              <Stack direction='row' alignItems='center' spacing={1.5}>
+                <CheckCircleOutlineIcon
+                  sx={{ color: "#98b720", fontSize: 20 }}
+                />
+                <Typography fontWeight='medium'>{rentType}</Typography>
               </Stack>
-              <Typography fontWeight="medium" textAlign="right">
-                {formatTime(booking.check_in)} - {formatTime(booking.check_out)} ngày {formatDate(booking.check_in)}
+              <Typography fontWeight='medium' textAlign='right'>
+                {formatTime(booking.check_in)} - {formatTime(booking.check_out)}{" "}
+                ngày {formatDate(booking.check_in)}
               </Typography>
             </Stack>
           </Stack>
         </Paper>
 
-        <Stack direction="row" justifyContent="flex-end" spacing={2} mt={2}>
-          <Button variant="outlined" onClick={onClose} sx={{ borderRadius: 8, px: 4, minWidth: 120, textTransform: "none", color: "#666", borderColor: "#ddd" }}>
+        <Stack direction='row' justifyContent='flex-end' spacing={2} mt={2}>
+          <Button
+            variant='outlined'
+            onClick={onClose}
+            sx={{
+              borderRadius: 8,
+              px: 4,
+              minWidth: 120,
+              textTransform: "none",
+              color: "#666",
+              borderColor: "#ddd",
+            }}>
             Hủy
           </Button>
           <Button
-            variant="contained"
+            variant='contained'
             startIcon={<CheckCircleOutlineIcon />}
             onClick={() => {
               // TODO: Gọi API xác nhận nhận phòng
               console.log("Xác nhận nhận phòng cho booking:", booking.id);
-              handleCheckinBooking()
+              handleCheckinBooking();
               onClose();
             }}
             sx={{
@@ -1714,8 +1848,7 @@ function CheckinConfirmModal({ openCheckin, onClose, booking, fetchBookings, idH
               boxShadow: "0 4px 15px rgba(139,195,74,0.4)",
               "&:hover": { bgcolor: "#7cb342" },
               textTransform: "none",
-            }}
-          >
+            }}>
             Nhận phòng
           </Button>
         </Stack>
