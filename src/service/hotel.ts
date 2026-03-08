@@ -411,7 +411,30 @@ export async function toggleHotels(id) {
     }
   }
 }
-
+export async function toggleRoom(idHotel, idRoom) {
+  try {
+    let token = localStorage.getItem("access_token");
+    const response = await api.post(
+      `/partner/hotel/${idHotel}/room-type/${idRoom}/toggle-status`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
 export async function addBankHotels(body) {
   try {
     let token = localStorage.getItem("access_token");

@@ -35,6 +35,7 @@ export default function HotelDetail({
   attribute,
   setActionRoom,
   actionRoom,
+  setDeleteDialogRoomOpen,
 }) {
   return (
     <Box sx={{ minHeight: "100vh" }}>
@@ -48,6 +49,7 @@ export default function HotelDetail({
         attribute={attribute}
         setActionRoom={setActionRoom}
         actionRoom={actionRoom}
+        setDeleteDialogRoomOpen={setDeleteDialogRoomOpen}
       />
     </Box>
   );
@@ -144,7 +146,8 @@ function HotelInfoDetail({
   locations,
   attribute,
   setActionRoom,
-        actionRoom
+  actionRoom,
+  setDeleteDialogRoomOpen,
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -177,8 +180,9 @@ function HotelInfoDetail({
   const rentTypes = detailHotel.rent_types
     ? JSON.parse(detailHotel.rent_types)
     : {};
-  const rentStr = `08:00-22:00 / ${rentTypes.overnight?.from || "22:00"}-${rentTypes.overnight?.to || "08:00"
-    } / ${rentTypes.daily?.from || "14:00"}-${rentTypes.daily?.to || "12:00"}`;
+  const rentStr = `08:00-22:00 / ${rentTypes.overnight?.from || "22:00"}-${
+    rentTypes.overnight?.to || "08:00"
+  } / ${rentTypes.daily?.from || "14:00"}-${rentTypes.daily?.to || "12:00"}`;
 
   const images = detailHotel.images ? JSON.parse(detailHotel.images) : [];
   const imagesVerify = detailHotel.verify_images
@@ -222,7 +226,7 @@ function HotelInfoDetail({
           mb: 3,
           flexWrap: "wrap",
 
-          gap: isMobile ? 2 : 0
+          gap: isMobile ? 2 : 0,
         }}>
         <Box sx={{ display: "flex", gap: 4 }}>
           <Typography
@@ -321,7 +325,7 @@ function HotelInfoDetail({
                 borderRadius: "50px",
                 textTransform: "none",
                 height: "40px",
-                width: isMobile ? "100%" : "unset"
+                width: isMobile ? "100%" : "unset",
               }}>
               Tạo loại phòng
             </Button>
@@ -337,7 +341,8 @@ function HotelInfoDetail({
           getHotelDetail={getHotelDetail}
           searchRoom={searchRoom}
           setActionRoom={setActionRoom}
-        actionRoom={actionRoom}
+          actionRoom={actionRoom}
+          setDeleteDialogRoomOpen={setDeleteDialogRoomOpen}
         />
       )}
 
@@ -510,34 +515,41 @@ function HotelInfoDetail({
                   </Typography>
                 </Box>
 
-                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start' }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "flex-start",
+                  }}>
                   {/* Cột 1: Theo giờ */}
-                  <Box sx={{  width: 120 }}>
-                    <Typography fontSize={14} color="black" fontWeight={600}>
+                  <Box sx={{ width: 120 }}>
+                    <Typography fontSize={14} color='black' fontWeight={600}>
                       Theo giờ
                     </Typography>
-                    <Typography fontSize={15} color="#333">
+                    <Typography fontSize={15} color='#333'>
                       08:00 - 22:00
                     </Typography>
                   </Box>
-                  
+
                   {/* Cột 2: Qua đêm */}
-                  <Box sx={{  width: 120 }}>
-                    <Typography fontSize={14} color="black" fontWeight={600}>
+                  <Box sx={{ width: 120 }}>
+                    <Typography fontSize={14} color='black' fontWeight={600}>
                       Qua đêm
                     </Typography>
-                    <Typography fontSize={15} color="#333">
-                      {rentTypes.overnight?.from || "22:00"} - {rentTypes.overnight?.to || "08:00"}
+                    <Typography fontSize={15} color='#333'>
+                      {rentTypes.overnight?.from || "22:00"} -{" "}
+                      {rentTypes.overnight?.to || "08:00"}
                     </Typography>
                   </Box>
 
                   {/* Cột 3: Theo ngày */}
-                  <Box sx={{  width: 120 }}>
-                    <Typography fontSize={14} color="black" fontWeight={600}>
+                  <Box sx={{ width: 120 }}>
+                    <Typography fontSize={14} color='black' fontWeight={600}>
                       Theo ngày
                     </Typography>
-                    <Typography fontSize={15} color="#333">
-                      {rentTypes.daily?.from || "14:00"} - {rentTypes.daily?.to || "12:00"}
+                    <Typography fontSize={15} color='#333'>
+                      {rentTypes.daily?.from || "14:00"} -{" "}
+                      {rentTypes.daily?.to || "12:00"}
                     </Typography>
                   </Box>
                 </Box>
@@ -660,8 +672,8 @@ function HotelInfoDetail({
                           typeof detailHotel.amenities === "string"
                             ? JSON.parse(detailHotel.amenities)
                             : Array.isArray(detailHotel.amenities)
-                              ? detailHotel.amenities
-                              : [];
+                            ? detailHotel.amenities
+                            : [];
                         return Array.isArray(parsed) ? parsed : [];
                       } catch (e) {
                         console.warn("Parse facilities error:", e);

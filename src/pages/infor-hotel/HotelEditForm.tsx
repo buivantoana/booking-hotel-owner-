@@ -112,6 +112,15 @@ export default function HotelEditFormExact({
   // Ref để lưu ảnh mới upload (được HotelImageUpload cập nhật)
   const newImagesRef = useRef({ images: [], verify_images: [] });
 
+  // Ref để lưu URL ảnh cần xóa trên server
+  const removeImagesRef = useRef<{
+    remove_images: string[];
+    remove_verify_images: string[];
+  }>({
+    remove_images: [],
+    remove_verify_images: [],
+  });
+
   useEffect(() => {
     if (searchParams.get("id")) {
       (async () => {
@@ -229,6 +238,20 @@ export default function HotelEditFormExact({
       formData.append("verify_images", file);
     });
 
+    // Append danh sách URL ảnh cần xóa (chỉ gửi nếu có)
+    if (removeImagesRef.current.remove_images.length > 0) {
+      formData.append(
+        "remove_images",
+        JSON.stringify(removeImagesRef.current.remove_images)
+      );
+    }
+    if (removeImagesRef.current.remove_verify_images.length > 0) {
+      formData.append(
+        "remove_verify_images",
+        JSON.stringify(removeImagesRef.current.remove_verify_images)
+      );
+    }
+
     // Gửi request (ví dụ)
     try {
       const response = await updateHotel(searchParams.get("id"), formData);
@@ -263,7 +286,10 @@ export default function HotelEditFormExact({
             }}
             onClick={() => setAction("edit_detail")}
           />
-          <Typography fontSize={isMobile?19:22} fontWeight={700} color='#222'>
+          <Typography
+            fontSize={isMobile ? 19 : 22}
+            fontWeight={700}
+            color='#222'>
             Cập nhật thông tin
           </Typography>
         </Box>
@@ -358,7 +384,9 @@ export default function HotelEditFormExact({
                   <Typography
                     fontSize={15}
                     fontWeight={600}
-                    color={lockedLangs[selectedLang]?"rgba(0, 0, 0, 0.38)":'#333'}
+                    color={
+                      lockedLangs[selectedLang] ? "rgba(0, 0, 0, 0.38)" : "#333"
+                    }
                     mb={1.2}>
                     Tên khách sạn
                   </Typography>
@@ -617,6 +645,9 @@ export default function HotelEditFormExact({
                 onNewImagesChange={(newImages) => {
                   newImagesRef.current = newImages; // lưu ảnh mới để submit
                 }}
+                onRemoveImagesChange={(removedImages) => {
+                  removeImagesRef.current = removedImages; // lưu URL ảnh cần xóa để submit
+                }}
               />
             </Grid>
           </Grid>
@@ -673,7 +704,12 @@ const modalStyle = {
   display: "flex",
   flexDirection: "column",
 };
-function FacilitySelector({ selectedIds = [], setSelectedIds, attribute,selectedLang }) {
+function FacilitySelector({
+  selectedIds = [],
+  setSelectedIds,
+  attribute,
+  selectedLang,
+}) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 

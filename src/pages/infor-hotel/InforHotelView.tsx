@@ -41,7 +41,7 @@ import success from "../../images/Frame.png";
 import HotelDetail from "./HotelDetail";
 import HotelEditForm from "./HotelEditForm";
 import RoomDetail from "./RoomDetail";
-import { getHotel, toggleHotels } from "../../service/hotel";
+import { getHotel, toggleHotels, toggleRoom } from "../../service/hotel";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import RoomTypeManager from "./RoomTypeManager";
 import { toast } from "react-toastify";
@@ -104,21 +104,29 @@ function ActionMenu({ setAction, setDeleteDialogOpen, setIdHotel, hotel }) {
           <ContentCopyIcon fontSize='small' sx={{ color: "#666" }} />
           Nhân bản
         </MenuItem> */}
-      {(hotel.status != "pending" && hotel.status != "rejected") &&   <MenuItem
-          onClick={() => {
-            setIdHotel(hotel);
-            setDeleteDialogOpen(true);
-          }}
-          sx={{
-            gap: 1.5,
-            fontSize: 14,
-            color: hotel?.status == "active" ? "#d32f2f" : "unset",
-          }}>
-          {hotel?.status == "paused" ? <PlayCircle fontSize='small' /> : <PauseCircleIcon fontSize='small' />}
-          {hotel?.status == "paused"
-            ? "Tiếp tục kinh doanh"
-            : "Ngừng kinh doanh"}
-        </MenuItem>}
+        {hotel.status != "pending" &&
+          hotel.status != "rejected" &&
+          hotel.status != "terminated" && (
+            <MenuItem
+              onClick={() => {
+                setIdHotel(hotel);
+                setDeleteDialogOpen(true);
+              }}
+              sx={{
+                gap: 1.5,
+                fontSize: 14,
+                color: hotel?.status == "active" ? "#d32f2f" : "unset",
+              }}>
+              {hotel?.status == "paused" ? (
+                <PlayCircle fontSize='small' />
+              ) : (
+                <PauseCircleIcon fontSize='small' />
+              )}
+              {hotel?.status == "paused"
+                ? "Tiếp tục kinh doanh"
+                : "Ngừng kinh doanh"}
+            </MenuItem>
+          )}
       </Menu>
     </>
   );
@@ -130,10 +138,10 @@ export default function InforHotelView({
   locations,
   attribute,
 }) {
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteDialogRoomOpen, setDeleteDialogRoomOpen] = useState(false);
   const [action, setAction] = useState("manager");
   const [idHotel, setIdHotel] = useState(null);
   const [room, setRoom] = useState(null);
@@ -163,7 +171,7 @@ export default function InforHotelView({
     }
   }, [searchParams]);
   const filteredHotels = selectedStatus
-    ? hotels.filter(h => h.status === selectedStatus)
+    ? hotels.filter((h) => h.status === selectedStatus)
     : hotels;
   const getHotelDetail = async () => {
     try {
@@ -203,10 +211,9 @@ export default function InforHotelView({
         <Stack
           direction={{ xs: "column", sm: "row" }}
           spacing={{ xs: 1.5, sm: 2.5, md: 2 }}
-          flexWrap="wrap"
-          color="#555"
-          fontSize={14}
-        >
+          flexWrap='wrap'
+          color='#555'
+          fontSize={14}>
           {stats.map((item) => (
             <Box
               key={item.label}
@@ -217,13 +224,14 @@ export default function InforHotelView({
                 py: 0.8,
                 borderRadius: "8px",
                 transition: "all 0.2s",
-                bgcolor: selectedStatus === item.status ? "#F0F1F3" : "transparent",
+                bgcolor:
+                  selectedStatus === item.status ? "#F0F1F3" : "transparent",
 
                 "&:hover": {
-                  bgcolor: selectedStatus === item.status ? "transparent" : "#F0F1F3",
+                  bgcolor:
+                    selectedStatus === item.status ? "transparent" : "#F0F1F3",
                 },
-              }}
-            >
+              }}>
               {item.label} <strong>{item.value}</strong>
             </Box>
           ))}
@@ -241,8 +249,7 @@ export default function InforHotelView({
         overflow: "hidden",
         border: "1px solid #eee",
         padding: 3,
-      }}
-    >
+      }}>
       {renderStats()}
 
       <TableContainer sx={{ overflowX: "auto" }}>
@@ -261,8 +268,12 @@ export default function InforHotelView({
               ].map((head) => (
                 <TableCell
                   key={head}
-                  sx={{ fontWeight: 600, color: "#555", fontSize: 14, whiteSpace: 'nowrap', }}
-                >
+                  sx={{
+                    fontWeight: 600,
+                    color: "#555",
+                    fontSize: 14,
+                    whiteSpace: "nowrap",
+                  }}>
                   {head}
                 </TableCell>
               ))}
@@ -281,7 +292,8 @@ export default function InforHotelView({
                   sx={{
                     fontWeight: 500,
                     cursor: "pointer",
-                    transition: "transform 0.2s ease, background-color 0.2s ease", // mượt mà
+                    transition:
+                      "transform 0.2s ease, background-color 0.2s ease", // mượt mà
                     "&:hover": {
                       transform: "scale(1.05)",
                       // hoặc dùng màu bạn thích, ví dụ: "rgba(0,0,0,0.04)"
@@ -289,12 +301,13 @@ export default function InforHotelView({
                       // boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                       // zIndex: 1,
                     },
-                  }}
-                >
+                  }}>
                   {parseLang(hotel.name)}
                 </TableCell>
 
-                <TableCell>{renderCooperationChip(hotel.cooperation_type)}</TableCell>
+                <TableCell>
+                  {renderCooperationChip(hotel.cooperation_type)}
+                </TableCell>
 
                 <TableCell>{renderStatusChip(hotel.status)}</TableCell>
 
@@ -333,15 +346,13 @@ export default function InforHotelView({
         overflow: "hidden",
         border: "1px solid #eee",
         p: 2, // giảm padding cho mobile
-      }}
-    >
+      }}>
       {renderStats()}
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
         {filteredHotels?.map((hotel, index) => (
           <Box
             key={hotel.id}
-
             sx={{
               bgcolor: "white",
               borderRadius: "12px",
@@ -354,18 +365,25 @@ export default function InforHotelView({
                 boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
                 transform: "translateY(-2px)",
               },
-            }}
-          >
+            }}>
             {/* Header card */}
-            <Box onClick={() => {
-              navigate(`/info-hotel?id=${hotel.id}`);
-              setAction("edit_detail");
-            }} sx={{ p: 2, bgcolor: "#f8f9fa", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <Stack direction="row" spacing={1.5} alignItems="center">
-                <Typography variant="subtitle2" color="text.secondary">
+            <Box
+              onClick={() => {
+                navigate(`/info-hotel?id=${hotel.id}`);
+                setAction("edit_detail");
+              }}
+              sx={{
+                p: 2,
+                bgcolor: "#f8f9fa",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}>
+              <Stack direction='row' spacing={1.5} alignItems='center'>
+                <Typography variant='subtitle2' color='text.secondary'>
                   #{index + 1}
                 </Typography>
-                <Typography variant="subtitle1" fontWeight="600">
+                <Typography variant='subtitle1' fontWeight='600'>
                   {parseLang(hotel.name)}
                 </Typography>
               </Stack>
@@ -378,7 +396,7 @@ export default function InforHotelView({
             <Box sx={{ p: 2 }}>
               <Stack spacing={1.5}>
                 <Box>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant='body2' color='text.secondary'>
                     Tình trạng hợp tác
                   </Typography>
                   <Box sx={{ mt: 0.5 }}>
@@ -387,28 +405,32 @@ export default function InforHotelView({
                 </Box>
 
                 <Box>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant='body2' color='text.secondary'>
                     Địa chỉ
                   </Typography>
-                  <Typography variant="body1" sx={{ mt: 0.5 }}>
+                  <Typography variant='body1' sx={{ mt: 0.5 }}>
                     {parseLang(hotel.address)}
                   </Typography>
                 </Box>
 
-                <Stack direction="row" justifyContent="space-between">
+                <Stack direction='row' justifyContent='space-between'>
                   <Box>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant='body2' color='text.secondary'>
                       Hoa hồng
                     </Typography>
-                    <Typography fontWeight="600">{hotel.commission_rate}%</Typography>
+                    <Typography fontWeight='600'>
+                      {hotel.commission_rate}%
+                    </Typography>
                   </Box>
 
                   <Box>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant='body2' color='text.secondary'>
                       PT thanh toán
                     </Typography>
-                    <Typography fontWeight="500">
-                      {hotel.cooperation_type === "listing" ? "Online" : "Cả hai"}
+                    <Typography fontWeight='500'>
+                      {hotel.cooperation_type === "listing"
+                        ? "Online"
+                        : "Cả hai"}
                     </Typography>
                   </Box>
                 </Stack>
@@ -416,13 +438,21 @@ export default function InforHotelView({
             </Box>
 
             {/* Thao tác */}
-            <Box sx={{ p: 2, bgcolor: "#fafafa", display: "flex", justifyContent: "flex-end" }}>
-              {(hotel.status != "pending" && hotel.status != "rejected") && <ActionMenu
-                hotel={hotel}
-                setIdHotel={setIdHotel}
-                setAction={setAction}
-                setDeleteDialogOpen={setDeleteDialogOpen}
-              />}
+            <Box
+              sx={{
+                p: 2,
+                bgcolor: "#fafafa",
+                display: "flex",
+                justifyContent: "flex-end",
+              }}>
+              {hotel.status != "pending" && hotel.status != "rejected" && (
+                <ActionMenu
+                  hotel={hotel}
+                  setIdHotel={setIdHotel}
+                  setAction={setAction}
+                  setDeleteDialogOpen={setDeleteDialogOpen}
+                />
+              )}
             </Box>
           </Box>
         ))}
@@ -471,6 +501,7 @@ export default function InforHotelView({
           attribute={attribute}
           setActionRoom={setActionRoom}
           actionRoom={actionRoom}
+          setDeleteDialogRoomOpen={setDeleteDialogRoomOpen}
         />
       )}
       {action == "manager" && (
@@ -478,27 +509,26 @@ export default function InforHotelView({
           {/* Header */}
           <Snackbar
             open={snackbarOpen}
-            autoHideDuration={3000}           // tự đóng sau 4 giây
+            autoHideDuration={3000} // tự đóng sau 4 giây
             onClose={() => setSnackbarOpen(false)}
             anchorOrigin={{
-              vertical: 'top',
-              horizontal: 'center'            // ← Ở giữa top
-            }}
-          >
+              vertical: "top",
+              horizontal: "center", // ← Ở giữa top
+            }}>
             <Alert
               onClose={() => setSnackbarOpen(false)}
-              severity="success"
-              variant="filled"
+              severity='success'
+              variant='filled'
               sx={{
-                width: '100%',
-                maxWidth: 500,                // giới hạn chiều rộng cho đẹp
-                boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-                borderRadius: '12px',
+                width: "100%",
+                maxWidth: 500, // giới hạn chiều rộng cho đẹp
+                boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                borderRadius: "12px",
                 fontWeight: 500,
-                background:"#EAF5ED",
-                color:"#20B720"
+                background: "#EAF5ED",
+                color: "#20B720",
               }}
-              icon={<Check/>}  // icon tick xanh
+              icon={<Check />} // icon tick xanh
             >
               {snackbarMessage}
             </Alert>
@@ -510,7 +540,7 @@ export default function InforHotelView({
               alignItems: "center",
               mb: 4,
             }}>
-            <Typography variant={isMobile ? "h6" : 'h5'} fontWeight='bold'>
+            <Typography variant={isMobile ? "h6" : "h5"} fontWeight='bold'>
               Thông tin khách sạn
             </Typography>
 
@@ -634,6 +664,97 @@ export default function InforHotelView({
           </Dialog>
         </>
       )}
+      <Dialog
+        open={deleteDialogRoomOpen}
+        onClose={() => setDeleteDialogRoomOpen(false)}
+        maxWidth='xs'
+        fullWidth
+        PaperProps={{ sx: { borderRadius: "16px" } }}>
+        <DialogTitle sx={{ textAlign: "center", pt: 4, pb: 1 }}>
+          <Box sx={{ position: "relative" }}>
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                bgcolor: "#ffebee",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                mx: "auto",
+                mb: 2,
+              }}>
+              <img src={room?.status == "paused" ? success : remove} alt='' />
+            </Box>
+            <IconButton
+              onClick={() => setDeleteDialogRoomOpen(false)}
+              sx={{ position: "absolute", top: -40, left: -30 }}>
+              <Close />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ textAlign: "center", px: 4, pb: 3 }}>
+          <Typography fontWeight={600} fontSize='20px' mb={1}>
+            {room?.status == "paused"
+              ? "Xác nhận mở lại kinh doanh"
+              : "Cảnh báo"}
+          </Typography>
+          <Typography fontSize='14px' color='#666'>
+            {room?.status == "paused"
+              ? "Hãy đảm bảo cập nhật đầu đủ thông tin, giá và tình trạng sãn sàng trước khi mở lại hoạt động kinh doanh để tránh sai sót trong quá trình đặt phòng."
+              : " Khách sẽ không nhìn thấy phòng này sau khi bạn ngừng kinh doanh phòng. Bạn có thể mở kinh doanh lại loại phòng trong tương lai."}
+          </Typography>
+        </DialogContent>
+        <DialogActions
+          sx={{
+            justifyContent: "center",
+            pb: 4,
+            gap: 2,
+            flexDirection: "column",
+          }}>
+          <Button
+            onClick={async () => {
+              try {
+                let result = await toggleRoom(detailHotel?.id, room.id);
+                if (result?.room_type_id) {
+                  getHotelDetail();
+                  setDeleteDialogRoomOpen(false);
+                  showSuccessSnackbar(
+                    room?.status === "paused"
+                      ? "Cập nhật trạng thái thành công"
+                      : "Gửi duyệt thành công"
+                  );
+                }
+              } catch (error) {
+                console.log(error);
+              }
+            }}
+            variant='contained'
+            sx={{
+              borderRadius: "24px",
+              textTransform: "none",
+              bgcolor: "#98b720",
+              "&:hover": { bgcolor: "#8ab020" },
+              width: "100%",
+            }}>
+            {room?.status == "paused"
+              ? "Gửi duyệt"
+              : "Xác nhận ngừng kinh doanh"}
+          </Button>
+          <Button
+            onClick={() => setDeleteDialogRoomOpen(false)}
+            variant='outlined'
+            sx={{
+              borderRadius: "24px",
+              textTransform: "none",
+              borderColor: "#ddd",
+              color: "#666",
+              width: "100%",
+            }}>
+            Hủy bỏ
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

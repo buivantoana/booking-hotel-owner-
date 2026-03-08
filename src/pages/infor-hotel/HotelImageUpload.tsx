@@ -12,6 +12,7 @@ import add from "../../images/gallery-add.png";
 function HotelImageUpload({
   hotelData,
   onNewImagesChange,
+  onRemoveImagesChange,
   isPadding = true,
 }) {
   const isMobile = useMediaQuery("(max-width:600px)");
@@ -22,26 +23,44 @@ function HotelImageUpload({
   const [existingHotelImages, setExistingHotelImages] = useState([]);
   const [existingVerifyImages, setExistingVerifyImages] = useState([]);
 
+  // Danh sách URL ảnh server đã bị xóa → gửi lên API
+  const [removedHotelUrls, setRemovedHotelUrls] = useState<string[]>([]);
+  const [removedVerifyUrls, setRemovedVerifyUrls] = useState<string[]>([]);
+
   // Parse ảnh cũ từ server
   useEffect(() => {
     if (hotelData) {
       try {
         const hotelUrls = hotelData.images ? JSON.parse(hotelData.images) : [];
         setExistingHotelImages(
-          hotelUrls.map((url, index) => ({ url, id: `exist-hotel-${index}`, isExisting: true }))
+          hotelUrls.map((url, index) => ({
+            url,
+            id: `exist-hotel-${index}`,
+            isExisting: true,
+          }))
         );
       } catch (e) {
         setExistingHotelImages([]);
       }
 
       try {
-        const verifyUrls = hotelData.verify_images ? JSON.parse(hotelData.verify_images) : [];
+        const verifyUrls = hotelData.verify_images
+          ? JSON.parse(hotelData.verify_images)
+          : [];
         setExistingVerifyImages(
-          verifyUrls.map((url, index) => ({ url, id: `exist-verify-${index}`, isExisting: true }))
+          verifyUrls.map((url, index) => ({
+            url,
+            id: `exist-verify-${index}`,
+            isExisting: true,
+          }))
         );
       } catch (e) {
         setExistingVerifyImages([]);
       }
+
+      // Reset danh sách xóa khi load hotel mới
+      setRemovedHotelUrls([]);
+      setRemovedVerifyUrls([]);
     }
   }, [hotelData]);
 
@@ -52,6 +71,14 @@ function HotelImageUpload({
       verify_images: newVerifyImages.map((img) => img.file),
     });
   }, [newHotelImages, newVerifyImages, onNewImagesChange]);
+
+  // Báo danh sách URL cần xóa cho parent
+  useEffect(() => {
+    onRemoveImagesChange?.({
+      remove_images: removedHotelUrls,
+      remove_verify_images: removedVerifyUrls,
+    });
+  }, [removedHotelUrls, removedVerifyUrls, onRemoveImagesChange]);
 
   // Dọn dẹp object URL khi component unmount hoặc ảnh bị xóa
   useEffect(() => {
@@ -73,10 +100,15 @@ function HotelImageUpload({
     event.target.value = ""; // reset input để có thể upload lại cùng file
   };
 
-  const handleDelete = (id, setter, allImgs) => {
-    const imgToDelete = allImgs.find(img => img.id === id);
-    if (imgToDelete && !imgToDelete.isExisting) {
-      URL.revokeObjectURL(imgToDelete.url);
+  const handleDelete = (id, setter, allImgs, removedUrlSetter?) => {
+    const imgToDelete = allImgs.find((img) => img.id === id);
+    if (imgToDelete) {
+      if (imgToDelete.isExisting) {
+        // Đánh dấu URL này cần xóa trên server
+        removedUrlSetter?.((prev: string[]) => [...prev, imgToDelete.url]);
+      } else {
+        URL.revokeObjectURL(imgToDelete.url);
+      }
     }
     setter((prev) => prev.filter((img) => img.id !== id));
   };
@@ -97,8 +129,14 @@ function HotelImageUpload({
             justifyContent: "center",
             cursor: "pointer",
           }}>
-          <input type="file" hidden multiple accept="image/*" onChange={onSelect} />
-          <img src={add} alt="add" style={{ width: 40, height: 40 }} />
+          <input
+            type='file'
+            hidden
+            multiple
+            accept='image/*'
+            onChange={onSelect}
+          />
+          <img src={add} alt='add' style={{ width: 40, height: 40 }} />
         </label>
       );
     };
@@ -118,12 +156,12 @@ function HotelImageUpload({
           }}>
           <img
             src={img.url}
-            alt="preview"
+            alt='preview'
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
           {onDelete && (
             <IconButton
-              size="small"
+              size='small'
               onClick={onDelete}
               sx={{
                 position: "absolute",
@@ -133,7 +171,7 @@ function HotelImageUpload({
                 color: "white",
                 "&:hover": { background: "rgba(0,0,0,0.8)" },
               }}>
-              <DeleteIcon fontSize="small" />
+              <DeleteIcon fontSize='small' />
             </IconButton>
           )}
         </Box>
@@ -141,35 +179,56 @@ function HotelImageUpload({
     };
   }, []);
 
-  const Section = React.useCallback(({ title, desc, existing = [], newImgs = [], setNewImgs }) => {
-    const allImages = [...existing, ...newImgs];
+  const Section = React.useCallback(
+    ({
+      title,
+      desc,
+      existing = [],
+      newImgs = [],
+      setNewImgs,
+      setExistingImgs,
+      removedUrlSetter,
+    }) => {
+      const allImages = [...existing, ...newImgs];
 
-    return (
-      <Box sx={{ mb: 5 }}>
-        <Typography fontWeight={600} mb={1}>{title}</Typography>
-        <Typography variant="body2" color="text.secondary" mb={2}>{desc}</Typography>
+      return (
+        <Box sx={{ mb: 5 }}>
+          <Typography fontWeight={600} mb={1}>
+            {title}
+          </Typography>
+          <Typography variant='body2' color='text.secondary' mb={2}>
+            {desc}
+          </Typography>
 
-        <Grid container spacing={2}>
-          {allImages.map((img) => (
-            <Grid item key={img.id}>
-              <ImagePreview
-                img={img}
-                onDelete={
-                  img.isExisting
-                    ? null
-                    : () => handleDelete(img.id, setNewImgs, newImgs)
-                }
-              />
+          <Grid container spacing={2}>
+            {allImages.map((img) => (
+              <Grid item key={img.id}>
+                <ImagePreview
+                  img={img}
+                  onDelete={
+                    img.isExisting
+                      ? () =>
+                          handleDelete(
+                            img.id,
+                            setExistingImgs,
+                            existing,
+                            removedUrlSetter
+                          )
+                      : () => handleDelete(img.id, setNewImgs, newImgs)
+                  }
+                />
+              </Grid>
+            ))}
+
+            <Grid item>
+              <UploadBox onSelect={(e) => handleUpload(e, setNewImgs)} />
             </Grid>
-          ))}
-
-          <Grid item>
-            <UploadBox onSelect={(e) => handleUpload(e, setNewImgs)} />
           </Grid>
-        </Grid>
-      </Box>
-    );
-  }, []);
+        </Box>
+      );
+    },
+    []
+  );
 
   return (
     <Box
@@ -179,19 +238,23 @@ function HotelImageUpload({
         borderRadius: 2,
       }}>
       <Section
-        title="Ảnh chụp biển hiệu khách sạn từ bên ngoài"
-        desc="Tải lên ít nhất 1 ảnh rõ nét về mặt tiền hoặc biển hiệu khách sạn. Ảnh này chỉ dùng để kiểm duyệt, không hiển thị trên Hotel Booking."
+        title='Ảnh chụp biển hiệu khách sạn từ bên ngoài'
+        desc='Tải lên ít nhất 1 ảnh rõ nét về mặt tiền hoặc biển hiệu khách sạn. Ảnh này chỉ dùng để kiểm duyệt, không hiển thị trên Hotel Booking.'
         existing={existingVerifyImages}
         newImgs={newVerifyImages}
         setNewImgs={setNewVerifyImages}
+        setExistingImgs={setExistingVerifyImages}
+        removedUrlSetter={setRemovedVerifyUrls}
       />
 
       <Section
-        title="Ảnh khách sạn"
-        desc="Tải lên ít nhất 5 ảnh chụp từ nhiều góc độ khác nhau (sảnh, hành lang, khu vực chung, phòng, v.v.). Các ảnh này sẽ được hiển thị trên Hotel Booking."
+        title='Ảnh khách sạn'
+        desc='Tải lên ít nhất 5 ảnh chụp từ nhiều góc độ khác nhau (sảnh, hành lang, khu vực chung, phòng, v.v.). Các ảnh này sẽ được hiển thị trên Hotel Booking.'
         existing={existingHotelImages}
         newImgs={newHotelImages}
         setNewImgs={setNewHotelImages}
+        setExistingImgs={setExistingHotelImages}
+        removedUrlSetter={setRemovedHotelUrls}
       />
     </Box>
   );

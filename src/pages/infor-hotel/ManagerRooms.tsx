@@ -1,4 +1,10 @@
-import { ContentCopy, Edit, MoreVert, PauseCircle } from "@mui/icons-material";
+import {
+  ContentCopy,
+  Edit,
+  MoreVert,
+  PauseCircle,
+  PlayCircle,
+} from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -21,7 +27,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { parseRoomName } from "../../utils/utils";
 import { useSearchParams } from "react-router-dom";
-import empty from "../../images/Frame 1321317883.png"
+import empty from "../../images/Frame 1321317883.png";
 type Props = {
   onNext: (action: string, roomId?: string) => void;
   detailHotel: any; // dữ liệu hotel từ props
@@ -65,17 +71,34 @@ const renderStatusChip = (status) => {
     />
   );
 };
-const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom , setActionRoom,
-  actionRoom }: Props) => {
+const ManagerRooms = ({
+  onNext,
+  detailHotel,
+  setRoom,
+  searchRoom,
+  setActionRoom,
+  actionRoom,
+  setDeleteDialogRoomOpen,
+}: Props) => {
   // Parse room_types từ props
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const total = detailHotel?.room_types.length;
-  
-  const active = detailHotel?.room_types.filter((h) => h.status === "active").length;
-  const confirm = detailHotel?.room_types.filter((h) => h.status === "pending").length;
-  const paused = detailHotel?.room_types.filter((h) => h.status === "paused").length;
-  const rejected = detailHotel?.room_types.filter((h) => h.status === "rejected").length;
-  const terminated = detailHotel?.room_types.filter((h) => h.status === "terminated").length;
+
+  const active = detailHotel?.room_types.filter(
+    (h) => h.status === "active"
+  ).length;
+  const confirm = detailHotel?.room_types.filter(
+    (h) => h.status === "pending"
+  ).length;
+  const paused = detailHotel?.room_types.filter(
+    (h) => h.status === "paused"
+  ).length;
+  const rejected = detailHotel?.room_types.filter(
+    (h) => h.status === "rejected"
+  ).length;
+  const terminated = detailHotel?.room_types.filter(
+    (h) => h.status === "terminated"
+  ).length;
   const roomTypes = React.useMemo(() => {
     if (!detailHotel || !Array.isArray(detailHotel.room_types)) {
       return [];
@@ -87,7 +110,9 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom , setActionRoom
       price_hourly_formatted: formatPrice(room.price_hourly),
       price_overnight_formatted: formatPrice(room.price_overnight),
       price_daily_formatted: formatPrice(room.price_daily),
-      price_hourly_increment_formatted: formatPrice(room.price_hourly_increment),
+      price_hourly_increment_formatted: formatPrice(
+        room.price_hourly_increment
+      ),
     }));
   }, [detailHotel]);
 
@@ -101,14 +126,20 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom , setActionRoom
   const handleRoomClick = (room) => {
     setRoom(room);
     onNext("detail");
-    setActionRoom("edit")
+    setActionRoom("edit");
+  };
+  const handleRoomToggle = (room) => {
+    console.log("AAA room ", room);
+    setRoom(room);
+    setDeleteDialogRoomOpen(true);
   };
 
   const totalRooms = roomTypes.length;
-  const displayedRooms = roomTypes.filter((acc) =>
-  acc.name.toLowerCase().includes(searchRoom.toLowerCase()) &&(selectedStatus?
-  acc.status == selectedStatus:true)
-);
+  const displayedRooms = roomTypes.filter(
+    (acc) =>
+      acc.name.toLowerCase().includes(searchRoom.toLowerCase()) &&
+      (selectedStatus ? acc.status == selectedStatus : true)
+  );
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -128,10 +159,9 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom , setActionRoom
         <Stack
           direction={{ xs: "column", sm: "row" }}
           spacing={{ xs: 1.5, sm: 2.5, md: 2 }}
-          flexWrap="wrap"
-          color="#555"
-          fontSize={14}
-        >
+          flexWrap='wrap'
+          color='#555'
+          fontSize={14}>
           {stats.map((item) => (
             <Box
               key={item.label}
@@ -142,13 +172,14 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom , setActionRoom
                 py: 0.8,
                 borderRadius: "8px",
                 transition: "all 0.2s",
-                bgcolor: selectedStatus === item.status ? "#F0F1F3" : "transparent",
+                bgcolor:
+                  selectedStatus === item.status ? "#F0F1F3" : "transparent",
 
                 "&:hover": {
-                  bgcolor: selectedStatus === item.status ? "transparent" : "#F0F1F3",
+                  bgcolor:
+                    selectedStatus === item.status ? "transparent" : "#F0F1F3",
                 },
-              }}
-            >
+              }}>
               {item.label} <strong>{item.value}</strong>
             </Box>
           ))}
@@ -165,12 +196,11 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom , setActionRoom
         overflow: "hidden",
         border: "1px solid #eee",
         padding: 3,
-      }}
-    >
+      }}>
       {renderStats()}
 
       <TableContainer sx={{ overflowX: "auto" }}>
-        <Table sx={{ }}>
+        <Table sx={{}}>
           <TableHead>
             <TableRow sx={{ bgcolor: "#f8f9fa" }}>
               {[
@@ -184,8 +214,7 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom , setActionRoom
               ].map((head) => (
                 <TableCell
                   key={head}
-                  sx={{ fontWeight: 600, color: "#555", fontSize: 14 }}
-                >
+                  sx={{ fontWeight: 600, color: "#555", fontSize: 14 }}>
                   {head}
                 </TableCell>
               ))}
@@ -194,8 +223,8 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom , setActionRoom
           <TableBody>
             {displayedRooms.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
-                  <img src={empty} alt="" />
+                <TableCell colSpan={7} align='center' sx={{ py: 6 }}>
+                  <img src={empty} alt='' />
                 </TableCell>
               </TableRow>
             ) : (
@@ -211,8 +240,7 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom , setActionRoom
                         textDecoration: "underline",
                         color: "#98B720",
                       },
-                    }}
-                  >
+                    }}>
                     {room.parsedName}
                   </TableCell>
 
@@ -223,8 +251,14 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom , setActionRoom
                   <TableCell>{room.number}</TableCell>
 
                   {/* Giá theo giờ */}
-                  <TableCell><Typography fontSize={"13.5px"} >{room.price_hourly_formatted} / 2 giờ đầu</Typography>
-                  <Typography fontSize={"13.5px"} >{room.price_hourly_increment_formatted} / mỗi giờ thêm</Typography></TableCell>
+                  <TableCell>
+                    <Typography fontSize={"13.5px"}>
+                      {room.price_hourly_formatted} / 2 giờ đầu
+                    </Typography>
+                    <Typography fontSize={"13.5px"}>
+                      {room.price_hourly_increment_formatted} / mỗi giờ thêm
+                    </Typography>
+                  </TableCell>
 
                   {/* Giá qua đêm */}
                   <TableCell>{room.price_overnight_formatted}</TableCell>
@@ -233,10 +267,16 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom , setActionRoom
                   <TableCell>{room.price_daily_formatted}</TableCell>
 
                   {/* Thao tác */}
-                  <TableCell align="right">
-                    <ActionMenu handleDetailRoom={() => {
-                     
-                      handleRoomClick(room)}} />
+                  <TableCell align='right'>
+                    <ActionMenu
+                      handleRoomToggle={() => {
+                        handleRoomToggle(room);
+                      }}
+                      room={room}
+                      handleDetailRoom={() => {
+                        handleRoomClick(room);
+                      }}
+                    />
                   </TableCell>
                 </TableRow>
               ))
@@ -256,20 +296,18 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom , setActionRoom
         overflow: "hidden",
         border: "1px solid #eee",
         p: 2, // giảm padding cho mobile
-      }}
-    >
+      }}>
       {renderStats()}
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
         {displayedRooms.length === 0 ? (
-          <Typography align="center" color="#999" py={6}>
+          <Typography align='center' color='#999' py={6}>
             Chưa có loại phòng nào
           </Typography>
         ) : (
           displayedRooms.map((room: any) => (
             <Box
               key={room.id}
-             
               sx={{
                 bgcolor: "white",
                 borderRadius: "12px",
@@ -282,20 +320,18 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom , setActionRoom
                   boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
                   transform: "translateY(-2px)",
                 },
-              }}
-            >
+              }}>
               {/* Header card */}
               <Box
-               onClick={() => handleRoomClick(room)}
+                onClick={() => handleRoomClick(room)}
                 sx={{
                   p: 2,
                   bgcolor: "#f8f9fa",
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                }}
-              >
-                <Typography variant="subtitle1" fontWeight="600">
+                }}>
+                <Typography variant='subtitle1' fontWeight='600'>
                   {room.parsedName}
                 </Typography>
                 {renderStatusChip(room?.status)}
@@ -306,24 +342,24 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom , setActionRoom
               {/* Nội dung chính */}
               <Box sx={{ p: 2 }}>
                 <Stack spacing={1.5}>
-                  <Stack direction="row" justifyContent="space-between">
+                  <Stack direction='row' justifyContent='space-between'>
                     <Box>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant='body2' color='text.secondary'>
                         SL phòng bán
                       </Typography>
-                      <Typography fontWeight="600">{room.number}</Typography>
+                      <Typography fontWeight='600'>{room.number}</Typography>
                     </Box>
                   </Stack>
 
-                  <Stack direction="row" justifyContent="space-between">
+                  <Stack direction='row' justifyContent='space-between'>
                     <Box>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant='body2' color='text.secondary'>
                         Giá theo giờ
                       </Typography>
                       <Typography>{room.price_hourly_formatted}</Typography>
                     </Box>
-                    <Box textAlign="right">
-                      <Typography variant="body2" color="text.secondary">
+                    <Box textAlign='right'>
+                      <Typography variant='body2' color='text.secondary'>
                         Giá qua đêm
                       </Typography>
                       <Typography>{room.price_overnight_formatted}</Typography>
@@ -331,10 +367,10 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom , setActionRoom
                   </Stack>
 
                   <Box>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant='body2' color='text.secondary'>
                       Giá qua ngày
                     </Typography>
-                    <Typography fontWeight="500">
+                    <Typography fontWeight='500'>
                       {room.price_daily_formatted}
                     </Typography>
                   </Box>
@@ -348,9 +384,14 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom , setActionRoom
                   bgcolor: "#fafafa",
                   display: "flex",
                   justifyContent: "flex-end",
-                }}
-              >
-                <ActionMenu handleDetailRoom={() => handleRoomClick(room)} />
+                }}>
+                <ActionMenu
+                  handleRoomToggle={() => {
+                    handleRoomToggle(room);
+                  }}
+                  room={room}
+                  handleDetailRoom={() => handleRoomClick(room)}
+                />
               </Box>
             </Box>
           ))
@@ -358,17 +399,13 @@ const ManagerRooms = ({ onNext, detailHotel, setRoom, searchRoom , setActionRoom
       </Box>
     </Paper>
   );
-  return (
-    <>
-     {isMobile ? renderMobile() : renderDesktop()}
-    </>
-  );
+  return <>{isMobile ? renderMobile() : renderDesktop()}</>;
 };
 
 export default ManagerRooms;
 
 // Menu thao tác
-function ActionMenu({handleDetailRoom}) {
+function ActionMenu({ handleDetailRoom, handleRoomToggle, room }) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -422,10 +459,23 @@ function ActionMenu({handleDetailRoom}) {
           Nhân bản
         </MenuItem> */}
         <MenuItem
-          onClick={handleClose}
-          sx={{ gap: 1.5, fontSize: 14, color: "#d32f2f" }}>
-          <PauseCircle fontSize='small' />
-          Ngừng kinh doanh
+          onClick={() => {
+            handleRoomToggle();
+            handleClose();
+          }}
+          sx={{
+            gap: 1.5,
+            fontSize: 14,
+            color: room?.status == "active" ? "#d32f2f" : "unset",
+          }}>
+          {room?.status == "paused" ? (
+            <PlayCircle fontSize='small' />
+          ) : (
+            <PauseCircle fontSize='small' />
+          )}
+          {room?.status == "active"
+            ? "Ngừng kinh doanh"
+            : "Tiếp tục kinh doanh"}
         </MenuItem>
       </Menu>
     </>
