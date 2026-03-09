@@ -80,14 +80,17 @@ export default function ManagerRoomView({
   const [openEdit, setOpenEdit] = useState(false);
   const [action, setAction] = useState("manager");
   const [currentEditSlot, setCurrentEditSlot] = useState(null);
+  const onCancelCallbackRef = useRef<(() => void) | null>(null);
+
   const tabs = [
     { key: "hourly", label: "Theo giờ" },
     { key: "overnight", label: "Qua đêm" },
     { key: "daily", label: "Theo ngày" },
   ];
 
-  const handleOpenQuickBlock = (slotData) => {
+  const handleOpenQuickBlock = (slotData, onCancel?: () => void) => {
     setCurrentEditSlot(slotData);
+    onCancelCallbackRef.current = onCancel ?? null;
     setOpenQuickBlock(true);
   };
 
@@ -268,6 +271,7 @@ export default function ManagerRoomView({
             currentSlot={currentEditSlot}
             idHotel={idHotel}
             onSuccess={getData}
+            onCancel={() => { onCancelCallbackRef.current?.(); onCancelCallbackRef.current = null; }}
           />
           <EditOperationDialog
             openEdit={openEdit}
@@ -284,6 +288,14 @@ function QuickBlockDialog({
   currentSlot,
   idHotel,
   onSuccess,
+  onCancel,
+}: {
+  openQuickBlock: boolean;
+  onClose: () => void;
+  currentSlot: any;
+  idHotel: any;
+  onSuccess: () => void;
+  onCancel?: () => void;
 }) {
   const [blockType, setBlockType] = useState("hourly");
   const isMobile = useMediaQuery("(max-width:600px)");
@@ -520,10 +532,14 @@ function QuickBlockDialog({
         onClose();
       } else {
         toast.error("Cập nhật số phòng còn lại thất bại");
+        onCancel?.(); // rollback input về giá trị cũ
+        onClose();
       }
     } catch (e) {
       console.error(e);
       alert("Lỗi kết nối mạng!");
+      onCancel?.(); // rollback input về giá trị cũ
+      onClose();
     }
   };
 
@@ -585,7 +601,7 @@ function QuickBlockDialog({
             Khóa nhanh / Cập nhật số phòng
           </Typography>
           <IconButton
-            onClick={onClose}
+            onClick={() => { onCancel?.(); onClose(); }}
             sx={{ position: "absolute", right: 12, top: 12 }}>
             <CloseIcon sx={{ fontSize: 20 }} />
           </IconButton>
@@ -819,7 +835,7 @@ function QuickBlockDialog({
             <Stack direction='row' spacing={2} mt={2}>
               <Button
                 variant='outlined'
-                onClick={onClose}
+                onClick={() => { onCancel?.(); onClose(); }}
                 fullWidth
                 sx={{ borderRadius: "50px", py:isMobile?1: 1.5 }}>
                 Hủy
@@ -1090,15 +1106,20 @@ function RoomScheduleTableHourly({
                           onBlur={(e) => {
                             const newVal = parseInt(e.target.value, 10);
                             if (!isNaN(newVal) && newVal !== slot.remaining_rooms) {
-                              handleOpenQuickBlock({
-                                room_type_id: data.room_type_id,
-                                rent_type: "hourly",
-                                start_time: slot.from,
-                                end_time: slot.to || slot.from,
-                                available_rooms: newVal,
-                                reason: "staff_shortage",
-                                note: "Thiếu nhân viên dọn phòng",
-                              });
+                              handleOpenQuickBlock(
+                                {
+                                  room_type_id: data.room_type_id,
+                                  rent_type: "hourly",
+                                  start_time: slot.from,
+                                  end_time: slot.to || slot.from,
+                                  available_rooms: newVal,
+                                  reason: "staff_shortage",
+                                  note: "Thiếu nhân viên dọn phòng",
+                                },
+                                () => setEditedValues((prev) => ({ ...prev, [i]: undefined }))
+                              );
+                            } else {
+                              setEditedValues((prev) => ({ ...prev, [i]: undefined }));
                             }
                           }}
                           type="number"
@@ -1240,15 +1261,20 @@ function RoomScheduleTableHourly({
                     onBlur={(e) => {
                       const newVal = parseInt(e.target.value, 10);
                       if (!isNaN(newVal) && newVal !== slot.remaining_rooms) {
-                        handleOpenQuickBlock({
-                          room_type_id: data.room_type_id,
-                          rent_type: "hourly",
-                          start_time: slot.from,
-                          end_time: slot.to || slot.from,
-                          available_rooms: newVal,
-                          reason: "staff_shortage",
-                          note: "Thiếu nhân viên dọn phòng",
-                        });
+                        handleOpenQuickBlock(
+                          {
+                            room_type_id: data.room_type_id,
+                            rent_type: "hourly",
+                            start_time: slot.from,
+                            end_time: slot.to || slot.from,
+                            available_rooms: newVal,
+                            reason: "staff_shortage",
+                            note: "Thiếu nhân viên dọn phòng",
+                          },
+                          () => setEditedValues((prev) => ({ ...prev, [i]: undefined }))
+                        );
+                      } else {
+                        setEditedValues((prev) => ({ ...prev, [i]: undefined }));
                       }
                     }}
                     type="number"
@@ -1529,15 +1555,20 @@ function RoomScheduleTableDaily({
                           onBlur={(e) => {
                             const newVal = parseInt(e.target.value, 10);
                             if (!isNaN(newVal) && newVal !== slot.remaining_rooms) {
-                              handleOpenQuickBlock({
-                                room_type_id: data.room_type_id,
-                                rent_type: "daily",
-                                start_time: slot.from,
-                                end_time: slot.to || slot.from,
-                                available_rooms: newVal,
-                                reason: "staff_shortage",
-                                note: "Thiếu nhân viên dọn phòng",
-                              });
+                              handleOpenQuickBlock(
+                                {
+                                  room_type_id: data.room_type_id,
+                                  rent_type: "daily",
+                                  start_time: slot.from,
+                                  end_time: slot.to || slot.from,
+                                  available_rooms: newVal,
+                                  reason: "staff_shortage",
+                                  note: "Thiếu nhân viên dọn phòng",
+                                },
+                                () => setEditedValues((prev) => ({ ...prev, [i]: undefined }))
+                              );
+                            } else {
+                              setEditedValues((prev) => ({ ...prev, [i]: undefined }));
                             }
                           }}
                           type="number"
@@ -1678,15 +1709,20 @@ function RoomScheduleTableDaily({
                     onBlur={(e) => {
                       const newVal = parseInt(e.target.value, 10);
                       if (!isNaN(newVal) && newVal !== slot.remaining_rooms) {
-                        handleOpenQuickBlock({
-                          room_type_id: data.room_type_id,
-                          rent_type: "daily",
-                          start_time: slot.from,
-                          end_time: slot.to || slot.from,
-                          available_rooms: newVal,
-                          reason: "staff_shortage",
-                          note: "Thiếu nhân viên dọn phòng",
-                        });
+                        handleOpenQuickBlock(
+                          {
+                            room_type_id: data.room_type_id,
+                            rent_type: "daily",
+                            start_time: slot.from,
+                            end_time: slot.to || slot.from,
+                            available_rooms: newVal,
+                            reason: "staff_shortage",
+                            note: "Thiếu nhân viên dọn phòng",
+                          },
+                          () => setEditedValues((prev) => ({ ...prev, [index]: undefined }))
+                        );
+                      } else {
+                        setEditedValues((prev) => ({ ...prev, [index]: undefined }));
                       }
                     }}
                     type="number"
@@ -1962,15 +1998,20 @@ function RoomScheduleTableOvernight({
                           onBlur={(e) => {
                             const newVal = parseInt(e.target.value, 10);
                             if (!isNaN(newVal) && newVal !== slot.remaining_rooms) {
-                              handleOpenQuickBlock({
-                                room_type_id: data.room_type_id,
-                                rent_type: "overnight",
-                                start_time: slot.from,
-                                end_time: slot.to || slot.from,
-                                available_rooms: newVal,
-                                reason: "staff_shortage",
-                                note: "Thiếu nhân viên dọn phòng",
-                              });
+                              handleOpenQuickBlock(
+                                {
+                                  room_type_id: data.room_type_id,
+                                  rent_type: "overnight",
+                                  start_time: slot.from,
+                                  end_time: slot.to || slot.from,
+                                  available_rooms: newVal,
+                                  reason: "staff_shortage",
+                                  note: "Thiếu nhân viên dọn phòng",
+                                },
+                                () => setEditedValues((prev) => ({ ...prev, [i]: undefined }))
+                              );
+                            } else {
+                              setEditedValues((prev) => ({ ...prev, [i]: undefined }));
                             }
                           }}
                           type="number"
@@ -2113,15 +2154,20 @@ function RoomScheduleTableOvernight({
                     onBlur={(e) => {
                       const newVal = parseInt(e.target.value, 10);
                       if (!isNaN(newVal) && newVal !== slot.remaining_rooms) {
-                        handleOpenQuickBlock({
-                          room_type_id: data.room_type_id,
-                          rent_type: "overnight",
-                          start_time: slot.from,
-                          end_time: slot.to || slot.from,
-                          available_rooms: newVal,
-                          reason: "staff_shortage",
-                          note: "Thiếu nhân viên dọn phòng",
-                        });
+                        handleOpenQuickBlock(
+                          {
+                            room_type_id: data.room_type_id,
+                            rent_type: "overnight",
+                            start_time: slot.from,
+                            end_time: slot.to || slot.from,
+                            available_rooms: newVal,
+                            reason: "staff_shortage",
+                            note: "Thiếu nhân viên dọn phòng",
+                          },
+                          () => setEditedValues((prev) => ({ ...prev, [index]: undefined }))
+                        );
+                      } else {
+                        setEditedValues((prev) => ({ ...prev, [index]: undefined }));
                       }
                     }}
                     type="number"
