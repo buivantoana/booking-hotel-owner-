@@ -166,12 +166,12 @@ export default function ManagerRoomView({
               </Box> */}
             </Box>
           </Box>
-          <Card sx={{ mt: 4,padding:{xs:0,md:3} }}>
+          <Card sx={{ mt: 4, padding: { xs: 0, md: 3 } }}>
             <Box
-              display={'flex'}
-              flexDirection={{xs:"column",md:"row"}}
+              display={"flex"}
+              flexDirection={{ xs: "column", md: "row" }}
               alignItems='center'
-              gap={{xs:2,md:0}}
+              gap={{ xs: 2, md: 0 }}
               justifyContent='space-between'
               py={2}
               px={isMobile ? 1 : 2}
@@ -206,7 +206,11 @@ export default function ManagerRoomView({
                   ))}
               </Box>
               {/* Date Range */}
-              <SimpleDateSearchBar type="daily" value={dateRange} onChange={setDateRange} />
+              <SimpleDateSearchBar
+                type='daily'
+                value={dateRange}
+                onChange={setDateRange}
+              />
             </Box>
             <Box py={3}>
               {active == "hourly" && data?.room_types?.length > 0 && (
@@ -271,7 +275,10 @@ export default function ManagerRoomView({
             currentSlot={currentEditSlot}
             idHotel={idHotel}
             onSuccess={getData}
-            onCancel={() => { onCancelCallbackRef.current?.(); onCancelCallbackRef.current = null; }}
+            onCancel={() => {
+              onCancelCallbackRef.current?.();
+              onCancelCallbackRef.current = null;
+            }}
           />
           <EditOperationDialog
             openEdit={openEdit}
@@ -303,32 +310,36 @@ function QuickBlockDialog({
     checkIn: dayjs(),
     checkOut: dayjs().add(1, "day"),
   });
-  
+
   // Lấy giờ hiện tại
   const now = dayjs();
   const currentHour = now.hour();
-  
+
   // Tính toán giờ mặc định
   const getDefaultStartHour = () => {
-    const isToday = dateRange.checkIn.isSame(now, 'day');
+    const isToday = dateRange.checkIn.isSame(now, "day");
     if (isToday) {
       // Nếu là hôm nay, bắt đầu từ giờ hiện tại + 1 (làm tròn lên)
       return currentHour + 1;
     }
     return 9; // Mặc định 09:00 cho ngày khác
   };
-  
+
   const getDefaultEndHour = () => {
-    const isToday = dateRange.checkOut.isSame(now, 'day');
+    const isToday = dateRange.checkOut.isSame(now, "day");
     if (isToday) {
       // Nếu checkout là hôm nay, kết thúc ở giờ cuối cùng trong ngày (23h)
       return 23;
     }
     return 10; // Mặc định 10:00 cho ngày khác
   };
-  
-  const [startTime, setStartTime] = useState(dayjs().hour(getDefaultStartHour()).minute(0));
-  const [endTime, setEndTime] = useState(dayjs().hour(getDefaultEndHour()).minute(0));
+
+  const [startTime, setStartTime] = useState(
+    dayjs().hour(getDefaultStartHour()).minute(0)
+  );
+  const [endTime, setEndTime] = useState(
+    dayjs().hour(getDefaultEndHour()).minute(0)
+  );
   const [availableRooms, setAvailableRooms] = useState(0);
   const [reason, setReason] = useState("");
   const [note, setNote] = useState("");
@@ -337,7 +348,7 @@ function QuickBlockDialog({
   const generateTimeOptions = () => {
     const options = [];
     for (let i = 0; i < 24; i++) {
-      const hour = i.toString().padStart(2, '0');
+      const hour = i.toString().padStart(2, "0");
       options.push({ value: i, label: `${hour}:00` });
     }
     return options;
@@ -347,24 +358,24 @@ function QuickBlockDialog({
 
   // Lọc giờ cho startTime
   const getFilteredStartTimeOptions = () => {
-    const isToday = dateRange.checkIn.isSame(now, 'day');
-    const isSameDay = dateRange.checkIn.isSame(dateRange.checkOut, 'day');
-    
+    const isToday = dateRange.checkIn.isSame(now, "day");
+    const isSameDay = dateRange.checkIn.isSame(dateRange.checkOut, "day");
+
     if (!isToday) {
       // Không phải hôm nay, hiển thị tất cả
       return timeOptions;
     }
 
     // Là hôm nay, chỉ hiển thị các giờ từ giờ hiện tại + 1 trở đi
-    return timeOptions.filter(option => option.value > currentHour);
+    return timeOptions.filter((option) => option.value > currentHour);
   };
 
   // Lọc giờ cho endTime
   const getFilteredEndTimeOptions = () => {
-    const isStartToday = dateRange.checkIn.isSame(now, 'day');
-    const isEndToday = dateRange.checkOut.isSame(now, 'day');
-    const isSameDay = dateRange.checkIn.isSame(dateRange.checkOut, 'day');
-    
+    const isStartToday = dateRange.checkIn.isSame(now, "day");
+    const isEndToday = dateRange.checkOut.isSame(now, "day");
+    const isSameDay = dateRange.checkIn.isSame(dateRange.checkOut, "day");
+
     if (!isEndToday) {
       // Nếu checkout không phải hôm nay, hiển thị tất cả
       return timeOptions;
@@ -374,15 +385,15 @@ function QuickBlockDialog({
     if (isSameDay) {
       // Cùng ngày với checkin (và là hôm nay)
       // Chỉ hiển thị các giờ lớn hơn startTime và không quá 23h
-      return timeOptions.filter(option => 
-        option.value > startTime.hour() && option.value <= 23
+      return timeOptions.filter(
+        (option) => option.value > startTime.hour() && option.value <= 23
       );
     } else {
       // Khác ngày (checkout là hôm nay, checkin là ngày trước)
       // Hiển thị tất cả các giờ từ 0-23, nhưng disable các giờ đã qua nếu là hôm nay
-      return timeOptions.map(option => ({
+      return timeOptions.map((option) => ({
         ...option,
-        disabled: option.value <= currentHour // Disable các giờ đã qua
+        disabled: option.value <= currentHour, // Disable các giờ đã qua
       }));
     }
   };
@@ -392,9 +403,9 @@ function QuickBlockDialog({
 
   // Cập nhật startTime và endTime khi dateRange thay đổi
   useEffect(() => {
-    const isToday = dateRange.checkIn.isSame(now, 'day');
-    const isSameDay = dateRange.checkIn.isSame(dateRange.checkOut, 'day');
-    
+    const isToday = dateRange.checkIn.isSame(now, "day");
+    const isSameDay = dateRange.checkIn.isSame(dateRange.checkOut, "day");
+
     // Cập nhật startTime
     let newStartHour = startTime.hour();
     if (isToday) {
@@ -410,7 +421,7 @@ function QuickBlockDialog({
         setStartTime(dayjs().hour(0).minute(0));
       }
     }
-    
+
     // Cập nhật endTime
     let newEndHour = endTime.hour();
     if (isSameDay) {
@@ -421,7 +432,7 @@ function QuickBlockDialog({
       }
     } else {
       // Khác ngày: endTime là 23h nếu checkout là ngày hôm nay, hoặc 23h nếu không
-      const isEndToday = dateRange.checkOut.isSame(now, 'day');
+      const isEndToday = dateRange.checkOut.isSame(now, "day");
       if (isEndToday) {
         // Nếu checkout là hôm nay, endTime không được lớn hơn giờ hiện tại
         newEndHour = Math.min(currentHour, 23);
@@ -439,19 +450,19 @@ function QuickBlockDialog({
     if (!currentSlot || !openQuickBlock) {
       // Reset với giá trị mặc định thông minh
       const today = dayjs();
-      const tomorrow = today.add(1, 'day');
-      
+      const tomorrow = today.add(1, "day");
+
       setBlockType("hourly");
       setDateRange({
         checkIn: today,
         checkOut: tomorrow,
       });
-      
+
       // Set giờ mặc định thông minh
       const startHour = Math.min(currentHour + 1, 23);
       setStartTime(today.hour(startHour).minute(0));
       setEndTime(tomorrow.hour(23).minute(0));
-      
+
       setAvailableRooms(0);
       setReason("");
       setNote("");
@@ -507,9 +518,12 @@ function QuickBlockDialog({
     if (isHourly) {
       startISO += `T${startTime.format("HH:mm")}:00+07:00`;
       endISO += `T${endTime.format("HH:mm")}:00+07:00`;
-    } else {
-      startISO += "T00:00:00+07:00";
-      endISO += "T23:59:59+07:00";
+    } else if (blockType === "overnight") {
+      startISO += "T22:00:00+07:00";
+      endISO += "T10:00:00+07:00";
+    } else if (blockType === "daily") {
+      startISO += "T14:00:00+07:00";
+      endISO += "T12:00:00+07:00";
     }
 
     const body = {
@@ -546,12 +560,12 @@ function QuickBlockDialog({
   // Handler khi dateRange thay đổi
   const handleDateRangeChange = (newDateRange) => {
     setDateRange(newDateRange);
-    
+
     // Cập nhật giờ tự động dựa trên ngày mới
-    const isStartToday = newDateRange.checkIn.isSame(now, 'day');
-    const isEndToday = newDateRange.checkOut.isSame(now, 'day');
-    const isSameDay = newDateRange.checkIn.isSame(newDateRange.checkOut, 'day');
-    
+    const isStartToday = newDateRange.checkIn.isSame(now, "day");
+    const isEndToday = newDateRange.checkOut.isSame(now, "day");
+    const isSameDay = newDateRange.checkIn.isSame(newDateRange.checkOut, "day");
+
     if (isHourly) {
       // Cập nhật startTime
       let newStartHour = startTime.hour();
@@ -563,7 +577,7 @@ function QuickBlockDialog({
         newStartHour = 0;
       }
       setStartTime(dayjs().hour(newStartHour).minute(0));
-      
+
       // Cập nhật endTime
       let newEndHour = endTime.hour();
       if (isSameDay) {
@@ -601,13 +615,16 @@ function QuickBlockDialog({
             Khóa nhanh / Cập nhật số phòng
           </Typography>
           <IconButton
-            onClick={() => { onCancel?.(); onClose(); }}
+            onClick={() => {
+              onCancel?.();
+              onClose();
+            }}
             sx={{ position: "absolute", right: 12, top: 12 }}>
             <CloseIcon sx={{ fontSize: 20 }} />
           </IconButton>
         </Box>
 
-        <DialogContent sx={{ bgcolor: "#fff", p: isMobile?1:3 }}>
+        <DialogContent sx={{ bgcolor: "#fff", p: isMobile ? 1 : 3 }}>
           <Stack spacing={3.5}>
             {/* Loại đặt phòng */}
             <Box
@@ -638,9 +655,9 @@ function QuickBlockDialog({
               <Typography fontSize={15} color='#888' fontWeight={500}>
                 Khoảng thời gian
               </Typography>
-              <SimpleDateSearchBar 
-                value={dateRange} 
-                onChange={handleDateRangeChange} 
+              <SimpleDateSearchBar
+                value={dateRange}
+                onChange={handleDateRangeChange}
                 type={blockType}
               />
             </Box>
@@ -657,7 +674,7 @@ function QuickBlockDialog({
                 <Stack
                   direction='row'
                   alignItems='center'
-                  width={isMobile?"70%":'60%'}
+                  width={isMobile ? "70%" : "60%"}
                   spacing={2}>
                   {/* Giờ bắt đầu */}
                   <FormControl fullWidth>
@@ -666,7 +683,7 @@ function QuickBlockDialog({
                       onChange={(e) => {
                         const hour = e.target.value as number;
                         setStartTime(dayjs().hour(hour).minute(0));
-                        
+
                         // Nếu endTime <= startTime, tự động tăng endTime
                         if (endTime.hour() <= hour) {
                           const newEndHour = Math.min(hour + 1, 23);
@@ -674,24 +691,23 @@ function QuickBlockDialog({
                         }
                       }}
                       size='small'
-                      sx={{ borderRadius: "32px", height: 40 }}
-                    >
-                      {filteredStartTimeOptions.map(option => (
-                        <MenuItem 
-                          key={`start-${option.value}`} 
-                          value={option.value}
-                        >
+                      sx={{ borderRadius: "32px", height: 40 }}>
+                      {filteredStartTimeOptions.map((option) => (
+                        <MenuItem
+                          key={`start-${option.value}`}
+                          value={option.value}>
                           {option.label}
-                          {dateRange.checkIn.isSame(now, 'day') && option.value === currentHour + 1 }
+                          {dateRange.checkIn.isSame(now, "day") &&
+                            option.value === currentHour + 1}
                         </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
-                  
+
                   <Typography color='#aaa' fontSize={18}>
                     —
                   </Typography>
-                  
+
                   {/* Giờ kết thúc */}
                   <FormControl fullWidth>
                     <Select
@@ -701,22 +717,24 @@ function QuickBlockDialog({
                         setEndTime(dayjs().hour(hour).minute(0));
                       }}
                       size='small'
-                      sx={{ borderRadius: "32px", height: 40 }}
-                    >
-                      {filteredEndTimeOptions.map(option => {
-                        const isDisabled = option.disabled || option.value <= startTime.hour();
-                        const isLastHourOfDay = dateRange.checkOut.isSame(now, 'day') && option.value === Math.min(currentHour, 23);
+                      sx={{ borderRadius: "32px", height: 40 }}>
+                      {filteredEndTimeOptions.map((option) => {
+                        const isDisabled =
+                          option.disabled || option.value <= startTime.hour();
+                        const isLastHourOfDay =
+                          dateRange.checkOut.isSame(now, "day") &&
+                          option.value === Math.min(currentHour, 23);
                         const isMaxHour = option.value === 23;
-                        
+
                         return (
-                          <MenuItem 
-                            key={`end-${option.value}`} 
+                          <MenuItem
+                            key={`end-${option.value}`}
                             value={option.value}
-                            disabled={isDisabled}
-                          >
+                            disabled={isDisabled}>
                             {option.label}
                             {isLastHourOfDay}
-                            {!dateRange.checkOut.isSame(now, 'day') && isMaxHour }
+                            {!dateRange.checkOut.isSame(now, "day") &&
+                              isMaxHour}
                           </MenuItem>
                         );
                       })}
@@ -812,8 +830,8 @@ function QuickBlockDialog({
                       color='#1b5e20'
                       mt={1}
                       fontWeight={500}>
-                      {startTime?.format("HH:mm")} - {endTime?.format("HH:mm")} từ{" "}
-                      {dateRange?.checkIn?.format("DD/MM/YYYY")} đến{" "}
+                      {startTime?.format("HH:mm")} - {endTime?.format("HH:mm")}{" "}
+                      từ {dateRange?.checkIn?.format("DD/MM/YYYY")} đến{" "}
                       {dateRange?.checkOut?.format("DD/MM/YYYY")}
                     </Typography>
                   )}
@@ -823,8 +841,8 @@ function QuickBlockDialog({
                       color='#1b5e20'
                       mt={1}
                       fontWeight={500}>
-                      Toàn ngày từ {dateRange?.checkIn?.format("DD/MM/YYYY")} đến{" "}
-                      {dateRange?.checkOut?.format("DD/MM/YYYY")}
+                      Toàn ngày từ {dateRange?.checkIn?.format("DD/MM/YYYY")}{" "}
+                      đến {dateRange?.checkOut?.format("DD/MM/YYYY")}
                     </Typography>
                   )}
                 </Box>
@@ -835,16 +853,23 @@ function QuickBlockDialog({
             <Stack direction='row' spacing={2} mt={2}>
               <Button
                 variant='outlined'
-                onClick={() => { onCancel?.(); onClose(); }}
+                onClick={() => {
+                  onCancel?.();
+                  onClose();
+                }}
                 fullWidth
-                sx={{ borderRadius: "50px", py:isMobile?1: 1.5 }}>
+                sx={{ borderRadius: "50px", py: isMobile ? 1 : 1.5 }}>
                 Hủy
               </Button>
               <Button
                 variant='contained'
                 onClick={handleSubmit}
                 fullWidth
-                sx={{ borderRadius: "50px", bgcolor: "#98B720", py:isMobile?1: 1.5 }}>
+                sx={{
+                  borderRadius: "50px",
+                  bgcolor: "#98B720",
+                  py: isMobile ? 1 : 1.5,
+                }}>
                 Xác nhận cập nhật
               </Button>
             </Stack>
@@ -891,7 +916,9 @@ function RoomScheduleTableHourly({
 
   const dayGroups = groupSlotsByDate(data?.slots);
 
-  const [editedValues, setEditedValues] = useState<{ [key: number]: number }>({});
+  const [editedValues, setEditedValues] = useState<{ [key: number]: number }>(
+    {}
+  );
 
   // Desktop version - giữ nguyên như cũ
   const renderDesktop = () => {
@@ -899,48 +926,54 @@ function RoomScheduleTableHourly({
     const columnWidth = `${100 / totalSlots}%`;
 
     return (
-      <Box p={2} bgcolor="#fff">
+      <Box p={2} bgcolor='#fff'>
         <Box
           sx={{
             overflowX: "auto",
             overflowY: "hidden",
             "&::-webkit-scrollbar": { height: 10 },
-            "&::-webkit-scrollbar-thumb": { background: "#aaa", borderRadius: 5 },
+            "&::-webkit-scrollbar-thumb": {
+              background: "#aaa",
+              borderRadius: 5,
+            },
             border: "1px solid #ccc",
-          }}
-        >
-          <Box minWidth="fit-content">
+          }}>
+          <Box minWidth='fit-content'>
             {/* HEADER */}
-            <Box display="flex">
+            <Box display='flex'>
               {/* Cột trái cố định */}
               <Box
-                width="280px"
+                width='280px'
                 flexShrink={0}
-                bgcolor="white"
-                position="sticky"
+                bgcolor='white'
+                position='sticky'
                 left={0}
                 zIndex={10}
-                borderRight="2px solid #ddd"
-                borderBottom="2px solid #ddd"
+                borderRight='2px solid #ddd'
+                borderBottom='2px solid #ddd'
               />
 
               {/* Header phải */}
               <Box flex={1}>
                 <Box
-                  textAlign="start"
+                  textAlign='start'
                   py={1.5}
                   px={2}
-                  borderBottom="1px solid #eee"
-                  bgcolor="#f9f9f9"
-                >
-                  <Typography fontWeight={600} sx={{textTransform:"capitalize"}} fontSize={16}>
-                    {format(new Date(data?.start_time), "MMMM yyyy", { locale: vi })}
+                  borderBottom='1px solid #eee'
+                  bgcolor='#f9f9f9'>
+                  <Typography
+                    fontWeight={600}
+                    sx={{ textTransform: "capitalize" }}
+                    fontSize={16}>
+                    {format(new Date(data?.start_time), "MMMM yyyy", {
+                      locale: vi,
+                    })}
                   </Typography>
                 </Box>
 
                 {/* Ngày */}
-                <Box borderBottom="1px solid #ddd" bgcolor="white">
-                  <Box display="flex">
+                <Box borderBottom='1px solid #ddd' bgcolor='white'>
+                  <Box display='flex'>
                     {dayGroups?.map((g) => {
                       const w = (g?.slots?.length / totalSlots) * 100;
                       return (
@@ -948,13 +981,12 @@ function RoomScheduleTableHourly({
                           key={g.date}
                           width={`${w}%`}
                           minWidth={`${g.slots.length * 80}px`}
-                          display="flex"
-                          justifyContent="start"
+                          display='flex'
+                          justifyContent='start'
                           py={2}
-                          mx={2}
-                        >
+                          mx={2}>
                           <Button
-                            variant="contained"
+                            variant='contained'
                             sx={{
                               bgcolor: "#98b720",
                               color: "white",
@@ -965,11 +997,15 @@ function RoomScheduleTableHourly({
                               borderRadius: "20px",
                               boxShadow: "0 4px 15px rgba(152,183,32,0.4)",
                               "&:hover": { bgcolor: "#80a61a" },
-                              display:"flex",
-                              gap:.5
-                            }}
-                          >
-                            {g.dayOfMonth + " "}<Typography variant="span" sx={{textTransform:"capitalize"}}>{g.dayName}</Typography>
+                              display: "flex",
+                              gap: 0.5,
+                            }}>
+                            {g.dayOfMonth + " "}
+                            <Typography
+                              variant='span'
+                              sx={{ textTransform: "capitalize" }}>
+                              {g.dayName}
+                            </Typography>
                           </Button>
                         </Box>
                       );
@@ -978,20 +1014,22 @@ function RoomScheduleTableHourly({
                 </Box>
 
                 {/* Giờ */}
-                <Box display="flex" borderBottom="2px solid #ddd" bgcolor="#f5f5f5">
+                <Box
+                  display='flex'
+                  borderBottom='2px solid #ddd'
+                  bgcolor='#f5f5f5'>
                   {data?.slots?.map((s, i) => (
                     <Box
                       key={i}
                       width={columnWidth}
-                      minWidth="150px"
+                      minWidth='150px'
                       py={2}
-                      textAlign="center"
-                      borderRight="1px solid #eee"
-                    >
+                      textAlign='center'
+                      borderRight='1px solid #eee'>
                       <Typography fontWeight={600} fontSize={15}>
                         {s.hour}
                       </Typography>
-                      <Typography fontSize={11} color="#888">
+                      <Typography fontSize={11} color='#888'>
                         {format(new Date(s.from), "dd/MM")}
                       </Typography>
                     </Box>
@@ -1006,7 +1044,8 @@ function RoomScheduleTableHourly({
               {
                 label: "Tình trạng phòng",
                 action: "Khóa nhanh",
-                onClick: () => handleOpenQuickBlock({ room_type_id: data?.room_type_id }),
+                onClick: () =>
+                  handleOpenQuickBlock({ room_type_id: data?.room_type_id }),
                 isStatus: true,
               },
               { label: "Số phòng đặt", isBooked: true },
@@ -1016,34 +1055,44 @@ function RoomScheduleTableHourly({
                 isRemaining: true,
               },
             ].map((row, idx) => (
-              <Box key={idx} display="flex">
+              <Box key={idx} display='flex'>
                 <Box
-                  width="280px"
+                  width='280px'
                   flexShrink={0}
                   bgcolor={idx === 0 ? "white" : "#fafafa"}
-                  position="sticky"
+                  position='sticky'
                   left={0}
                   zIndex={10}
-                  borderRight="2px solid #ddd"
-                  borderBottom="1px solid #ddd"
-                >
-                  <Box px={3} py={2} display="flex" justifyContent="space-between" alignItems="center">
+                  borderRight='2px solid #ddd'
+                  borderBottom='1px solid #ddd'>
+                  <Box
+                    px={3}
+                    py={2}
+                    display='flex'
+                    justifyContent='space-between'
+                    alignItems='center'>
                     {row.isName ? (
                       <>
-                        <Typography fontWeight={700} fontSize={18} display="flex" alignItems="center" gap={1}>
+                        <Typography
+                          fontWeight={700}
+                          fontSize={18}
+                          display='flex'
+                          alignItems='center'
+                          gap={1}>
                           {row.label} <KeyboardArrowUpIcon />
                         </Typography>
                         <Typography
                           onClick={() =>
-                            navigate(`/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`)
+                            navigate(
+                              `/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`
+                            )
                           }
-                          color="#98b720"
-                          display="flex"
-                          alignItems="center"
+                          color='#98b720'
+                          display='flex'
+                          alignItems='center'
                           gap={0.5}
-                          sx={{ cursor: "pointer" }}
-                        >
-                          Xem <LaunchIcon fontSize="small" />
+                          sx={{ cursor: "pointer" }}>
+                          Xem <LaunchIcon fontSize='small' />
                         </Typography>
                       </>
                     ) : (
@@ -1052,8 +1101,11 @@ function RoomScheduleTableHourly({
                         {row.action && (
                           <Typography
                             onClick={row.onClick}
-                            sx={{ cursor: "pointer", color: "#98b720", fontWeight: 600 }}
-                          >
+                            sx={{
+                              cursor: "pointer",
+                              color: "#98b720",
+                              fontWeight: 600,
+                            }}>
                             {row.action}
                           </Typography>
                         )}
@@ -1062,69 +1114,82 @@ function RoomScheduleTableHourly({
                   </Box>
                 </Box>
 
-                <Box flex={1} display="flex">
+                <Box flex={1} display='flex'>
                   {data?.slots?.map((slot, i) => (
                     <Box
                       key={i}
                       width={columnWidth}
-                      minWidth="150px"
-                      borderRight="1px solid #eee"
-                      borderBottom="1px solid #eee"
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                      py={1}
-                    >
+                      minWidth='150px'
+                      borderRight='1px solid #eee'
+                      borderBottom='1px solid #eee'
+                      display='flex'
+                      alignItems='center'
+                      justifyContent='center'
+                      py={1}>
                       {row.isStatus && (
                         <Box
                           px={2}
                           py={1}
-                          borderRadius="50px"
+                          borderRadius='50px'
                           fontSize={13}
                           fontWeight={500}
-                          bgcolor={slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"}
-                          color={slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"}
-                        >
+                          bgcolor={
+                            slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"
+                          }
+                          color={
+                            slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"
+                          }>
                           {slot.remaining_rooms > 0 ? "Còn phòng" : "Hết phòng"}
                         </Box>
                       )}
                       {row.isBooked && (
-                        <Typography fontWeight={600} color="#333">
+                        <Typography fontWeight={600} color='#333'>
                           {slot.booked_rooms}
                         </Typography>
                       )}
                       {row.isRemaining && (
                         <TextField
-                          value={editedValues[i] ?? slot.remaining_rooms}
+                          value={
+                            editedValues[i] !== undefined
+                              ? editedValues[i]
+                              : slot.remaining_rooms
+                          }
                           onChange={(e) => {
                             const val = e.target.value;
-                            setEditedValues((prev) => ({
-                              ...prev,
-                              [i]: val === "" ? undefined : parseInt(val, 10),
-                            }));
-                          }}
-                          onBlur={(e) => {
-                            const newVal = parseInt(e.target.value, 10);
-                            if (!isNaN(newVal) && newVal !== slot.remaining_rooms) {
-                              handleOpenQuickBlock(
-                                {
-                                  room_type_id: data.room_type_id,
-                                  rent_type: "hourly",
-                                  start_time: slot.from,
-                                  end_time: slot.to || slot.from,
-                                  available_rooms: newVal,
-                                  reason: "staff_shortage",
-                                  note: "Thiếu nhân viên dọn phòng",
-                                },
-                                () => setEditedValues((prev) => ({ ...prev, [i]: undefined }))
-                              );
-                            } else {
-                              setEditedValues((prev) => ({ ...prev, [i]: undefined }));
+                            if (val === "" || /^\d+$/.test(val)) {
+                              // chỉ cho nhập số hoặc rỗng
+                              setEditedValues((prev) => ({
+                                ...prev,
+                                [i]: val,
+                              }));
                             }
                           }}
-                          type="number"
-                          size="small"
-                          inputProps={{ min: 0, style: { textAlign: "center", fontWeight: 600 } }}
+                          onBlur={(e) => {
+                            const val = e.target.value;
+                            const newVal = val === "" ? 0 : parseInt(val, 10);
+
+                            if (newVal !== slot.remaining_rooms) {
+                              handleOpenQuickBlock({
+                                room_type_id: data.room_type_id,
+                                rent_type: "hourly", // đổi theo từng component
+                                start_time: slot.from,
+                                end_time: slot.to || slot.from,
+                                available_rooms: newVal,
+                                reason: "staff_shortage",
+                                note: "Thiếu nhân viên dọn phòng",
+                              });
+                            }
+                            // reset về undefined để hiện lại slot.remaining_rooms sau khi submit
+                            // setEditedValues((prev) => ({
+                            //   ...prev,
+                            //   [i]: undefined,
+                            // }));
+                          }}
+                          type='text' // đổi từ number sang text
+                          size='small'
+                          inputProps={{
+                            style: { textAlign: "center", fontWeight: 600 },
+                          }}
                           sx={{ width: 60 }}
                         />
                       )}
@@ -1144,36 +1209,36 @@ function RoomScheduleTableHourly({
               },
               {
                 label: "Giá 1 giờ thêm",
-                value: `${data?.price_hourly_increment?.toLocaleString("vi-VN")}đ`,
+                value: `${data?.price_hourly_increment?.toLocaleString(
+                  "vi-VN"
+                )}đ`,
                 bg: "#eef1ff",
                 color: "#4e6aff",
               },
             ].map((p) => (
-              <Box key={p.label} display="flex">
+              <Box key={p.label} display='flex'>
                 <Box
-                  width="280px"
+                  width='280px'
                   flexShrink={0}
-                  bgcolor="#f8f9fa"
-                  position="sticky"
-                  borderBottom="1px solid #ddd"
+                  bgcolor='#f8f9fa'
+                  position='sticky'
+                  borderBottom='1px solid #ddd'
                   left={0}
                   zIndex={10}
-                  borderRight="2px solid #ddd"
-                >
+                  borderRight='2px solid #ddd'>
                   <Box px={3} py={2}>
                     <Typography fontWeight={500}>{p.label}</Typography>
                   </Box>
                 </Box>
-                <Box width={"100%"}py={1} >
+                <Box width={"100%"} py={1}>
                   <Box
                     bgcolor={p.bg}
                     color={p.color}
                     px={4}
                     py={1.5}
-                    borderRadius="50px"
+                    borderRadius='50px'
                     fontWeight={600}
-                    fontSize={15}
-                  >
+                    fontSize={15}>
                     {p.value}
                   </Box>
                 </Box>
@@ -1188,16 +1253,15 @@ function RoomScheduleTableHourly({
   // Mobile version - dạng card theo ngày
   const renderMobile = () => {
     return (
-      <Box p={2} bgcolor="#fff">
+      <Box p={2} bgcolor='#fff'>
         {/* Tháng */}
         <Box
-          textAlign="center"
+          textAlign='center'
           py={2}
-          bgcolor="#f9f9f9"
-          borderRadius="12px"
-          mb={3}
-        >
-          <Typography variant="h6" fontWeight={700}>
+          bgcolor='#f9f9f9'
+          borderRadius='12px'
+          mb={3}>
+          <Typography variant='h6' fontWeight={700}>
             {format(new Date(data?.start_time), "MMMM yyyy", { locale: vi })}
           </Typography>
         </Box>
@@ -1205,15 +1269,14 @@ function RoomScheduleTableHourly({
         {dayGroups?.map((group) => (
           <Box
             key={group.date}
-            bgcolor="white"
-            borderRadius="12px"
-            boxShadow="0 2px 12px rgba(0,0,0,0.08)"
+            bgcolor='white'
+            borderRadius='12px'
+            boxShadow='0 2px 12px rgba(0,0,0,0.08)'
             mb={3}
-            overflow="hidden"
-          >
+            overflow='hidden'>
             {/* Header ngày */}
-            <Box bgcolor="#98b720" color="white" py={2} px={3}>
-              <Typography variant="h6" fontWeight={700}>
+            <Box bgcolor='#98b720' color='white' py={2} px={3}>
+              <Typography variant='h6' fontWeight={700}>
                 {group.dayOfMonth} {group.dayName}
               </Typography>
             </Box>
@@ -1222,8 +1285,12 @@ function RoomScheduleTableHourly({
 
             {/* Slots theo giờ */}
             {group.slots?.map((slot, i) => (
-              <Box key={i} p={2} borderBottom="1px solid #eee">
-                <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+              <Box key={i} p={2} borderBottom='1px solid #eee'>
+                <Box
+                  display='flex'
+                  justifyContent='space-between'
+                  alignItems='center'
+                  mb={1.5}>
                   <Typography fontWeight={600} fontSize={16}>
                     {slot.hour} • {format(new Date(slot.from), "dd/MM")}
                   </Typography>
@@ -1232,23 +1299,26 @@ function RoomScheduleTableHourly({
                   <Box
                     px={2}
                     py={0.8}
-                    borderRadius="50px"
+                    borderRadius='50px'
                     fontSize={13}
                     fontWeight={600}
                     bgcolor={slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"}
-                    color={slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"}
-                  >
+                    color={slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"}>
                     {slot.remaining_rooms > 0 ? "Còn phòng" : "Hết phòng"}
                   </Box>
                 </Box>
 
-                <Box display="flex" justifyContent="space-between" mb={1.5}>
-                  <Typography color="text.secondary">Số phòng đặt:</Typography>
+                <Box display='flex' justifyContent='space-between' mb={1.5}>
+                  <Typography color='text.secondary'>Số phòng đặt:</Typography>
                   <Typography fontWeight={600}>{slot.booked_rooms}</Typography>
                 </Box>
 
-                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                  <Typography color="text.secondary">Còn lại:</Typography>
+                <Box
+                  display='flex'
+                  justifyContent='space-between'
+                  alignItems='center'
+                  mb={2}>
+                  <Typography color='text.secondary'>Còn lại:</Typography>
                   <TextField
                     value={editedValues[i] ?? slot.remaining_rooms}
                     onChange={(e) => {
@@ -1271,14 +1341,21 @@ function RoomScheduleTableHourly({
                             reason: "staff_shortage",
                             note: "Thiếu nhân viên dọn phòng",
                           },
-                          () => setEditedValues((prev) => ({ ...prev, [i]: undefined }))
+                          () =>
+                            setEditedValues((prev) => ({
+                              ...prev,
+                              [i]: undefined,
+                            }))
                         );
                       } else {
-                        setEditedValues((prev) => ({ ...prev, [i]: undefined }));
+                        setEditedValues((prev) => ({
+                          ...prev,
+                          [i]: undefined,
+                        }));
                       }
                     }}
-                    type="number"
-                    size="small"
+                    type='number'
+                    size='small'
                     inputProps={{ min: 0, style: { textAlign: "center" } }}
                     sx={{ width: 80 }}
                   />
@@ -1286,59 +1363,58 @@ function RoomScheduleTableHourly({
 
                 {/* Nút Khóa nhanh */}
                 <Button
-                  variant="outlined"
-                  color="primary"
+                  variant='outlined'
+                  color='primary'
                   fullWidth
-                  size="small"
+                  size='small'
                   onClick={() =>
                     handleOpenQuickBlock({ room_type_id: data?.room_type_id })
-                  }
-                >
+                  }>
                   Khóa nhanh khung giờ này
                 </Button>
               </Box>
             ))}
 
             {/* Thông tin phòng */}
-            <Box p={3} bgcolor="#fafafa">
+            <Box p={3} bgcolor='#fafafa'>
               <Typography fontWeight={700} mb={1}>
                 {parseVi(data?.name)}
               </Typography>
 
-              <Box display="flex" justifyContent="space-between" mb={1}>
+              <Box display='flex' justifyContent='space-between' mb={1}>
                 <Typography>Giá phòng/2h đầu:</Typography>
-                <Typography fontWeight={600} color="#e65e00">
+                <Typography fontWeight={600} color='#e65e00'>
                   {data?.price_hourly?.toLocaleString("vi-VN")}đ
                 </Typography>
               </Box>
 
-              <Box display="flex" justifyContent="space-between">
+              <Box display='flex' justifyContent='space-between'>
                 <Typography>Giá 1 giờ thêm:</Typography>
-                <Typography fontWeight={600} color="#4e6aff">
+                <Typography fontWeight={600} color='#4e6aff'>
                   {data?.price_hourly_increment?.toLocaleString("vi-VN")}đ
                 </Typography>
               </Box>
             </Box>
 
             {/* Action */}
-            <Box p={2} display="flex" gap={2}>
+            <Box p={2} display='flex' gap={2}>
               <Button
-                variant="outlined"
-                color="success"
+                variant='outlined'
+                color='success'
                 fullWidth
-                onClick={handleOpenEdit}
-              >
+                onClick={handleOpenEdit}>
                 Chỉnh sửa
               </Button>
 
               <Button
-                variant="contained"
-                color="primary"
+                variant='contained'
+                color='primary'
                 fullWidth
                 onClick={() =>
-                  navigate(`/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`)
-                }
-              >
+                  navigate(
+                    `/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`
+                  )
+                }>
                 Xem chi tiết
               </Button>
             </Box>
@@ -1361,7 +1437,9 @@ function RoomScheduleTableDaily({
   const navigate = useNavigate();
 
   const dailySlots = data?.slots || [];
-  const [editedValues, setEditedValues] = useState<{ [key: number]: number }>({});
+  const [editedValues, setEditedValues] = useState<{ [key: number]: number }>(
+    {}
+  );
 
   // Desktop version - giữ nguyên như cũ
   const renderDesktop = () => {
@@ -1369,44 +1447,50 @@ function RoomScheduleTableDaily({
     const columnWidth = `${100 / totalDays}%`;
 
     return (
-      <Box p={2} bgcolor="#fff">
+      <Box p={2} bgcolor='#fff'>
         <Box
           sx={{
             overflowX: "auto",
             overflowY: "hidden",
             "&::-webkit-scrollbar": { height: 10 },
-            "&::-webkit-scrollbar-thumb": { background: "#aaa", borderRadius: 5 },
+            "&::-webkit-scrollbar-thumb": {
+              background: "#aaa",
+              borderRadius: 5,
+            },
             border: "1px solid #ccc",
-          }}
-        >
-          <Box minWidth="fit-content">
+          }}>
+          <Box minWidth='fit-content'>
             {/* HEADER */}
-            <Box display="flex">
+            <Box display='flex'>
               <Box
-                width="280px"
+                width='280px'
                 flexShrink={0}
-                bgcolor="white"
-                position="sticky"
+                bgcolor='white'
+                position='sticky'
                 left={0}
                 zIndex={10}
-                borderRight="2px solid #ddd"
-                borderBottom="2px solid #ddd"
+                borderRight='2px solid #ddd'
+                borderBottom='2px solid #ddd'
               />
 
               <Box flex={1}>
                 <Box
-                  textAlign="start"
+                  textAlign='start'
                   py={1.5}
                   px={2}
-                  borderBottom="1px solid #eee"
-                  bgcolor="#f9f9f9"
-                >
+                  borderBottom='1px solid #eee'
+                  bgcolor='#f9f9f9'>
                   <Typography fontWeight={600} fontSize={16}>
-                    {format(new Date(data.start_time), "MMMM yyyy", { locale: vi })}
+                    {format(new Date(data.start_time), "MMMM yyyy", {
+                      locale: vi,
+                    })}
                   </Typography>
                 </Box>
 
-                <Box display="flex" borderBottom="2px solid #ddd" bgcolor="white">
+                <Box
+                  display='flex'
+                  borderBottom='2px solid #ddd'
+                  bgcolor='white'>
                   {dailySlots?.map((slot) => {
                     const dateObj = new Date(slot.date);
                     const dayNum = format(dateObj, "dd");
@@ -1419,15 +1503,14 @@ function RoomScheduleTableDaily({
                       <Box
                         key={slot.date}
                         width={columnWidth}
-                        minWidth="150px"
-                        display="flex"
-                        justifyContent="center"
-                        alignItems="center"
+                        minWidth='150px'
+                        display='flex'
+                        justifyContent='center'
+                        alignItems='center'
                         py={2}
-                        borderRight="1px solid #eee"
-                      >
+                        borderRight='1px solid #eee'>
                         <Button
-                          variant="contained"
+                          variant='contained'
                           sx={{
                             bgcolor: "#98b720",
                             color: "white",
@@ -1438,8 +1521,7 @@ function RoomScheduleTableDaily({
                             borderRadius: "20px",
                             boxShadow: "0 4px 15px rgba(152,183,32,0.4)",
                             "&:hover": { bgcolor: "#80a61a" },
-                          }}
-                        >
+                          }}>
                           {dayNum} {dayName}
                         </Button>
                       </Box>
@@ -1455,7 +1537,11 @@ function RoomScheduleTableDaily({
               {
                 label: "Tình trạng phòng",
                 action: "Khóa nhanh",
-                onClick: () => handleOpenQuickBlock({ room_type_id: data?.room_type_id, rent_type: "daily" }),
+                onClick: () =>
+                  handleOpenQuickBlock({
+                    room_type_id: data?.room_type_id,
+                    rent_type: "daily",
+                  }),
                 isStatus: true,
               },
               { label: "Số phòng đặt", isBooked: true },
@@ -1465,34 +1551,44 @@ function RoomScheduleTableDaily({
                 isRemaining: true,
               },
             ].map((row, idx) => (
-              <Box key={idx} display="flex" borderBottom="1px solid #eee">
+              <Box key={idx} display='flex' borderBottom='1px solid #eee'>
                 <Box
-                  width="280px"
+                  width='280px'
                   flexShrink={0}
                   bgcolor={idx === 0 ? "white" : "#fafafa"}
-                  position="sticky"
+                  position='sticky'
                   left={0}
                   zIndex={10}
-                  borderRight="2px solid #ddd"
-                  borderBottom="1px solid #ddd"
-                >
-                  <Box px={3} py={2} display="flex" justifyContent="space-between" alignItems="center">
+                  borderRight='2px solid #ddd'
+                  borderBottom='1px solid #ddd'>
+                  <Box
+                    px={3}
+                    py={2}
+                    display='flex'
+                    justifyContent='space-between'
+                    alignItems='center'>
                     {row.isName ? (
                       <>
-                        <Typography fontWeight={700} fontSize={18} display="flex" alignItems="center" gap={1}>
+                        <Typography
+                          fontWeight={700}
+                          fontSize={18}
+                          display='flex'
+                          alignItems='center'
+                          gap={1}>
                           {row.label} <KeyboardArrowUpIcon />
                         </Typography>
                         <Typography
                           onClick={() =>
-                            navigate(`/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`)
+                            navigate(
+                              `/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`
+                            )
                           }
-                          color="#98b720"
-                          display="flex"
-                          alignItems="center"
+                          color='#98b720'
+                          display='flex'
+                          alignItems='center'
                           gap={0.5}
-                          sx={{ cursor: "pointer" }}
-                        >
-                          Xem <LaunchIcon fontSize="small" />
+                          sx={{ cursor: "pointer" }}>
+                          Xem <LaunchIcon fontSize='small' />
                         </Typography>
                       </>
                     ) : (
@@ -1501,8 +1597,11 @@ function RoomScheduleTableDaily({
                         {row.action && (
                           <Typography
                             onClick={row.onClick}
-                            sx={{ cursor: "pointer", color: "#98b720", fontWeight: 600 }}
-                          >
+                            sx={{
+                              cursor: "pointer",
+                              color: "#98b720",
+                              fontWeight: 600,
+                            }}>
                             {row.action}
                           </Typography>
                         )}
@@ -1511,69 +1610,82 @@ function RoomScheduleTableDaily({
                   </Box>
                 </Box>
 
-                <Box flex={1} display="flex">
+                <Box flex={1} display='flex'>
                   {dailySlots?.map((slot, i) => (
                     <Box
                       key={i}
                       width={columnWidth}
-                      minWidth="150px"
-                      borderRight="1px solid #eee"
-                      borderBottom="1px solid #eee"
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                      py={2}
-                    >
+                      minWidth='150px'
+                      borderRight='1px solid #eee'
+                      borderBottom='1px solid #eee'
+                      display='flex'
+                      alignItems='center'
+                      justifyContent='center'
+                      py={2}>
                       {row.isStatus && (
                         <Box
                           px={2}
                           py={1}
-                          borderRadius="50px"
+                          borderRadius='50px'
                           fontSize={13}
                           fontWeight={500}
-                          bgcolor={slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"}
-                          color={slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"}
-                        >
+                          bgcolor={
+                            slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"
+                          }
+                          color={
+                            slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"
+                          }>
                           {slot.remaining_rooms > 0 ? "Còn phòng" : "Hết phòng"}
                         </Box>
                       )}
                       {row.isBooked && (
-                        <Typography fontWeight={600} color="#333">
+                        <Typography fontWeight={600} color='#333'>
                           {slot.booked_rooms}
                         </Typography>
                       )}
                       {row.isRemaining && (
                         <TextField
-                          value={editedValues[i] ?? slot.remaining_rooms}
+                          value={
+                            editedValues[i] !== undefined
+                              ? editedValues[i]
+                              : slot.remaining_rooms
+                          }
                           onChange={(e) => {
                             const val = e.target.value;
-                            setEditedValues((prev) => ({
-                              ...prev,
-                              [i]: val === "" ? undefined : parseInt(val, 10),
-                            }));
-                          }}
-                          onBlur={(e) => {
-                            const newVal = parseInt(e.target.value, 10);
-                            if (!isNaN(newVal) && newVal !== slot.remaining_rooms) {
-                              handleOpenQuickBlock(
-                                {
-                                  room_type_id: data.room_type_id,
-                                  rent_type: "daily",
-                                  start_time: slot.from,
-                                  end_time: slot.to || slot.from,
-                                  available_rooms: newVal,
-                                  reason: "staff_shortage",
-                                  note: "Thiếu nhân viên dọn phòng",
-                                },
-                                () => setEditedValues((prev) => ({ ...prev, [i]: undefined }))
-                              );
-                            } else {
-                              setEditedValues((prev) => ({ ...prev, [i]: undefined }));
+                            if (val === "" || /^\d+$/.test(val)) {
+                              // chỉ cho nhập số hoặc rỗng
+                              setEditedValues((prev) => ({
+                                ...prev,
+                                [i]: val,
+                              }));
                             }
                           }}
-                          type="number"
-                          size="small"
-                          inputProps={{ min: 0, style: { textAlign: "center", fontWeight: 600 } }}
+                          onBlur={(e) => {
+                            const val = e.target.value;
+                            const newVal = val === "" ? 0 : parseInt(val, 10);
+
+                            if (newVal !== slot.remaining_rooms) {
+                              handleOpenQuickBlock({
+                                room_type_id: data.room_type_id,
+                                rent_type: "daily", // đổi theo từng component
+                                start_time: slot.from,
+                                end_time: slot.to || slot.from,
+                                available_rooms: newVal,
+                                reason: "staff_shortage",
+                                note: "Thiếu nhân viên dọn phòng",
+                              });
+                            }
+                            // reset về undefined để hiện lại slot.remaining_rooms sau khi submit
+                            // setEditedValues((prev) => ({
+                            //   ...prev,
+                            //   [i]: undefined,
+                            // }));
+                          }}
+                          type='text' // đổi từ number sang text
+                          size='small'
+                          inputProps={{
+                            style: { textAlign: "center", fontWeight: 600 },
+                          }}
                           sx={{ width: 60 }}
                         />
                       )}
@@ -1592,31 +1704,29 @@ function RoomScheduleTableDaily({
                 color: "#e65e00",
               },
             ].map((p) => (
-              <Box key={p.label} display="flex">
+              <Box key={p.label} display='flex'>
                 <Box
-                  width="280px"
+                  width='280px'
                   flexShrink={0}
-                  bgcolor="#f8f9fa"
-                  position="sticky"
+                  bgcolor='#f8f9fa'
+                  position='sticky'
                   left={0}
                   zIndex={10}
-                  borderRight="2px solid #ddd"
-                  borderBottom="1px solid #ddd"
-                >
+                  borderRight='2px solid #ddd'
+                  borderBottom='1px solid #ddd'>
                   <Box px={3} py={2}>
                     <Typography fontWeight={500}>{p.label}</Typography>
                   </Box>
                 </Box>
-                <Box flex={1} display="flex" alignItems="center" pl={4}>
+                <Box flex={1} display='flex' alignItems='center' pl={4}>
                   <Box
                     bgcolor={p.bg}
                     color={p.color}
                     px={4}
                     py={1.5}
-                    borderRadius="50px"
+                    borderRadius='50px'
                     fontWeight={600}
-                    fontSize={15}
-                  >
+                    fontSize={15}>
                     {p.value}
                   </Box>
                 </Box>
@@ -1631,16 +1741,15 @@ function RoomScheduleTableDaily({
   // Mobile version - card theo ngày
   const renderMobile = () => {
     return (
-      <Box p={2} bgcolor="#fff">
+      <Box p={2} bgcolor='#fff'>
         {/* Tháng */}
         <Box
-          textAlign="center"
+          textAlign='center'
           py={2}
-          bgcolor="#f9f9f9"
-          borderRadius="12px"
-          mb={3}
-        >
-          <Typography variant="h6" fontWeight={700}>
+          bgcolor='#f9f9f9'
+          borderRadius='12px'
+          mb={3}>
+          <Typography variant='h6' fontWeight={700}>
             {format(new Date(data.start_time), "MMMM yyyy", { locale: vi })}
           </Typography>
         </Box>
@@ -1656,15 +1765,14 @@ function RoomScheduleTableDaily({
           return (
             <Box
               key={slot.date}
-              bgcolor="white"
-              borderRadius="12px"
-              boxShadow="0 2px 12px rgba(0,0,0,0.08)"
+              bgcolor='white'
+              borderRadius='12px'
+              boxShadow='0 2px 12px rgba(0,0,0,0.08)'
               mb={3}
-              overflow="hidden"
-            >
+              overflow='hidden'>
               {/* Header ngày */}
-              <Box bgcolor="#98b720" color="white" py={2} px={3}>
-                <Typography variant="h6" fontWeight={700}>
+              <Box bgcolor='#98b720' color='white' py={2} px={3}>
+                <Typography variant='h6' fontWeight={700}>
                   {dayNum} {dayName}
                 </Typography>
               </Box>
@@ -1673,30 +1781,37 @@ function RoomScheduleTableDaily({
 
               {/* Thông tin */}
               <Box p={2}>
-                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <Box
+                  display='flex'
+                  justifyContent='space-between'
+                  alignItems='center'
+                  mb={2}>
                   <Typography fontWeight={600} fontSize={16}>
                     Tình trạng phòng
                   </Typography>
                   <Box
                     px={2}
                     py={0.8}
-                    borderRadius="50px"
+                    borderRadius='50px'
                     fontSize={13}
                     fontWeight={600}
                     bgcolor={slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"}
-                    color={slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"}
-                  >
+                    color={slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"}>
                     {slot.remaining_rooms > 0 ? "Còn phòng" : "Hết phòng"}
                   </Box>
                 </Box>
 
-                <Box display="flex" justifyContent="space-between" mb={1.5}>
-                  <Typography color="text.secondary">Số phòng đặt:</Typography>
+                <Box display='flex' justifyContent='space-between' mb={1.5}>
+                  <Typography color='text.secondary'>Số phòng đặt:</Typography>
                   <Typography fontWeight={600}>{slot.booked_rooms}</Typography>
                 </Box>
 
-                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                  <Typography color="text.secondary">Còn lại:</Typography>
+                <Box
+                  display='flex'
+                  justifyContent='space-between'
+                  alignItems='center'
+                  mb={2}>
+                  <Typography color='text.secondary'>Còn lại:</Typography>
                   <TextField
                     value={editedValues[index] ?? slot.remaining_rooms}
                     onChange={(e) => {
@@ -1719,14 +1834,21 @@ function RoomScheduleTableDaily({
                             reason: "staff_shortage",
                             note: "Thiếu nhân viên dọn phòng",
                           },
-                          () => setEditedValues((prev) => ({ ...prev, [index]: undefined }))
+                          () =>
+                            setEditedValues((prev) => ({
+                              ...prev,
+                              [index]: undefined,
+                            }))
                         );
                       } else {
-                        setEditedValues((prev) => ({ ...prev, [index]: undefined }));
+                        setEditedValues((prev) => ({
+                          ...prev,
+                          [index]: undefined,
+                        }));
                       }
                     }}
-                    type="number"
-                    size="small"
+                    type='number'
+                    size='small'
                     inputProps={{ min: 0, style: { textAlign: "center" } }}
                     sx={{ width: 80 }}
                   />
@@ -1734,51 +1856,53 @@ function RoomScheduleTableDaily({
 
                 {/* Nút Khóa nhanh */}
                 <Button
-                  variant="outlined"
-                  color="primary"
+                  variant='outlined'
+                  color='primary'
                   fullWidth
-                  size="small"
+                  size='small'
                   onClick={() =>
-                    handleOpenQuickBlock({ room_type_id: data?.room_type_id, rent_type: "daily" })
-                  }
-                >
+                    handleOpenQuickBlock({
+                      room_type_id: data?.room_type_id,
+                      rent_type: "daily",
+                    })
+                  }>
                   Khóa nhanh ngày này
                 </Button>
               </Box>
 
               {/* Thông tin phòng */}
-              <Box p={3} bgcolor="#fafafa">
+              <Box p={3} bgcolor='#fafafa'>
                 <Typography fontWeight={700} mb={1}>
                   {parseVi(data?.name)}
                 </Typography>
 
-                <Box display="flex" justifyContent="space-between">
+                <Box display='flex' justifyContent='space-between'>
                   <Typography>Giá phòng/đêm:</Typography>
-                  <Typography fontWeight={600} color="#e65e00">
+                  <Typography fontWeight={600} color='#e65e00'>
                     {data?.price_daily?.toLocaleString("vi-VN")}đ
                   </Typography>
                 </Box>
               </Box>
 
               {/* Action */}
-              <Box p={2} display="flex" gap={2}>
+              <Box p={2} display='flex' gap={2}>
                 <Button
-                  variant="outlined"
-                  color="success"
+                  variant='outlined'
+                  color='success'
                   fullWidth
-                  onClick={handleOpenEdit}
-                >
+                  onClick={handleOpenEdit}>
                   Chỉnh sửa
                 </Button>
 
                 <Button
-                  variant="contained"
-                  color="primary"
+                  variant='contained'
+                  color='primary'
                   fullWidth
                   onClick={() =>
-                    navigate(`/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`)
-                  }
-                >
+                    navigate(
+                      `/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`
+                    )
+                  }>
                   Xem chi tiết
                 </Button>
               </Box>
@@ -1802,7 +1926,9 @@ function RoomScheduleTableOvernight({
   const navigate = useNavigate();
 
   const overnightSlots = data?.slots || [];
-  const [editedValues, setEditedValues] = useState<{ [key: number]: number }>({});
+  const [editedValues, setEditedValues] = useState<{ [key: number]: number }>(
+    {}
+  );
 
   // Desktop version - giữ nguyên như cũ
   const renderDesktop = () => {
@@ -1810,44 +1936,50 @@ function RoomScheduleTableOvernight({
     const columnWidth = `${100 / totalDays}%`;
 
     return (
-      <Box p={2} bgcolor="#fff">
+      <Box p={2} bgcolor='#fff'>
         <Box
           sx={{
             overflowX: "auto",
             overflowY: "hidden",
             "&::-webkit-scrollbar": { height: 10 },
-            "&::-webkit-scrollbar-thumb": { background: "#aaa", borderRadius: 5 },
+            "&::-webkit-scrollbar-thumb": {
+              background: "#aaa",
+              borderRadius: 5,
+            },
             border: "1px solid #ccc",
-          }}
-        >
-          <Box minWidth="fit-content">
+          }}>
+          <Box minWidth='fit-content'>
             {/* HEADER */}
-            <Box display="flex">
+            <Box display='flex'>
               <Box
-                width="280px"
+                width='280px'
                 flexShrink={0}
-                bgcolor="white"
-                position="sticky"
+                bgcolor='white'
+                position='sticky'
                 left={0}
                 zIndex={10}
-                borderRight="2px solid #ddd"
-                borderBottom="2px solid #ddd"
+                borderRight='2px solid #ddd'
+                borderBottom='2px solid #ddd'
               />
 
               <Box flex={1}>
                 <Box
-                  textAlign="start"
+                  textAlign='start'
                   py={1.5}
                   px={2}
-                  borderBottom="1px solid #eee"
-                  bgcolor="#f9f9f9"
-                >
+                  borderBottom='1px solid #eee'
+                  bgcolor='#f9f9f9'>
                   <Typography fontWeight={600} fontSize={16}>
-                    {format(new Date(data.start_time), "MMMM yyyy", { locale: vi })}
+                    {format(new Date(data.start_time), "MMMM yyyy", {
+                      locale: vi,
+                    })}
                   </Typography>
                 </Box>
 
-                <Box display="flex" borderBottom="2px solid #ddd" bgcolor="white">
+                <Box
+                  display='flex'
+                  borderBottom='2px solid #ddd'
+                  bgcolor='white'>
                   {overnightSlots?.map((slot) => {
                     const dateObj = slot?.date ? new Date(slot.date) : null;
                     const dayNum = dateObj ? format(dateObj, "dd") : "";
@@ -1862,15 +1994,14 @@ function RoomScheduleTableOvernight({
                       <Box
                         key={slot.date}
                         width={columnWidth}
-                        minWidth="150px"
-                        display="flex"
-                        justifyContent="center"
-                        alignItems="center"
+                        minWidth='150px'
+                        display='flex'
+                        justifyContent='center'
+                        alignItems='center'
                         py={2}
-                        borderRight="1px solid #eee"
-                      >
+                        borderRight='1px solid #eee'>
                         <Button
-                          variant="contained"
+                          variant='contained'
                           sx={{
                             bgcolor: "#98b720",
                             color: "white",
@@ -1881,8 +2012,7 @@ function RoomScheduleTableOvernight({
                             borderRadius: "20px",
                             boxShadow: "0 4px 15px rgba(152,183,32,0.4)",
                             "&:hover": { bgcolor: "#80a61a" },
-                          }}
-                        >
+                          }}>
                           {dayNum} {dayName}
                         </Button>
                       </Box>
@@ -1898,7 +2028,11 @@ function RoomScheduleTableOvernight({
               {
                 label: "Tình trạng phòng",
                 action: "Khóa nhanh",
-                onClick: () => handleOpenQuickBlock({ room_type_id: data?.room_type_id, rent_type: "overnight" }),
+                onClick: () =>
+                  handleOpenQuickBlock({
+                    room_type_id: data?.room_type_id,
+                    rent_type: "overnight",
+                  }),
                 isStatus: true,
               },
               { label: "Số phòng đặt", isBooked: true },
@@ -1908,34 +2042,44 @@ function RoomScheduleTableOvernight({
                 isRemaining: true,
               },
             ].map((row, idx) => (
-              <Box key={idx} display="flex" borderBottom="1px solid #eee">
+              <Box key={idx} display='flex' borderBottom='1px solid #eee'>
                 <Box
-                  width="280px"
+                  width='280px'
                   flexShrink={0}
                   bgcolor={idx === 0 ? "white" : "#fafafa"}
-                  position="sticky"
+                  position='sticky'
                   left={0}
                   zIndex={10}
-                  borderRight="2px solid #ddd"
-                  borderBottom="1px solid #ddd"
-                >
-                  <Box px={3} py={2} display="flex" justifyContent="space-between" alignItems="center">
+                  borderRight='2px solid #ddd'
+                  borderBottom='1px solid #ddd'>
+                  <Box
+                    px={3}
+                    py={2}
+                    display='flex'
+                    justifyContent='space-between'
+                    alignItems='center'>
                     {row.isName ? (
                       <>
-                        <Typography fontWeight={700} fontSize={18} display="flex" alignItems="center" gap={1}>
+                        <Typography
+                          fontWeight={700}
+                          fontSize={18}
+                          display='flex'
+                          alignItems='center'
+                          gap={1}>
                           {row.label} <KeyboardArrowUpIcon />
                         </Typography>
                         <Typography
                           onClick={() =>
-                            navigate(`/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`)
+                            navigate(
+                              `/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`
+                            )
                           }
-                          color="#98b720"
-                          display="flex"
-                          alignItems="center"
+                          color='#98b720'
+                          display='flex'
+                          alignItems='center'
                           gap={0.5}
-                          sx={{ cursor: "pointer" }}
-                        >
-                          Xem <LaunchIcon fontSize="small" />
+                          sx={{ cursor: "pointer" }}>
+                          Xem <LaunchIcon fontSize='small' />
                         </Typography>
                       </>
                     ) : (
@@ -1944,8 +2088,11 @@ function RoomScheduleTableOvernight({
                         {row.action && (
                           <Typography
                             onClick={row.onClick}
-                            sx={{ cursor: "pointer", color: "#98b720", fontWeight: 600 }}
-                          >
+                            sx={{
+                              cursor: "pointer",
+                              color: "#98b720",
+                              fontWeight: 600,
+                            }}>
                             {row.action}
                           </Typography>
                         )}
@@ -1954,69 +2101,82 @@ function RoomScheduleTableOvernight({
                   </Box>
                 </Box>
 
-                <Box flex={1} display="flex">
+                <Box flex={1} display='flex'>
                   {overnightSlots?.map((slot, i) => (
                     <Box
                       key={i}
                       width={columnWidth}
-                      minWidth="150px"
-                      borderRight="1px solid #eee"
-                      borderBottom="1px solid #eee"
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                      py={2}
-                    >
+                      minWidth='150px'
+                      borderRight='1px solid #eee'
+                      borderBottom='1px solid #eee'
+                      display='flex'
+                      alignItems='center'
+                      justifyContent='center'
+                      py={2}>
                       {row.isStatus && (
                         <Box
                           px={2}
                           py={1}
-                          borderRadius="50px"
+                          borderRadius='50px'
                           fontSize={13}
                           fontWeight={500}
-                          bgcolor={slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"}
-                          color={slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"}
-                        >
+                          bgcolor={
+                            slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"
+                          }
+                          color={
+                            slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"
+                          }>
                           {slot.remaining_rooms > 0 ? "Còn phòng" : "Hết phòng"}
                         </Box>
                       )}
                       {row.isBooked && (
-                        <Typography fontWeight={600} color="#333">
+                        <Typography fontWeight={600} color='#333'>
                           {slot.booked_rooms}
                         </Typography>
                       )}
                       {row.isRemaining && (
                         <TextField
-                          value={editedValues[i] ?? slot.remaining_rooms}
+                          value={
+                            editedValues[i] !== undefined
+                              ? editedValues[i]
+                              : slot.remaining_rooms
+                          }
                           onChange={(e) => {
                             const val = e.target.value;
-                            setEditedValues((prev) => ({
-                              ...prev,
-                              [i]: val === "" ? undefined : parseInt(val, 10),
-                            }));
-                          }}
-                          onBlur={(e) => {
-                            const newVal = parseInt(e.target.value, 10);
-                            if (!isNaN(newVal) && newVal !== slot.remaining_rooms) {
-                              handleOpenQuickBlock(
-                                {
-                                  room_type_id: data.room_type_id,
-                                  rent_type: "overnight",
-                                  start_time: slot.from,
-                                  end_time: slot.to || slot.from,
-                                  available_rooms: newVal,
-                                  reason: "staff_shortage",
-                                  note: "Thiếu nhân viên dọn phòng",
-                                },
-                                () => setEditedValues((prev) => ({ ...prev, [i]: undefined }))
-                              );
-                            } else {
-                              setEditedValues((prev) => ({ ...prev, [i]: undefined }));
+                            if (val === "" || /^\d+$/.test(val)) {
+                              // chỉ cho nhập số hoặc rỗng
+                              setEditedValues((prev) => ({
+                                ...prev,
+                                [i]: val,
+                              }));
                             }
                           }}
-                          type="number"
-                          size="small"
-                          inputProps={{ min: 0, style: { textAlign: "center", fontWeight: 600 } }}
+                          onBlur={(e) => {
+                            const val = e.target.value;
+                            const newVal = val === "" ? 0 : parseInt(val, 10);
+
+                            if (newVal !== slot.remaining_rooms) {
+                              handleOpenQuickBlock({
+                                room_type_id: data.room_type_id,
+                                rent_type: "overnight", // đổi theo từng component
+                                start_time: slot.from,
+                                end_time: slot.to || slot.from,
+                                available_rooms: newVal,
+                                reason: "staff_shortage",
+                                note: "Thiếu nhân viên dọn phòng",
+                              });
+                            }
+                            // reset về undefined để hiện lại slot.remaining_rooms sau khi submit
+                            // setEditedValues((prev) => ({
+                            //   ...prev,
+                            //   [i]: undefined,
+                            // }));
+                          }}
+                          type='text' // đổi từ number sang text
+                          size='small'
+                          inputProps={{
+                            style: { textAlign: "center", fontWeight: 600 },
+                          }}
                           sx={{ width: 60 }}
                         />
                       )}
@@ -2035,31 +2195,29 @@ function RoomScheduleTableOvernight({
                 color: "#e65e00",
               },
             ].map((p) => (
-              <Box key={p.label} display="flex">
+              <Box key={p.label} display='flex'>
                 <Box
-                  width="280px"
+                  width='280px'
                   flexShrink={0}
-                  bgcolor="#f8f9fa"
-                  position="sticky"
+                  bgcolor='#f8f9fa'
+                  position='sticky'
                   left={0}
                   zIndex={10}
-                  borderRight="2px solid #ddd"
-                  borderBottom="1px solid #ddd"
-                >
+                  borderRight='2px solid #ddd'
+                  borderBottom='1px solid #ddd'>
                   <Box px={3} py={2}>
                     <Typography fontWeight={500}>{p.label}</Typography>
                   </Box>
                 </Box>
-                <Box flex={1} display="flex" alignItems="center" pl={4}>
+                <Box flex={1} display='flex' alignItems='center' pl={4}>
                   <Box
                     bgcolor={p.bg}
                     color={p.color}
                     px={4}
                     py={1.5}
-                    borderRadius="50px"
+                    borderRadius='50px'
                     fontWeight={600}
-                    fontSize={15}
-                  >
+                    fontSize={15}>
                     {p.value}
                   </Box>
                 </Box>
@@ -2074,16 +2232,15 @@ function RoomScheduleTableOvernight({
   // Mobile version - card theo ngày
   const renderMobile = () => {
     return (
-      <Box p={2} bgcolor="#fff">
+      <Box p={2} bgcolor='#fff'>
         {/* Tháng */}
         <Box
-          textAlign="center"
+          textAlign='center'
           py={2}
-          bgcolor="#f9f9f9"
-          borderRadius="12px"
-          mb={3}
-        >
-          <Typography variant="h6" fontWeight={700}>
+          bgcolor='#f9f9f9'
+          borderRadius='12px'
+          mb={3}>
+          <Typography variant='h6' fontWeight={700}>
             {format(new Date(data.start_time), "MMMM yyyy", { locale: vi })}
           </Typography>
         </Box>
@@ -2101,15 +2258,14 @@ function RoomScheduleTableOvernight({
           return (
             <Box
               key={slot.date}
-              bgcolor="white"
-              borderRadius="12px"
-              boxShadow="0 2px 12px rgba(0,0,0,0.08)"
+              bgcolor='white'
+              borderRadius='12px'
+              boxShadow='0 2px 12px rgba(0,0,0,0.08)'
               mb={3}
-              overflow="hidden"
-            >
+              overflow='hidden'>
               {/* Header ngày */}
-              <Box bgcolor="#98b720" color="white" py={2} px={3}>
-                <Typography variant="h6" fontWeight={700}>
+              <Box bgcolor='#98b720' color='white' py={2} px={3}>
+                <Typography variant='h6' fontWeight={700}>
                   {dayNum} {dayName}
                 </Typography>
               </Box>
@@ -2118,30 +2274,37 @@ function RoomScheduleTableOvernight({
 
               {/* Thông tin */}
               <Box p={2}>
-                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <Box
+                  display='flex'
+                  justifyContent='space-between'
+                  alignItems='center'
+                  mb={2}>
                   <Typography fontWeight={600} fontSize={16}>
                     Tình trạng phòng
                   </Typography>
                   <Box
                     px={2}
                     py={0.8}
-                    borderRadius="50px"
+                    borderRadius='50px'
                     fontSize={13}
                     fontWeight={600}
                     bgcolor={slot.remaining_rooms > 0 ? "#eaf5ed" : "#ffebee"}
-                    color={slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"}
-                  >
+                    color={slot.remaining_rooms > 0 ? "#089408" : "#d32f2f"}>
                     {slot.remaining_rooms > 0 ? "Còn phòng" : "Hết phòng"}
                   </Box>
                 </Box>
 
-                <Box display="flex" justifyContent="space-between" mb={1.5}>
-                  <Typography color="text.secondary">Số phòng đặt:</Typography>
+                <Box display='flex' justifyContent='space-between' mb={1.5}>
+                  <Typography color='text.secondary'>Số phòng đặt:</Typography>
                   <Typography fontWeight={600}>{slot.booked_rooms}</Typography>
                 </Box>
 
-                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                  <Typography color="text.secondary">Còn lại:</Typography>
+                <Box
+                  display='flex'
+                  justifyContent='space-between'
+                  alignItems='center'
+                  mb={2}>
+                  <Typography color='text.secondary'>Còn lại:</Typography>
                   <TextField
                     value={editedValues[index] ?? slot.remaining_rooms}
                     onChange={(e) => {
@@ -2164,14 +2327,21 @@ function RoomScheduleTableOvernight({
                             reason: "staff_shortage",
                             note: "Thiếu nhân viên dọn phòng",
                           },
-                          () => setEditedValues((prev) => ({ ...prev, [index]: undefined }))
+                          () =>
+                            setEditedValues((prev) => ({
+                              ...prev,
+                              [index]: undefined,
+                            }))
                         );
                       } else {
-                        setEditedValues((prev) => ({ ...prev, [index]: undefined }));
+                        setEditedValues((prev) => ({
+                          ...prev,
+                          [index]: undefined,
+                        }));
                       }
                     }}
-                    type="number"
-                    size="small"
+                    type='number'
+                    size='small'
                     inputProps={{ min: 0, style: { textAlign: "center" } }}
                     sx={{ width: 80 }}
                   />
@@ -2179,51 +2349,53 @@ function RoomScheduleTableOvernight({
 
                 {/* Nút Khóa nhanh */}
                 <Button
-                  variant="outlined"
-                  color="primary"
+                  variant='outlined'
+                  color='primary'
                   fullWidth
-                  size="small"
+                  size='small'
                   onClick={() =>
-                    handleOpenQuickBlock({ room_type_id: data?.room_type_id, rent_type: "overnight" })
-                  }
-                >
+                    handleOpenQuickBlock({
+                      room_type_id: data?.room_type_id,
+                      rent_type: "overnight",
+                    })
+                  }>
                   Khóa nhanh ngày này
                 </Button>
               </Box>
 
               {/* Thông tin phòng */}
-              <Box p={3} bgcolor="#fafafa">
+              <Box p={3} bgcolor='#fafafa'>
                 <Typography fontWeight={700} mb={1}>
                   {parseVi(data?.name)}
                 </Typography>
 
-                <Box display="flex" justifyContent="space-between">
+                <Box display='flex' justifyContent='space-between'>
                   <Typography>Giá phòng/đêm:</Typography>
-                  <Typography fontWeight={600} color="#e65e00">
+                  <Typography fontWeight={600} color='#e65e00'>
                     {data?.price_overnight?.toLocaleString("vi-VN")}đ
                   </Typography>
                 </Box>
               </Box>
 
               {/* Action */}
-              <Box p={2} display="flex" gap={2}>
+              <Box p={2} display='flex' gap={2}>
                 <Button
-                  variant="outlined"
-                  color="success"
+                  variant='outlined'
+                  color='success'
                   fullWidth
-                  onClick={handleOpenEdit}
-                >
+                  onClick={handleOpenEdit}>
                   Chỉnh sửa
                 </Button>
 
                 <Button
-                  variant="contained"
-                  color="primary"
+                  variant='contained'
+                  color='primary'
                   fullWidth
                   onClick={() =>
-                    navigate(`/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`)
-                  }
-                >
+                    navigate(
+                      `/info-hotel?hotel_id=${data?.hotel_id}&room_id=${data?.room_type_id}`
+                    )
+                  }>
                   Xem chi tiết
                 </Button>
               </Box>
@@ -2327,7 +2499,7 @@ function EditOperationDialog({ openEdit, onClose }) {
             {/* Khoảng ngày & Thời gian áp dụng */}
             <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
               {/* Khoảng ngày */}
-              <Box width={isMobile?"100%":"48%"}>
+              <Box width={isMobile ? "100%" : "48%"}>
                 <Typography
                   fontSize={13.5}
                   color='#777'
@@ -2384,7 +2556,7 @@ function EditOperationDialog({ openEdit, onClose }) {
               </Box>
 
               {/* Thời gian áp dụng */}
-              <Box width={isMobile?"100%":"48%"}>
+              <Box width={isMobile ? "100%" : "48%"}>
                 <Typography
                   fontSize={13.5}
                   color='#777'
