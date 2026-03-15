@@ -545,7 +545,16 @@ function QuickBlockDialog({
         onSuccess();
         onClose();
       } else {
-        toast.error("Cập nhật số phòng còn lại thất bại");
+        const str = result.code == "EXCEED_TOTAL_ROOMS" ? result.message : "";
+        const match = str.match(/\((\d+)\)/);
+        const number = match ? parseInt(match[1]) : null;
+
+        console.log(number); // 2
+        toast.error(
+          result.code == "EXCEED_TOTAL_ROOMS"
+            ? `Số phòng có sẵn không được vượt quá tổng số phòng (${number})`
+            : "Cập nhật số phòng còn lại thất bại"
+        );
         onCancel?.(); // rollback input về giá trị cũ
         onClose();
       }
