@@ -1489,7 +1489,7 @@ function RoomScheduleTableDaily({
                   px={2}
                   borderBottom='1px solid #eee'
                   bgcolor='#f9f9f9'>
-                  <Typography fontWeight={600} fontSize={16}>
+                  <Typography fontWeight={600}   sx={{ textTransform: "capitalize" }} fontSize={16}>
                     {format(new Date(data.start_time), "MMMM yyyy", {
                       locale: vi,
                     })}
@@ -1978,7 +1978,7 @@ function RoomScheduleTableOvernight({
                   px={2}
                   borderBottom='1px solid #eee'
                   bgcolor='#f9f9f9'>
-                  <Typography fontWeight={600} fontSize={16}>
+                  <Typography fontWeight={600}   sx={{ textTransform: "capitalize" }} fontSize={16}>
                     {format(new Date(data.start_time), "MMMM yyyy", {
                       locale: vi,
                     })}

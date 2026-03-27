@@ -69,23 +69,23 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
   // Name - Đáp ứng đầy đủ yêu cầu test case
   const isValidName = (value: string): { valid: boolean; error?: string } => {
     if (!value) return { valid: false, error: "Tên không được để trống" };
-
+  
     const trimmed = value.trim();
     if (trimmed === "") return { valid: false, error: "Tên không được chỉ chứa khoảng trắng" };
     if (trimmed.length < 2) return { valid: false, error: "Tên phải có ít nhất 2 ký tự" };
     if (trimmed.length > 100) return { valid: false, error: "Tên không được vượt quá 100 ký tự" };
-
-    // Chỉ cho phép chữ cái (bao gồm tiếng Việt) và khoảng trắng
-    const nameRegex = /^[A-Za-zÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪỬỮỰỲỴÝỶỸ\s]+$/;
+  
+    // ✅ Cho phép tất cả chữ cái Unicode (bao gồm tiếng Việt) + khoảng trắng
+    const nameRegex = /^[\p{L}\s]+$/u;
     if (!nameRegex.test(trimmed)) {
       return { valid: false, error: "Tên chỉ được chứa chữ cái và khoảng trắng" };
     }
-
+  
     // Không cho nhiều khoảng trắng liên tiếp
     if (/\s{2,}/.test(trimmed)) {
       return { valid: false, error: "Tên không được chứa nhiều khoảng trắng liên tiếp" };
     }
-
+  
     return { valid: true };
   };
 
@@ -150,7 +150,8 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
         // toast.success("Đăng ký thành công");
         onNext();
       } else {
-        toast.error("Đăng ký thất bại" );
+        toast.error(
+          getErrorMessage(result?.code) || result?.message || "Đăng ký thất bại")
       }
     } catch (error) {
       toast.error("Có lỗi xảy ra, vui lòng thử lại");
@@ -447,6 +448,7 @@ import {
   Info as InfoIcon,
 } from "@mui/icons-material";
 import success from "../../images/Frame 1321317962.png";
+import { getErrorMessage } from "../../utils/utils";
 
 const RegisterSuccess = ({ Email }) => {
   const theme = useTheme();

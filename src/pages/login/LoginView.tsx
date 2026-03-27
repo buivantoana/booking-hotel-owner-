@@ -20,6 +20,7 @@ import { Login } from "../../service/admin";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useBookingContext } from "../../App";
+import { getErrorMessage } from "../../utils/utils";
 
 const LoginView = () => {
   return <RegistrationForm />;
@@ -90,7 +91,8 @@ const RegistrationForm = () => {
         toast.success("Đăng nhập thành công");
         // navigate("/") // uncomment nếu muốn redirect sau login
       } else {
-        toast.error("Đăng nhập thất bại");
+        
+        toast.error(getErrorMessage(result?.code) || result?.message || "Đăng nhập thất bại");
       }
     } catch (error) {
       console.error(error);

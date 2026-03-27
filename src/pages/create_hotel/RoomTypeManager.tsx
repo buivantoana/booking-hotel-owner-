@@ -258,10 +258,10 @@ export default function RoomTypeManager({
           mb: 4,
           pt: 2,
         }}>
-        {roomTypes.map((_, index) => (
+        {roomTypes.map((room, index) => (
           <Chip
             key={index}
-            label={`Phòng ${index + 1}`}
+            label={room?.name?.[selectedLang]?.trim() || `Phòng ${index + 1}`}
             onClick={() => setActiveTab(index)}
             onDelete={
               roomTypes.length > 1 ? () => removeRoomType(index) : undefined
@@ -1125,23 +1125,59 @@ function FacilitySelector({
         </Box>
 
         <Box width={{ xs: "100%", md: "65%" }}>
+        <Box display="flex" flexDirection={{ xs: "column", md: "row" }} justifyContent="space-between" gap={4}>
+        {/* Bên trái: label + chips đã chọn */}
+        <Box width={{ xs: "100%", md: "55%" }}>
+          <Typography variant="subtitle2"  gutterBottom>
+            Thêm tiện ích
+          </Typography>
+
+          <Stack direction="row" flexWrap="wrap" gap={1} mt={1}>
+            {selectedFacilities.map((fac) => (
+              <Chip
+                key={fac.id}
+                icon={
+                  <img
+                    src={fac.icon}
+                    alt={fac.name.vi}
+                    width={18}
+                    height={18}
+                    style={{ marginLeft: 8 }}
+                  />
+                }
+                label={<Typography sx={{color:"#9AC33C !important"}} fontSize={"12px"}>{fac.name[selectedLang]}</Typography>}
+                onDelete={() => handleDelete(fac.id)}
+                deleteIcon={<CloseIcon sx={{ fontSize: "16px !important",color:"#9AC33C !important" }} />}
+                sx={{
+                  bgcolor: "white",
+                  border: "1px solid #9AC33C",
+                  color: "#333",
+                  fontWeight: 500,
+                  "& .MuiChip-deleteIcon": { color: "#999" },
+                  "& .MuiChip-icon": { color: "inherit" },
+                }}
+              />
+            ))}
+          </Stack>
+
+          {error && (
+            <Typography variant="caption" color="error" sx={{ mt: 0.5, display: "block" }}>
+              {helperText}
+            </Typography>
+          )}
+        </Box>
+
+        {/* Bên phải: ô search */}
+        <Box width={{ xs: "100%", md: "30%" }}>
           <TextField
             fullWidth
-            placeholder='Chọn tiện ích phòng'
-            value={selectedFacilities.map((f) => f.name[selectedLang]).join(", ")}
+            placeholder="Chọn tiện ích"
             onClick={() => setOpen(true)}
             onBlur={onBlur}
-            error={error}
-            helperText={helperText}
+            inputProps={{ readOnly: true }}
             InputProps={{
-              readOnly: true,
-              startAdornment: selectedFacilities.length > 0 && (
-                <MuiInputAdornment position='start'>
-                  <SearchIcon sx={{ color: "text.secondary" }} />
-                </MuiInputAdornment>
-              ),
-              endAdornment: (
-                <MuiInputAdornment position='end'>
+              startAdornment: (
+                <MuiInputAdornment position="start">
                   <SearchIcon sx={{ color: "text.secondary" }} />
                 </MuiInputAdornment>
               ),
@@ -1149,110 +1185,85 @@ function FacilitySelector({
             sx={{
               cursor: "pointer",
               "& .MuiOutlinedInput-root": {
-                height: 56,
-                borderRadius: 2,
+                height: 40,
+                borderRadius: "10px",
+                cursor: "pointer",
                 "&.Mui-focused fieldset": { borderColor: "#a0d468" },
               },
+              "& input": { cursor: "pointer" },
             }}
           />
+        </Box>
+      </Box>
 
-          {/* Chip hiển thị đã chọn */}
-          {selectedFacilities.length > 0 && (
-            <Stack direction='row' flexWrap='wrap' gap={1} mt={2}>
-              {selectedFacilities.map((fac) => (
-                <Chip
-                  key={fac.id}
-                  label={fac.name[selectedLang]}
-                  onDelete={() => handleDelete(fac.id)}
-                  deleteIcon={<CloseIcon />}
-                  sx={{
-                    bgcolor: "#7CB518",
-                    color: "white",
-                    "& .MuiChip-deleteIcon": { color: "white" },
-                  }}
-                />
+      {/* Modal chọn tiện ích — giữ nguyên */}
+      <Modal open={open} onClose={() => setOpen(false)}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: { xs: "90%", sm: 500 },
+            maxHeight: "80vh",
+            bgcolor: "background.paper",
+            borderRadius: 3,
+            boxShadow: 24,
+            p: 3,
+            display: "flex",
+            flexDirection: "column",
+          }}>
+          <Typography variant="h6" mb={2}>Chọn tiện ích</Typography>
+
+          <TextField
+            fullWidth
+            placeholder="Tìm kiếm tiện ích"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <MuiInputAdornment position="start">
+                  <SearchIcon />
+                </MuiInputAdornment>
+              ),
+            }}
+            sx={{ mb: 2 }}
+          />
+
+          <Box sx={{ flex: 1, overflow: "auto" }}>
+            <List disablePadding>
+              {filteredFacilities.map((fac, index) => (
+                <React.Fragment key={fac.id}>
+                  <ListItem disablePadding>
+                    <ListItemButton onClick={() => handleToggle(fac.id)}>
+                      <ListItemIcon sx={{ minWidth: 40 }}>
+                        <img src={fac.icon} alt={fac.name.vi} width={28} height={28} />
+                      </ListItemIcon>
+                      <ListItemText primary={fac.name[selectedLang]} />
+                      <Checkbox edge="end" checked={selectedIds.includes(fac.id)} />
+                    </ListItemButton>
+                  </ListItem>
+                  {index < filteredFacilities.length - 1 && <Divider />}
+                </React.Fragment>
               ))}
-            </Stack>
-          )}
+            </List>
+          </Box>
 
-          {/* Modal chọn tiện ích */}
-          <Modal open={open} onClose={() => setOpen(false)}>
-            <Box
-              sx={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: { xs: "90%", sm: 500 },
-                maxHeight: "80vh",
-                bgcolor: "background.paper",
-                borderRadius: 3,
-                boxShadow: 24,
-                p: 3,
-                display: "flex",
-                flexDirection: "column",
-              }}>
-              <Typography variant='h6' mb={2}>
-                Chọn tiện ích
-              </Typography>
-
-              <TextField
-                fullWidth
-                placeholder='Tìm kiếm tiện ích'
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <MuiInputAdornment position='start'>
-                      <SearchIcon />
-                    </MuiInputAdornment>
-                  ),
-                }}
-                sx={{ mb: 2 }}
-              />
-
-              <Box sx={{ flex: 1, overflow: "auto" }}>
-                <List disablePadding>
-                  {filteredFacilities.map((fac, index) => (
-                    <React.Fragment key={fac.id}>
-                      <ListItem disablePadding>
-                        <ListItemButton onClick={() => handleToggle(fac.id)}>
-                          <ListItemIcon sx={{ minWidth: 40 }}>
-                            <img
-                              src={fac.icon}
-                              alt={fac.name.vi}
-                              width={28}
-                              height={28}
-                            />
-                          </ListItemIcon>
-                          <ListItemText primary={fac.name[selectedLang]} />
-                          <Checkbox
-                            edge='end'
-                            checked={selectedIds.includes(fac.id)}
-                          />
-                        </ListItemButton>
-                      </ListItem>
-                      {index < filteredFacilities.length - 1 && <Divider />}
-                    </React.Fragment>
-                  ))}
-                </List>
-              </Box>
-
-              <Button
-                variant='contained'
-                fullWidth
-                onClick={() => setOpen(false)}
-                sx={{
-                  mt: 3,
-                  bgcolor: "#7CB518",
-                  "&:hover": { bgcolor: "#6a9e15" },
-                  borderRadius: 2,
-                  py: 1.5,
-                }}>
-                Xác nhận
-              </Button>
-            </Box>
-          </Modal>
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={() => setOpen(false)}
+            sx={{
+              mt: 3,
+              bgcolor: "#7CB518",
+              "&:hover": { bgcolor: "#6a9e15" },
+              borderRadius: 2,
+              py: 1.5,
+            }}>
+            Xác nhận
+          </Button>
+        </Box>
+      </Modal>
         </Box>
       </Box>
     </Box>

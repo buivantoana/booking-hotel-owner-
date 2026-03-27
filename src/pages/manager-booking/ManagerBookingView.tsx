@@ -1438,10 +1438,10 @@ function CancelBookingModal({
         status: "cancelled",
       });
       if (result?.booking_id) {
-        toast.success(result?.message);
+        toast.success("Thao tác thành công");
         fetchBookings(idHotel);
       } else {
-        toast.success(result?.message);
+        toast.success("Thao tác thất bại");
       }
     } catch (error) {
       console.log(error);
@@ -1735,10 +1735,10 @@ function CheckinConfirmModal({
     try {
       let result = await updateBooking(booking.id, { status: "checked_in" });
       if (result?.booking_id) {
-        toast.success(result?.message);
+        toast.success("Thao tác thành công");
         fetchBookings(idHotel);
       } else {
-        toast.success(result?.message);
+        toast.success("Thao tác thật bại"  );
       }
     } catch (error) {
       console.log(error);

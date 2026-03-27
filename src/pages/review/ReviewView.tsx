@@ -38,7 +38,7 @@ import {
 import React, { useEffect, useState } from "react";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
-import AccessTime from "@mui/icons-material/AccessTime";
+
 import Bed from "@mui/icons-material/Bed";
 import Close from "@mui/icons-material/Close";
 import HotelSelect from "../../components/HotelSelect";
@@ -46,6 +46,16 @@ import start from "../../images/star.svg"; // giữ nguyên icon sao
 import { getDetailReview, replyReviewHotels } from "../../service/hotel";
 import { toast } from "react-toastify";
 import edit from "../../images/brush-square.png";
+import { parseRoomName } from "../../utils/utils";
+import AccessTime from "@mui/icons-material/AccessTime";
+import Bedtime from "@mui/icons-material/Bedtime";
+import CalendarToday from "@mui/icons-material/CalendarToday";
+
+const rentTypeConfig = {
+  hourly:    { icon: <AccessTime sx={{ fontSize: 16, color: "#98b720" }} />,    label: "Theo giờ" },
+  overnight: { icon: <Bedtime sx={{ fontSize: 16, color: "#98b720" }} />,       label: "Qua đêm" },
+  daily:     { icon: <CalendarToday sx={{ fontSize: 16, color: "#98b720" }} />, label: "Theo ngày" },
+};
 const ReviewView = ({
   hotels,
   idHotel,
@@ -56,6 +66,7 @@ const ReviewView = ({
   setValue,
   pagination,
   onPageChange,
+  dataReview
 }) => {
   const [detailReview, setDetailReview] = useState(null);
 
@@ -68,6 +79,7 @@ const ReviewView = ({
         setIdHotel={setIdHotel}
         reviews={reviews}
         setDetailReview={setDetailReview}
+        dataReview={dataReview}
       />
 
       <HotelReview
@@ -86,7 +98,13 @@ const ReviewView = ({
 export default ReviewView;
 
 // ==================== Tổng quan đánh giá ====================
-const Review = ({ reviews, hotels, idHotel, setIdHotel }) => {
+const Review = ({ reviews, hotels, idHotel, setIdHotel,dataReview }) => {
+  const {
+    total_reviews = 0,
+    avg_rating = 0,
+    rating_stats = {},
+   
+  } = dataReview || {};
   const renderStars = (rating: number) => {
     return [...Array(5)].map((_, i) => (
       <Star
@@ -98,18 +116,13 @@ const Review = ({ reviews, hotels, idHotel, setIdHotel }) => {
       />
     ));
   };
-
-  const avgRate = reviews.length
-    ? (reviews.reduce((acc, r) => acc + r.rate, 0) / reviews.length).toFixed(1)
-    : 0;
-
+  const starOrder = [5, 4, 3, 2, 1];
+ 
   const starCounts = [5, 4, 3, 2, 1].map(
     (star) => reviews.filter((r) => r.rate === star).length
   );
-
   // Tính phần trăm cho progress bar (tối đa 100%)
   const maxCount = Math.max(...starCounts, 1);
-  const percentages = starCounts.map((count) => (count / maxCount) * 100);
 
   return (
     <Stack spacing={4}>
@@ -150,7 +163,7 @@ const Review = ({ reviews, hotels, idHotel, setIdHotel }) => {
                     justifyContent: "center",
                     alignItems: "center",
                   }}>
-                  <Typography variant='h2'>{avgRate}</Typography>
+                  <Typography variant='h2'>{avg_rating.toFixed(1)}</Typography>
                 </Box>
                 <Box display={"flex"} flexDirection={"column"} gap={{xs:0,md:2}}>
                   <Typography
@@ -160,7 +173,7 @@ const Review = ({ reviews, hotels, idHotel, setIdHotel }) => {
                     Xuất sắc
                   </Typography>
                   <Typography fontSize='1.1rem' color='#2b2f38'>
-                    Từ {reviews.length} đánh giá
+                  Từ {total_reviews} đánh giá
                   </Typography>
                   <Typography fontSize='0.9rem' color='#999'>
                     Bởi người dùng trong Booking Hotel
@@ -170,46 +183,48 @@ const Review = ({ reviews, hotels, idHotel, setIdHotel }) => {
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <Stack spacing={2}>
-                {[5, 4, 3, 2, 1].map((star, idx) => (
+            <Stack spacing={2}>
+              {starOrder.map((star) => {
+                const count = rating_stats[star] || 0;
+                const percent = total_reviews
+                  ? (count / total_reviews) * 100
+                  : 0;
+
+                return (
                   <Stack
                     key={star}
                     direction='row'
                     alignItems='center'
                     spacing={2}>
-                    <Typography
-                      width={40}
-                      fontSize='0.9rem'
-                      display={"flex"}
-                      alignItems={"center"}
-                      gap={1}
-                      color='#666'>
-                      {star} <img src={start} alt='' />
+                    <Typography width={40} fontSize='0.9rem'>
+                      {star} ⭐
                     </Typography>
+
                     <Box sx={{ flex: 1 }}>
                       <LinearProgress
                         variant='determinate'
-                        value={percentages[idx]}
+                        value={percent}
                         sx={{
                           height: 8,
                           borderRadius: 4,
                           bgcolor: "#e0e0e0",
                           "& .MuiLinearProgress-bar": {
                             bgcolor: "#98b720",
-                            borderRadius: 4,
                           },
                         }}
                       />
                     </Box>
+
                     <Typography
                       fontWeight={600}
                       fontSize='0.9rem'
                       color='#98b720'>
-                      {starCounts[idx]}
+                      {count}
                     </Typography>
                   </Stack>
-                ))}
-              </Stack>
+                );
+              })}
+            </Stack>
             </Grid>
           </Grid>
         </Paper>
@@ -478,7 +493,7 @@ function HotelReview({
                       variant='body2'
                       color='text.secondary'
                       fontSize='14px'>
-                      {review?.room_type_name}
+                      {parseRoomName(review?.room_type_name)}
                     </Typography>
                   {/* Bạn có thể thêm chip loại phòng nếu cần */}
                 </Stack>
@@ -908,6 +923,10 @@ function ReviewDetailModal({
 
   // Sau đó dùng trong phần hiển thị "Số giờ"
   const rentDuration = calculateRentDuration();
+  const config = rentTypeConfig[detail.booking?.rent_type] ?? {
+    icon: <AccessTime sx={{ fontSize: 16, color: "#98b720" }} />,
+    label: "Thuê phòng",
+  };
   return (
     <StyledModal
       open={open}
@@ -966,24 +985,13 @@ function ReviewDetailModal({
               textAlign: "center",
               mb: 2,
             }}>
-            <Stack
-              direction='row'
-              spacing={0.5}
-              alignItems='center'
-              justifyContent='start'
-              mb={1}>
-              <CheckCircle sx={{ fontSize: 16, color: "#98b720" }} />
-              <Typography fontSize='0.75rem' color='#98b720' fontWeight={600}>
-                {detail.booking?.rent_type === "hourly"
-                  ? "Theo giờ"
-                  : detail.booking?.rent_type === "overnight"
-                  ? "Qua đêm"
-                  : detail.booking?.rent_type === "daily"
-                  ? "Theo ngày"
-                  : "Thuê phòng"}{" "}
-                {/* fallback nếu rent_type không có */}
-              </Typography>
-            </Stack>
+           <Stack direction="row" spacing={0.5} alignItems="center" justifyContent="start" mb={1}>
+  {config.icon}
+  <Typography fontSize="0.75rem" color="#98b720" fontWeight={600}>
+    {config.label}
+  </Typography>
+</Stack>
+           
             <Divider />
             <Grid container spacing={0.5} mt={1} fontSize='0.7rem'>
               <Grid item xs={detail.booking?.rent_type !== "hourly" ? 6 : 4}>

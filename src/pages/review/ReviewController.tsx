@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ReviewView from "./ReviewView";
-import { getHotelReview, getHotels } from "../../service/hotel";
+import { getHotelReview, getHotels, getReviewstats } from "../../service/hotel";
 
 type Props = {};
 
@@ -9,6 +9,7 @@ const ReviewController = (props: Props) => {
   const [reviews, setReviews] = useState([]);
   const [idHotel, setIdHotel] = useState(null);
   const [value, setValue] = React.useState("all");
+  const [dataReview, setDataReview] = useState([]);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 2,
@@ -17,11 +18,13 @@ const ReviewController = (props: Props) => {
   });
   useEffect(() => {
     getListHotel()
+
   }, [])
 
   useEffect(() => {
     if (idHotel) {
       getReview(1,value)
+      getDataReview()
     }
   }, [idHotel,value])
   
@@ -49,6 +52,17 @@ const ReviewController = (props: Props) => {
       console.log(error)
     }
   }
+  const getDataReview = async () => {
+    try {
+      let result = await getReviewstats(idHotel);
+      if (Object.keys(result)?.length > 0) {
+        setDataReview(result);
+      }
+      console.log("AAAA result review", result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const getListHotel = async () => {
     try {
       let result = await getHotels();
@@ -77,7 +91,7 @@ const ReviewController = (props: Props) => {
     setValue={setValue}
     onPageChange={handlePageChange}
     value={value}
-   
+    dataReview={dataReview}
   />;
 };
 
