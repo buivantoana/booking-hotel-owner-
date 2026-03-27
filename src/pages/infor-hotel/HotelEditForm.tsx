@@ -665,9 +665,9 @@ export default function HotelEditFormExact({
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={loading}
+              disabled={!formValues.phone || !formValues.name[selectedLang] ||  loading}
               sx={{
-                background: "#98B720",
+                background:!formValues.phone || !formValues.name[selectedLang] ||  loading ? "#ccc": "#98B720",
                 color: "white",
                 borderRadius: "30px",
                 padding: 1,

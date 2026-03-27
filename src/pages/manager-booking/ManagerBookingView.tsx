@@ -1340,7 +1340,7 @@ function ActionMenu({
               openModalSafely(() => setOpenCheckIn(true));
             }}
             sx={{ gap: 1.5 }}>
-            <CheckCircleOutlineIcon fontSize='small' color='success' />
+            {/* <CheckCircleOutlineIcon fontSize='small' color='success' /> */}
             Khách nhận phòng
           </MenuItem>
         )}
@@ -1353,7 +1353,7 @@ function ActionMenu({
               openModalSafely(() => setOpenCheckOut(true));
             }}
             sx={{ gap: 1.5 }}>
-            <CheckCircleOutlineIcon fontSize='small' color='success' />
+            {/* <CheckCircleOutlineIcon fontSize='small' color='success' /> */}
             Khách trả phòng
           </MenuItem>
         )}
@@ -1366,7 +1366,7 @@ function ActionMenu({
               openModalSafely(() => setOpenCancel(true));
             }}
             sx={{ gap: 1.5, color: "error.main" }}>
-            <HighlightOffIcon fontSize='small' />
+            {/* <HighlightOffIcon fontSize='small' /> */}
             Hủy đặt phòng
           </MenuItem>
         )}

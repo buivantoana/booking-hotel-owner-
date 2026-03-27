@@ -1184,8 +1184,8 @@ function RoomScheduleTableHourly({
                                 start_time: slot.from,
                                 end_time: slot.to || slot.from,
                                 available_rooms: newVal,
-                                reason: "staff_shortage",
-                                note: "Thiếu nhân viên dọn phòng",
+                                reason: "",
+                                note: "",
                               });
                             }
                             // reset về undefined để hiện lại slot.remaining_rooms sau khi submit
@@ -1347,8 +1347,8 @@ function RoomScheduleTableHourly({
                             start_time: slot.from,
                             end_time: slot.to || slot.from,
                             available_rooms: newVal,
-                            reason: "staff_shortage",
-                            note: "Thiếu nhân viên dọn phòng",
+                            reason: "",
+                            note: "",
                           },
                           () =>
                             setEditedValues((prev) => ({
@@ -1680,8 +1680,8 @@ function RoomScheduleTableDaily({
                                 start_time: slot.from,
                                 end_time: slot.to || slot.from,
                                 available_rooms: newVal,
-                                reason: "staff_shortage",
-                                note: "Thiếu nhân viên dọn phòng",
+                                reason: "",
+                                note: "",
                               });
                             }
                             // reset về undefined để hiện lại slot.remaining_rooms sau khi submit
@@ -1840,8 +1840,8 @@ function RoomScheduleTableDaily({
                             start_time: slot.from,
                             end_time: slot.to || slot.from,
                             available_rooms: newVal,
-                            reason: "staff_shortage",
-                            note: "Thiếu nhân viên dọn phòng",
+                            reason: "",
+                            note: "",
                           },
                           () =>
                             setEditedValues((prev) => ({
@@ -2171,8 +2171,8 @@ function RoomScheduleTableOvernight({
                                 start_time: slot.from,
                                 end_time: slot.to || slot.from,
                                 available_rooms: newVal,
-                                reason: "staff_shortage",
-                                note: "Thiếu nhân viên dọn phòng",
+                                reason: "",
+                                note: "",
                               });
                             }
                             // reset về undefined để hiện lại slot.remaining_rooms sau khi submit
@@ -2333,8 +2333,8 @@ function RoomScheduleTableOvernight({
                             start_time: slot.from,
                             end_time: slot.to || slot.from,
                             available_rooms: newVal,
-                            reason: "staff_shortage",
-                            note: "Thiếu nhân viên dọn phòng",
+                            reason: "",
+                            note: "",
                           },
                           () =>
                             setEditedValues((prev) => ({
