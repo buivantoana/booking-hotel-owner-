@@ -1521,10 +1521,10 @@ function ConfirmCompleteModal({
         });
         if (response?.bank_id) {
           setAction(2);
-          toast.success(response?.msg);
+          toast.success("Cập nhật thành công");
           getListBankPartner();
         } else {
-          toast.error(response?.message);
+          toast.error("Cập nhật thất bại");
         }
       } else {
         const response = await addBankHotels({
@@ -1536,10 +1536,10 @@ function ConfirmCompleteModal({
         });
         if (response?.bank_id) {
           setAction(4);
-          toast.success(response?.msg);
+          toast.success("Thêm thành công");
           getListBankPartner();
         } else {
-          toast.error(response?.message);
+          toast.error("Thêm thất bại");
         }
       }
 
@@ -2032,6 +2032,7 @@ function ConfirmCompleteModal({
         </Button>
 
         <Button
+          disabled={action == 5 ? !(checked1 && checked2) : false}
           variant='contained'
           onClick={() => {
             if (!bankPrimary && action != 3) {

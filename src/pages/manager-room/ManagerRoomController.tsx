@@ -54,6 +54,7 @@ const ManagerRoomController = (props: Props) => {
     }
   };
   const getData = async () => {
+    setData({})
     setLoading(true);
     try {
       let result;

@@ -271,7 +271,10 @@ export default function ManagerRoomView({
           </Card>
           <QuickBlockDialog
             openQuickBlock={openQuickBlock}
-            onClose={() => setOpenQuickBlock(false)}
+            onClose={() => {
+              getData()
+              setOpenQuickBlock(false)
+            }}
             currentSlot={currentEditSlot}
             idHotel={idHotel}
             onSuccess={getData}

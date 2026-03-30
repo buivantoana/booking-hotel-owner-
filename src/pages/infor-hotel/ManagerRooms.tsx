@@ -123,10 +123,16 @@ const ManagerRooms = ({
       // onNext("detail");
     }
   }, [searchParams]);
-  const handleRoomClick = (room) => {
+  const handleRoomClick = (room,edit) => {
     setRoom(room);
-    onNext("detail");
-    setActionRoom("edit");
+   
+    if(edit){
+      onNext("detail");
+      setActionRoom("edit");
+    }else{
+      onNext("detail");
+    }
+     
   };
   const handleRoomToggle = (room) => {
     console.log("AAA room ", room);
@@ -274,7 +280,7 @@ const ManagerRooms = ({
                       }}
                       room={room}
                       handleDetailRoom={() => {
-                        handleRoomClick(room);
+                        handleRoomClick(room,true);
                       }}
                     />
                   </TableCell>
@@ -390,7 +396,7 @@ const ManagerRooms = ({
                     handleRoomToggle(room);
                   }}
                   room={room}
-                  handleDetailRoom={() => handleRoomClick(room)}
+                  handleDetailRoom={() => handleRoomClick(room,true)}
                 />
               </Box>
             </Box>
