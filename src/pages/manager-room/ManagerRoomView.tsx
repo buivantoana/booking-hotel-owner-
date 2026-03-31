@@ -1533,8 +1533,10 @@ function RoomScheduleTableDaily({
                             borderRadius: "20px",
                             boxShadow: "0 4px 15px rgba(152,183,32,0.4)",
                             "&:hover": { bgcolor: "#80a61a" },
+                            display:"flex",
+                            gap:.5
                           }}>
-                          {dayNum} {dayName}
+                          {dayNum} <Typography variant="span" sx={{textTransform: "capitalize"}} >{dayName}</Typography>
                         </Button>
                       </Box>
                     );
@@ -2024,8 +2026,10 @@ function RoomScheduleTableOvernight({
                             borderRadius: "20px",
                             boxShadow: "0 4px 15px rgba(152,183,32,0.4)",
                             "&:hover": { bgcolor: "#80a61a" },
+                            display:"flex",
+                            gap:.5
                           }}>
-                          {dayNum} {dayName}
+                          {dayNum} <Typography variant="span" sx={{textTransform: "capitalize"}} >{dayName}</Typography>
                         </Button>
                       </Box>
                     );

@@ -56,6 +56,10 @@ const renderStatusChip = (status) => {
       label: "Đã kết thúc",
       sx: { bgcolor: "#D32F2F", color: "white" },
     },
+    rejected: {
+      label: "Bị từ chối",
+      sx: { bgcolor: "#D32F2F", color: "white" },
+    }
   };
 
   const config = map[status];

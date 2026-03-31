@@ -55,6 +55,10 @@ const renderStatusChip = (status) => {
       label: "Chờ duyệt",
       sx: { bgcolor: "#1976D2", color: "white" },
     },
+    rejected: {
+      label: "Bị từ chối",
+      sx: { bgcolor: "#D32F2F", color: "white" },
+    },
     terminated: {
       label: "Đã kết thúc",
       sx: { bgcolor: "#D32F2F", color: "white" },

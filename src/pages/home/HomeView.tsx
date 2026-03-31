@@ -948,7 +948,7 @@ const RevenueCompareChart = ({
               />
             </Stack>
             <Typography variant='body2' color='text.secondary' mt={1}>
-              doanh thu đang tăng – bạn hãy thêm những ưu đãi để hút khách hơn
+              Doanh thu đang tăng – bạn hãy thêm những ưu đãi để hút khách hơn
               nữa
             </Typography>
           </Box>
